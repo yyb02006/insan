@@ -1,27 +1,198 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://webfontworld.github.io/pretendard/Pretendard.css');
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+/* @layer base에 적힌 스타일은 항상 다른 스타일보다 우선된다*/
+@layer base {
+	html {
+		font-family: 'SCoreDream';
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+	input[type='number']::-webkit-inner-spin-button,
+	input[type='number']::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 100;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamThin.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamThin.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamThin.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamThin.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamThin.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 200;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraLight.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraLight.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraLight.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraLight.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraLight.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 300;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamLight.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamLight.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamLight.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamLight.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamLight.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 400;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamRegular.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamRegular.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamRegular.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamRegular.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamRegular.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 500;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamMedium.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamMedium.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamMedium.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamMedium.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamMedium.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 600;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBold.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBold.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBold.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBold.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBold.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 700;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraBold.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraBold.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraBold.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraBold.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamExtraBold.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 800;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamHeavy.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamHeavy.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamHeavy.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamHeavy.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamHeavy.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'SCoreDream';
+		font-weight: 900;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBlack.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBlack.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBlack.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBlack.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/score/SCoreDreamBlack.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'GmarketSans';
+		font-weight: 300;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansLight.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansLight.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansLight.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansLight.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansLight.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'GmarketSans';
+		font-weight: 500;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.ttf')
+				format('truetype');
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'GmarketSans';
+		font-weight: 700;
+		font-style: normal;
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot');
+		src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot?#iefix')
+				format('embedded-opentype'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff2')
+				format('woff2'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff')
+				format('woff'),
+			url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.ttf')
+				format('truetype');
+		font-display: swap;
+	}
 }
