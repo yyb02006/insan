@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="27.999" height="41.999" viewBox="0 0 27.999 41.999">
+  <defs>
+    <linearGradient id="linear-gradient" y1="0.5" x2="1" y2="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fafafa"/>
+      <stop offset="0.375" stop-color="#f7f7f7"/>
+      <stop offset="0.601" stop-color="#efefef"/>
+      <stop offset="0.787" stop-color="#e0e0e0"/>
+      <stop offset="0.951" stop-color="#ccc"/>
+      <stop offset="1" stop-color="#c5c5c5"/>
+    </linearGradient>
+  </defs>
+  <g id="Logo" transform="translate(-2309.333 -2476.833)">
+    <path id="패스_69" data-name="패스 69" d="M2309.333,2476.833h0v14h0a14,14,0,0,0,14,14h0v-14A14,14,0,0,0,2309.333,2476.833Z" fill="url(#linear-gradient)"/>
+    <path id="패스_70" data-name="패스 70" d="M2455,2476.833a14,14,0,0,0-14,14h0v28h0a14,14,0,0,0,14-14h0v-28Z" transform="translate(-117.667)" fill="#fafafa"/>
+    <path id="사각형_24" data-name="사각형 24" d="M7,0H7a7,7,0,0,1,7,7v7a0,0,0,0,1,0,0H7A7,7,0,0,1,0,7V7A7,7,0,0,1,7,0Z" transform="translate(2309.333 2504.832)" fill="url(#linear-gradient)"/>
+  </g>
+</svg>
