@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 interface LayoutProps {
 	seoTitle: string;
@@ -12,13 +13,13 @@ interface LayoutProps {
 export default function Layout({ seoTitle, children }: LayoutProps) {
 	const router = useRouter();
 	return (
-		<div>
+		<div className='relative scrollbar-hide'>
 			<Head>
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
 				</title>
 			</Head>
-			<nav className='fixed bg-[#101010] w-full h-[100px]'>
+			<nav className='fixed z-[1] w-full h-[100px]'>
 				<div className='mx-[60px] h-full flex justify-between items-center'>
 					<Link href={'/'}>
 						<Image

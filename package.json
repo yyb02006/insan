@@ -16,6 +16,7 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
+    "framer-motion": "^10.12.2",
     "iron-session": "^6.3.1",
     "next": "13.3.0",
     "postcss": "8.4.21",
