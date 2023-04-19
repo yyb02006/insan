@@ -1,5 +1,12 @@
 import Layout from '@/components/layout';
-import { motion, useScroll, useMotionValue, useTransform } from 'framer-motion';
+import {
+	motion,
+	useScroll,
+	useMotionValue,
+	useTransform,
+	useMotionValueEvent,
+	useWillChange,
+} from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
 const logo = {
@@ -14,19 +21,20 @@ const list = {
 	bigger: {
 		scale: 1,
 		transition: {
-			duration: 1,
+			duration: 0.7,
 			delay: 0.3,
 		},
 	},
 };
 
 export default function Home() {
-	const x = useMotionValue(0);
-	const y = useTransform(x, [0, 100, 200], [200, 100, 0]);
+	const x = useMotionValue(100);
 	const { scrollYProgress, scrollY } = useScroll();
-	useEffect(() => {
-		console.log(x.get());
-	}, [x.get()]);
+	const rotate = useTransform(scrollY, [0, 2000], [0, 360], { clamp: false });
+	const y = useTransform(scrollY, [0, 1000], [0, 1000]);
+	useMotionValueEvent(x, 'animationStart', () => {
+		console.log('애니메이션 변경');
+	});
 
 	return (
 		<>
@@ -44,9 +52,20 @@ export default function Home() {
 					variants={logo}
 					className='top-[-120px] left-[-80px] border rounded-full border-[#bababa] w-[340px] aspect-square absolute'
 				/>
-				<section className='bg-[#101010] min-h-screen px-10 flex justify-center items-center'>
+				<motion.div
+					animate={{ x: [null, 200] }}
+					transition={{ type: 'spring', stiffness: 200, duration: 8 }}
+					className='w-80 h-80 bg-pink-400'
+				>
+					{x}
+				</motion.div>
+				<motion.section
+					style={{ y }}
+					className='bg-[#101010] min-h-screen px-10 flex justify-center items-center'
+				>
 					<div className='w-[640px] aspect-square relative'>
 						<motion.ul
+							style={{ rotate }}
 							initial='initial'
 							animate='bigger'
 							variants={list}
@@ -68,13 +87,7 @@ export default function Home() {
 							className='bg-[#efefef] w-[640px] aspect-square rounded-full relative'
 						></motion.div>
 					</div>
-				</section>
-				<motion.div
-					style={{ x, y }}
-					drag='x'
-					animate={{ x: [0, 200] }}
-					className='w-80 h-80 bg-pink-400'
-				/>
+				</motion.section>
 				<section className='bg-[#101010] h-[3000px]'></section>
 			</Layout>
 		</>
