@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
-import { motion } from 'framer-motion';
 
 interface LayoutProps {
 	seoTitle: string;
@@ -13,7 +12,7 @@ interface LayoutProps {
 export default function Layout({ seoTitle, children }: LayoutProps) {
 	const router = useRouter();
 	return (
-		<div className='relative scrollbar-hide'>
+		<div className='relative'>
 			<Head>
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
