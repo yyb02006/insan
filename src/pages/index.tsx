@@ -16,11 +16,22 @@ import {
 	motionValue,
 	wrap,
 } from 'framer-motion';
-import { PointerEvent, useEffect, useRef } from 'react';
+import { MutableRefObject, PointerEvent, useEffect, useRef } from 'react';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
 	mouseY: MotionValue;
+	scrollYProgress: MotionValue<number>;
+}
+
+interface HeaderProps extends MouseEventProps {
+	inheritRef: MutableRefObject<null>;
+}
+
+interface SpringTextProps extends MouseEventProps {}
+
+interface WaveProps {
+	scrollYProgress: MotionValue<number>;
 }
 
 const logo = {
@@ -54,43 +65,59 @@ const wave = (sec: number) => {
 	};
 };
 
-const SpringText = ({ mouseX, mouseY }: MouseEventProps) => {
-	let firstWordX = (ratio: number) =>
+const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
+	const firstWordX = (ratio: number) =>
 		useTransform(mouseX, (value) => value / ratio);
-	let firstWordY = (ratio: number) =>
+	const firstWordY = (ratio: number) =>
 		useTransform(mouseY, (value) => value / ratio);
-	// let secondWordX = useTransform(mouseX, [], []);
-	// let secondWordY = useTransform(mouseY, [], []);
 	const elements = useRef([
-		{ title: 'Future', yRatio: 2 },
-		{ title: 'Creative', yRatio: 3 },
-		{ title: 'Emotional', yRatio: 6 },
-		{ title: 'Intuitive', yRatio: 3 },
-		{ title: 'Trendy', yRatio: 2 },
+		{ title: 'Future', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
+		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.5rem]', dropHeight: 600 },
+		{ title: 'Emotional', yRatio: 6, text: 'text-[6.5rem]', dropHeight: 600 },
+		{ title: 'Intuitive', yRatio: 3.5, text: 'text-[5.5rem]', dropHeight: 600 },
+		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
 	]);
-	console.log(elements);
+	const y = useTransform(scrollYProgress, [0.4, 0.6], [0, 600]);
 
+	useEffect(() => {
+		window.addEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+		window.removeEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+	}, []);
 	return (
 		<>
-			<div className='flex justify-center items-center overflow-hidden bg-green-400 w-full aspect-square rounded-full'>
-				<ul className='font-Roboto font-extrabold text-[6.5rem] leading-relaxed text-center '>
+			<div className='flex justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
+				<motion.ul
+					style={{ y }}
+					className='font-Roboto font-extrabold text-[6.5rem] leading-relaxed text-center '
+				>
 					{elements.current.map((element, idx) => (
 						<motion.li
 							key={idx}
-							style={{ x: firstWordX(9), y: firstWordY(element.yRatio) }}
+							style={{
+								x: firstWordX(15),
+								y: firstWordY(element.yRatio),
+							}}
+							className={element.text}
 						>
 							{element.title}
 						</motion.li>
 					))}
-				</ul>
+				</motion.ul>
 			</div>
 		</>
 	);
 };
 
-const Header = ({ mouseX, mouseY }: MouseEventProps) => {
-	const target = useRef(null);
-	const { scrollYProgress } = useScroll({ target });
+const Header = ({
+	mouseX,
+	mouseY,
+	scrollYProgress,
+	inheritRef,
+}: HeaderProps) => {
 	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
 		clamp: false,
 	});
@@ -100,14 +127,6 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 		[0.1, 0.4, 0.8, 1],
 		[1, 0.5, 0.5, 0]
 	);
-	useEffect(() => {
-		window.addEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-		window.removeEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-	}, []);
 	/* const baseX = motionValue(0);
 	const x = useTransform(baseX, (v) => `${wrap(-40, -60, v)}%`);
 	useAnimationFrame((time, delta) => {
@@ -121,8 +140,8 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 	]);
 	return (
 		<motion.section
-			ref={target}
 			className='relative bg-[#101010] h-[500vh] px-10'
+			ref={inheritRef}
 		>
 			<div className='h-[30%] absolute'>
 				<div className='sticky top-0'>
@@ -172,7 +191,11 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 						}}
 						className='relative bg-[#efefef] w-[570px] aspect-square rounded-full flex justify-center items-center'
 					>
-						<SpringText mouseX={mouseX} mouseY={mouseY}></SpringText>
+						<SpringText
+							mouseX={mouseX}
+							mouseY={mouseY}
+							scrollYProgress={scrollYProgress}
+						></SpringText>
 						{/* <motion.div
 							style={{ x }}
 							className='whitespace-nowrap absolute left-0 m-w-[100vw] text-[#101010] font-normal font-Roboto text-[132px]'
@@ -190,7 +213,8 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 	);
 };
 
-const WaveSection = () => {
+const Wave = ({ scrollYProgress }: WaveProps) => {
+	const y = useTransform(scrollYProgress, [0.5, 0.6], [20, -65]);
 	return (
 		<motion.div
 			animate='wave'
@@ -198,17 +222,35 @@ const WaveSection = () => {
 		>
 			<div className='sticky top-[40vh] h-[60vh] '>
 				<motion.div
+					style={{ y }}
+					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					Future & Hornesty
+				</motion.div>
+				<motion.div
 					variants={wave(12)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
 				></motion.div>
 			</div>
 			<div className='sticky top-[50vh] h-[50vh] '>
 				<motion.div
+					style={{ y }}
+					className='absolute w-full px-[200px] text-right font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					Intuitive & Trendy
+				</motion.div>
+				<motion.div
 					variants={wave(10)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave2-pattern'
 				></motion.div>
 			</div>
 			<div className='sticky top-[60vh] h-[40vh] '>
+				<motion.div
+					style={{ y }}
+					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					Creative & Emotional
+				</motion.div>
 				<motion.div
 					variants={wave(8)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
@@ -223,15 +265,23 @@ export default function Home() {
 	// useEffect(() => {
 	// 	animate(scope.current, { opacity: 0 }, { duration: 4 });
 	// }, []);
-	let mouseX = useSpring(0, { stiffness: 100 });
-	let mouseY = useSpring(0);
+	const target = useRef(null);
+	const { scrollYProgress } = useScroll({ target });
+	const mouseX = useSpring(0, { stiffness: 100 });
+	const mouseY = useSpring(0);
+
 	return (
 		<div
 			onMouseMove={(e) => {
-				let offsetX = e.clientX - window.innerWidth / 2;
-				let offsetY = e.clientY - window.innerHeight / 2;
-				mouseX.set(offsetX);
-				mouseY.set(offsetY);
+				if (e.pageY < 2200) {
+					const offsetX = e.clientX - window.innerWidth / 2;
+					const offsetY = e.clientY - window.innerHeight / 2;
+					mouseX.set(offsetX);
+					mouseY.set(offsetY);
+				} else {
+					mouseX.set(0);
+					mouseY.set(0);
+				}
 			}}
 			onMouseLeave={(e) => {
 				mouseX.set(0);
@@ -240,8 +290,13 @@ export default function Home() {
 			className='absolute w-[100vw] h-[100vh] bg-[#13969342]'
 		>
 			<Layout seoTitle='INSAN'>
-				<Header mouseX={mouseX} mouseY={mouseY} />
-				<WaveSection />
+				<Header
+					inheritRef={target}
+					mouseX={mouseX}
+					mouseY={mouseY}
+					scrollYProgress={scrollYProgress}
+				/>
+				<Wave scrollYProgress={scrollYProgress} />
 				<section className='bg-[#101010] h-[3000px]'></section>
 			</Layout>
 		</div>
