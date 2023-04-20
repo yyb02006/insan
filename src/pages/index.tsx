@@ -1,6 +1,7 @@
 import Layout from '@/components/layout';
 import { time } from 'console';
 import { reverse } from 'dns';
+import { MotionValue, useSpring } from 'framer-motion';
 import {
 	motion,
 	useScroll,
@@ -15,6 +16,11 @@ import {
 	wrap,
 } from 'framer-motion';
 import { PointerEvent, useEffect, useRef } from 'react';
+
+interface MouseEventProps {
+	mouseX: MotionValue;
+	mouseY: MotionValue;
+}
 
 const logo = {
 	bigger: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
@@ -47,9 +53,39 @@ const wave = (sec: number) => {
 	};
 };
 
-const ParallaxText = () => {};
+const SpringText = ({ mouseX, mouseY }: MouseEventProps) => {
+	let firstWordX = (ratio: number) =>
+		useTransform(mouseX, (value) => value / ratio);
+	let firstWordY = (ratio: number) =>
+		useTransform(mouseY, (value) => value / ratio);
+	// let secondWordX = useTransform(mouseX, [], []);
+	// let secondWordY = useTransform(mouseY, [], []);
+	return (
+		<>
+			<div className='flex justify-center items-center overflow-hidden bg-green-400 w-full aspect-square rounded-full'>
+				<ul className='font-Roboto font-extrabold text-[6.5rem] leading-relaxed text-center '>
+					<motion.li style={{ x: firstWordX(9), y: firstWordY(2) }}>
+						Future
+					</motion.li>
+					<motion.li style={{ x: firstWordX(9), y: firstWordY(3) }}>
+						Creative
+					</motion.li>
+					<motion.li style={{ x: firstWordX(9), y: firstWordY(6) }}>
+						Emotional
+					</motion.li>
+					<motion.li style={{ x: firstWordX(9), y: firstWordY(3) }}>
+						Intuitive
+					</motion.li>
+					<motion.li style={{ x: firstWordX(9), y: firstWordY(2) }}>
+						Trendy
+					</motion.li>
+				</ul>
+			</div>
+		</>
+	);
+};
 
-const Header = () => {
+const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 	const target = useRef(null);
 	const { scrollYProgress } = useScroll({ target });
 	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
@@ -69,11 +105,11 @@ const Header = () => {
 			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
 		);
 	}, []);
-	const baseX = motionValue(0);
+	/* const baseX = motionValue(0);
 	const x = useTransform(baseX, (v) => `${wrap(-40, -60, v)}%`);
 	useAnimationFrame((time, delta) => {
-		baseX.set(baseX.get() + (5 * delta) / 1000);
-	});
+		baseX.set(baseX.get() + (2 * delta) / 1000);
+	}); */
 	return (
 		<motion.section
 			ref={target}
@@ -95,10 +131,10 @@ const Header = () => {
 					/>
 				</div>
 			</div>
-			<div className='h-full flex justify-center items-start'>
+			<div className='h-full flex justify-center items-start '>
 				<motion.div
 					style={{ scale, y }}
-					className='sticky top-0 h-[100vh] flex items-center'
+					className='sticky top-0 h-[100vh] flex items-center '
 				>
 					<motion.ul
 						style={{ rotate }}
@@ -107,10 +143,10 @@ const Header = () => {
 						variants={list}
 						className='w-full aspect-square absolute'
 					>
-						<li className='left-0 top-0 border rounded-full border-[#bababa] w-[694px] aspect-square absolute z-0' />
-						<li className='right-0 top-0 border rounded-full border-[#bababa] w-[694px] aspect-square absolute z-0' />
-						<li className='left-0 bottom-0 border rounded-full border-[#bababa] w-[694px] aspect-square absolute z-0' />
-						<li className='right-0 bottom-0 border rounded-full border-[#bababa] w-[694px] aspect-square absolute z-0' />
+						<li className='left-0 top-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
+						<li className='right-0 top-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
+						<li className='left-0 bottom-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
+						<li className='right-0 bottom-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
 					</motion.ul>
 					<motion.div
 						animate={{
@@ -120,9 +156,10 @@ const Header = () => {
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#efefef] w-[640px] aspect-square rounded-full flex justify-center items-center '
+						className='relative bg-[#efefef] w-[570px] aspect-square rounded-full flex justify-center items-center'
 					>
-						<motion.div
+						<SpringText mouseX={mouseX} mouseY={mouseY}></SpringText>
+						{/* <motion.div
 							style={{ x }}
 							className='whitespace-nowrap absolute left-0 m-w-[100vw] text-[#101010] font-normal font-Roboto text-[132px]'
 						>
@@ -131,11 +168,39 @@ const Header = () => {
 								Creative Trendy Emotional Creative Trendy Emotional Creative
 								Trendy
 							</span>
-						</motion.div>
+						</motion.div> */}
 					</motion.div>
 				</motion.div>
 			</div>
 		</motion.section>
+	);
+};
+
+const WaveSection = () => {
+	return (
+		<motion.div
+			animate='wave'
+			className='absolute top-[200vh] w-full h-[300vh]'
+		>
+			<div className='sticky top-[40vh] h-[60vh] '>
+				<motion.div
+					variants={wave(12)}
+					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
+				></motion.div>
+			</div>
+			<div className='sticky top-[50vh] h-[50vh] '>
+				<motion.div
+					variants={wave(10)}
+					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave2-pattern'
+				></motion.div>
+			</div>
+			<div className='sticky top-[60vh] h-[40vh] '>
+				<motion.div
+					variants={wave(8)}
+					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
+				></motion.div>
+			</div>
+		</motion.div>
 	);
 };
 
@@ -144,35 +209,28 @@ export default function Home() {
 	// useEffect(() => {
 	// 	animate(scope.current, { opacity: 0 }, { duration: 4 });
 	// }, []);
+	let mouseX = useSpring(0, { stiffness: 100 });
+	let mouseY = useSpring(0);
 	return (
-		<>
+		<div
+			onMouseMove={(e) => {
+				let offsetX = e.clientX - window.innerWidth / 2;
+				let offsetY = e.clientY - window.innerHeight / 2;
+				mouseX.set(offsetX);
+				mouseY.set(offsetY);
+				console.log(offsetX, offsetY);
+			}}
+			onMouseLeave={(e) => {
+				mouseX.set(0);
+				mouseY.set(0);
+			}}
+			className='absolute w-[100vw] h-[100vh] bg-[#13969342]'
+		>
 			<Layout seoTitle='INSAN'>
-				<Header />
-				<motion.div
-					animate='wave'
-					className='absolute top-[200vh] w-full h-[300vh]'
-				>
-					<div className='sticky top-[40vh] h-[60vh] '>
-						<motion.div
-							variants={wave(12)}
-							className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
-						></motion.div>
-					</div>
-					<div className='sticky top-[50vh] h-[50vh] '>
-						<motion.div
-							variants={wave(10)}
-							className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave2-pattern'
-						></motion.div>
-					</div>
-					<div className='sticky top-[60vh] h-[40vh] '>
-						<motion.div
-							variants={wave(8)}
-							className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
-						></motion.div>
-					</div>
-				</motion.div>
+				<Header mouseX={mouseX} mouseY={mouseY} />
+				<WaveSection />
 				<section className='bg-[#101010] h-[3000px]'></section>
 			</Layout>
-		</>
+		</div>
 	);
 }
