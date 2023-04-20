@@ -72,12 +72,17 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 		useTransform(mouseY, (value) => value / ratio);
 	const elements = useRef([
 		{ title: 'Future', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
-		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.5rem]', dropHeight: 600 },
-		{ title: 'Emotional', yRatio: 6, text: 'text-[6.5rem]', dropHeight: 600 },
-		{ title: 'Intuitive', yRatio: 3.5, text: 'text-[5.5rem]', dropHeight: 600 },
+		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.75rem]', dropHeight: 600 },
+		{ title: 'Emotional', yRatio: 6, text: 'text-[7rem]', dropHeight: 600 },
+		{
+			title: 'Intuitive',
+			yRatio: 3.5,
+			text: 'text-[5.75rem]',
+			dropHeight: 600,
+		},
 		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
 	]);
-	const y = useTransform(scrollYProgress, [0.4, 0.6], [0, 600]);
+	const y = useTransform(scrollYProgress, [0.4, 0.6, 0.8], [0, 600, 1000]);
 
 	useEffect(() => {
 		window.addEventListener('scroll', () =>
@@ -124,7 +129,7 @@ const Header = ({
 	const y = useTransform(scrollYProgress, [0.1, 0.4], [0, -200]);
 	const scale = useTransform(
 		scrollYProgress,
-		[0.1, 0.4, 0.8, 1],
+		[0.1, 0.4, 0.7, 0.9],
 		[1, 0.5, 0.5, 0]
 	);
 	/* const baseX = motionValue(0);
@@ -143,7 +148,7 @@ const Header = ({
 			className='relative bg-[#101010] h-[500vh] px-10'
 			ref={inheritRef}
 		>
-			<div className='h-[30%] absolute'>
+			<div className='h-[80%] absolute'>
 				<div className='sticky top-0'>
 					<motion.div
 						initial='initial'
@@ -223,7 +228,7 @@ const Wave = ({ scrollYProgress }: WaveProps) => {
 			<div className='sticky top-[40vh] h-[60vh] '>
 				<motion.div
 					style={{ y }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
 				>
 					Future & Hornesty
 				</motion.div>
@@ -235,7 +240,7 @@ const Wave = ({ scrollYProgress }: WaveProps) => {
 			<div className='sticky top-[50vh] h-[50vh] '>
 				<motion.div
 					style={{ y }}
-					className='absolute w-full px-[200px] text-right font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+					className='absolute w-full px-[200px] text-right font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
 				>
 					Intuitive & Trendy
 				</motion.div>
@@ -247,7 +252,7 @@ const Wave = ({ scrollYProgress }: WaveProps) => {
 			<div className='sticky top-[60vh] h-[40vh] '>
 				<motion.div
 					style={{ y }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa]'
+					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
 				>
 					Creative & Emotional
 				</motion.div>
