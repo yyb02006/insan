@@ -4,7 +4,7 @@ export default function Document() {
 	return (
 		<Html lang='ko'>
 			<Head />
-			<body className='scrollbar-hide'>
+			<body>
 				<Main />
 				<NextScript />
 			</body>
