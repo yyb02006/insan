@@ -1,4 +1,5 @@
 import Layout from '@/components/layout';
+import { cls } from '@/libs/client/utils';
 import { time } from 'console';
 import { reverse } from 'dns';
 import { MotionValue, useSpring } from 'framer-motion';
@@ -60,25 +61,27 @@ const SpringText = ({ mouseX, mouseY }: MouseEventProps) => {
 		useTransform(mouseY, (value) => value / ratio);
 	// let secondWordX = useTransform(mouseX, [], []);
 	// let secondWordY = useTransform(mouseY, [], []);
+	const elements = useRef([
+		{ title: 'Future', yRatio: 2 },
+		{ title: 'Creative', yRatio: 3 },
+		{ title: 'Emotional', yRatio: 6 },
+		{ title: 'Intuitive', yRatio: 3 },
+		{ title: 'Trendy', yRatio: 2 },
+	]);
+	console.log(elements);
+
 	return (
 		<>
 			<div className='flex justify-center items-center overflow-hidden bg-green-400 w-full aspect-square rounded-full'>
 				<ul className='font-Roboto font-extrabold text-[6.5rem] leading-relaxed text-center '>
-					<motion.li style={{ x: firstWordX(9), y: firstWordY(2) }}>
-						Future
-					</motion.li>
-					<motion.li style={{ x: firstWordX(9), y: firstWordY(3) }}>
-						Creative
-					</motion.li>
-					<motion.li style={{ x: firstWordX(9), y: firstWordY(6) }}>
-						Emotional
-					</motion.li>
-					<motion.li style={{ x: firstWordX(9), y: firstWordY(3) }}>
-						Intuitive
-					</motion.li>
-					<motion.li style={{ x: firstWordX(9), y: firstWordY(2) }}>
-						Trendy
-					</motion.li>
+					{elements.current.map((element, idx) => (
+						<motion.li
+							key={idx}
+							style={{ x: firstWordX(9), y: firstWordY(element.yRatio) }}
+						>
+							{element.title}
+						</motion.li>
+					))}
 				</ul>
 			</div>
 		</>
@@ -110,6 +113,12 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 	useAnimationFrame((time, delta) => {
 		baseX.set(baseX.get() + (2 * delta) / 1000);
 	}); */
+	const circles = useRef([
+		'left-0 top-0',
+		'right-0 top-0',
+		'left-0 bottom-0',
+		'right-0 bottom-0',
+	]);
 	return (
 		<motion.section
 			ref={target}
@@ -143,10 +152,15 @@ const Header = ({ mouseX, mouseY }: MouseEventProps) => {
 						variants={list}
 						className='w-full aspect-square absolute'
 					>
-						<li className='left-0 top-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
-						<li className='right-0 top-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
-						<li className='left-0 bottom-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
-						<li className='right-0 bottom-0 border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0' />
+						{circles.current.map((circle, idx) => (
+							<li
+								key={idx}
+								className={cls(
+									circle,
+									'border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0'
+								)}
+							/>
+						))}
 					</motion.ul>
 					<motion.div
 						animate={{
@@ -218,7 +232,6 @@ export default function Home() {
 				let offsetY = e.clientY - window.innerHeight / 2;
 				mouseX.set(offsetX);
 				mouseY.set(offsetY);
-				console.log(offsetX, offsetY);
 			}}
 			onMouseLeave={(e) => {
 				mouseX.set(0);
