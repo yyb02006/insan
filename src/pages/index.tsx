@@ -26,19 +26,18 @@ interface WaveProps {
 	startHeight: number;
 	endHeigth: number;
 	inViewCondition: number;
-	stickyCondition: { top: number; height: number };
+	stickyCondition: { top: number; height: string };
 	waveSec: number;
 	waveReverse?: boolean;
 	css?: string;
 	letterHeightFix?: number;
-	index: number;
 }
 
 const wave = (sec: number, reverse: boolean = false) => {
 	if (reverse) {
 		return {
 			wave: {
-				backgroundPositionX: '-1920px',
+				backgroundPositionX: '-100vw',
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -49,7 +48,7 @@ const wave = (sec: number, reverse: boolean = false) => {
 	} else {
 		return {
 			wave: {
-				backgroundPositionX: '1920px',
+				backgroundPositionX: `100vw`,
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -127,14 +126,14 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	]);
 	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
 
-	useEffect(() => {
-		window.addEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-		window.removeEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-	}, []);
+	// useEffect(() => {
+	// 	window.addEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+	// 	);
+	// 	window.removeEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+	// 	);
+	// }, []);
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
@@ -282,7 +281,6 @@ const Wave = ({
 	waveReverse = false,
 	css = '',
 	letterHeightFix = -65,
-	index,
 }: WaveProps) => {
 	const y = useTransform(
 		scrollYProgress,
@@ -298,11 +296,8 @@ const Wave = ({
 		<div
 			ref={parent}
 			className={cls(
-				`top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`,
 				'sticky',
-				index === 1 ? 'bg-pink-400' : '',
-				index === 2 ? 'bg-pink-500' : '',
-				index === 3 ? 'bg-pink-600' : ''
+				`top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`
 			)}
 		>
 			<motion.div
@@ -312,7 +307,7 @@ const Wave = ({
 				variants={container}
 				className={cls(
 					css,
-					'absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
+					'absolute top-0 flex px-[200px] font-Roboto font-black text-[calc(100px+1vw)] text-[#fafafa] '
 				)}
 			>
 				{waveReverse
@@ -333,13 +328,13 @@ const Wave = ({
 	>
 		Future & Hornesty
 	</motion.div> */}
-			{/* <motion.div
+			<motion.div
 				variants={wave(waveSec, waveReverse)}
 				className={cls(
 					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-					'relative w-full max-h-[400px] aspect-[1920/400] bg-pink-400'
+					'relative w-full max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
 				)}
-			></motion.div> */}
+			></motion.div>
 		</div>
 	);
 };
@@ -352,7 +347,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 			startHeight: 0.5,
 			endHeigth: 0.6,
 			inViewCondition: 0.5,
-			stickyCondition: { top: 35, height: 100 },
+			stickyCondition: { top: 35, height: '100' },
 			waveSec: 12,
 			waveReverse: false,
 		},
@@ -362,7 +357,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 			startHeight: 0.6,
 			endHeigth: 0.7,
 			inViewCondition: 0.5,
-			stickyCondition: { top: 50, height: 55 },
+			stickyCondition: { top: 50, height: '55' },
 			waveSec: 10,
 			waveReverse: true,
 			css: 'flex-row-reverse right-0',
@@ -374,7 +369,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 			startHeight: 0.7,
 			endHeigth: 0.8,
 			inViewCondition: 0.5,
-			stickyCondition: { top: 65, height: 10 },
+			stickyCondition: { top: 65, height: '10' },
 			waveSec: 8,
 			waveReverse: false,
 		},
@@ -383,7 +378,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 	return (
 		<motion.div
 			animate='wave'
-			className='absolute top-[200vh] w-full h-[400vh]'
+			className='absolute top-[200vh] w-full h-[400vh] pb-[40vh]'
 		>
 			{waveProps.current.map((prop) =>
 				prop.index % 2 === 0 ? (
@@ -399,7 +394,6 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						waveReverse={prop.waveReverse}
 						css={prop.css}
 						letterHeightFix={prop.letterHeightFix}
-						index={prop.index}
 					></Wave>
 				) : (
 					<Wave
@@ -411,7 +405,6 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						inViewCondition={prop.inViewCondition}
 						stickyCondition={prop.stickyCondition}
 						waveSec={prop.waveSec}
-						index={prop.index}
 					></Wave>
 				)
 			)}
@@ -442,7 +435,7 @@ export default function Home() {
 					mouseY.set(0);
 				}
 			}}
-			onMouseLeave={(e) => {
+			onMouseLeave={() => {
 				mouseX.set(0);
 				mouseY.set(0);
 			}}
@@ -474,7 +467,7 @@ export default function Home() {
 							</div>
 						</div>
 					</div>
-					<div className='h-[500px] bg-red-500 mt-[40vh]'></div>
+					<div className='h-[500px] bg-red-500'></div>
 				</section>
 			</Layout>
 		</div>
