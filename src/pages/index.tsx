@@ -1,28 +1,8 @@
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
-import { time } from 'console';
-import { reverse } from 'dns';
 import { MotionValue, Variants, useInView, useSpring } from 'framer-motion';
-import {
-	motion,
-	useScroll,
-	useMotionValue,
-	useTransform,
-	useMotionValueEvent,
-	useWillChange,
-	useDragControls,
-	useAnimate,
-	useAnimationFrame,
-	motionValue,
-	wrap,
-} from 'framer-motion';
-import {
-	MutableRefObject,
-	PointerEvent,
-	RefObject,
-	useEffect,
-	useRef,
-} from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { MutableRefObject, useEffect, useRef } from 'react';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -40,23 +20,19 @@ interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
 }
 
-const logo = {
-	bigger: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
-	initial: { scale: 0 },
-};
-
-const list = {
-	initial: {
-		scale: 0,
-	},
-	bigger: {
-		scale: 1,
-		transition: {
-			duration: 0.7,
-			delay: 0.3,
-		},
-	},
-};
+interface WaveProps {
+	scrollYProgress: MotionValue<number>;
+	letter: string[];
+	startHeight: number;
+	endHeigth: number;
+	inViewCondition: number;
+	stickyCondition: { top: number; height: number };
+	waveSec: number;
+	waveReverse?: boolean;
+	css?: string;
+	letterHeightFix?: number;
+	index: number;
+}
 
 const wave = (sec: number, reverse: boolean = false) => {
 	if (reverse) {
@@ -82,6 +58,55 @@ const wave = (sec: number, reverse: boolean = false) => {
 			},
 		};
 	}
+};
+
+const logo = {
+	bigger: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+	initial: { scale: 0 },
+};
+
+const list = {
+	initial: {
+		scale: 0,
+	},
+	bigger: {
+		scale: 1,
+		transition: {
+			duration: 0.7,
+			delay: 0.3,
+		},
+	},
+};
+
+const container: Variants = {
+	hidden: {
+		opacity: 0,
+	},
+	visible: (i: number = 1) => ({
+		opacity: 1,
+		transition: { staggerChildren: 0.08, delayChildren: i * 0 },
+	}),
+};
+
+const child: Variants = {
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
+	hidden: {
+		opacity: 1,
+		y: 20,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
 };
 
 const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
@@ -172,10 +197,10 @@ const CircleSection = ({
 	]);
 	return (
 		<motion.section
-			className='relative bg-[#101010] h-[500vh] px-10'
+			className='relative bg-[#101010] h-[500vh] mb-[100vh] px-10'
 			ref={inheritRef}
 		>
-			<div className='h-[80%] absolute'>
+			<div className='absolute top-0 h-[80%] '>
 				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
 						<motion.div
@@ -246,50 +271,6 @@ const CircleSection = ({
 	);
 };
 
-const container: Variants = {
-	hidden: {
-		opacity: 0,
-	},
-	visible: (i: number = 1) => ({
-		opacity: 1,
-		transition: { staggerChildren: 0.08, delayChildren: i * 0 },
-	}),
-};
-
-const child: Variants = {
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-	hidden: {
-		opacity: 1,
-		y: 20,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-};
-
-interface WaveProps {
-	scrollYProgress: MotionValue<number>;
-	letter: string[];
-	startHeight: number;
-	endHeigth: number;
-	inViewCondition: number;
-	stickyCondition: { top: number; height: number };
-	waveSec: number;
-	waveReverse?: boolean;
-	css?: string;
-	letterHeightFix?: number;
-}
-
 const Wave = ({
 	scrollYProgress,
 	letter,
@@ -301,6 +282,7 @@ const Wave = ({
 	waveReverse = false,
 	css = '',
 	letterHeightFix = -65,
+	index,
 }: WaveProps) => {
 	const y = useTransform(
 		scrollYProgress,
@@ -317,7 +299,10 @@ const Wave = ({
 			ref={parent}
 			className={cls(
 				`top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`,
-				'sticky top-[35vh] h-[100vh]'
+				'sticky',
+				index === 1 ? 'bg-pink-400' : '',
+				index === 2 ? 'bg-pink-500' : '',
+				index === 3 ? 'bg-pink-600' : ''
 			)}
 		>
 			<motion.div
@@ -327,7 +312,7 @@ const Wave = ({
 				variants={container}
 				className={cls(
 					css,
-					'absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
+					'absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
 				)}
 			>
 				{waveReverse
@@ -348,13 +333,13 @@ const Wave = ({
 	>
 		Future & Hornesty
 	</motion.div> */}
-			<motion.div
+			{/* <motion.div
 				variants={wave(waveSec, waveReverse)}
 				className={cls(
 					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-					'relative w-full max-h-[400px] aspect-[1920/400]'
+					'relative w-full max-h-[400px] aspect-[1920/400] bg-pink-400'
 				)}
-			></motion.div>
+			></motion.div> */}
 		</div>
 	);
 };
@@ -414,6 +399,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						waveReverse={prop.waveReverse}
 						css={prop.css}
 						letterHeightFix={prop.letterHeightFix}
+						index={prop.index}
 					></Wave>
 				) : (
 					<Wave
@@ -425,6 +411,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						inViewCondition={prop.inViewCondition}
 						stickyCondition={prop.stickyCondition}
 						waveSec={prop.waveSec}
+						index={prop.index}
 					></Wave>
 				)
 			)}
@@ -469,7 +456,26 @@ export default function Home() {
 					scrollYProgress={scrollYProgress}
 				/>
 				<WavesSection scrollYProgress={scrollYProgress} />
-				<section className='bg-[#101010] h-[3000px]'></section>
+				<section className='relative h-[3000px] bg-amber-400 text-[200px]'>
+					<div className='h-[2000px] bg-cyan-600'>
+						<div className=' bg-green-400 sticky top-[400px] h-[300px] opacity-50'>
+							<div className='h-[200px] top-0 bg-green-800 absolute'>
+								CONTENTS1
+							</div>
+						</div>
+						<div className=' bg-indigo-400 sticky top-[400px] h-[300px] opacity-50'>
+							<div className='h-[200px] top-0 bg-indigo-800 absolute'>
+								CONTENTS2
+							</div>
+						</div>
+						<div className=' bg-pink-400 sticky top-[400px] h-[300px] opacity-50'>
+							<div className='h-[200px] top-0 bg-pink-800 absolute'>
+								CONTENTS3
+							</div>
+						</div>
+					</div>
+					<div className='h-[500px] bg-red-500 mt-[40vh]'></div>
+				</section>
 			</Layout>
 		</div>
 	);
