@@ -36,7 +36,7 @@ interface HeaderProps extends MouseEventProps {
 
 interface SpringTextProps extends MouseEventProps {}
 
-interface WaveProps {
+interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
 }
 
@@ -135,7 +135,7 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	);
 };
 
-const Header = ({
+const CircleSection = ({
 	mouseX,
 	mouseY,
 	scrollYProgress,
@@ -277,105 +277,157 @@ const child: Variants = {
 	},
 };
 
-const Wave = ({ scrollYProgress }: WaveProps) => {
-	const letters = useRef({
-		first: Array.from('Future & Hornesty'),
-		second: Array.from('Intuitive & Trendy'),
-		third: Array.from('Creative & Emotional'),
-	});
-	const y1 = useTransform(scrollYProgress, [0.5, 0.6], [20, -65]);
-	const parent1 = useRef(null);
-	const isInView1 = useInView(parent1, { amount: 0.5 });
-	const y2 = useTransform(scrollYProgress, [0.6, 0.7], [20, -60]);
-	const parent2 = useRef(null);
-	const isInView2 = useInView(parent2, { amount: 0.5 });
-	const y3 = useTransform(scrollYProgress, [0.7, 0.8], [20, -65]);
-	const parent3 = useRef(null);
-	const isInView3 = useInView(parent3, { amount: 0.5 });
-	const visibility = useTransform(scrollYProgress, (value) =>
-		value > 0.5 ? 'visible' : 'hidden'
+interface WaveProps {
+	scrollYProgress: MotionValue<number>;
+	letter: string[];
+	startHeight: number;
+	endHeigth: number;
+	inViewCondition: number;
+	stickyCondition: { top: number; height: number };
+	waveSec: number;
+	waveReverse?: boolean;
+	css?: string;
+	letterHeightFix?: number;
+}
+
+const Wave = ({
+	scrollYProgress,
+	letter,
+	startHeight,
+	endHeigth,
+	inViewCondition,
+	stickyCondition,
+	waveSec,
+	waveReverse = false,
+	css = '',
+	letterHeightFix = -65,
+}: WaveProps) => {
+	const y = useTransform(
+		scrollYProgress,
+		[startHeight, endHeigth],
+		[20, letterHeightFix]
 	);
+	const parent = useRef(null);
+	const isInView = useInView(parent, { amount: inViewCondition });
+	const visibility = useTransform(scrollYProgress, (value) =>
+		value > startHeight ? 'visible' : 'hidden'
+	);
+	return (
+		<div
+			ref={parent}
+			className={cls(
+				`top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`,
+				'sticky top-[35vh] h-[100vh]'
+			)}
+		>
+			<motion.div
+				style={{ y, visibility }}
+				initial='hidden'
+				animate={isInView ? 'visible' : 'hidden'}
+				variants={container}
+				className={cls(
+					css,
+					'absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
+				)}
+			>
+				{waveReverse
+					? [...letter].reverse().map((test, idx) => (
+							<motion.span variants={child} key={idx}>
+								{test === ' ' ? '\u00A0' : test}
+							</motion.span>
+					  ))
+					: letter.map((test, idx) => (
+							<motion.span variants={child} key={idx}>
+								{test === ' ' ? '\u00A0' : test}
+							</motion.span>
+					  ))}
+			</motion.div>
+			{/* <motion.div
+		style={{ y, visibility }}
+		className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
+	>
+		Future & Hornesty
+	</motion.div> */}
+			<motion.div
+				variants={wave(waveSec, waveReverse)}
+				className={cls(
+					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
+					'relative w-full max-h-[400px] aspect-[1920/400]'
+				)}
+			></motion.div>
+		</div>
+	);
+};
+
+const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
+	const waveProps = useRef([
+		{
+			index: 1,
+			letter: Array.from('Future & Hornesty'),
+			startHeight: 0.5,
+			endHeigth: 0.6,
+			inViewCondition: 0.5,
+			stickyCondition: { top: 35, height: 100 },
+			waveSec: 12,
+			waveReverse: false,
+		},
+		{
+			index: 2,
+			letter: Array.from('Intuitive & Trendy'),
+			startHeight: 0.6,
+			endHeigth: 0.7,
+			inViewCondition: 0.5,
+			stickyCondition: { top: 50, height: 55 },
+			waveSec: 10,
+			waveReverse: true,
+			css: 'flex-row-reverse right-0',
+			letterHeightFix: -60,
+		},
+		{
+			index: 3,
+			letter: Array.from('Creative & Emotional'),
+			startHeight: 0.7,
+			endHeigth: 0.8,
+			inViewCondition: 0.5,
+			stickyCondition: { top: 65, height: 10 },
+			waveSec: 8,
+			waveReverse: false,
+		},
+	]);
 
 	return (
 		<motion.div
 			animate='wave'
 			className='absolute top-[200vh] w-full h-[400vh]'
 		>
-			<div ref={parent1} className='sticky top-[35vh] h-[100vh] '>
-				<motion.div
-					style={{ y: y1, visibility }}
-					initial='hidden'
-					animate={isInView1 ? 'visible' : 'hidden'}
-					variants={container}
-					className='absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
-				>
-					{letters.current.first.map((test, idx) => (
-						<motion.span variants={child} key={idx}>
-							{test === ' ' ? '\u00A0' : test}
-						</motion.span>
-					))}
-				</motion.div>
-				{/* <motion.div
-					style={{ y, visibility }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
-				>
-					Future & Hornesty
-				</motion.div> */}
-				<motion.div
-					variants={wave(12)}
-					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
-				></motion.div>
-			</div>
-			<div ref={parent2} className='sticky top-[50vh] h-[55vh] '>
-				<motion.div
-					style={{ y: y2, visibility }}
-					initial='hidden'
-					animate={isInView2 ? 'visible' : 'hidden'}
-					variants={container}
-					className='absolute flex flex-row-reverse px-[200px] font-Roboto font-black top-0 right-0 text-[calc(100px+1vw)] text-[#fafafa]'
-				>
-					{[...letters.current.second].reverse().map((test, idx) => (
-						<motion.span variants={child} key={idx}>
-							{test === ' ' ? '\u00A0' : test}
-						</motion.span>
-					))}
-				</motion.div>
-				{/* <motion.div
-					style={{ y: y2, visibility }}
-					className='absolute w-full px-[200px] text-right font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
-				>
-					Intuitive & Trendy
-				</motion.div> */}
-				<motion.div
-					variants={wave(10, true)}
-					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave2-pattern'
-				></motion.div>
-			</div>
-			<div ref={parent3} className='sticky top-[65vh] h-[10vh] '>
-				<motion.div
-					style={{ y: y3, visibility }}
-					initial='hidden'
-					animate={isInView3 ? 'visible' : 'hidden'}
-					variants={container}
-					className='absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
-				>
-					{letters.current.third.map((test, idx) => (
-						<motion.span variants={child} key={idx}>
-							{test === ' ' ? '\u00A0' : test}
-						</motion.span>
-					))}
-				</motion.div>
-				{/* <motion.div
-					style={{ y: y3, visibility }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
-				>
-					Creative & Emotional
-				</motion.div> */}
-				<motion.div
-					variants={wave(8)}
-					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
-				></motion.div>
-			</div>
+			{waveProps.current.map((prop) =>
+				prop.index % 2 === 0 ? (
+					<Wave
+						key={prop.index}
+						scrollYProgress={scrollYProgress}
+						letter={prop.letter}
+						startHeight={prop.startHeight}
+						endHeigth={prop.endHeigth}
+						inViewCondition={prop.inViewCondition}
+						stickyCondition={prop.stickyCondition}
+						waveSec={prop.waveSec}
+						waveReverse={prop.waveReverse}
+						css={prop.css}
+						letterHeightFix={prop.letterHeightFix}
+					></Wave>
+				) : (
+					<Wave
+						key={prop.index}
+						scrollYProgress={scrollYProgress}
+						letter={prop.letter}
+						startHeight={prop.startHeight}
+						endHeigth={prop.endHeigth}
+						inViewCondition={prop.inViewCondition}
+						stickyCondition={prop.stickyCondition}
+						waveSec={prop.waveSec}
+					></Wave>
+				)
+			)}
 		</motion.div>
 	);
 };
@@ -410,13 +462,13 @@ export default function Home() {
 			className='absolute w-[100vw] h-[100vh] bg-[#13969342]'
 		>
 			<Layout seoTitle='INSAN'>
-				<Header
+				<CircleSection
 					inheritRef={target}
 					mouseX={mouseX}
 					mouseY={mouseY}
 					scrollYProgress={scrollYProgress}
 				/>
-				<Wave scrollYProgress={scrollYProgress} />
+				<WavesSection scrollYProgress={scrollYProgress} />
 				<section className='bg-[#101010] h-[3000px]'></section>
 			</Layout>
 		</div>
