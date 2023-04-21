@@ -2,7 +2,7 @@ import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
 import { time } from 'console';
 import { reverse } from 'dns';
-import { MotionValue, useSpring } from 'framer-motion';
+import { MotionValue, Variants, useInView, useSpring } from 'framer-motion';
 import {
 	motion,
 	useScroll,
@@ -16,7 +16,13 @@ import {
 	motionValue,
 	wrap,
 } from 'framer-motion';
-import { MutableRefObject, PointerEvent, useEffect, useRef } from 'react';
+import {
+	MutableRefObject,
+	PointerEvent,
+	RefObject,
+	useEffect,
+	useRef,
+} from 'react';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -52,37 +58,49 @@ const list = {
 	},
 };
 
-const wave = (sec: number) => {
-	return {
-		wave: {
-			backgroundPositionX: '1920px',
-			transition: {
-				ease: 'linear',
-				duration: sec,
-				repeat: Infinity,
+const wave = (sec: number, reverse: boolean = false) => {
+	if (reverse) {
+		return {
+			wave: {
+				backgroundPositionX: '-1920px',
+				transition: {
+					ease: 'linear',
+					duration: sec,
+					repeat: Infinity,
+				},
 			},
-		},
-	};
+		};
+	} else {
+		return {
+			wave: {
+				backgroundPositionX: '1920px',
+				transition: {
+					ease: 'linear',
+					duration: sec,
+					repeat: Infinity,
+				},
+			},
+		};
+	}
 };
 
 const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
-	const firstWordX = (ratio: number) =>
-		useTransform(mouseX, (value) => value / ratio);
-	const firstWordY = (ratio: number) =>
-		useTransform(mouseY, (value) => value / ratio);
+	const wordsX = (ratio: number) =>
+		useTransform(mouseX, (offset) => offset / ratio);
+	const wordsY = (ratio: number) =>
+		useTransform(mouseY, (offset) => offset / ratio);
 	const elements = useRef([
-		{ title: 'Future', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
-		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.75rem]', dropHeight: 600 },
-		{ title: 'Emotional', yRatio: 6, text: 'text-[7rem]', dropHeight: 600 },
+		{ title: 'Future', yRatio: 2.5, text: 'text-[4.5rem]' },
+		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.75rem]' },
+		{ title: 'Emotional', yRatio: 6, text: 'text-[7rem]' },
 		{
 			title: 'Intuitive',
 			yRatio: 3.5,
 			text: 'text-[5.75rem]',
-			dropHeight: 600,
 		},
-		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]', dropHeight: 600 },
+		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]' },
 	]);
-	const y = useTransform(scrollYProgress, [0.4, 0.6, 0.8], [0, 600, 1000]);
+	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
 
 	useEffect(() => {
 		window.addEventListener('scroll', () =>
@@ -94,17 +112,17 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	}, []);
 	return (
 		<>
-			<div className='flex justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
+			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
 				<motion.ul
 					style={{ y }}
-					className='font-Roboto font-extrabold text-[6.5rem] leading-relaxed text-center '
+					className='font-Roboto text-[#efefef] font-extrabold leading-snug text-center '
 				>
 					{elements.current.map((element, idx) => (
 						<motion.li
 							key={idx}
 							style={{
-								x: firstWordX(15),
-								y: firstWordY(element.yRatio),
+								x: wordsX(15),
+								y: wordsY(element.yRatio),
 							}}
 							className={element.text}
 						>
@@ -132,16 +150,25 @@ const Header = ({
 		[0.1, 0.4, 0.7, 0.9],
 		[1, 0.5, 0.5, 0]
 	);
+	const logoCircle = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]);
+	const circleLineScale = useTransform(
+		mouseY,
+		(offset) => 1 + Math.abs(offset / 20000)
+	);
 	/* const baseX = motionValue(0);
 	const x = useTransform(baseX, (v) => `${wrap(-40, -60, v)}%`);
 	useAnimationFrame((time, delta) => {
 		baseX.set(baseX.get() + (2 * delta) / 1000);
 	}); */
-	const circles = useRef([
-		'left-0 top-0',
-		'right-0 top-0',
-		'left-0 bottom-0',
-		'right-0 bottom-0',
+	const mainCircles = useRef([
+		'left-0 top-0 origin-top-left',
+		'right-0 top-0 origin-top-right',
+		'left-0 bottom-0 origin-bottom-left',
+		'right-0 bottom-0 origin-bottom-right',
+	]);
+	const logoCircles = useRef([
+		'top-[-220px] left-[-200px] w-[460px]',
+		'top-[-120px] left-[-80px] w-[340px]',
 	]);
 	return (
 		<motion.section
@@ -149,20 +176,20 @@ const Header = ({
 			ref={inheritRef}
 		>
 			<div className='h-[80%] absolute'>
-				<div className='sticky top-0'>
-					<motion.div
-						initial='initial'
-						animate='bigger'
-						variants={logo}
-						className='absolute top-[-220px] left-[-200px] border rounded-full border-[#bababa] w-[460px] aspect-square'
-					/>
-					<motion.div
-						initial='initial'
-						animate='bigger'
-						variants={logo}
-						className='absolute top-[-120px] left-[-80px] border rounded-full border-[#bababa] w-[340px] aspect-square'
-					/>
-				</div>
+				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
+					{logoCircles.current.map((arr, idx) => (
+						<motion.div
+							key={idx}
+							initial='initial'
+							animate='bigger'
+							variants={logo}
+							className={cls(
+								arr,
+								'absolute border rounded-full border-[#bababa] aspect-square'
+							)}
+						/>
+					))}
+				</motion.div>
 			</div>
 			<div className='h-full flex justify-center items-start '>
 				<motion.div
@@ -176,9 +203,10 @@ const Header = ({
 						variants={list}
 						className='w-full aspect-square absolute'
 					>
-						{circles.current.map((circle, idx) => (
-							<li
+						{mainCircles.current.map((circle, idx) => (
+							<motion.li
 								key={idx}
+								style={{ scale: circleLineScale }}
 								className={cls(
 									circle,
 									'border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0'
@@ -194,7 +222,7 @@ const Header = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#efefef] w-[570px] aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] w-[570px] aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
@@ -218,44 +246,131 @@ const Header = ({
 	);
 };
 
+const container: Variants = {
+	hidden: {
+		opacity: 0,
+	},
+	visible: (i: number = 1) => ({
+		opacity: 1,
+		transition: { staggerChildren: 0.08, delayChildren: i * 0 },
+	}),
+};
+
+const child: Variants = {
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
+	hidden: {
+		opacity: 1,
+		y: 20,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
+};
+
 const Wave = ({ scrollYProgress }: WaveProps) => {
-	const y = useTransform(scrollYProgress, [0.5, 0.6], [20, -65]);
+	const letters = useRef({
+		first: Array.from('Future & Hornesty'),
+		second: Array.from('Intuitive & Trendy'),
+		third: Array.from('Creative & Emotional'),
+	});
+	const y1 = useTransform(scrollYProgress, [0.5, 0.6], [20, -65]);
+	const parent1 = useRef(null);
+	const isInView1 = useInView(parent1, { amount: 0.5 });
+	const y2 = useTransform(scrollYProgress, [0.6, 0.7], [20, -60]);
+	const parent2 = useRef(null);
+	const isInView2 = useInView(parent2, { amount: 0.5 });
+	const y3 = useTransform(scrollYProgress, [0.7, 0.8], [20, -65]);
+	const parent3 = useRef(null);
+	const isInView3 = useInView(parent3, { amount: 0.5 });
+	const visibility = useTransform(scrollYProgress, (value) =>
+		value > 0.5 ? 'visible' : 'hidden'
+	);
+
 	return (
 		<motion.div
 			animate='wave'
-			className='absolute top-[200vh] w-full h-[300vh]'
+			className='absolute top-[200vh] w-full h-[400vh]'
 		>
-			<div className='sticky top-[40vh] h-[60vh] '>
+			<div ref={parent1} className='sticky top-[35vh] h-[100vh] '>
 				<motion.div
-					style={{ y }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
+					style={{ y: y1, visibility }}
+					initial='hidden'
+					animate={isInView1 ? 'visible' : 'hidden'}
+					variants={container}
+					className='absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					{letters.current.first.map((test, idx) => (
+						<motion.span variants={child} key={idx}>
+							{test === ' ' ? '\u00A0' : test}
+						</motion.span>
+					))}
+				</motion.div>
+				{/* <motion.div
+					style={{ y, visibility }}
+					className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
 				>
 					Future & Hornesty
-				</motion.div>
+				</motion.div> */}
 				<motion.div
 					variants={wave(12)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
 				></motion.div>
 			</div>
-			<div className='sticky top-[50vh] h-[50vh] '>
+			<div ref={parent2} className='sticky top-[50vh] h-[55vh] '>
 				<motion.div
-					style={{ y }}
-					className='absolute w-full px-[200px] text-right font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
+					style={{ y: y2, visibility }}
+					initial='hidden'
+					animate={isInView2 ? 'visible' : 'hidden'}
+					variants={container}
+					className='absolute flex flex-row-reverse px-[200px] font-Roboto font-black top-0 right-0 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					{[...letters.current.second].reverse().map((test, idx) => (
+						<motion.span variants={child} key={idx}>
+							{test === ' ' ? '\u00A0' : test}
+						</motion.span>
+					))}
+				</motion.div>
+				{/* <motion.div
+					style={{ y: y2, visibility }}
+					className='absolute w-full px-[200px] text-right font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
 				>
 					Intuitive & Trendy
-				</motion.div>
+				</motion.div> */}
 				<motion.div
-					variants={wave(10)}
+					variants={wave(10, true)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave2-pattern'
 				></motion.div>
 			</div>
-			<div className='sticky top-[60vh] h-[40vh] '>
+			<div ref={parent3} className='sticky top-[65vh] h-[10vh] '>
 				<motion.div
-					style={{ y }}
-					className='absolute w-full px-[200px] font-Roboto font-black top-4 text-[calc(100px+1vw)] text-[#fafafa] drop-shadow-[0_0px_8px_rgba(10,10,10,0.4)]'
+					style={{ y: y3, visibility }}
+					initial='hidden'
+					animate={isInView3 ? 'visible' : 'hidden'}
+					variants={container}
+					className='absolute flex px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa]'
+				>
+					{letters.current.third.map((test, idx) => (
+						<motion.span variants={child} key={idx}>
+							{test === ' ' ? '\u00A0' : test}
+						</motion.span>
+					))}
+				</motion.div>
+				{/* <motion.div
+					style={{ y: y3, visibility }}
+					className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
 				>
 					Creative & Emotional
-				</motion.div>
+				</motion.div> */}
 				<motion.div
 					variants={wave(8)}
 					className='relative w-full max-h-[400px] aspect-[1920/400] bg-wave-pattern'
