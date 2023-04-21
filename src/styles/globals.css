@@ -3,24 +3,26 @@
 @tailwind utilities;
 @import url('https://webfontworld.github.io/pretendard/Pretendard.css');
 
+.text-stroke {
+	text-shadow: -2px -2px 0 #f4f4f4, 2px -2px 0 #f4f4f4, -2px 2px 0 #f4f4f4,
+		2px 2px 0 #f4f4f4;
+}
+html {
+	font-family: 'SCoreDream';
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: #101010;
+}
+body {
+	overflow-x: hidden;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
 /* @layer base에 적힌 스타일은 항상 다른 스타일보다 우선된다*/
 @layer base {
-	.text-stroke {
-		text-shadow: -2px -2px 0 #f4f4f4, 2px -2px 0 #f4f4f4, -2px 2px 0 #f4f4f4,
-			2px 2px 0 #f4f4f4;
-	}
-	html {
-		font-family: 'SCoreDream';
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		overflow-x: hidden;
-		background-color: #101010;
-	}
-	input[type='number']::-webkit-inner-spin-button,
-	input[type='number']::-webkit-outer-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
 	@font-face {
 		font-family: 'SCoreDream';
 		font-weight: 100;

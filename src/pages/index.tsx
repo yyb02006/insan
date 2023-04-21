@@ -2,7 +2,7 @@ import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
 import { MotionValue, Variants, useInView, useSpring } from 'framer-motion';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -31,6 +31,7 @@ interface WaveProps {
 	waveReverse?: boolean;
 	css?: string;
 	letterHeightFix?: number;
+	index: number;
 }
 
 const wave = (sec: number, reverse: boolean = false) => {
@@ -281,6 +282,7 @@ const Wave = ({
 	waveReverse = false,
 	css = '',
 	letterHeightFix = -65,
+	index,
 }: WaveProps) => {
 	const y = useTransform(
 		scrollYProgress,
@@ -292,12 +294,16 @@ const Wave = ({
 	const visibility = useTransform(scrollYProgress, (value) =>
 		value > startHeight ? 'visible' : 'hidden'
 	);
+	// const test = `top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`;
 	return (
 		<div
 			ref={parent}
+			//cls에 stickyCondition 프로퍼티를 올리고 globalcss 갔다가 오면 이부분만 css 적용이 풀린다 ㅈ버그 ㅅㅂ
 			className={cls(
 				'sticky',
-				`top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`
+				index === 1 ? 'top-[35vh] h-[100vh]' : '',
+				index === 2 ? 'top-[50vh] h-[55vh]' : '',
+				index === 3 ? 'top-[65vh] h-[10vh]' : ''
 			)}
 		>
 			<motion.div
@@ -378,7 +384,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 	return (
 		<motion.div
 			animate='wave'
-			className='absolute top-[200vh] w-full h-[400vh] pb-[40vh]'
+			className='absolute top-[200vh] w-full h-[400vh] pb-[50vh]'
 		>
 			{waveProps.current.map((prop) =>
 				prop.index % 2 === 0 ? (
@@ -394,6 +400,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						waveReverse={prop.waveReverse}
 						css={prop.css}
 						letterHeightFix={prop.letterHeightFix}
+						index={prop.index}
 					></Wave>
 				) : (
 					<Wave
@@ -405,10 +412,54 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 						inViewCondition={prop.inViewCondition}
 						stickyCondition={prop.stickyCondition}
 						waveSec={prop.waveSec}
+						index={prop.index}
 					></Wave>
 				)
 			)}
 		</motion.div>
+	);
+};
+
+const WorksSection = () => {
+	const [range, setRange] = useState(0);
+	const vertical = useRef(null);
+	const horizental = useRef<HTMLDivElement>(null);
+	const { scrollYProgress } = useScroll({ target: vertical });
+	useEffect(() => {
+		if (horizental.current?.offsetWidth) {
+			setRange((horizental.current.offsetWidth * 3) / 4);
+		}
+	}, [horizental.current?.offsetWidth]);
+	const x = useTransform(scrollYProgress, [0.2, 0.8], [0, -range]);
+	useEffect(() => {
+		window.addEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get() })
+		);
+		window.removeEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get() })
+		);
+	}, []);
+	return (
+		<div ref={vertical} className='h-[600vh]'>
+			<motion.div
+				ref={horizental}
+				style={{ x }}
+				className='sticky top-0 bg-amber-400 text-[200px] w-[400vw]'
+			>
+				<div className='inline-block justify-center h-[100vh] w-screen bg-purple-500'>
+					1
+				</div>
+				<div className='inline-block justify-center h-[100vh] w-screen bg-green-500'>
+					2
+				</div>
+				<div className='inline-block justify-center h-[100vh] w-screen bg-pink-500'>
+					3
+				</div>
+				<div className='inline-block justify-center h-[100vh] w-screen bg-sky-500'>
+					4
+				</div>
+			</motion.div>
+		</div>
 	);
 };
 
@@ -449,26 +500,8 @@ export default function Home() {
 					scrollYProgress={scrollYProgress}
 				/>
 				<WavesSection scrollYProgress={scrollYProgress} />
-				<section className='relative h-[3000px] bg-amber-400 text-[200px]'>
-					<div className='h-[2000px] bg-cyan-600'>
-						<div className=' bg-green-400 sticky top-[400px] h-[300px] opacity-50'>
-							<div className='h-[200px] top-0 bg-green-800 absolute'>
-								CONTENTS1
-							</div>
-						</div>
-						<div className=' bg-indigo-400 sticky top-[400px] h-[300px] opacity-50'>
-							<div className='h-[200px] top-0 bg-indigo-800 absolute'>
-								CONTENTS2
-							</div>
-						</div>
-						<div className=' bg-pink-400 sticky top-[400px] h-[300px] opacity-50'>
-							<div className='h-[200px] top-0 bg-pink-800 absolute'>
-								CONTENTS3
-							</div>
-						</div>
-					</div>
-					<div className='h-[500px] bg-red-500'></div>
-				</section>
+				<WorksSection />
+				<section className='h-[200vh]'></section>
 			</Layout>
 		</div>
 	);
