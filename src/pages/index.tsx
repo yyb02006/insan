@@ -1,6 +1,15 @@
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
-import { MotionValue, Variants, useInView, useSpring } from 'framer-motion';
+import { useAnimationFrame } from 'framer-motion';
+import { useAnimationControls } from 'framer-motion';
+import {
+	MotionValue,
+	Variants,
+	useAnimate,
+	useAnimation,
+	useInView,
+	useSpring,
+} from 'framer-motion';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
 	MouseEventHandler,
@@ -113,6 +122,20 @@ const child: Variants = {
 			damping: 6,
 			stiffness: 200,
 		},
+	},
+};
+
+const videoCircle = {
+	start: {
+		rotate: '360deg',
+		transition: {
+			ease: 'linear',
+			duration: 10,
+			repeat: Infinity,
+		},
+	},
+	set: {
+		rotate: '360deg',
 	},
 };
 
@@ -434,6 +457,8 @@ const Video = () => {
 		'left-0 bottom-0 origin-bottom-left',
 		'right-0 bottom-0 origin-bottom-right',
 	]);
+	const ref = useRef(null);
+	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
 	const [video, setVideo] = useState<YouTubeEvent>();
 	const [videoState, setVideoState] = useState<number>(-1);
@@ -451,62 +476,79 @@ const Video = () => {
 		} else if (video && videoState === 0) {
 			video.target.stopVideo();
 		}
+		if (video && videoState === 1) {
+		}
 	}, [thumnail, video, videoState]);
+	useEffect(() => {
+		if (!isInView && videoState === 1) {
+			setThumnail((p) => !p);
+		}
+	}, [isInView, videoState]);
+	/* controls.start와 controls.stop을 반복하면 점점 느려지는 버그
+	const ref = useRef<HTMLUListElement | null>(null);
+	const controls = useAnimationControls();
+	useEffect(() => {
+		if (videoState === 1) {
+			controls.start('start');
+		}
+		if (videoState !== 1) {
+			controls.stop();
+			return;
+		}
+	}, [videoState]); */
 	return (
-		<div className='h-[100vh] w-screen flex justify-start items-center'>
-			<div className='absolute top-0 w-screen h-full flex items-center'>
-				<img
-					src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
-					alt='1'
-					className='relative h-[80vh] aspect-video'
-				/>
-				<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
-			</div>
-			<motion.div className='relative w-[600px] ml-[calc(160px+10vw)]'>
-				<motion.ul className='w-full aspect-square absolute'>
-					{mainCircles.current.map((circle, idx) => (
-						<motion.li
-							key={idx}
-							className={cls(
-								circle,
-								'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
-							)}
-						/>
-					))}
-				</motion.ul>
-				<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
-					<div className='h-full aspect-video'>
-						<YouTube
-							videoId='OaqCq1k5EPA'
-							opts={{
-								width: '100%',
-								height: '100%',
-								playerVars: { rel: 0, modestbranding: 1 },
-							}}
-							onReady={onVideoReady}
-							onStateChange={onVideoStateChange}
-							className='relative h-full aspect-video pointer-events-none'
-						/>
-					</div>
-					<div
-						onClick={() => {
-							setThumnail((p) => !p);
-						}}
+		<div ref={ref} className='relative w-[600px] ml-[calc(160px+10vw)]'>
+			<motion.ul
+				className={cls(
+					videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
+					'w-full aspect-square absolute transition-all'
+				)}
+			>
+				{mainCircles.current.map((circle, idx) => (
+					<motion.li
+						key={idx}
 						className={cls(
-							thumnail
-								? 'opacity-100'
-								: 'opacity-0 transition-opacity duration-300',
-							'absolute top-0 h-full aspect-video cursor-pointer'
+							circle,
+							'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
 						)}
-					>
-						<img
-							src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
-							alt='1'
-							className='absolute h-full aspect-video'
-						/>
-						<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
-					</div>
-				</motion.div>
+					/>
+				))}
+			</motion.ul>
+			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+				<div className='h-full aspect-video'>
+					<YouTube
+						videoId='OaqCq1k5EPA'
+						opts={{
+							width: '100%',
+							height: '100%',
+							playerVars: { rel: 0, modestbranding: 1 },
+							host: 'https://www.youtube-nocookie.com',
+						}}
+						onReady={onVideoReady}
+						onStateChange={onVideoStateChange}
+						className='relative h-full aspect-video pointer-events-none'
+					/>
+				</div>
+				<div
+					onClick={() => {
+						if (video) {
+							setThumnail((p) => !p);
+						}
+					}}
+					className={cls(
+						thumnail
+							? 'opacity-100'
+							: 'opacity-0 transition-opacity duration-300',
+						'absolute top-0 h-full aspect-video cursor-pointer'
+					)}
+				>
+					<img
+						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						alt='1'
+						className='absolute h-full aspect-video'
+					/>
+					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
+				</div>
 			</motion.div>
 		</div>
 	);
@@ -540,7 +582,17 @@ const VideosSection = () => {
 				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
 				<div className='h-[100vh] w-screen'>
-					<Video />
+					<div className='h-[100vh] w-screen flex justify-start items-center'>
+						<div className='absolute top-0 w-screen h-full flex items-center'>
+							<img
+								src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+								alt='1'
+								className='relative h-[80vh] aspect-video'
+							/>
+							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
+						</div>
+						<Video />
+					</div>
 				</div>
 				<div className=' h-[100vh] w-screen'></div>
 				<div className=' h-[100vh] w-screen'></div>

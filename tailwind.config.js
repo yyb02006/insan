@@ -21,6 +21,9 @@ module.exports = {
 				'wave-pattern': `url('../../public/images/wave.svg')`,
 				'wave-pattern-reverse': `url('../../public/images/wave2.svg')`,
 			},
+			animation: {
+				'spin-slow': 'spin 10s linear infinite',
+			},
 		},
 	},
 	plugins: [require('@tailwindcss/forms'), require('tailwind-scrollbar-hide')],
