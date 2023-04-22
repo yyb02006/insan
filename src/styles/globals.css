@@ -21,6 +21,9 @@ input[type='number']::-webkit-outer-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
 }
+.pause {
+	animation-play-state: paused;
+}
 /* @layer base에 적힌 스타일은 항상 다른 스타일보다 우선된다*/
 @layer base {
 	@font-face {
