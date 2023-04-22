@@ -2,7 +2,14 @@ import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
 import { MotionValue, Variants, useInView, useSpring } from 'framer-motion';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import {
+	MouseEventHandler,
+	MutableRefObject,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
+import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -247,7 +254,7 @@ const CircleSection = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#101010] w-[570px] aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] w-[570px] scale-0 aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
@@ -430,34 +437,115 @@ const WorksSection = () => {
 			setRange((horizental.current.offsetWidth * 3) / 4);
 		}
 	}, [horizental.current?.offsetWidth]);
-	const x = useTransform(scrollYProgress, [0.2, 0.8], [0, -range]);
+	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
+	// useEffect(() => {
+	// 	window.addEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get() })
+	// 	);
+	// 	window.removeEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get() })
+	// 	);
+	// }, []);
+	const mainCircles = useRef([
+		'left-0 top-0 origin-top-left',
+		'right-0 top-0 origin-top-right',
+		'left-0 bottom-0 origin-bottom-left',
+		'right-0 bottom-0 origin-bottom-right',
+	]);
+	const [thumnail, setThumnail] = useState(true);
+	const [video, setVideo] = useState<YouTubeEvent>();
+	const [videoState, setVideoState] = useState<number>(-1);
+	const onVideoReady: YouTubeProps['onReady'] = (e) => {
+		setVideo(e);
+	};
+	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
+		setVideoState(e.data);
+	};
 	useEffect(() => {
-		window.addEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get() })
-		);
-		window.removeEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get() })
-		);
-	}, []);
+		if (!thumnail && video && (videoState < 1 || videoState === 2)) {
+			video.target.playVideo();
+		} else if (thumnail && video && videoState === 1) {
+			video.target.pauseVideo();
+		}
+	}, [thumnail, video]);
 	return (
 		<div ref={vertical} className='h-[600vh]'>
 			<motion.div
 				ref={horizental}
 				style={{ x }}
-				className='sticky top-0 bg-amber-400 text-[200px] w-[400vw]'
+				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
-				<div className='inline-block justify-center h-[100vh] w-screen bg-purple-500'>
-					1
+				<div className='h-[100vh] w-screen'>
+					<div className='h-[100vh] w-screen flex justify-center items-center'>
+						<div className='absolute top-0 w-screen h-full flex items-center'>
+							<img
+								src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+								alt='1'
+								className='relative h-[80vh] aspect-video'
+							/>
+							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
+						</div>
+						<motion.div className='relative w-[600px]'>
+							<motion.ul className='w-full aspect-square absolute'>
+								{mainCircles.current.map((circle, idx) => (
+									<motion.li
+										key={idx}
+										className={cls(
+											circle,
+											'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
+										)}
+									/>
+								))}
+							</motion.ul>
+							<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+								<div
+									onClick={() => {
+										setThumnail(true);
+									}}
+									className='h-full aspect-video'
+								>
+									<YouTube
+										videoId='OaqCq1k5EPA'
+										opts={{
+											width: '100%',
+											height: '100%',
+											playerVars: { rel: 0, modestbranding: 1 },
+										}}
+										onReady={onVideoReady}
+										onStateChange={onVideoStateChange}
+										className='relative h-full aspect-video pointer-events-none'
+									/>
+								</div>
+								<div
+									onClick={() => {
+										setThumnail(false);
+									}}
+									className={cls(
+										thumnail ? '' : 'hidden',
+										'absolute top-0 h-full aspect-video cursor-pointer'
+									)}
+								>
+									<img
+										src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+										alt='1'
+										className='absolute h-full aspect-video'
+									/>
+									<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
+								</div>
+								{/* <iframe
+									id='ytplayer'
+									width='100%'
+									height='100%'
+									src='https://www.youtube.com/embed/OaqCq1k5EPA?autoplay=1&rel=0&controls=0&modestbranding=1&origin=http://example.com'
+									frameBorder={0}
+								></iframe> */}
+							</motion.div>
+						</motion.div>
+					</div>
 				</div>
-				<div className='inline-block justify-center h-[100vh] w-screen bg-green-500'>
-					2
-				</div>
-				<div className='inline-block justify-center h-[100vh] w-screen bg-pink-500'>
-					3
-				</div>
-				<div className='inline-block justify-center h-[100vh] w-screen bg-sky-500'>
-					4
-				</div>
+				<div className=' h-[100vh] w-screen'></div>
+				<div className=' h-[100vh] w-screen'></div>
+				<div className=' h-[100vh] w-screen'></div>
 			</motion.div>
 		</div>
 	);
