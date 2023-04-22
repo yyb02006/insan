@@ -427,25 +427,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 	);
 };
 
-const WorksSection = () => {
-	const [range, setRange] = useState(0);
-	const vertical = useRef(null);
-	const horizental = useRef<HTMLDivElement>(null);
-	const { scrollYProgress } = useScroll({ target: vertical });
-	useEffect(() => {
-		if (horizental.current?.offsetWidth) {
-			setRange((horizental.current.offsetWidth * 3) / 4);
-		}
-	}, [horizental.current?.offsetWidth]);
-	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// }, []);
+const Video = () => {
 	const mainCircles = useRef([
 		'left-0 top-0 origin-top-left',
 		'right-0 top-0 origin-top-right',
@@ -466,8 +448,90 @@ const WorksSection = () => {
 			video.target.playVideo();
 		} else if (thumnail && video && videoState === 1) {
 			video.target.pauseVideo();
+		} else if (video && videoState === 0) {
+			video.target.stopVideo();
 		}
-	}, [thumnail, video]);
+	}, [thumnail, video, videoState]);
+	return (
+		<div className='h-[100vh] w-screen flex justify-start items-center'>
+			<div className='absolute top-0 w-screen h-full flex items-center'>
+				<img
+					src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+					alt='1'
+					className='relative h-[80vh] aspect-video'
+				/>
+				<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
+			</div>
+			<motion.div className='relative w-[600px] ml-[calc(160px+10vw)]'>
+				<motion.ul className='w-full aspect-square absolute'>
+					{mainCircles.current.map((circle, idx) => (
+						<motion.li
+							key={idx}
+							className={cls(
+								circle,
+								'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
+							)}
+						/>
+					))}
+				</motion.ul>
+				<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+					<div className='h-full aspect-video'>
+						<YouTube
+							videoId='OaqCq1k5EPA'
+							opts={{
+								width: '100%',
+								height: '100%',
+								playerVars: { rel: 0, modestbranding: 1 },
+							}}
+							onReady={onVideoReady}
+							onStateChange={onVideoStateChange}
+							className='relative h-full aspect-video pointer-events-none'
+						/>
+					</div>
+					<div
+						onClick={() => {
+							setThumnail((p) => !p);
+						}}
+						className={cls(
+							thumnail
+								? 'opacity-100'
+								: 'opacity-0 transition-opacity duration-300',
+							'absolute top-0 h-full aspect-video cursor-pointer'
+						)}
+					>
+						<img
+							src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+							alt='1'
+							className='absolute h-full aspect-video'
+						/>
+						<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
+					</div>
+				</motion.div>
+			</motion.div>
+		</div>
+	);
+};
+
+const VideosSection = () => {
+	const [range, setRange] = useState(0);
+	const vertical = useRef(null);
+	const horizental = useRef<HTMLDivElement>(null);
+	const { scrollYProgress } = useScroll({ target: vertical });
+	useEffect(() => {
+		if (horizental.current?.offsetWidth) {
+			setRange((horizental.current.offsetWidth * 3) / 4);
+		}
+	}, [horizental.current?.offsetWidth]);
+	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
+	// useEffect(() => {
+	// 	window.addEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get() })
+	// 	);
+	// 	window.removeEventListener('scroll', () =>
+	// 		console.log({ scrollYProgress: scrollYProgress.get() })
+	// 	);
+	// }, []);
+
 	return (
 		<div ref={vertical} className='h-[600vh]'>
 			<motion.div
@@ -476,72 +540,7 @@ const WorksSection = () => {
 				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
 				<div className='h-[100vh] w-screen'>
-					<div className='h-[100vh] w-screen flex justify-center items-center'>
-						<div className='absolute top-0 w-screen h-full flex items-center'>
-							<img
-								src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
-								alt='1'
-								className='relative h-[80vh] aspect-video'
-							/>
-							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
-						</div>
-						<motion.div className='relative w-[600px]'>
-							<motion.ul className='w-full aspect-square absolute'>
-								{mainCircles.current.map((circle, idx) => (
-									<motion.li
-										key={idx}
-										className={cls(
-											circle,
-											'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
-										)}
-									/>
-								))}
-							</motion.ul>
-							<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
-								<div
-									onClick={() => {
-										setThumnail(true);
-									}}
-									className='h-full aspect-video'
-								>
-									<YouTube
-										videoId='OaqCq1k5EPA'
-										opts={{
-											width: '100%',
-											height: '100%',
-											playerVars: { rel: 0, modestbranding: 1 },
-										}}
-										onReady={onVideoReady}
-										onStateChange={onVideoStateChange}
-										className='relative h-full aspect-video pointer-events-none'
-									/>
-								</div>
-								<div
-									onClick={() => {
-										setThumnail(false);
-									}}
-									className={cls(
-										thumnail ? '' : 'hidden',
-										'absolute top-0 h-full aspect-video cursor-pointer'
-									)}
-								>
-									<img
-										src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
-										alt='1'
-										className='absolute h-full aspect-video'
-									/>
-									<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
-								</div>
-								{/* <iframe
-									id='ytplayer'
-									width='100%'
-									height='100%'
-									src='https://www.youtube.com/embed/OaqCq1k5EPA?autoplay=1&rel=0&controls=0&modestbranding=1&origin=http://example.com'
-									frameBorder={0}
-								></iframe> */}
-							</motion.div>
-						</motion.div>
-					</div>
+					<Video />
 				</div>
 				<div className=' h-[100vh] w-screen'></div>
 				<div className=' h-[100vh] w-screen'></div>
@@ -588,7 +587,7 @@ export default function Home() {
 					scrollYProgress={scrollYProgress}
 				/>
 				<WavesSection scrollYProgress={scrollYProgress} />
-				<WorksSection />
+				<VideosSection />
 				<section className='h-[200vh]'></section>
 			</Layout>
 		</div>
