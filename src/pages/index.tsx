@@ -58,6 +58,14 @@ interface SnsLinkProps {
 	isInView?: boolean;
 }
 
+interface VideoContainerProps {
+	index: number;
+	title: string;
+	role: string;
+	description: string;
+	date: string;
+}
+
 const wave = (sec: number, reverse: boolean = false) => {
 	if (reverse) {
 		return {
@@ -567,7 +575,13 @@ const Video = () => {
 	);
 };
 
-const VideoContainer = () => {
+const VideoContainer = ({
+	index,
+	title,
+	role,
+	description,
+	date,
+}: VideoContainerProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.6 });
 	const [textScope, textAnimate] = useAnimate();
@@ -599,7 +613,6 @@ const VideoContainer = () => {
 			);
 		});
 	};
-
 	useEffect(() => {
 		if (isInView) {
 			videoAnimate(
@@ -636,20 +649,25 @@ const VideoContainer = () => {
 					className='font-Roboto font-thin absolute pt-[80px] pb-[140px] flex flex-col justify-between items-end text-[100px] text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square pointer-events-none'
 				>
 					<div className='flex justify-end items-center'>
-						<div className='Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'>
-							1
+						<div
+							className={cls(
+								index === 1 ? '-mr-[60px]' : '',
+								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'
+							)}
+						>
+							{index}
 						</div>
 						<div className='Title font-GmarketSans font-bold absolute'>
-							EMOTIONAL
+							{title}
 						</div>
 					</div>
-					<div className='text-[#cacaca] text-5xl -mt-20'>
-						<div className='Role -ml-20'>Director</div>
-						<div className='Desc font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-4'>
-							확장과 재창조, 창작의 결과물
+					<div className='text-[#9a9a9a] text-5xl -mt-20 flex flex-col items-end'>
+						<div className='Role -ml-20'>{role}</div>
+						<div className='Desc font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-3'>
+							{description}
 						</div>
 					</div>
-					<div className='Date text-2xl'>2023.2.25</div>
+					<div className='Date text-2xl'>{date}</div>
 				</div>
 			</div>
 		</div>
@@ -657,6 +675,36 @@ const VideoContainer = () => {
 };
 
 const VideosSection = () => {
+	const dummyDatas = [
+		{
+			index: 1,
+			title: 'EMOTIONAL',
+			role: 'Director',
+			description: '확장과 재창조, 창작의 결과물',
+			date: '2023.2.22',
+		},
+		{
+			index: 2,
+			title: 'TRENDY',
+			role: 'Camera',
+			description: '엔터테인먼트와 현실의 연결',
+			date: '2023.2.23',
+		},
+		{
+			index: 3,
+			title: 'CREATIVE',
+			role: 'Art Director',
+			description: '확장과 재창조, 창작의 결과물',
+			date: '2023.2.24',
+		},
+		{
+			index: 4,
+			title: 'INTUITIVE',
+			role: 'Lead Developer',
+			description: '영감을 주고 받은 기록',
+			date: '2023.2.25',
+		},
+	];
 	const [range, setRange] = useState(0);
 	const vertical = useRef(null);
 	const horizental = useRef<HTMLDivElement>(null);
@@ -674,10 +722,16 @@ const VideosSection = () => {
 				style={{ x }}
 				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
-				<VideoContainer />
-				<VideoContainer />
-				<VideoContainer />
-				<VideoContainer />
+				{dummyDatas.map((data) => (
+					<VideoContainer
+						key={data.index}
+						index={data.index}
+						title={data.title}
+						role={data.role}
+						description={data.description}
+						date={data.date}
+					/>
+				))}
 			</motion.div>
 		</div>
 	);
