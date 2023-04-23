@@ -11,7 +11,13 @@ import {
 	useTransform,
 } from 'framer-motion';
 import Link from 'next/link';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import {
+	MouseEvent,
+	MutableRefObject,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
@@ -76,12 +82,12 @@ const wave = (sec: number, reverse: boolean = false) => {
 	}
 };
 
-const sideCircle = {
+const sideCircle: Variants = {
 	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
 	hidden: { scale: 0 },
 };
 
-const list = {
+const list: Variants = {
 	initial: {
 		scale: 0,
 	},
@@ -122,6 +128,28 @@ const child: Variants = {
 			damping: 6,
 			stiffness: 200,
 		},
+	},
+};
+
+const snsAnchor: Variants = {
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.2 },
+	},
+	disappear: {
+		transition: { staggerChildren: 0.1 },
+	},
+};
+
+const items: Variants = {
+	hidden: {
+		opacity: 0,
+	},
+	visible: { x: [50, 0], opacity: [0, 1], transition: { duration: 0.6 } },
+	disappear: {
+		x: [null, 50],
+		opacity: [null, 0],
+		transition: { duration: 0.4 },
 	},
 };
 
@@ -547,14 +575,6 @@ const VideosSection = () => {
 		}
 	}, [horizental.current?.offsetWidth]);
 	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// }, []);
 
 	return (
 		<div ref={vertical} className='h-[600vh]'>
@@ -571,10 +591,11 @@ const VideosSection = () => {
 								alt='1'
 								className='relative h-[80vh] aspect-video'
 							/>
-							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95'></div>
+							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
 						</div>
 						<Video />
 					</div>
+					<div className='w-[400px] aspect-square bg-blue-600'>Emotional</div>
 				</div>
 				<div className=' h-[100vh] w-screen'></div>
 				<div className=' h-[100vh] w-screen'></div>
@@ -584,46 +605,24 @@ const VideosSection = () => {
 	);
 };
 
-const snsAnchor: Variants = {
-	hidden: {},
-	visible: {
-		transition: { staggerChildren: 0.2 },
-	},
-	disappear: {
-		transition: { staggerChildren: 0.1 },
-	},
-};
-
-const items: Variants = {
-	hidden: {
-		opacity: 0,
-	},
-	visible: { x: [50, 0], opacity: [0, 1], transition: { duration: 0.6 } },
-	disappear: {
-		x: [null, 50],
-		opacity: [null, 0],
-		transition: { duration: 0.4 },
-	},
-};
-
 const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
-	const display = useTransform(scrollYProgress, (value) => {
+	const visibility = useTransform(scrollYProgress, (value) => {
 		if (value > 0.35) {
-			return 'none';
+			return 'hidden';
 		} else {
-			return '';
+			return 'visible';
 		}
 	});
 	return (
 		<motion.div
-			style={{ display }}
-			initial='hidden'
-			animate='visible'
+			style={{ visibility }}
 			className='fixed w-full h-full flex justify-end items-end text-[#efefef]'
 		>
 			<motion.div
 				style={{ scale }}
+				initial='hidden'
+				animate='visible'
 				variants={sideCircle}
 				className='absolute w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
 			/>
@@ -649,7 +648,7 @@ export default function Home() {
 	const { scrollYProgress } = useScroll({ target: circle });
 	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
-	const onMove = (e) => {
+	const onMove = (e: MouseEvent) => {
 		if (e.pageY < 2200) {
 			const offsetX = e.clientX - window.innerWidth / 2;
 			const offsetY = e.clientY - window.innerHeight / 2;
@@ -670,7 +669,7 @@ export default function Home() {
 			onMouseLeave={onLeave}
 			className='w-[100vw] h-[100vh]'
 		>
-			<Chevron isInView={isInView} />
+			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
 			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
 			<Layout seoTitle='INSAN'>
 				<CircleSection
