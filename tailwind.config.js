@@ -19,7 +19,10 @@ module.exports = {
 			},
 			backgroundImage: {
 				'wave-pattern': `url('../../public/images/wave.svg')`,
-				'wave2-pattern': `url('../../public/images/wave2.svg')`,
+				'wave-pattern-reverse': `url('../../public/images/wave2.svg')`,
+			},
+			animation: {
+				'spin-slow': 'spin 10s linear infinite',
 			},
 		},
 	},
