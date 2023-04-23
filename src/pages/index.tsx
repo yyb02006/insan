@@ -16,7 +16,6 @@ import Link from 'next/link';
 import {
 	MouseEvent,
 	MutableRefObject,
-	RefObject,
 	useEffect,
 	useRef,
 	useState,
@@ -235,12 +234,6 @@ const CircleSection = ({
 		mouseY,
 		(offset) => 1 + Math.abs(offset / 20000)
 	);
-	const mainCircles = useRef([
-		'left-0 top-0 origin-top-left',
-		'right-0 top-0 origin-top-right',
-		'left-0 bottom-0 origin-bottom-left',
-		'right-0 bottom-0 origin-bottom-right',
-	]);
 	const logoCircles = useRef([
 		'top-[-220px] left-[-200px] w-[460px]',
 		'top-[-120px] left-[-80px] w-[340px]',
@@ -467,12 +460,6 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 };
 
 const Video = () => {
-	const mainCircles = useRef([
-		'left-0 top-0 origin-top-left',
-		'right-0 top-0 origin-top-right',
-		'left-0 bottom-0 origin-bottom-left',
-		'right-0 bottom-0 origin-bottom-right',
-	]);
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
@@ -764,6 +751,47 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	);
 };
 
+const TextSection = () => {
+	const [scope, animate] = useAnimate();
+	const isInView = useInView(scope, { amount: 0.5 });
+	const textMotion = async () => {
+		await animate('.S1', { y: [40, 0], opacity: [0, 1] }, { duration: 0.2 });
+	};
+	useEffect(() => {
+		if (isInView) {
+		}
+	}, [isInView]);
+	return (
+		<section ref={scope} className='mt-[50vh] h-[100vh] flex justify-center'>
+			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[10rem] pr-40'>
+				<div className='text-stroke-darker'>Moves</div>
+				<div className='flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
+					<span className='S1'>
+						좋은 영상을 <span className='font-extralight'>만든다는 것은,</span>
+					</span>
+					<span className='S2'>
+						당신께 감동을 <span className='font-extralight'>드린다는 것.</span>
+					</span>
+				</div>
+				<div className='text-stroke-darker'>Client</div>
+				<div className='relative flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
+					<div className='absolute text-stroke-darker text-[10rem] text-[#101010] top-[50%] translate-y-[-50%] -left-14'>
+						&
+					</div>
+					<span className='S3 relative'>
+						상상을 현실로{' '}
+						<span className='font-extralight'>만드는 감동을,</span>
+					</span>
+					<span className='S4 relative'>
+						더 나은 컨텐츠로의 <span className='font-extralight'>영감을.</span>
+					</span>
+				</div>
+				<div className='text-stroke-darker'>Customer</div>
+			</div>
+		</section>
+	);
+};
+
 export default function Home() {
 	const wave = useRef(null);
 	const circle = useRef(null);
@@ -771,20 +799,21 @@ export default function Home() {
 	const { scrollYProgress } = useScroll({ target: circle });
 	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
+	const mouseCoord = (opX = 0, opY = 0) => {
+		mouseX.set(opX);
+		mouseY.set(opY);
+	};
 	const onMove = (e: MouseEvent) => {
 		if (e.pageY < 2200) {
 			const offsetX = e.clientX - window.innerWidth / 2;
 			const offsetY = e.clientY - window.innerHeight / 2;
-			mouseX.set(offsetX);
-			mouseY.set(offsetY);
+			mouseCoord(offsetX, offsetY);
 		} else {
-			mouseX.set(0);
-			mouseY.set(0);
+			mouseCoord();
 		}
 	};
 	const onLeave = () => {
-		mouseX.set(0);
-		mouseY.set(0);
+		mouseCoord();
 	};
 	return (
 		<div
@@ -803,7 +832,7 @@ export default function Home() {
 				/>
 				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
 				<VideosSection />
-				<section className='h-[200vh]'></section>
+				<TextSection />
 			</Layout>
 		</div>
 	);
