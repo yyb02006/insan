@@ -9,11 +9,13 @@ import {
 	motion,
 	useScroll,
 	useTransform,
+	useAnimate,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
 	MouseEvent,
 	MutableRefObject,
+	RefObject,
 	useEffect,
 	useRef,
 	useState,
@@ -507,7 +509,7 @@ const Video = () => {
 		}
 	}, [videoState]); */
 	return (
-		<div ref={ref} className='relative w-[600px] ml-[calc(160px+10vw)]'>
+		<div ref={ref} className='relative'>
 			<motion.ul
 				className={cls(
 					videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
@@ -533,6 +535,7 @@ const Video = () => {
 							height: '100%',
 							playerVars: { rel: 0, modestbranding: 1 },
 							host: 'https://www.youtube-nocookie.com',
+							origin: 'http://localhost:3000',
 						}}
 						onReady={onVideoReady}
 						onStateChange={onVideoStateChange}
@@ -564,6 +567,95 @@ const Video = () => {
 	);
 };
 
+const VideoContainer = () => {
+	const ref = useRef<HTMLDivElement>(null);
+	const isInView = useInView(ref, { amount: 0.6 });
+	const [textScope, textAnimate] = useAnimate();
+	const [videoScope, videoAnimate] = useAnimate();
+	const motionInfos = [
+		{ kind: '.Index', move: 'up', range: 100 },
+		{ kind: '.Title', move: 'down', range: 100 },
+		{ kind: '.Role', move: 'down', range: 100 },
+		{ kind: '.Desc', move: 'up', range: 100 },
+		{ kind: '.Date', move: 'up', range: 100 },
+	];
+	const textMotion = (reverse = false) => {
+		motionInfos.forEach((motionInfo) => {
+			textAnimate(
+				motionInfo.kind,
+				{
+					opacity: reverse ? [1, 0] : [0, 1],
+					y: reverse
+						? [
+								0,
+								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
+						  ]
+						: [
+								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
+								0,
+						  ],
+				},
+				{ duration: 0.6, ease: 'easeOut' }
+			);
+		});
+	};
+
+	useEffect(() => {
+		if (isInView) {
+			videoAnimate(
+				'ul',
+				{ scale: [0.8, 1] },
+				{ duration: 0.4, ease: 'easeOut' }
+			);
+			textMotion();
+		} else {
+			videoAnimate(
+				'ul',
+				{ scale: [1, 0.8] },
+				{ duration: 0.4, ease: 'easeIn' }
+			);
+			textMotion(true);
+		}
+	}, [isInView]);
+	return (
+		<div ref={ref} className='h-[100vh] w-screen'>
+			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
+				<div className='absolute w-full h-full flex items-center'>
+					<img
+						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						alt='1'
+						className='relative h-[80vh] aspect-video'
+					/>
+					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
+				</div>
+				<div ref={videoScope} className='w-[600px] ml-[calc(160px+10vw)]'>
+					<Video />
+				</div>
+				<div
+					ref={textScope}
+					className='font-Roboto font-thin absolute pt-[80px] pb-[140px] flex flex-col justify-between items-end text-[100px] text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square pointer-events-none'
+				>
+					<div className='flex justify-end items-center'>
+						<div className='Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'>
+							1
+						</div>
+						<div className='Title font-GmarketSans font-bold absolute'>
+							EMOTIONAL
+						</div>
+					</div>
+					<div className='text-[#cacaca] text-5xl -mt-20'>
+						<div className='Role -ml-20'>Director</div>
+						<div className='Desc font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-4'>
+							확장과 재창조, 창작의 결과물
+						</div>
+					</div>
+					<div className='Date text-2xl'>2023.2.25</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
 const VideosSection = () => {
 	const [range, setRange] = useState(0);
 	const vertical = useRef(null);
@@ -582,39 +674,10 @@ const VideosSection = () => {
 				style={{ x }}
 				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
-				<div className='h-[100vh] w-screen'>
-					<div className='relative h-[100vh] w-screen flex justify-start items-center'>
-						<div className='absolute w-full h-full flex items-center'>
-							<img
-								src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
-								alt='1'
-								className='relative h-[80vh] aspect-video'
-							/>
-							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
-						</div>
-						<Video />
-						<div className='font-Roboto font-thin absolute pt-[80px] pb-[120px] flex flex-col justify-between items-end text-[100px] text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square'>
-							<div className='flex justify-end items-center'>
-								<div className='font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'>
-									1
-								</div>
-								<div className='font-GmarketSans font-bold absolute'>
-									EMOTIONAL
-								</div>
-							</div>
-							<div className='text-[#cacaca] text-5xl -mt-20'>
-								<div className='-ml-20'>Director</div>
-								<div className='font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-4'>
-									확장과 재창조, 창작의 결과물
-								</div>
-							</div>
-							<div className='text-2xl'>2023.2.25</div>
-						</div>
-					</div>
-				</div>
-				<div className=' h-[100vh] w-screen'></div>
-				<div className=' h-[100vh] w-screen'></div>
-				<div className=' h-[100vh] w-screen'></div>
+				<VideoContainer />
+				<VideoContainer />
+				<VideoContainer />
+				<VideoContainer />
 			</motion.div>
 		</div>
 	);
@@ -623,7 +686,7 @@ const VideosSection = () => {
 const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
 	const visibility = useTransform(scrollYProgress, (value) => {
-		if (value > 0.35) {
+		if (value > 0.3) {
 			return 'hidden';
 		} else {
 			return 'visible';
