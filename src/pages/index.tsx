@@ -10,6 +10,7 @@ import {
 	useScroll,
 	useTransform,
 } from 'framer-motion';
+import Link from 'next/link';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
@@ -44,6 +45,11 @@ interface WaveProps {
 	index: number;
 }
 
+interface SnsLinkProps {
+	scrollYProgress: MotionValue<number>;
+	isInView?: boolean;
+}
+
 const wave = (sec: number, reverse: boolean = false) => {
 	if (reverse) {
 		return {
@@ -70,9 +76,9 @@ const wave = (sec: number, reverse: boolean = false) => {
 	}
 };
 
-const logo = {
-	bigger: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
-	initial: { scale: 0 },
+const sideCircle = {
+	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+	hidden: { scale: 0 },
 };
 
 const list = {
@@ -210,9 +216,9 @@ const CircleSection = ({
 					{logoCircles.current.map((arr, idx) => (
 						<motion.div
 							key={idx}
-							initial='initial'
-							animate='bigger'
-							variants={logo}
+							initial='hidden'
+							animate='visible'
+							variants={sideCircle}
 							className={cls(
 								arr,
 								'absolute border rounded-full border-[#bababa] aspect-square'
@@ -578,33 +584,94 @@ const VideosSection = () => {
 	);
 };
 
+const snsAnchor: Variants = {
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.2 },
+	},
+	disappear: {
+		transition: { staggerChildren: 0.1 },
+	},
+};
+
+const items: Variants = {
+	hidden: {
+		opacity: 0,
+	},
+	visible: { x: [50, 0], opacity: [0, 1], transition: { duration: 0.6 } },
+	disappear: {
+		x: [null, 50],
+		opacity: [null, 0],
+		transition: { duration: 0.4 },
+	},
+};
+
+const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
+	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
+	const display = useTransform(scrollYProgress, (value) => {
+		if (value > 0.35) {
+			return 'none';
+		} else {
+			return '';
+		}
+	});
+	return (
+		<motion.div
+			style={{ display }}
+			initial='hidden'
+			animate='visible'
+			className='fixed w-full h-full flex justify-end items-end text-[#efefef]'
+		>
+			<motion.div
+				style={{ scale }}
+				variants={sideCircle}
+				className='absolute w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
+			/>
+			<motion.ul
+				animate={!isInView ? 'visible' : 'disappear'}
+				variants={snsAnchor}
+				className='pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-lg gap-2'
+			>
+				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
+					<motion.li key={idx} variants={items}>
+						<Link href={''}>{arr}</Link>
+					</motion.li>
+				))}
+			</motion.ul>
+		</motion.div>
+	);
+};
+
 export default function Home() {
 	const wave = useRef(null);
 	const circle = useRef(null);
-	const isInView = useInView(wave, { margin: '0px 0px 150px 0px', once: true });
+	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const { scrollYProgress } = useScroll({ target: circle });
 	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
+	const onMove = (e) => {
+		if (e.pageY < 2200) {
+			const offsetX = e.clientX - window.innerWidth / 2;
+			const offsetY = e.clientY - window.innerHeight / 2;
+			mouseX.set(offsetX);
+			mouseY.set(offsetY);
+		} else {
+			mouseX.set(0);
+			mouseY.set(0);
+		}
+	};
+	const onLeave = () => {
+		mouseX.set(0);
+		mouseY.set(0);
+	};
 	return (
 		<div
-			onMouseMove={(e) => {
-				if (e.pageY < 2200) {
-					const offsetX = e.clientX - window.innerWidth / 2;
-					const offsetY = e.clientY - window.innerHeight / 2;
-					mouseX.set(offsetX);
-					mouseY.set(offsetY);
-				} else {
-					mouseX.set(0);
-					mouseY.set(0);
-				}
-			}}
-			onMouseLeave={() => {
-				mouseX.set(0);
-				mouseY.set(0);
-			}}
+			onMouseMove={onMove}
+			onMouseLeave={onLeave}
 			className='w-[100vw] h-[100vh]'
 		>
 			<Chevron isInView={isInView} />
+			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
 			<Layout seoTitle='INSAN'>
 				<CircleSection
 					inheritRef={circle}
