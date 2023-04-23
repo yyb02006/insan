@@ -270,11 +270,10 @@ const CircleSection = ({
 							initial: 'initial',
 							animate: 'bigger',
 							variants: list,
-							css: 'w-full aspect-square absolute',
 						}}
 						liMotion={{
 							style: { scale: circleLineScale },
-							css: 'border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0',
+							css: 'w-[620px]',
 						}}
 					/>
 					<motion.div
@@ -505,11 +504,11 @@ const Video = () => {
 				ulMotion={{
 					css: cls(
 						videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
-						'w-full aspect-square absolute transition-all'
+						'transition-all'
 					),
 				}}
 				liMotion={{
-					css: 'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0',
+					css: 'w-[calc(50px+100%)]',
 				}}
 			/>
 			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
@@ -752,41 +751,84 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 };
 
 const TextSection = () => {
-	const [scope, animate] = useAnimate();
-	const isInView = useInView(scope, { amount: 0.5 });
-	const textMotion = async () => {
-		await animate('.S1', { y: [40, 0], opacity: [0, 1] }, { duration: 0.2 });
-	};
-	useEffect(() => {
-		if (isInView) {
-		}
-	}, [isInView]);
+	const ref = useRef(null);
+	const { scrollYProgress } = useScroll({
+		target: ref,
+		offset: ['start end', 'end end'],
+	});
+	const y = [];
+	const opacity = [];
+	for (let i = 2; i < 9; i++) {
+		y.push(useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [70, -70]));
+		opacity.push(
+			useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [0, 1])
+		);
+	}
+	const scale = useTransform(scrollYProgress, [0, 0.9], [0.5, 1]);
+	const rotate = useTransform(scrollYProgress, [0, 0.9], [90, 0]);
 	return (
-		<section ref={scope} className='mt-[50vh] h-[100vh] flex justify-center'>
+		<section
+			ref={ref}
+			className='relative mt-[50vh] h-[90vh] flex justify-center'
+		>
+			<motion.div
+				style={{ scale, rotate }}
+				className='absolute -right-[40vh] -top-4 h-[80vh] aspect-square'
+			>
+				<Circles
+					liMotion={{
+						css: 'w-[calc(50px+100%)]',
+					}}
+				/>
+			</motion.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[10rem] pr-40'>
-				<div className='text-stroke-darker'>Moves</div>
+				<motion.div
+					style={{ y: y[0], opacity: opacity[0] }}
+					className='text-stroke-darker'
+				>
+					Moves
+				</motion.div>
 				<div className='flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
-					<span className='S1'>
+					<motion.span style={{ y: y[1], opacity: opacity[1] }}>
 						좋은 영상을 <span className='font-extralight'>만든다는 것은,</span>
-					</span>
-					<span className='S2'>
+					</motion.span>
+					<motion.span style={{ y: y[2], opacity: opacity[2] }}>
 						당신께 감동을 <span className='font-extralight'>드린다는 것.</span>
-					</span>
+					</motion.span>
 				</div>
-				<div className='text-stroke-darker'>Client</div>
+				<motion.div
+					style={{ y: y[3], opacity: opacity[3] }}
+					className='text-stroke-darker'
+				>
+					Client
+				</motion.div>
 				<div className='relative flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
-					<div className='absolute text-stroke-darker text-[10rem] text-[#101010] top-[50%] translate-y-[-50%] -left-14'>
+					<motion.div
+						style={{ y: y[6], opacity: opacity[6] }}
+						className='absolute text-stroke-darker text-[10rem] text-[#101010] -left-16'
+					>
 						&
-					</div>
-					<span className='S3 relative'>
+					</motion.div>
+					<motion.span
+						style={{ y: y[4], opacity: opacity[4] }}
+						className='relative'
+					>
 						상상을 현실로{' '}
 						<span className='font-extralight'>만드는 감동을,</span>
-					</span>
-					<span className='S4 relative'>
+					</motion.span>
+					<motion.span
+						style={{ y: y[5], opacity: opacity[5] }}
+						className='relative'
+					>
 						더 나은 컨텐츠로의 <span className='font-extralight'>영감을.</span>
-					</span>
+					</motion.span>
 				</div>
-				<div className='text-stroke-darker'>Customer</div>
+				<motion.div
+					style={{ y: y[6], opacity: opacity[6] }}
+					className='text-stroke-darker'
+				>
+					Customer
+				</motion.div>
 			</div>
 		</section>
 	);
@@ -833,6 +875,7 @@ export default function Home() {
 				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
 				<VideosSection />
 				<TextSection />
+				<section className='h-[100vh]'></section>
 			</Layout>
 		</div>
 	);
