@@ -251,39 +251,39 @@ const CircleSection = ({
 			ref={inheritRef}
 		>
 			<div className='absolute top-0 h-[80%]'>
-				<Circles
-					ulMotion={{ style: { scale: logoCircle }, css: 'sticky top-0' }}
-					liMotion={{
-						initial: 'hidden',
-						animate: 'visible',
-						variants: sideCircle,
-						css: 'absolute border rounded-full border-[#bababa] aspect-square',
-					}}
-				/>
+				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
+					{logoCircles.current.map((arr, idx) => (
+						<motion.div
+							key={idx}
+							initial='hidden'
+							animate='visible'
+							variants={sideCircle}
+							className={cls(
+								arr,
+								'absolute border rounded-full border-[#bababa] aspect-square'
+							)}
+						/>
+					))}
+				</motion.div>
 			</div>
 			<div className='h-full flex justify-center items-start '>
 				<motion.div
 					style={{ scale, y }}
 					className='sticky top-0 h-[100vh] flex items-center'
 				>
-					<motion.ul
-						style={{ rotate }}
-						initial='initial'
-						animate='bigger'
-						variants={list}
-						className='w-full aspect-square absolute '
-					>
-						{mainCircles.current.map((circle, idx) => (
-							<motion.li
-								key={idx}
-								style={{ scale: circleLineScale }}
-								className={cls(
-									circle,
-									'border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0'
-								)}
-							/>
-						))}
-					</motion.ul>
+					<Circles
+						ulMotion={{
+							style: { rotate },
+							initial: 'initial',
+							animate: 'bigger',
+							variants: list,
+							css: 'w-full aspect-square absolute',
+						}}
+						liMotion={{
+							style: { scale: circleLineScale },
+							css: 'border rounded-full border-[#bababa] w-[620px] aspect-square absolute z-0',
+						}}
+					/>
 					<motion.div
 						animate={{
 							scale: [0, 1],
