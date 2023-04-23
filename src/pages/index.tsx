@@ -1,4 +1,5 @@
 import Chevron from '@/components/chevron';
+import Circles from '@/components/circles';
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
 import {
@@ -250,20 +251,15 @@ const CircleSection = ({
 			ref={inheritRef}
 		>
 			<div className='absolute top-0 h-[80%]'>
-				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
-					{logoCircles.current.map((arr, idx) => (
-						<motion.div
-							key={idx}
-							initial='hidden'
-							animate='visible'
-							variants={sideCircle}
-							className={cls(
-								arr,
-								'absolute border rounded-full border-[#bababa] aspect-square'
-							)}
-						/>
-					))}
-				</motion.div>
+				<Circles
+					ulMotion={{ style: { scale: logoCircle }, css: 'sticky top-0' }}
+					liMotion={{
+						initial: 'hidden',
+						animate: 'visible',
+						variants: sideCircle,
+						css: 'absolute border rounded-full border-[#bababa] aspect-square',
+					}}
+				/>
 			</div>
 			<div className='h-full flex justify-center items-start '>
 				<motion.div
@@ -518,22 +514,17 @@ const Video = () => {
 	}, [videoState]); */
 	return (
 		<div ref={ref} className='relative'>
-			<motion.ul
-				className={cls(
-					videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
-					'w-full aspect-square absolute transition-all'
-				)}
-			>
-				{mainCircles.current.map((circle, idx) => (
-					<motion.li
-						key={idx}
-						className={cls(
-							circle,
-							'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0'
-						)}
-					/>
-				))}
-			</motion.ul>
+			<Circles
+				ulMotion={{
+					css: cls(
+						videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
+						'w-full aspect-square absolute transition-all'
+					),
+				}}
+				liMotion={{
+					css: 'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0',
+				}}
+			/>
 			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					<YouTube
