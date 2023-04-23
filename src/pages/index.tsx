@@ -1,23 +1,16 @@
+import Chevron from '@/components/chevron';
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
-import { useAnimationFrame } from 'framer-motion';
-import { useAnimationControls } from 'framer-motion';
 import {
 	MotionValue,
 	Variants,
-	useAnimate,
-	useAnimation,
 	useInView,
 	useSpring,
+	motion,
+	useScroll,
+	useTransform,
 } from 'framer-motion';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import {
-	MouseEventHandler,
-	MutableRefObject,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
@@ -34,6 +27,7 @@ interface SpringTextProps extends MouseEventProps {}
 
 interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
+	inheritRef: MutableRefObject<null>;
 }
 
 interface WaveProps {
@@ -125,20 +119,6 @@ const child: Variants = {
 	},
 };
 
-const videoCircle = {
-	start: {
-		rotate: '360deg',
-		transition: {
-			ease: 'linear',
-			duration: 10,
-			repeat: Infinity,
-		},
-	},
-	set: {
-		rotate: '360deg',
-	},
-};
-
 const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	const wordsX = (ratio: number) =>
 		useTransform(mouseX, (offset) => offset / ratio);
@@ -210,11 +190,6 @@ const CircleSection = ({
 		mouseY,
 		(offset) => 1 + Math.abs(offset / 20000)
 	);
-	/* const baseX = motionValue(0);
-	const x = useTransform(baseX, (v) => `${wrap(-40, -60, v)}%`);
-	useAnimationFrame((time, delta) => {
-		baseX.set(baseX.get() + (2 * delta) / 1000);
-	}); */
 	const mainCircles = useRef([
 		'left-0 top-0 origin-top-left',
 		'right-0 top-0 origin-top-right',
@@ -227,10 +202,10 @@ const CircleSection = ({
 	]);
 	return (
 		<motion.section
-			className='relative bg-[#101010] h-[500vh] mb-[100vh] px-10'
+			className='relative h-[500vh] mb-[100vh] px-10'
 			ref={inheritRef}
 		>
-			<div className='absolute top-0 h-[80%] '>
+			<div className='absolute top-0 h-[80%]'>
 				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
 						<motion.div
@@ -249,14 +224,14 @@ const CircleSection = ({
 			<div className='h-full flex justify-center items-start '>
 				<motion.div
 					style={{ scale, y }}
-					className='sticky top-0 h-[100vh] flex items-center '
+					className='sticky top-0 h-[100vh] flex items-center'
 				>
 					<motion.ul
 						style={{ rotate }}
 						initial='initial'
 						animate='bigger'
 						variants={list}
-						className='w-full aspect-square absolute'
+						className='w-full aspect-square absolute '
 					>
 						{mainCircles.current.map((circle, idx) => (
 							<motion.li
@@ -375,7 +350,7 @@ const Wave = ({
 	);
 };
 
-const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
+const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 	const waveProps = useRef([
 		{
 			index: 1,
@@ -413,6 +388,7 @@ const WavesSection = ({ scrollYProgress }: WaveSectionProps) => {
 
 	return (
 		<motion.div
+			ref={inheritRef}
 			animate='wave'
 			className='absolute top-[200vh] w-full h-[400vh] pb-[50vh]'
 		>
@@ -603,15 +579,12 @@ const VideosSection = () => {
 };
 
 export default function Home() {
-	// const [scope, animate] = useAnimate();
-	// useEffect(() => {
-	// 	animate(scope.current, { opacity: 0 }, { duration: 4 });
-	// }, []);
-	const target = useRef(null);
-	const { scrollYProgress } = useScroll({ target });
-	const mouseX = useSpring(0, { stiffness: 100 });
+	const wave = useRef(null);
+	const circle = useRef(null);
+	const isInView = useInView(wave, { margin: '0px 0px 150px 0px', once: true });
+	const { scrollYProgress } = useScroll({ target: circle });
+	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
-
 	return (
 		<div
 			onMouseMove={(e) => {
@@ -629,16 +602,17 @@ export default function Home() {
 				mouseX.set(0);
 				mouseY.set(0);
 			}}
-			className='absolute w-[100vw] h-[100vh] bg-[#13969342]'
+			className='w-[100vw] h-[100vh]'
 		>
+			<Chevron isInView={isInView} />
 			<Layout seoTitle='INSAN'>
 				<CircleSection
-					inheritRef={target}
+					inheritRef={circle}
 					mouseX={mouseX}
 					mouseY={mouseY}
 					scrollYProgress={scrollYProgress}
 				/>
-				<WavesSection scrollYProgress={scrollYProgress} />
+				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
 				<VideosSection />
 				<section className='h-[200vh]'></section>
 			</Layout>
