@@ -141,11 +141,11 @@ const snsAnchor: Variants = {
 	},
 };
 
-const items: Variants = {
+const snsList: Variants = {
 	hidden: {
 		opacity: 0,
 	},
-	visible: { x: [50, 0], opacity: [0, 1], transition: { duration: 0.6 } },
+	visible: { x: [50, 0], opacity: [0, 1], transition: { duration: 0.4 } },
 	disappear: {
 		x: [null, 50],
 		opacity: [null, 0],
@@ -575,7 +575,6 @@ const VideosSection = () => {
 		}
 	}, [horizental.current?.offsetWidth]);
 	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
-
 	return (
 		<div ref={vertical} className='h-[600vh]'>
 			<motion.div
@@ -584,8 +583,8 @@ const VideosSection = () => {
 				className='sticky top-0 text-[200px] w-[400vw] flex'
 			>
 				<div className='h-[100vh] w-screen'>
-					<div className='h-[100vh] w-screen flex justify-start items-center'>
-						<div className='absolute top-0 w-screen h-full flex items-center'>
+					<div className='relative h-[100vh] w-screen flex justify-start items-center'>
+						<div className='absolute w-full h-full flex items-center'>
 							<img
 								src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
 								alt='1'
@@ -594,8 +593,24 @@ const VideosSection = () => {
 							<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
 						</div>
 						<Video />
+						<div className='font-Roboto font-thin absolute pt-[80px] pb-[120px] flex flex-col justify-between items-end text-[100px] text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square'>
+							<div className='flex justify-end items-center'>
+								<div className='font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'>
+									1
+								</div>
+								<div className='font-GmarketSans font-bold absolute'>
+									EMOTIONAL
+								</div>
+							</div>
+							<div className='text-[#cacaca] text-5xl -mt-20'>
+								<div className='-ml-20'>Director</div>
+								<div className='font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-4'>
+									확장과 재창조, 창작의 결과물
+								</div>
+							</div>
+							<div className='text-2xl'>2023.2.25</div>
+						</div>
 					</div>
-					<div className='w-[400px] aspect-square bg-blue-600'>Emotional</div>
 				</div>
 				<div className=' h-[100vh] w-screen'></div>
 				<div className=' h-[100vh] w-screen'></div>
@@ -632,7 +647,7 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 				className='pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-lg gap-2'
 			>
 				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
-					<motion.li key={idx} variants={items}>
+					<motion.li key={idx} variants={snsList}>
 						<Link href={''}>{arr}</Link>
 					</motion.li>
 				))}

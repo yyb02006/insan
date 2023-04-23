@@ -3,6 +3,10 @@
 @tailwind utilities;
 @import url('https://webfontworld.github.io/pretendard/Pretendard.css');
 
+.text-stroke-darker {
+	text-shadow: -1px -1px 0 #9c9c9c, 1px -1px 0 #9c9c9c, -1px 1px 0 #9c9c9c,
+		1px 1px 0 #9c9c9c;
+}
 .text-stroke {
 	text-shadow: -2px -2px 0 #f4f4f4, 2px -2px 0 #f4f4f4, -2px 2px 0 #f4f4f4,
 		2px 2px 0 #f4f4f4;
