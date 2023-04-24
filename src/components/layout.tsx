@@ -1,19 +1,124 @@
+import { cls } from '@/libs/client/utils';
+import {
+	AnimatePresence,
+	stagger,
+	useAnimate,
+	usePresence,
+} from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 interface LayoutProps {
 	seoTitle: string;
 	children: ReactNode;
-	nav?: boolean;
+	nav?: { exist?: boolean; isShort: boolean };
 }
+
+const ListMenu = () => {
+	const [isPresent, safeToRemove] = usePresence();
+	const [navRef, animate] = useAnimate();
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					'li',
+					{ y: [-24, 0], opacity: [0, 1] },
+					{
+						duration: 0.2,
+						ease: 'easeOut',
+						delay: stagger(0.2),
+					}
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					'li',
+					{ y: [0, -24], opacity: [1, 0] },
+					{ duration: 0.2, ease: 'easeOut', delay: stagger(0.2, { from: 3 }) }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<ul
+			ref={navRef}
+			className='relative top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'
+		>
+			{[
+				{ href: '/work', name: 'Work' },
+				{ href: '/about', name: 'About' },
+				{ href: '/contact', name: 'Contact' },
+			].map((arr, idx) => (
+				<li key={idx} className='opacity-0'>
+					<Link href={arr.href}>{arr.name}</Link>
+				</li>
+			))}
+		</ul>
+	);
+};
+
+const HamburgerMenu = () => {
+	const [isPresent, safeToRemove] = usePresence();
+	const [navRef, animate] = useAnimate();
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					'li',
+					{ x: [84, 0] },
+					{
+						duration: 0.2,
+						ease: 'easeOut',
+						delay: stagger(0.2, { from: 3 }),
+					}
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					'li',
+					{ x: [0, 84] },
+					{ duration: 0.2, ease: 'easeOut', delay: stagger(0.2) }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<ul
+			ref={navRef}
+			className='absolute top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'
+		>
+			<Link href={'/work'}>
+				<ul className='h-6 aspect-square flex flex-col justify-between items-end'>
+					{['6', '4', '6'].map((arr, idx) => (
+						<li
+							key={idx}
+							className={cls(
+								`w-${arr}`,
+								'h-[1px] bg-[#cacaca] rounded-full translate-x-[84px]'
+							)}
+						/>
+					))}
+				</ul>
+			</Link>
+		</ul>
+	);
+};
 
 export default function Layout({
 	seoTitle,
 	children,
-	nav = true,
+	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
 	return (
@@ -24,7 +129,7 @@ export default function Layout({
 				</title>
 			</Head>
 			{nav ? (
-				<nav className='fixed z-[1] w-full h-[100px]'>
+				<nav className='fixed z-[1] w-full h-[100px] '>
 					<div className='mx-[60px] h-full flex justify-between items-center'>
 						<Link href={'/'}>
 							<Image
@@ -35,11 +140,14 @@ export default function Layout({
 								className='cursor-pointer'
 							/>
 						</Link>
-						<ul className='font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'>
-							<Link href={'/work'}>Work</Link>
-							<Link href={'/about'}>About</Link>
-							<Link href={'/contact'}>Contact us</Link>
-						</ul>
+						<div className='relative w-[50px] h-[24px] flex justify-end items-center'>
+							<AnimatePresence>
+								{!nav.isShort ? <ListMenu /> : null}
+							</AnimatePresence>
+							<AnimatePresence>
+								{nav.isShort ? <HamburgerMenu /> : null}
+							</AnimatePresence>
+						</div>
 					</div>
 				</nav>
 			) : null}

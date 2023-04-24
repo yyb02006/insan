@@ -990,8 +990,10 @@ const OutroSection = () => {
 
 export default function Home() {
 	const wave = useRef(null);
+	const background = useRef(null);
 	const circle = useRef(null);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
+	const isInBackround = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
 	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
@@ -1013,13 +1015,14 @@ export default function Home() {
 	};
 	return (
 		<div
+			ref={background}
 			onMouseMove={onMove}
 			onMouseLeave={onLeave}
 			className='w-[100vw] h-[100vh]'
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
 			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
-			<Layout seoTitle='INSAN'>
+			<Layout seoTitle='INSAN' nav={{ isShort: isInBackround ? false : true }}>
 				<CircleSection
 					inheritRef={circle}
 					mouseX={mouseX}
