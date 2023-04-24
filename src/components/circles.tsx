@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { MotionStyle, Variants, motion } from 'framer-motion';
 import { cls } from '@/libs/client/utils';
 
-interface defalutMotion {
+interface DefalutMotion {
 	style?: MotionStyle;
 	initial?: string;
 	animate?: string;
@@ -11,11 +11,12 @@ interface defalutMotion {
 }
 
 interface CirclesProps {
-	ulMotion?: defalutMotion;
-	liMotion?: defalutMotion;
+	ulMotion?: DefalutMotion;
+	liMotion?: DefalutMotion;
 	[key: string]: any;
 }
 
+/**부모 엘리먼트에 CSS 포지션 값 필수 */
 export default function Circles({ ulMotion, liMotion, ...rest }: CirclesProps) {
 	const mainCircles = useRef([
 		'left-0 top-0 origin-top-left',

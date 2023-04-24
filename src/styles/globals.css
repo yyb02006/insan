@@ -7,6 +7,10 @@
 	text-shadow: -1px -1px 0 #9c9c9c, 1px -1px 0 #9c9c9c, -1px 1px 0 #9c9c9c,
 		1px 1px 0 #9c9c9c;
 }
+.text-stroke-light {
+	text-shadow: -1px -1px 0 #eaeaea, 1px -1px 0 #eaeaea, -1px 1px 0 #eaeaea,
+		1px 1px 0 #eaeaea;
+}
 .text-stroke {
 	text-shadow: -2px -2px 0 #f4f4f4, 2px -2px 0 #f4f4f4, -2px 2px 0 #f4f4f4,
 		2px 2px 0 #f4f4f4;

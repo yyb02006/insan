@@ -756,26 +756,29 @@ const TextSection = () => {
 		target: ref,
 		offset: ['start end', 'end start'],
 	});
-	const y = [];
-	const opacity = [];
-	for (let i = 0; i < 7; i++) {
-		y.push(
-			useTransform(
-				scrollYProgress,
-				[0.1 * ((i * 5) / 8 + 1), 0.1 * ((i * 5) / 8 + 2)],
-				[70, 0]
-			)
-		);
-		opacity.push(
-			useTransform(
-				scrollYProgress,
-				[0.1 * ((i * 5) / 8 + 1), 0.1 * ((i * 5) / 8 + 2)],
-				[0, 1]
-			)
-		);
-	}
-	const scale = useTransform(scrollYProgress, [0, 0.9], [0.5, 1]);
-	const rotate = useTransform(scrollYProgress, [0, 0.9], [90, 0]);
+	const y: MotionValue[] = [];
+	const opacity: MotionValue[] = [];
+	const setTiming = (start: number, end: number, term: number) => {
+		for (let i = 0; i < 7; i++) {
+			y.push(
+				useTransform(
+					scrollYProgress,
+					[0.1 * (i * term + start), 0.1 * (i * term + end)],
+					[100, 0]
+				)
+			);
+			opacity.push(
+				useTransform(
+					scrollYProgress,
+					[0.1 * (i * term + start), 0.1 * (i * term + end)],
+					[0, 1]
+				)
+			);
+		}
+	};
+	setTiming(1, 2, 5 / 8);
+	const scale = useTransform(scrollYProgress, [0, 0.4], [0.5, 1]);
+	const rotate = useTransform(scrollYProgress, [0, 0.4], [90, 0]);
 	return (
 		<section
 			ref={ref}
@@ -783,7 +786,7 @@ const TextSection = () => {
 		>
 			<motion.div
 				style={{ scale, rotate }}
-				className='absolute -right-[40vh] -top-4 h-[80vh] aspect-square'
+				className='absolute -right-[40vh] top-8 h-[80vh] aspect-square'
 			>
 				<Circles
 					liMotion={{
@@ -823,8 +826,7 @@ const TextSection = () => {
 						style={{ y: y[4], opacity: opacity[4] }}
 						className='relative'
 					>
-						상상을 현실로{' '}
-						<span className='font-extralight'>만드는 감동을,</span>
+						상상이 현실이 <span className='font-extralight'>되는 감동을,</span>
 					</motion.span>
 					<motion.span
 						style={{ y: y[5], opacity: opacity[5] }}
@@ -841,6 +843,50 @@ const TextSection = () => {
 				</motion.div>
 			</div>
 		</section>
+	);
+};
+
+const OutroSection = () => {
+	const [scope, animate] = useAnimate();
+	const isInView = useInView(scope, { amount: 0.3 });
+	useEffect(() => {
+		if (isInView) {
+			animate(scope.current, { scale: 1 }, { duration: 0.5 });
+		} else {
+			animate(scope.current, { scale: 0.5 });
+		}
+	}, [isInView]);
+	const onCircleOver = () => {
+		animate('.Container', { scale: 1.2 }, { duration: 0.5 });
+		animate('.Text', { color: '#eaeaea' }, { duration: 0.5 });
+	};
+	const onCircleOut = () => {
+		animate('.Container', { scale: 1 }, { duration: 0.5 });
+		animate('.Text', { color: '#101010' }, { duration: 0.2 });
+	};
+	return (
+		<div className='mt-[30vh] h-[100vh] flex justify-center items-center'>
+			<div
+				ref={scope}
+				onMouseOver={onCircleOver}
+				onMouseOut={onCircleOut}
+				className='relative h-[70vh] aspect-square flex justify-center items-center'
+			>
+				<div className='Container absolute h-full aspect-square'>
+					<Circles
+						ulMotion={{
+							css: cls(
+								isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
+								'transition-all'
+							),
+						}}
+					/>
+				</div>
+				<span className='Text text-stroke-light relative text-[#eaeaea] text-[10rem] font-GmarketSans font-bold'>
+					INSAN
+				</span>
+			</div>
+		</div>
 	);
 };
 
@@ -885,7 +931,10 @@ export default function Home() {
 				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
 				<VideosSection />
 				<TextSection />
-				<section className='h-[100vh]'></section>
+				<OutroSection />
+				<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
+					2023 Insan - all rights reserved
+				</footer>
 			</Layout>
 		</div>
 	);
