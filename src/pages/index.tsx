@@ -980,7 +980,7 @@ const OutroSection = () => {
 						}}
 					/>
 				</div>
-				<span className='Text text-stroke-light relative text-[#eaeaea] text-[10rem] font-GmarketSans font-bold'>
+				<span className='Text text-stroke-light relative text-[#101010] text-[10rem] font-GmarketSans font-bold'>
 					INSAN
 				</span>
 			</div>
