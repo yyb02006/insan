@@ -754,14 +754,24 @@ const TextSection = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
-		offset: ['start end', 'end end'],
+		offset: ['start end', 'end start'],
 	});
 	const y = [];
 	const opacity = [];
-	for (let i = 2; i < 9; i++) {
-		y.push(useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [70, -70]));
+	for (let i = 0; i < 7; i++) {
+		y.push(
+			useTransform(
+				scrollYProgress,
+				[0.1 * ((i * 5) / 8 + 1), 0.1 * ((i * 5) / 8 + 2)],
+				[70, 0]
+			)
+		);
 		opacity.push(
-			useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [0, 1])
+			useTransform(
+				scrollYProgress,
+				[0.1 * ((i * 5) / 8 + 1), 0.1 * ((i * 5) / 8 + 2)],
+				[0, 1]
+			)
 		);
 	}
 	const scale = useTransform(scrollYProgress, [0, 0.9], [0.5, 1]);
@@ -769,7 +779,7 @@ const TextSection = () => {
 	return (
 		<section
 			ref={ref}
-			className='relative mt-[50vh] h-[90vh] flex justify-center'
+			className='relative mt-[50vh] h-[100vh] flex justify-center'
 		>
 			<motion.div
 				style={{ scale, rotate }}
