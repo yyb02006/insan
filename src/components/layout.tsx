@@ -44,6 +44,9 @@ export default function Layout({
 				</nav>
 			) : null}
 			{children}
+			<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
+				2023 Insan - all rights reserved
+			</footer>
 		</div>
 	);
 }

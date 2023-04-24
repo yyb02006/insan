@@ -60,12 +60,21 @@ interface SnsLinkProps {
 	isInView?: boolean;
 }
 
+interface VideoProps {
+	videoId: string;
+}
+
 interface VideoContainerProps {
 	index: number;
 	title: string;
 	role: string;
 	description: string;
 	date: string;
+	videoId: string;
+}
+
+interface VideoSectionIndicatorProps {
+	scrollYProgress: MotionValue<number>;
 }
 
 const wave = (sec: number, reverse: boolean = false) => {
@@ -460,7 +469,7 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 	);
 };
 
-const Video = () => {
+const Video = ({ videoId }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
@@ -502,21 +511,25 @@ const Video = () => {
 	}, [videoState]); */
 	return (
 		<div ref={ref} className='relative'>
-			<Circles
-				ulMotion={{
-					css: cls(
-						videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
-						'transition-all'
-					),
-				}}
-				liMotion={{
-					css: 'w-[calc(50px+100%)]',
-				}}
-			/>
+			<div className='Wrapper absolute w-full aspect-square'>
+				<Circles
+					ulMotion={{
+						css: cls(
+							videoState === 1
+								? 'animate-spin-slow'
+								: 'animate-spin-slow pause',
+							'transition-all'
+						),
+					}}
+					liMotion={{
+						css: 'w-[calc(50px+100%)]',
+					}}
+				/>
+			</div>
 			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					<YouTube
-						videoId='OaqCq1k5EPA'
+						videoId={videoId}
 						opts={{
 							width: '100%',
 							height: '100%',
@@ -543,7 +556,7 @@ const Video = () => {
 					)}
 				>
 					<img
-						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						alt='1'
 						className='absolute h-full aspect-video'
 					/>
@@ -560,9 +573,10 @@ const VideoContainer = ({
 	role,
 	description,
 	date,
+	videoId,
 }: VideoContainerProps) => {
 	const ref = useRef<HTMLDivElement>(null);
-	const isInView = useInView(ref, { amount: 0.6 });
+	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
 	const [videoScope, videoAnimate] = useAnimate();
 	const motionInfos = [
@@ -595,14 +609,14 @@ const VideoContainer = ({
 	useEffect(() => {
 		if (isInView) {
 			videoAnimate(
-				'ul',
+				'.Wrapper',
 				{ scale: [0.8, 1] },
 				{ duration: 0.4, ease: 'easeOut' }
 			);
 			textMotion();
 		} else {
 			videoAnimate(
-				'ul',
+				'.Wrapper',
 				{ scale: [1, 0.8] },
 				{ duration: 0.4, ease: 'easeIn' }
 			);
@@ -614,14 +628,14 @@ const VideoContainer = ({
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
 					<img
-						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						alt='1'
 						className='relative h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
 				</div>
 				<div ref={videoScope} className='w-[600px] ml-[calc(160px+10vw)]'>
-					<Video />
+					<Video videoId={videoId} />
 				</div>
 				<div
 					ref={textScope}
@@ -661,6 +675,7 @@ const VideosSection = () => {
 			role: 'Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.22',
+			videoId: 'd4I-0Zv1Lv8',
 		},
 		{
 			index: 2,
@@ -668,6 +683,7 @@ const VideosSection = () => {
 			role: 'Camera',
 			description: '엔터테인먼트와 현실의 연결',
 			date: '2023.2.23',
+			videoId: 'CWBy5PyyMyw',
 		},
 		{
 			index: 3,
@@ -675,6 +691,7 @@ const VideosSection = () => {
 			role: 'Art Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.24',
+			videoId: 'Kzgid8FIjKc',
 		},
 		{
 			index: 4,
@@ -682,6 +699,7 @@ const VideosSection = () => {
 			role: 'Lead Developer',
 			description: '영감을 주고 받은 기록',
 			date: '2023.2.25',
+			videoId: 'AuXYLGyEajg',
 		},
 	];
 	const [range, setRange] = useState(0);
@@ -721,6 +739,7 @@ const VideosSection = () => {
 						role={data.role}
 						description={data.description}
 						date={data.date}
+						videoId={data.videoId}
 					/>
 				))}
 			</motion.div>
@@ -732,10 +751,6 @@ const VideosSection = () => {
 		</div>
 	);
 };
-
-interface VideoSectionIndicatorProps {
-	scrollYProgress: MotionValue<number>;
-}
 
 const VideoSectionIndicator = ({
 	scrollYProgress,
@@ -1015,9 +1030,6 @@ export default function Home() {
 				<VideosSection />
 				<TextSection />
 				<OutroSection />
-				<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
-					2023 Insan - all rights reserved
-				</footer>
 			</Layout>
 		</div>
 	);
