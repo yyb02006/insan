@@ -11,6 +11,8 @@ import {
 	useScroll,
 	useTransform,
 	useAnimate,
+	usePresence,
+	AnimatePresence,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -691,13 +693,25 @@ const VideosSection = () => {
 			setRange((horizental.current.offsetWidth * 3) / 4);
 		}
 	}, [horizental.current?.offsetWidth]);
-	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
+	const x = useTransform(scrollYProgress, [0.1, 0.9], [0, -range]);
+	// useEffect(() => {
+	// 	window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
+	// 	window.removeEventListener('scroll', () => {});
+	// }, []);
+
+	/**inner를 100vh만큼 줄이고 마진으로 인식범위 최적화 */
+	const inner = useRef(null);
+	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<div ref={vertical} className='h-[600vh]'>
+		<div ref={vertical} className='relative h-[600vh]'>
+			<div
+				ref={inner}
+				className='top-0 absolute h-[calc(100%-100vh)] w-full'
+			></div>
 			<motion.div
 				ref={horizental}
 				style={{ x }}
-				className='sticky top-0 text-[200px] w-[400vw] flex'
+				className='sticky top-0 text-[200px] h-[100vh] w-[400vw] flex'
 			>
 				{dummyDatas.map((data) => (
 					<VideoContainer
@@ -710,7 +724,76 @@ const VideosSection = () => {
 					/>
 				))}
 			</motion.div>
+			<AnimatePresence>
+				{isInView ? (
+					<VideoSectionIndicator scrollYProgress={scrollYProgress} />
+				) : null}
+			</AnimatePresence>
 		</div>
+	);
+};
+
+interface VideoSectionIndicatorProps {
+	scrollYProgress: MotionValue<number>;
+}
+
+const VideoSectionIndicator = ({
+	scrollYProgress,
+}: VideoSectionIndicatorProps) => {
+	const [isPresent, safeToRemove] = usePresence();
+	const [indicator, animate] = useAnimate();
+	const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+	// const opacity = useTransform(
+	// 	scrollYProgress,
+	// 	[
+	// 		0.13, 0.15, 0.24, 0.26, 0.39, 0.41, 0.5, 0.52, 0.65, 0.67, 0.76, 0.78,
+	// 		0.91,
+	// 	],
+	// 	[1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1]
+	// );
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					indicator.current,
+					{ x: 60, opacity: 1 },
+					{ duration: 0.5 }
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					indicator.current,
+					{ x: 0, opacity: 0 },
+					{ duration: 0.2 }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<motion.div
+			ref={indicator}
+			className='fixed left-0 top-0 h-full w-[28px] flex items-center '
+		>
+			<div className='relative bg-[#202020] py-4 box-content rounded-full h-[60vh] w-full flex flex-col justify-between items-center'>
+				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
+				<div className='h-[30vh]'>
+					<motion.div
+						style={{ height }}
+						className='relative w-[4px] bg-[#FE4A5D] rounded-full'
+					/>
+				</div>
+				<div
+					className='tracking-[1rem] text-lg text-[#eaeaea]'
+					style={{ writingMode: 'vertical-rl' }}
+				>
+					Artist
+				</div>
+			</div>
+		</motion.div>
 	);
 };
 
