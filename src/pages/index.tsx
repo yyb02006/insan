@@ -11,6 +11,8 @@ import {
 	useScroll,
 	useTransform,
 	useAnimate,
+	usePresence,
+	AnimatePresence,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -58,12 +60,21 @@ interface SnsLinkProps {
 	isInView?: boolean;
 }
 
+interface VideoProps {
+	videoId: string;
+}
+
 interface VideoContainerProps {
 	index: number;
 	title: string;
 	role: string;
 	description: string;
 	date: string;
+	videoId: string;
+}
+
+interface VideoSectionIndicatorProps {
+	scrollYProgress: MotionValue<number>;
 }
 
 const wave = (sec: number, reverse: boolean = false) => {
@@ -458,7 +469,7 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 	);
 };
 
-const Video = () => {
+const Video = ({ videoId }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
@@ -500,21 +511,25 @@ const Video = () => {
 	}, [videoState]); */
 	return (
 		<div ref={ref} className='relative'>
-			<Circles
-				ulMotion={{
-					css: cls(
-						videoState === 1 ? 'animate-spin-slow' : 'animate-spin-slow pause',
-						'transition-all'
-					),
-				}}
-				liMotion={{
-					css: 'w-[calc(50px+100%)]',
-				}}
-			/>
+			<div className='Wrapper absolute w-full aspect-square'>
+				<Circles
+					ulMotion={{
+						css: cls(
+							videoState === 1
+								? 'animate-spin-slow'
+								: 'animate-spin-slow pause',
+							'transition-all'
+						),
+					}}
+					liMotion={{
+						css: 'w-[calc(50px+100%)]',
+					}}
+				/>
+			</div>
 			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					<YouTube
-						videoId='OaqCq1k5EPA'
+						videoId={videoId}
 						opts={{
 							width: '100%',
 							height: '100%',
@@ -541,7 +556,7 @@ const Video = () => {
 					)}
 				>
 					<img
-						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						alt='1'
 						className='absolute h-full aspect-video'
 					/>
@@ -558,9 +573,10 @@ const VideoContainer = ({
 	role,
 	description,
 	date,
+	videoId,
 }: VideoContainerProps) => {
 	const ref = useRef<HTMLDivElement>(null);
-	const isInView = useInView(ref, { amount: 0.6 });
+	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
 	const [videoScope, videoAnimate] = useAnimate();
 	const motionInfos = [
@@ -593,14 +609,14 @@ const VideoContainer = ({
 	useEffect(() => {
 		if (isInView) {
 			videoAnimate(
-				'ul',
+				'.Wrapper',
 				{ scale: [0.8, 1] },
 				{ duration: 0.4, ease: 'easeOut' }
 			);
 			textMotion();
 		} else {
 			videoAnimate(
-				'ul',
+				'.Wrapper',
 				{ scale: [1, 0.8] },
 				{ duration: 0.4, ease: 'easeIn' }
 			);
@@ -612,14 +628,14 @@ const VideoContainer = ({
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
 					<img
-						src='https://img.youtube.com/vi/OaqCq1k5EPA/maxresdefault.jpg'
+						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						alt='1'
 						className='relative h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
 				</div>
 				<div ref={videoScope} className='w-[600px] ml-[calc(160px+10vw)]'>
-					<Video />
+					<Video videoId={videoId} />
 				</div>
 				<div
 					ref={textScope}
@@ -659,6 +675,7 @@ const VideosSection = () => {
 			role: 'Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.22',
+			videoId: 'd4I-0Zv1Lv8',
 		},
 		{
 			index: 2,
@@ -666,6 +683,7 @@ const VideosSection = () => {
 			role: 'Camera',
 			description: '엔터테인먼트와 현실의 연결',
 			date: '2023.2.23',
+			videoId: 'CWBy5PyyMyw',
 		},
 		{
 			index: 3,
@@ -673,6 +691,7 @@ const VideosSection = () => {
 			role: 'Art Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.24',
+			videoId: 'Kzgid8FIjKc',
 		},
 		{
 			index: 4,
@@ -680,6 +699,7 @@ const VideosSection = () => {
 			role: 'Lead Developer',
 			description: '영감을 주고 받은 기록',
 			date: '2023.2.25',
+			videoId: 'AuXYLGyEajg',
 		},
 	];
 	const [range, setRange] = useState(0);
@@ -691,13 +711,25 @@ const VideosSection = () => {
 			setRange((horizental.current.offsetWidth * 3) / 4);
 		}
 	}, [horizental.current?.offsetWidth]);
-	const x = useTransform(scrollYProgress, [0.15, 0.85], [0, -range]);
+	const x = useTransform(scrollYProgress, [0.1, 0.9], [0, -range]);
+	// useEffect(() => {
+	// 	window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
+	// 	window.removeEventListener('scroll', () => {});
+	// }, []);
+
+	/**inner를 100vh만큼 줄이고 마진으로 인식범위 최적화 */
+	const inner = useRef(null);
+	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<div ref={vertical} className='h-[600vh]'>
+		<div ref={vertical} className='relative h-[600vh]'>
+			<div
+				ref={inner}
+				className='top-0 absolute h-[calc(100%-100vh)] w-full'
+			></div>
 			<motion.div
 				ref={horizental}
 				style={{ x }}
-				className='sticky top-0 text-[200px] w-[400vw] flex'
+				className='sticky top-0 text-[200px] h-[100vh] w-[400vw] flex'
 			>
 				{dummyDatas.map((data) => (
 					<VideoContainer
@@ -707,10 +739,76 @@ const VideosSection = () => {
 						role={data.role}
 						description={data.description}
 						date={data.date}
+						videoId={data.videoId}
 					/>
 				))}
 			</motion.div>
+			<AnimatePresence>
+				{isInView ? (
+					<VideoSectionIndicator scrollYProgress={scrollYProgress} />
+				) : null}
+			</AnimatePresence>
 		</div>
+	);
+};
+
+const VideoSectionIndicator = ({
+	scrollYProgress,
+}: VideoSectionIndicatorProps) => {
+	const [isPresent, safeToRemove] = usePresence();
+	const [indicator, animate] = useAnimate();
+	const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+	// const opacity = useTransform(
+	// 	scrollYProgress,
+	// 	[
+	// 		0.13, 0.15, 0.24, 0.26, 0.39, 0.41, 0.5, 0.52, 0.65, 0.67, 0.76, 0.78,
+	// 		0.91,
+	// 	],
+	// 	[1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1]
+	// );
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					indicator.current,
+					{ x: 60, opacity: 1 },
+					{ duration: 0.5 }
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					indicator.current,
+					{ x: 0, opacity: 0 },
+					{ duration: 0.2 }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<motion.div
+			ref={indicator}
+			className='fixed left-0 top-0 h-full w-[28px] flex items-center '
+		>
+			<div className='relative bg-[#202020] py-4 box-content rounded-full h-[60vh] w-full flex flex-col justify-between items-center'>
+				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
+				<div className='h-[30vh]'>
+					<motion.div
+						style={{ height }}
+						className='relative w-[4px] bg-[#FE4A5D] rounded-full'
+					/>
+				</div>
+				<div
+					className='tracking-[1rem] text-lg text-[#eaeaea]'
+					style={{ writingMode: 'vertical-rl' }}
+				>
+					Artist
+				</div>
+			</div>
+		</motion.div>
 	);
 };
 
@@ -754,26 +852,39 @@ const TextSection = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
-		offset: ['start end', 'end end'],
+		offset: ['start end', 'end start'],
 	});
-	const y = [];
-	const opacity = [];
-	for (let i = 2; i < 9; i++) {
-		y.push(useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [70, -70]));
-		opacity.push(
-			useTransform(scrollYProgress, [0.08 * i, 0.1 * (i + 2)], [0, 1])
-		);
-	}
-	const scale = useTransform(scrollYProgress, [0, 0.9], [0.5, 1]);
-	const rotate = useTransform(scrollYProgress, [0, 0.9], [90, 0]);
+	const y: MotionValue[] = [];
+	const opacity: MotionValue[] = [];
+	const setTiming = (start: number, end: number, term: number) => {
+		for (let i = 0; i < 7; i++) {
+			y.push(
+				useTransform(
+					scrollYProgress,
+					[0.1 * (i * term + start), 0.1 * (i * term + end)],
+					[100, 0]
+				)
+			);
+			opacity.push(
+				useTransform(
+					scrollYProgress,
+					[0.1 * (i * term + start), 0.1 * (i * term + end)],
+					[0, 1]
+				)
+			);
+		}
+	};
+	setTiming(1, 2, 5 / 8);
+	const scale = useTransform(scrollYProgress, [0, 0.4], [0.5, 1]);
+	const rotate = useTransform(scrollYProgress, [0, 0.4], [90, 0]);
 	return (
 		<section
 			ref={ref}
-			className='relative mt-[50vh] h-[90vh] flex justify-center'
+			className='relative mt-[50vh] h-[100vh] flex justify-center'
 		>
 			<motion.div
 				style={{ scale, rotate }}
-				className='absolute -right-[40vh] -top-4 h-[80vh] aspect-square'
+				className='absolute -right-[40vh] top-8 h-[80vh] aspect-square'
 			>
 				<Circles
 					liMotion={{
@@ -813,8 +924,7 @@ const TextSection = () => {
 						style={{ y: y[4], opacity: opacity[4] }}
 						className='relative'
 					>
-						상상을 현실로{' '}
-						<span className='font-extralight'>만드는 감동을,</span>
+						상상이 현실이 <span className='font-extralight'>되는 감동을,</span>
 					</motion.span>
 					<motion.span
 						style={{ y: y[5], opacity: opacity[5] }}
@@ -834,10 +944,56 @@ const TextSection = () => {
 	);
 };
 
+const OutroSection = () => {
+	const [scope, animate] = useAnimate();
+	const isInView = useInView(scope, { amount: 0.3 });
+	useEffect(() => {
+		if (isInView) {
+			animate(scope.current, { scale: 1 }, { duration: 0.5 });
+		} else {
+			animate(scope.current, { scale: 0.5 });
+		}
+	}, [isInView]);
+	const onCircleOver = () => {
+		animate('.Container', { scale: 1.2 }, { duration: 0.5 });
+		animate('.Text', { color: '#eaeaea' }, { duration: 0.5 });
+	};
+	const onCircleOut = () => {
+		animate('.Container', { scale: 1 }, { duration: 0.5 });
+		animate('.Text', { color: '#101010' }, { duration: 0.2 });
+	};
+	return (
+		<div className='mt-[30vh] h-[100vh] flex justify-center items-center'>
+			<div
+				ref={scope}
+				onMouseOver={onCircleOver}
+				onMouseOut={onCircleOut}
+				className='relative h-[70vh] aspect-square flex justify-center items-center'
+			>
+				<div className='Container absolute h-full aspect-square'>
+					<Circles
+						ulMotion={{
+							css: cls(
+								isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
+								'transition-all'
+							),
+						}}
+					/>
+				</div>
+				<span className='Text text-stroke-light relative text-[#101010] text-[10rem] font-GmarketSans font-bold'>
+					INSAN
+				</span>
+			</div>
+		</div>
+	);
+};
+
 export default function Home() {
 	const wave = useRef(null);
+	const background = useRef(null);
 	const circle = useRef(null);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
+	const isInBackround = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
 	const mouseX = useSpring(0);
 	const mouseY = useSpring(0);
@@ -859,13 +1015,14 @@ export default function Home() {
 	};
 	return (
 		<div
+			ref={background}
 			onMouseMove={onMove}
 			onMouseLeave={onLeave}
 			className='w-[100vw] h-[100vh]'
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
 			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
-			<Layout seoTitle='INSAN'>
+			<Layout seoTitle='INSAN' nav={{ isShort: isInBackround ? false : true }}>
 				<CircleSection
 					inheritRef={circle}
 					mouseX={mouseX}
@@ -875,7 +1032,7 @@ export default function Home() {
 				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
 				<VideosSection />
 				<TextSection />
-				<section className='h-[100vh]'></section>
+				<OutroSection />
 			</Layout>
 		</div>
 	);

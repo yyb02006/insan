@@ -24,6 +24,10 @@ module.exports = {
 			animation: {
 				'spin-slow': 'spin 10s linear infinite',
 			},
+			colors: {
+				transparent: 'transparent',
+				palettered: '#FF4A5D',
+			},
 		},
 	},
 	plugins: [require('@tailwindcss/forms'), require('tailwind-scrollbar-hide')],
