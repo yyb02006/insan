@@ -49,14 +49,17 @@ const ListMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='relative top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'
+			className='relative top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 '
 		>
 			{[
 				{ href: '/work', name: 'Work' },
 				{ href: '/about', name: 'About' },
 				{ href: '/contact', name: 'Contact' },
 			].map((arr, idx) => (
-				<li key={idx} className='opacity-0'>
+				<li
+					key={idx}
+					className='opacity-0 hover:text-palettered transition-colors duration-300'
+				>
 					<Link href={arr.href}>{arr.name}</Link>
 				</li>
 			))}
@@ -99,13 +102,13 @@ const HamburgerMenu = () => {
 			className='absolute top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'
 		>
 			<Link href={'/work'}>
-				<ul className='h-6 aspect-square flex flex-col justify-between items-end'>
-					{['6', '4', '6'].map((arr, idx) => (
+				<ul className='h-6 aspect-square flex flex-col justify-between items-end group'>
+					{['w-6', 'w-4', 'w-6'].map((arr, idx) => (
 						<li
 							key={idx}
 							className={cls(
-								`w-${arr}`,
-								'h-[1px] bg-[#cacaca] rounded-full translate-x-[84px]'
+								arr,
+								'h-[1px] bg-[#cacaca] rounded-full translate-x-[84px] group-hover:bg-palettered transition-colors duration-300'
 							)}
 						/>
 					))}
@@ -141,12 +144,15 @@ export default function Layout({
 							/>
 						</Link>
 						<div className='relative w-[50px] h-[24px] flex justify-end items-center'>
-							<AnimatePresence>
-								{!nav.isShort ? <ListMenu /> : null}
-							</AnimatePresence>
-							<AnimatePresence>
-								{nav.isShort ? <HamburgerMenu /> : null}
-							</AnimatePresence>
+							{!nav.isShort ? (
+								<AnimatePresence>
+									<ListMenu />
+								</AnimatePresence>
+							) : (
+								<AnimatePresence>
+									<HamburgerMenu />
+								</AnimatePresence>
+							)}
 						</div>
 					</div>
 				</nav>
