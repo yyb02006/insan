@@ -58,7 +58,7 @@ const ListMenu = () => {
 			].map((arr, idx) => (
 				<li
 					key={idx}
-					className='opacity-0 hover:text-palettered transition-colors duration-300'
+					className='relative opacity-0 hover:text-palettered transition-colors duration-300'
 				>
 					<Link href={arr.href}>{arr.name}</Link>
 				</li>
@@ -99,10 +99,11 @@ const HamburgerMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='absolute top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9'
+			className='absolute top-0 bg-pink-600 flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
+			<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
 			<Link href={'/work'}>
-				<ul className='h-6 aspect-square flex flex-col justify-between items-end group'>
+				<ul className='relative h-6 aspect-square flex flex-col justify-between items-end group'>
 					{['w-6', 'w-4', 'w-6'].map((arr, idx) => (
 						<li
 							key={idx}
@@ -134,15 +135,18 @@ export default function Layout({
 			{nav ? (
 				<nav className='fixed z-[1] w-full h-[100px] '>
 					<div className='mx-[60px] h-full flex justify-between items-center'>
-						<Link href={'/'}>
-							<Image
-								src='/images/Logo.svg'
-								alt='INSAN'
-								width={28}
-								height={42}
-								className='cursor-pointer'
-							/>
-						</Link>
+						<div className='relative w-[28px] h-[42px] flex justify-center items-center'>
+							<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
+							<Link href={'/'}>
+								<Image
+									src='/images/Logo.svg'
+									alt='INSAN'
+									width={28}
+									height={42}
+									className='relative cursor-pointer'
+								/>
+							</Link>
+						</div>
 						<div className='relative w-[50px] h-[24px] flex justify-end items-center'>
 							{!nav.isShort ? (
 								<AnimatePresence>

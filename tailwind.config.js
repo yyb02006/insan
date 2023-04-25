@@ -10,10 +10,6 @@ module.exports = {
 		'./src/app/**/*.{js,ts,jsx,tsx}',
 	],
 	theme: {
-		colors: {
-			transparent: 'transparent',
-			palettered: '#FF4A5D',
-		},
 		extend: {
 			fontFamily: {
 				SCoreDream: ['SCoreDream', ...defaultTheme.fontFamily.sans],
@@ -27,6 +23,10 @@ module.exports = {
 			},
 			animation: {
 				'spin-slow': 'spin 10s linear infinite',
+			},
+			colors: {
+				transparent: 'transparent',
+				palettered: '#FF4A5D',
 			},
 		},
 	},

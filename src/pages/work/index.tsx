@@ -4,7 +4,52 @@ import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 const VideoSection = () => {
-	return <section></section>;
+	return (
+		<section className='w-full h-auto gap-2 grid grid-cols-4 auto-rows-auto grid-flow-dense bg-green-500'>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				1
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				2
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				3
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				4
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				5
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				6
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				7
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				8
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				9
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				10
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				11
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				12
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
+				13
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
+				14
+			</div>
+		</section>
+	);
 };
 
 interface TagButtonProps {
@@ -52,7 +97,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	);
 };
 
-const TagSection = () => {
+const TagButtonSection = () => {
 	const [tags, setTags] = useState({
 		selected: ['All'],
 		tagList: [
@@ -60,6 +105,9 @@ const TagSection = () => {
 			{ name: 'Movie', isSelected: false },
 			{ name: 'Advertisement', isSelected: false },
 			{ name: 'film', isSelected: false },
+			{ name: '16 : 9', isSelected: false },
+			{ name: '1 : 1', isSelected: false },
+			{ name: '9 : 16', isSelected: false },
 		],
 	});
 	const onTagInsert = (tag: string) => {
@@ -106,6 +154,7 @@ const TagSection = () => {
 				<AnimatePresence>
 					{tags.selected.map((tag) => (
 						<TagButton
+							key={tag}
 							tag={{ name: tag }}
 							css='border-palettered'
 							onTagFunction={onTagDelete}
@@ -133,12 +182,12 @@ const TagSection = () => {
 
 const SearchSection = () => {
 	return (
-		<section className='mt-[10vh] font-light flex gap-2 pb-2 border-b border-[#9a9a9a] text-[#bababa]'>
+		<section className='mt-[10vh] font-bold flex gap-2 pb-2 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'>
 			<svg
 				xmlns='http://www.w3.org/2000/svg'
 				fill='none'
 				viewBox='0 0 24 24'
-				strokeWidth={1.5}
+				strokeWidth={2}
 				stroke='currentColor'
 				className='w-6 h-6'
 			>
@@ -185,7 +234,7 @@ export default function Work() {
 				<div className='p-9'>
 					<TitleSection />
 					<SearchSection />
-					<TagSection />
+					<TagButtonSection />
 					<VideoSection />
 				</div>
 			</main>
