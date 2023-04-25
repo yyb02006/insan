@@ -1,25 +1,50 @@
 import Layout from '@/components/layout';
-import { AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { cls } from '@/libs/client/utils';
+import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const VideoSection = () => {
 	return <section></section>;
 };
 
 interface TagButtonProps {
-	tag: { name: string; isSelected: boolean };
+	tag: { name: string };
+	css: string;
 	onTagFunction: (tag: string) => void;
 }
 
-const TagButton = ({ tag, onTagFunction }: TagButtonProps) => {
+const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
+	const [isPresent, safeToRemove] = usePresence();
+	const [button, animate] = useAnimate();
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					button.current,
+					{ y: [-20, 0], opacity: [0, 1] },
+					{ duration: 0.2, delay: 0.1 }
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					button.current,
+					{ y: [0, -20], opacity: [1, 0] },
+					{ duration: 0.1 }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
 	return (
-		<div>
+		<div ref={button}>
 			<button
-				key={tag.name}
 				onClick={() => {
 					onTagFunction(tag.name);
 				}}
-				className='border border-[#9a9a9a] rounded-full p-2 hover:border-palettered hover:text-palettered transition-colors duration-200'
+				className={cls(css, 'border rounded-full p-2')}
 			>
 				{tag.name}
 			</button>
@@ -30,7 +55,7 @@ const TagButton = ({ tag, onTagFunction }: TagButtonProps) => {
 const TagSection = () => {
 	const [tags, setTags] = useState({
 		selected: ['All'],
-		notSelected: [
+		tagList: [
 			{ name: 'All', isSelected: true },
 			{ name: 'Movie', isSelected: false },
 			{ name: 'Advertisement', isSelected: false },
@@ -42,7 +67,7 @@ const TagSection = () => {
 			(p) =>
 				(p = {
 					selected: [...p.selected, tag],
-					notSelected: p.notSelected.map((arr) => ({
+					tagList: p.tagList.map((arr) => ({
 						name: arr.name,
 						isSelected: arr.name === tag ? true : arr.isSelected,
 					})),
@@ -54,7 +79,7 @@ const TagSection = () => {
 			(p) =>
 				(p = {
 					selected: p.selected.filter((arr) => arr !== tag),
-					notSelected: p.notSelected.map((arr) => ({
+					tagList: p.tagList.map((arr) => ({
 						name: arr.name,
 						isSelected: arr.name === tag ? false : arr.isSelected,
 					})),
@@ -78,26 +103,29 @@ const TagSection = () => {
 	return (
 		<section className='py-3 flex justify-between'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
-				{tags.selected.map((tag) => (
-					<button
-						key={tag}
-						onClick={() => {
-							onTagDelete(tag);
-						}}
-						className='border border-palettered rounded-full p-2'
-					>
-						{tag}
-					</button>
-				))}
+				<AnimatePresence>
+					{tags.selected.map((tag) => (
+						<TagButton
+							tag={{ name: tag }}
+							css='border-palettered'
+							onTagFunction={onTagDelete}
+						></TagButton>
+					))}
+				</AnimatePresence>
 			</div>
 			<div className='flex font-medium text-[#bababa] leading-none text-sm gap-2'>
-				{tags.notSelected.map((tag) =>
-					!tag.isSelected ? (
-						<AnimatePresence>
-							<TagButton tag={tag} onTagFunction={onTagInsert} />
-						</AnimatePresence>
-					) : null
-				)}
+				<AnimatePresence>
+					{tags.tagList.map((tag) =>
+						!tag.isSelected ? (
+							<TagButton
+								key={tag.name}
+								tag={tag}
+								css='border-[#9a9a9a] hover:border-palettered hover:text-palettered transition-colors duration-200'
+								onTagFunction={onTagInsert}
+							/>
+						) : null
+					)}
+				</AnimatePresence>
 			</div>
 		</section>
 	);
