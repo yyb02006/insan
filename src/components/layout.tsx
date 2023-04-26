@@ -133,7 +133,7 @@ export default function Layout({
 				</title>
 			</Head>
 			{nav ? (
-				<nav className='fixed z-[1] w-full h-[100px] '>
+				<nav className='fixed z-[1000] w-full h-[100px] '>
 					<div className='mx-[60px] h-full flex justify-between items-center'>
 						<div className='relative w-[28px] h-[42px] flex justify-center items-center'>
 							<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
@@ -144,6 +144,7 @@ export default function Layout({
 									width={28}
 									height={42}
 									className='relative cursor-pointer'
+									priority={true}
 								/>
 							</Link>
 						</div>
