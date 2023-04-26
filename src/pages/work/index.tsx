@@ -1,11 +1,170 @@
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
 import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const VideoSection = () => {
+	const ref = useRef<HTMLDivElement[]>([]);
+	const videoDatas = [
+		{ direction: 'horizental', index: 1 },
+		{ direction: 'vertical', index: 2 },
+		{ direction: 'vertical', index: 3 },
+		{ direction: 'vertical', index: 4 },
+		{ direction: 'horizental', index: 5 },
+		{ direction: 'horizental', index: 6 },
+		{ direction: 'horizental', index: 7 },
+		{ direction: 'horizental', index: 8 },
+		{ direction: 'horizental', index: 9 },
+		{ direction: 'vertical', index: 10 },
+		{ direction: 'vertical', index: 11 },
+		{ direction: 'vertical', index: 12 },
+		{ direction: 'horizental', index: 13 },
+		{ direction: 'horizental', index: 14 },
+	];
+	const testover = (index: number) => {
+		ref.current[index].style.zIndex = '1';
+	};
+	const testout = (index: number) => {
+		ref.current[index].style.zIndex = '0';
+	};
 	return (
-		<section className='w-full h-auto gap-2 grid grid-cols-4 auto-rows-auto grid-flow-dense bg-green-500'>
+		<section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
+			{videoDatas.map((data) => {
+				if (data.direction === 'horizental') {
+					return data.index % 4 === 0 ? (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					) : (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				} else if (data.direction === 'vertical') {
+					return (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				}
+			})}
+		</section>
+
+		/**Layout 2 마우스오버시 늘리기 */
+		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
+			{videoDatas.map((data) => {
+				if (data.direction === 'horizental') {
+					return data.index % 4 === 0 ? (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					) : (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				} else if (data.direction === 'vertical') {
+					return (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				}
+			})}
+		</section> */
+
+		/**Layout 1 자동 배치 */
+		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2'>
 			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400'>
 				1
 			</div>
@@ -48,7 +207,7 @@ const VideoSection = () => {
 			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400'>
 				14
 			</div>
-		</section>
+		</section> */
 	);
 };
 
