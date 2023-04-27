@@ -6,8 +6,11 @@ import {
 	AnimatePresence,
 	useAnimate,
 	usePresence,
+	Variants,
+	useInView,
 } from 'framer-motion';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { waveChild, waveContainer } from '..';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -596,21 +599,82 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 };
 
 const OutroSection = () => {
+	const letterRef = useRef(null);
+	const isinview = useInView(letterRef, {
+		amount: 0.6,
+		margin: '50% 0% 0% 0%',
+	});
+	const text = 'You can view my work here too.';
+	const letter = Array.from(text);
+	const [snsLinks, animate] = useAnimate();
+	const onLinksEnter = (angle: number, selector: string) => {
+		animate('.Circles', { rotate: angle }, { duration: 0.4 });
+		animate(selector, { color: '#eaeaea' }, { duration: 0.4 });
+	};
+	const onLinksLeave = (selector: string) => {
+		animate(selector, { color: '#101010' }, { duration: 0.4 });
+	};
 	return (
 		<section className='relative bg-[#101010] h-[200vh] flex flex-col items-center font-bold'>
-			<div className='text-[4.5rem] h-[60vh] flex items-end'>
-				You can view my work here too.
-			</div>
-
-			<ul className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010] text-stroke-darker'>
-				<div className='absolute rotate-[-60deg]'>
-					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
-					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
-					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
+			<motion.div
+				initial={'hidden'}
+				animate={isinview ? 'visible' : 'hidden'}
+				variants={waveContainer}
+				custom={0.05}
+				ref={letterRef}
+				className='text-[4.5rem] h-[60vh] flex items-end'
+			>
+				{letter.map((test, idx) => (
+					<motion.span variants={waveChild} key={idx}>
+						{test === ' ' ? '\u00A0' : test}
+					</motion.span>
+				))}
+			</motion.div>
+			<ul
+				ref={snsLinks}
+				className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010] text-stroke-darker'
+			>
+				<motion.div initial={{ rotate: -60 }} className='Circles absolute'>
+					{Array.from({ length: 3 }).map((_, idx) => (
+						<div
+							key={idx}
+							className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'
+						/>
+					))}
+				</motion.div>
+				<div
+					onMouseEnter={() => {
+						onLinksEnter(-60, '.TopLink');
+					}}
+					onMouseLeave={() => {
+						onLinksLeave('.TopLink');
+					}}
+					className='TopLink relative'
+				>
+					INSTAGRAM
 				</div>
-				<div className='relative text-[#eaeaea]'>INSTAGRAM</div>
-				<div className='relative'>VIMEO</div>
-				<div className='relative'>YOUTUBE</div>
+				<div
+					onMouseEnter={() => {
+						onLinksEnter(-90, '.MiddleLink');
+					}}
+					onMouseLeave={() => {
+						onLinksLeave('.MiddleLink');
+					}}
+					className='MiddleLink relative'
+				>
+					VIMEO
+				</div>
+				<div
+					onMouseEnter={() => {
+						onLinksEnter(-120, '.BottomLink');
+					}}
+					onMouseLeave={() => {
+						onLinksLeave('.BottomLink');
+					}}
+					className='BottomLink relative'
+				>
+					YOUTUBE
+				</div>
 			</ul>
 		</section>
 	);
