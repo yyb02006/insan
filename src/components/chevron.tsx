@@ -44,14 +44,7 @@ const chevron: Variants = {
 };
 
 export default function Chevron({ scrollYProgress, isInView }: ChevronProps) {
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// }, []);
+	
 	return (
 		<AnimatePresence>
 			{!isInView && scrollYProgress.get() < 0.4 ? (

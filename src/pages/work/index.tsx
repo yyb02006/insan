@@ -1,13 +1,7 @@
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
-import {
-	motion,
-	AnimatePresence,
-	useAnimate,
-	usePresence,
-} from 'framer-motion';
+import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import Circles from '@/components/circles';
 
 const VideoSection = () => {
 	const ref = useRef<HTMLDivElement[]>([]);
