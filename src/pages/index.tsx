@@ -103,35 +103,17 @@ const wave = (sec: number, reverse: boolean = false) => {
 	}
 };
 
-const sideCircle: Variants = {
-	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
-	hidden: { scale: 0 },
-};
-
-const list: Variants = {
-	initial: {
-		scale: 0,
-	},
-	bigger: {
-		scale: 1,
-		transition: {
-			duration: 0.7,
-			delay: 0.3,
-		},
-	},
-};
-
-const container: Variants = {
+export const waveContainer: Variants = {
 	hidden: {
 		opacity: 0,
 	},
 	visible: (i: number = 1) => ({
 		opacity: 1,
-		transition: { staggerChildren: 0.08, delayChildren: i * 0 },
+		transition: { staggerChildren: i, delayChildren: 0 },
 	}),
 };
 
-const child: Variants = {
+export const waveChild: Variants = {
 	visible: {
 		opacity: 1,
 		y: 0,
@@ -148,6 +130,24 @@ const child: Variants = {
 			type: 'spring',
 			damping: 6,
 			stiffness: 200,
+		},
+	},
+};
+
+const sideCircle: Variants = {
+	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+	hidden: { scale: 0 },
+};
+
+const list: Variants = {
+	initial: {
+		scale: 0,
+	},
+	bigger: {
+		scale: 1,
+		transition: {
+			duration: 0.7,
+			delay: 0.3,
 		},
 	},
 };
@@ -358,7 +358,8 @@ const Wave = ({
 				style={{ y, visibility }}
 				initial='hidden'
 				animate={isInView ? 'visible' : 'hidden'}
-				variants={container}
+				variants={waveContainer}
+				custom={0.08}
 				className={cls(
 					css,
 					'absolute top-0 flex px-[200px] font-Roboto font-black text-[calc(100px+1vw)] text-[#fafafa] '
@@ -366,12 +367,12 @@ const Wave = ({
 			>
 				{waveReverse
 					? [...letter].reverse().map((test, idx) => (
-							<motion.span variants={child} key={idx}>
+							<motion.span variants={waveChild} key={idx}>
 								{test === ' ' ? '\u00A0' : test}
 							</motion.span>
 					  ))
 					: letter.map((test, idx) => (
-							<motion.span variants={child} key={idx}>
+							<motion.span variants={waveChild} key={idx}>
 								{test === ' ' ? '\u00A0' : test}
 							</motion.span>
 					  ))}
