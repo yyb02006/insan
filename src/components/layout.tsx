@@ -49,7 +49,7 @@ const ListMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='relative top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 '
+			className='relative z-[1] top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 '
 		>
 			{[
 				{ href: '/work', name: 'Work' },
@@ -99,7 +99,7 @@ const HamburgerMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='relative top-0 bg-pink-600 flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
+			className='absolute bg-pink-600 flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
 			<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
 			<Link href={'/work'}>
@@ -149,15 +149,12 @@ export default function Layout({
 			) : null}
 			{nav ? (
 				<div className='fixed z-[1000] right-0 mt-6 mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
-					{!nav.isShort ? (
-						<AnimatePresence>
-							<ListMenu />
-						</AnimatePresence>
-					) : (
-						<AnimatePresence>
-							<HamburgerMenu />
-						</AnimatePresence>
-					)}
+					<AnimatePresence>
+						{!nav.isShort ? <ListMenu /> : null}
+					</AnimatePresence>
+					<AnimatePresence>
+						{nav.isShort ? <HamburgerMenu /> : null}
+					</AnimatePresence>
 				</div>
 			) : null}
 			{children}

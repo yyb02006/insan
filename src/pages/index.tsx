@@ -538,7 +538,11 @@ const Video = ({ videoId }: VideoProps) => {
 							origin: 'http://localhost:3000',
 						}}
 						onReady={onVideoReady}
-						onStateChange={onVideoStateChange}
+						onStateChange={(e) => {
+							if (video) {
+								onVideoStateChange(e);
+							}
+						}}
 						className='relative h-full aspect-video pointer-events-none'
 					/>
 				</div>
