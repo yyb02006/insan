@@ -99,7 +99,7 @@ const HamburgerMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='absolute top-0 bg-pink-600 flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
+			className='relative top-0 bg-pink-600 flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
 			<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
 			<Link href={'/work'}>
@@ -133,34 +133,32 @@ export default function Layout({
 				</title>
 			</Head>
 			{nav ? (
-				<nav className='fixed z-[1000] w-full h-[100px] '>
-					<div className='mx-[60px] h-full flex justify-between items-center'>
-						<div className='relative w-[28px] h-[42px] flex justify-center items-center'>
-							<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
-							<Link href={'/'}>
-								<Image
-									src='/images/Logo.svg'
-									alt='INSAN'
-									width={28}
-									height={42}
-									className='relative cursor-pointer'
-									priority={true}
-								/>
-							</Link>
-						</div>
-						<div className='relative w-[50px] h-[24px] flex justify-end items-center'>
-							{!nav.isShort ? (
-								<AnimatePresence>
-									<ListMenu />
-								</AnimatePresence>
-							) : (
-								<AnimatePresence>
-									<HamburgerMenu />
-								</AnimatePresence>
-							)}
-						</div>
-					</div>
-				</nav>
+				<div className='fixed z-[1000] left-0 mt-6 ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
+					<Link href={'/'} className='flex justify-center items-center'>
+						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
+						<Image
+							src='/images/Logo.svg'
+							alt='INSAN'
+							width={28}
+							height={42}
+							className='relative cursor-pointer'
+							priority={true}
+						/>
+					</Link>
+				</div>
+			) : null}
+			{nav ? (
+				<div className='fixed z-[1000] right-0 mt-6 mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
+					{!nav.isShort ? (
+						<AnimatePresence>
+							<ListMenu />
+						</AnimatePresence>
+					) : (
+						<AnimatePresence>
+							<HamburgerMenu />
+						</AnimatePresence>
+					)}
+				</div>
 			) : null}
 			{children}
 			<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
