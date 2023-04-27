@@ -1,7 +1,13 @@
+import Circles from '@/components/circles';
 import Layout from '@/components/layout';
 import { cls } from '@/libs/client/utils';
-import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import {
+	motion,
+	AnimatePresence,
+	useAnimate,
+	usePresence,
+} from 'framer-motion';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -11,6 +17,18 @@ interface TagButtonProps {
 
 interface TitleSvgPresenseProps {
 	explanation: string;
+}
+
+interface TitleSectionProps {
+	setCategory: Dispatch<SetStateAction<string>>;
+}
+
+interface VideoSectionProps {
+	category: string;
+}
+
+interface VideoProps {
+	index: number;
 }
 
 const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
@@ -61,8 +79,9 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	);
 };
 
-const TitleSection = () => {
+const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const [categoryState, setCategoryState] = useState('film');
+	const rotate = useRef(0);
 	const categories = [
 		{
 			title: 'Film & AD',
@@ -86,9 +105,34 @@ const TitleSection = () => {
 			explanation: 'partial',
 		},
 	];
+	useEffect(() => {
+		setCategory(categoryState);
+		switch (categoryState) {
+			case 'film':
+				rotate.current = 0;
+				break;
+			case 'short':
+				rotate.current = 120;
+				break;
+			case 'outsource':
+				rotate.current = 240;
+				break;
+			default:
+				rotate.current = 0;
+				break;
+		}
+	}, [categoryState, setCategory]);
 	return (
-		<section className='inline-block'>
-			<div className='text-[9rem] font-bold leading-none'>
+		<section className='relative inline-block'>
+			<motion.div
+				style={{ rotate: rotate.current }}
+				className={
+					'absolute w-[400%] h-full right-0 flex items-center -mr-32 transition-transform duration-1000'
+				}
+			>
+				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
+			</motion.div>
+			<div className='relative text-[9rem] font-bold leading-none'>
 				<span className='font-light'>60 </span>
 				<span>Works</span>
 			</div>
@@ -211,7 +255,7 @@ const TagButtonSection = () => {
 		}
 	}, [tags]); */
 	return (
-		<section className='py-6 flex justify-between'>
+		<section className='relative bg-[#101010] py-6 flex justify-between'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
 				<AnimatePresence>
 					{tags.selected.map((tag) => (
@@ -264,23 +308,103 @@ const SearchSection = () => {
 	);
 };
 
-const VideoSection = () => {
+const VideoTitlePresense = () => {
+	const [title, animate] = useAnimate();
+	const [isPresent, safeToRemove] = usePresence();
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				animate(
+					'.Desc',
+					{ y: [40, 0], opacity: [0, 1] },
+					{ duration: 0.4, ease: 'easeOut' }
+				);
+				await animate(
+					'.Title',
+					{ y: [-40, 0], opacity: [0, 1] },
+					{ duration: 0.4, ease: 'easeOut' }
+				);
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				animate(
+					'.Desc',
+					{ x: [0, 40], opacity: [1, 0] },
+					{ duration: 0.4, ease: 'easeIn' }
+				);
+				await animate(
+					'.Title',
+					{ x: [0, -40], opacity: [1, 0] },
+					{ duration: 0.4, ease: 'easeIn' }
+				);
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<div
+			ref={title}
+			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold'
+		>
+			<div className='Title'>Video Title</div>
+			<div className='Desc font-medium text-3xl'>Description</div>
+		</div>
+	);
+};
+
+const Video = ({ index }: VideoProps) => {
+	const [titleScreen, setTitleScreen] = useState(false);
+	return (
+		<article
+			onMouseEnter={() => {
+				setTitleScreen((p) => (p = true));
+			}}
+			onMouseLeave={() => {
+				setTitleScreen((p) => (p = false));
+			}}
+			key={index}
+			className='relative flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
+		>
+			<AnimatePresence>
+				{titleScreen ? <VideoTitlePresense /> : null}
+			</AnimatePresence>
+			<div
+				className={cls(
+					titleScreen ? 'opacity-0' : '',
+					'relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center transition-opacity duration-300'
+				)}
+			>
+				Thumnail
+			</div>
+		</article>
+	);
+};
+
+const VideoSection = ({ category }: VideoSectionProps) => {
 	// const ref = useRef<HTMLDivElement[]>([]);
 	const videoDatas = [
-		{ direction: 'horizental', index: 1 },
-		{ direction: 'vertical', index: 2 },
-		{ direction: 'horizental', index: 3 },
-		{ direction: 'vertical', index: 4 },
-		{ direction: 'vertical', index: 5 },
-		{ direction: 'horizental', index: 6 },
-		{ direction: 'horizental', index: 7 },
-		{ direction: 'vertical', index: 8 },
-		{ direction: 'horizental', index: 9 },
-		{ direction: 'vertical', index: 10 },
-		{ direction: 'vertical', index: 11 },
-		{ direction: 'vertical', index: 12 },
-		{ direction: 'horizental', index: 13 },
-		{ direction: 'vertical', index: 14 },
+		{ category: 'film', direction: 'horizental', index: 1 },
+		{ category: 'short', direction: 'vertical', index: 2 },
+		{ category: 'film', direction: 'horizental', index: 3 },
+		{ category: 'short', direction: 'vertical', index: 4 },
+		{ category: 'short', direction: 'vertical', index: 5 },
+		{ category: 'film', direction: 'horizental', index: 6 },
+		{ category: 'film', direction: 'horizental', index: 7 },
+		{ category: 'short', direction: 'vertical', index: 8 },
+		{ category: 'film', direction: 'horizental', index: 9 },
+		{ category: 'short', direction: 'vertical', index: 10 },
+		{ category: 'film', direction: 'horizental', index: 11 },
+		{ category: 'short', direction: 'vertical', index: 12 },
+		{ category: 'outsource', direction: 'horizental', index: 13 },
+		{ category: 'film', direction: 'horizental', index: 14 },
+		{ category: 'film', direction: 'horizental', index: 15 },
+		{ category: 'short', direction: 'vertical', index: 16 },
+		{ category: 'outsource', direction: 'horizental', index: 17 },
+		{ category: 'outsource', direction: 'horizental', index: 18 },
+		{ category: 'film', direction: 'horizental', index: 19 },
+		{ category: 'short', direction: 'vertical', index: 20 },
 	];
 	/* const testover = (index: number) => {
 		ref.current[index].style.zIndex = '1';
@@ -289,8 +413,13 @@ const VideoSection = () => {
 		ref.current[index].style.zIndex = '0';
 	}; */
 	return (
-		/* 서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법 */
-		<section className='relative w-full h-auto'>
+		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1'>
+			{videoDatas.map((data) =>
+				data.category === category ? <Video index={data.index} /> : null
+			)}
+		</section>
+		/**Layout 3 플렉스로 조절(서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법) */
+		/* <section className='relative w-full h-auto'>
 			<div className='flex flex-wrap grow gap-2 w-full'>
 				{videoDatas.map((arr) => (
 					<div
@@ -306,7 +435,7 @@ const VideoSection = () => {
 					</div>
 				))}
 			</div>
-		</section>
+		</section> */
 		/**Layout 2 마우스오버시 늘리기 */
 		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
 			{videoDatas.map((data) => {
@@ -374,7 +503,6 @@ const VideoSection = () => {
 				}
 			})}
 		</section> */
-
 		/**Layout 1 자동 배치 */
 		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-3 md:grid-cols-2'>
 			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
@@ -424,14 +552,15 @@ const VideoSection = () => {
 };
 
 export default function Work() {
+	const [category, setCategory] = useState('');
 	return (
 		<Layout seoTitle='Works' nav={{ isShort: true }}>
 			<main className='pt-[100px] font-GmarketSans'>
 				<div className='p-9'>
-					<TitleSection />
+					<TitleSection setCategory={setCategory} />
 					<SearchSection />
 					<TagButtonSection />
-					<VideoSection />
+					<VideoSection category={category} />
 				</div>
 			</main>
 		</Layout>
