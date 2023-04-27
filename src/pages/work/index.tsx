@@ -3,169 +3,125 @@ import { cls } from '@/libs/client/utils';
 import { AnimatePresence, useAnimate, usePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
-const VideoSection = () => {
-	const ref = useRef<HTMLDivElement[]>([]);
-	const videoDatas = [
-		{ direction: 'horizental', index: 1 },
-		{ direction: 'vertical', index: 2 },
-		{ direction: 'horizental', index: 3 },
-		{ direction: 'horizental', index: 4 },
-		{ direction: 'vertical', index: 5 },
-		{ direction: 'horizental', index: 6 },
-		{ direction: 'vertical', index: 7 },
-		{ direction: 'vertical', index: 8 },
-		{ direction: 'horizental', index: 9 },
-		{ direction: 'vertical', index: 10 },
-		{ direction: 'vertical', index: 11 },
-		{ direction: 'vertical', index: 12 },
-		{ direction: 'horizental', index: 13 },
-		{ direction: 'vertical', index: 14 },
-	];
-	const testover = (index: number) => {
-		ref.current[index].style.zIndex = '1';
-	};
-	const testout = (index: number) => {
-		ref.current[index].style.zIndex = '0';
-	};
-	return (
-		<section className='relative w-full h-auto xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
-			<div className='flex flex-wrap grow gap-2 w-full'>
-				{videoDatas.map((arr) => (
-					<div
-						key={arr.index}
-						className={cls(
-							arr.direction === 'horizental'
-								? 'aspect-[16/9] grow-[256] '
-								: 'aspect-[9/16] grow-[81]',
-							'lg:min-h-[500px] sm:h-[300px] h-[200px] bg-indigo-500'
-						)}
-					>
-						{arr.index}
-					</div>
-				))}
-			</div>
-		</section>
-		/**Layout 2 마우스오버시 늘리기 */
-		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
-			{videoDatas.map((data) => {
-				if (data.direction === 'horizental') {
-					return data.index % 4 === 0 ? (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					) : (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				} else if (data.direction === 'vertical') {
-					return (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				}
-			})}
-		</section> */
-
-		/**Layout 1 자동 배치 */
-		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-3 md:grid-cols-2'>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				1
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				2
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				3
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				4
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				5
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				6
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				7
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				8
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				9
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				10
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				11
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				12
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				13
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				14
-			</div>
-		</section> */
-	);
-};
-
 interface TagButtonProps {
 	tag: { name: string };
 	css: string;
 	onTagFunction: (tag: string) => void;
 }
+
+interface TitleSvgPresenseProps {
+	explanation: string;
+}
+
+const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
+	const [chevron, animate] = useAnimate();
+	const [isPresent, safeToRemove] = usePresence();
+	useEffect(() => {
+		if (isPresent) {
+			const enterAnimation = async () => {
+				await animate(
+					chevron.current,
+					{ x: [40, 0], opacity: 1 },
+					{ duration: 0.3 }
+				);
+				await animate('div', { opacity: [0, 1] }, { duration: 0.1 });
+			};
+			enterAnimation();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					chevron.current,
+					{ x: [0, 40], opacity: 0 },
+					{ duration: 0.3 }
+				);
+				await animate('div', { opacity: [1, 0] }, { duration: 0.1 });
+				safeToRemove();
+			};
+			exitAnimation();
+		}
+	}, [isPresent]);
+	return (
+		<div ref={chevron} className='relative opacity-0 flex items-center'>
+			<svg
+				xmlns='http://www.w3.org/2000/svg'
+				fill='none'
+				viewBox='0 0 24 24'
+				strokeWidth={1.5}
+				stroke='currentColor'
+				className='w-6 h-6 inline-block'
+			>
+				<path
+					strokeLinecap='round'
+					strokeLinejoin='round'
+					d='M15.75 19.5L8.25 12l7.5-7.5'
+				/>
+			</svg>
+			<div className='text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
+		</div>
+	);
+};
+
+const TitleSection = () => {
+	const [categoryState, setCategoryState] = useState('film');
+	const categories = [
+		{
+			title: 'Film & AD',
+			kind: 'film',
+			count: 225,
+			idx: 1,
+			explanation: '16 : 9',
+		},
+		{
+			title: 'Short-form',
+			kind: 'short',
+			count: 22,
+			idx: 2,
+			explanation: '9 : 16',
+		},
+		{
+			title: 'Outsource',
+			kind: 'outsource',
+			count: 13,
+			idx: 3,
+			explanation: 'partial',
+		},
+	];
+	return (
+		<section className='inline-block'>
+			<div className='text-[9rem] font-bold leading-none'>
+				<span className='font-light'>60 </span>
+				<span>Works</span>
+			</div>
+			{categories.map((category) => (
+				<div
+					key={category.idx}
+					onClick={() => {
+						setCategoryState(category.kind);
+					}}
+					className={cls(
+						categoryState === category.kind
+							? 'text-palettered'
+							: 'text-[#bababa]',
+						'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
+					)}
+				>
+					{/* {categoryState === category.kind ? (
+						<div className='absolute bg-[#151515] w-full h-[40%]' />
+					) : null} */}
+					<div className='relative text-[2rem] leading-tight'>
+						<div className='inline-block pr-3'>{category.count} </div>
+						{category.title}
+					</div>
+					<AnimatePresence>
+						{categoryState === category.kind ? (
+							<TitleSvgPresense explanation={category.explanation} />
+						) : null}
+					</AnimatePresence>
+				</div>
+			))}
+		</section>
+	);
+};
 
 const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	const [isPresent, safeToRemove] = usePresence();
@@ -308,117 +264,162 @@ const SearchSection = () => {
 	);
 };
 
-interface TitleSvgPresenseProps {
-	explanation: string;
-}
-
-const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
-	const [chevron, animate] = useAnimate();
-	const [isPresent, safeToRemove] = usePresence();
-	useEffect(() => {
-		if (isPresent) {
-			const enterAnimation = async () => {
-				await animate(
-					chevron.current,
-					{ x: [40, 0], opacity: 1 },
-					{ duration: 0.3 }
-				);
-				await animate('div', { opacity: [0, 1] }, { duration: 0.1 });
-			};
-			enterAnimation();
-		} else {
-			const exitAnimation = async () => {
-				await animate(
-					chevron.current,
-					{ x: [0, 40], opacity: 0 },
-					{ duration: 0.3 }
-				);
-				await animate('div', { opacity: [1, 0] }, { duration: 0.1 });
-				safeToRemove();
-			};
-			exitAnimation();
-		}
-	}, [isPresent]);
-	return (
-		<div ref={chevron} className='relative opacity-0 flex items-center'>
-			<svg
-				xmlns='http://www.w3.org/2000/svg'
-				fill='none'
-				viewBox='0 0 24 24'
-				strokeWidth={1.5}
-				stroke='currentColor'
-				className='w-6 h-6 inline-block'
-			>
-				<path
-					strokeLinecap='round'
-					strokeLinejoin='round'
-					d='M15.75 19.5L8.25 12l7.5-7.5'
-				/>
-			</svg>
-			<div className='text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
-		</div>
-	);
-};
-
-const TitleSection = () => {
-	const [categoryState, setCategoryState] = useState('film');
-	const categories = [
-		{
-			title: 'Film & AD',
-			kind: 'film',
-			count: 225,
-			idx: 1,
-			explanation: '16 : 9',
-		},
-		{
-			title: 'Short-form',
-			kind: 'short',
-			count: 22,
-			idx: 2,
-			explanation: '9 : 16',
-		},
-		{
-			title: 'Outsource',
-			kind: 'outsource',
-			count: 13,
-			idx: 3,
-			explanation: 'partial',
-		},
+const VideoSection = () => {
+	// const ref = useRef<HTMLDivElement[]>([]);
+	const videoDatas = [
+		{ direction: 'horizental', index: 1 },
+		{ direction: 'vertical', index: 2 },
+		{ direction: 'horizental', index: 3 },
+		{ direction: 'vertical', index: 4 },
+		{ direction: 'vertical', index: 5 },
+		{ direction: 'horizental', index: 6 },
+		{ direction: 'horizental', index: 7 },
+		{ direction: 'vertical', index: 8 },
+		{ direction: 'horizental', index: 9 },
+		{ direction: 'vertical', index: 10 },
+		{ direction: 'vertical', index: 11 },
+		{ direction: 'vertical', index: 12 },
+		{ direction: 'horizental', index: 13 },
+		{ direction: 'vertical', index: 14 },
 	];
+	/* const testover = (index: number) => {
+		ref.current[index].style.zIndex = '1';
+	};
+	const testout = (index: number) => {
+		ref.current[index].style.zIndex = '0';
+	}; */
 	return (
-		<section className='inline-block'>
-			<div className='text-[9rem] font-bold leading-none'>
-				<span className='font-light'>60 </span>
-				<span>Works</span>
-			</div>
-			{categories.map((category) => (
-				<div
-					key={category.idx}
-					onClick={() => {
-						setCategoryState(category.kind);
-					}}
-					className={cls(
-						categoryState === category.kind
-							? 'text-palettered'
-							: 'text-[#bababa]',
-						'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
-					)}
-				>
-					{/* {categoryState === category.kind ? (
-						<div className='absolute bg-[#151515] w-full h-[40%]' />
-					) : null} */}
-					<div className='relative text-[2rem] leading-tight'>
-						<div className='inline-block pr-3'>{category.count} </div>
-						{category.title}
+		/* 서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법 */
+		<section className='relative w-full h-auto'>
+			<div className='flex flex-wrap grow gap-2 w-full'>
+				{videoDatas.map((arr) => (
+					<div
+						key={arr.index}
+						className={cls(
+							arr.direction === 'horizental'
+								? 'aspect-[16/9] grow-[256]'
+								: 'aspect-[9/16] grow-[81]',
+							'lg:min-h-[400px] h-full sm:min-h-[220px] min-h-[200px] bg-indigo-500'
+						)}
+					>
+						{arr.index}
 					</div>
-					<AnimatePresence>
-						{categoryState === category.kind ? (
-							<TitleSvgPresense explanation={category.explanation} />
-						) : null}
-					</AnimatePresence>
-				</div>
-			))}
+				))}
+			</div>
 		</section>
+		/**Layout 2 마우스오버시 늘리기 */
+		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
+			{videoDatas.map((data) => {
+				if (data.direction === 'horizental') {
+					return data.index % 4 === 0 ? (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					) : (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				} else if (data.direction === 'vertical') {
+					return (
+						<div key={data.index} className='relative w-full aspect-[1/1] '>
+							<div
+								onMouseOver={() => {
+									testover(data.index - 1);
+								}}
+								onMouseOut={() => {
+									testout(data.index - 1);
+								}}
+								ref={(el) =>
+									el !== null ? (ref.current[data.index - 1] = el) : null
+								}
+								className={
+									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
+								}
+							>
+								{data.index}
+							</div>
+						</div>
+					);
+				}
+			})}
+		</section> */
+
+		/**Layout 1 자동 배치 */
+		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-3 md:grid-cols-2'>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				1
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				2
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				3
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				4
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				5
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				6
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				7
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				8
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				9
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				10
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				11
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				12
+			</div>
+			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
+				13
+			</div>
+			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
+				14
+			</div>
+		</section> */
 	);
 };
 
