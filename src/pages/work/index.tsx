@@ -314,6 +314,7 @@ const VideoTitlePresense = () => {
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
+				animate('div', { x: 0 }, { duration: 0 });
 				animate(
 					'.Desc',
 					{ y: [40, 0], opacity: [0, 1] },
@@ -346,7 +347,7 @@ const VideoTitlePresense = () => {
 	return (
 		<div
 			ref={title}
-			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold'
+			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
 			<div className='Title'>Video Title</div>
 			<div className='Desc font-medium text-3xl'>Description</div>
@@ -356,6 +357,24 @@ const VideoTitlePresense = () => {
 
 const Video = ({ index }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
+	const [thumnail, animate] = useAnimate();
+	useEffect(() => {
+		if (titleScreen) {
+			const enterAnimaition = async () => {
+				await animate(thumnail.current, { opacity: 0 }, { duration: 0.4 });
+			};
+			enterAnimaition();
+		} else {
+			const exitAnimation = async () => {
+				await animate(
+					thumnail.current,
+					{ opacity: 1 },
+					{ duration: 0.4, delay: 0.4 }
+				);
+			};
+			exitAnimation();
+		}
+	}, [titleScreen]);
 	return (
 		<article
 			onMouseEnter={() => {
@@ -367,14 +386,13 @@ const Video = ({ index }: VideoProps) => {
 			key={index}
 			className='relative flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
 		>
+			<button className='absolute w-32 aspect-square bg-indigo-400'></button>
 			<AnimatePresence>
 				{titleScreen ? <VideoTitlePresense /> : null}
 			</AnimatePresence>
 			<div
-				className={cls(
-					titleScreen ? 'opacity-0' : '',
-					'relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center transition-opacity duration-300'
-				)}
+				ref={thumnail}
+				className='relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center pointer-events-none'
 			>
 				Thumnail
 			</div>
