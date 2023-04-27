@@ -29,6 +29,7 @@ interface VideoSectionProps {
 
 interface VideoProps {
 	index: number;
+	waiting: number;
 }
 
 const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
@@ -355,18 +356,22 @@ const VideoTitlePresense = () => {
 	);
 };
 
-const Video = ({ index }: VideoProps) => {
+const Video = ({ index, waiting }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
-	const [thumnail, animate] = useAnimate();
+	const [thumnail, thumnailAnimate] = useAnimate();
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
-				await animate(thumnail.current, { opacity: 0 }, { duration: 0.4 });
+				await thumnailAnimate(
+					thumnail.current,
+					{ opacity: 0 },
+					{ duration: 0.4 }
+				);
 			};
 			enterAnimaition();
 		} else {
 			const exitAnimation = async () => {
-				await animate(
+				await thumnailAnimate(
 					thumnail.current,
 					{ opacity: 1 },
 					{ duration: 0.4, delay: 0.4 }
@@ -376,7 +381,14 @@ const Video = ({ index }: VideoProps) => {
 		}
 	}, [titleScreen]);
 	return (
-		<article
+		<motion.article
+			initial={{ opacity: 1 }}
+			animate={{
+				opacity: [0, 1],
+				y: [80, 0],
+				transition: { delay: 0.2 + 0.08 * waiting },
+			}}
+			exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 			onMouseEnter={() => {
 				setTitleScreen((p) => (p = true));
 			}}
@@ -394,9 +406,9 @@ const Video = ({ index }: VideoProps) => {
 				ref={thumnail}
 				className='relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center pointer-events-none'
 			>
-				Thumnail
+				Thumnail{index}
 			</div>
-		</article>
+		</motion.article>
 	);
 };
 
@@ -424,6 +436,14 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 		{ category: 'film', direction: 'horizental', index: 19 },
 		{ category: 'short', direction: 'vertical', index: 20 },
 	];
+	const newDatas = {
+		film: videoDatas.filter((data) => data.category === 'film'),
+		short: videoDatas.filter((data) => data.category === 'short'),
+		outsource: videoDatas.filter((data) => data.category === 'outsource'),
+	};
+	type test = typeof newDatas & {
+		[key: string]: { category: string; direction: string; index: number }[];
+	};
 	/* const testover = (index: number) => {
 		ref.current[index].style.zIndex = '1';
 	};
@@ -431,10 +451,16 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 		ref.current[index].style.zIndex = '0';
 	}; */
 	return (
-		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1'>
-			{videoDatas.map((data) =>
-				data.category === category ? <Video index={data.index} /> : null
-			)}
+		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010]'>
+			<AnimatePresence>
+				{['film', 'short', 'outsource'].map((data) =>
+					category === data
+						? (newDatas as test)[data].map((arr, idx) => (
+								<Video key={arr.index} index={arr.index} waiting={idx} />
+						  ))
+						: null
+				)}
+			</AnimatePresence>
 		</section>
 		/**Layout 3 플렉스로 조절(서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법) */
 		/* <section className='relative w-full h-auto'>
@@ -569,6 +595,27 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 	);
 };
 
+const OutroSection = () => {
+	return (
+		<section className='relative bg-[#101010] h-[200vh] flex flex-col items-center font-bold'>
+			<div className='text-[4.5rem] h-[60vh] flex items-end'>
+				You can view my work here too.
+			</div>
+
+			<ul className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010] text-stroke-darker'>
+				<div className='absolute rotate-[-60deg]'>
+					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
+					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
+					<div className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'></div>
+				</div>
+				<div className='relative text-[#eaeaea]'>INSTAGRAM</div>
+				<div className='relative'>VIMEO</div>
+				<div className='relative'>YOUTUBE</div>
+			</ul>
+		</section>
+	);
+};
+
 export default function Work() {
 	const [category, setCategory] = useState('');
 	return (
@@ -579,6 +626,7 @@ export default function Work() {
 					<SearchSection />
 					<TagButtonSection />
 					<VideoSection category={category} />
+					<OutroSection />
 				</div>
 			</main>
 		</Layout>
