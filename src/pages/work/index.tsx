@@ -10,15 +10,9 @@ import {
 	animate,
 	useMotionValue,
 	useTransform,
+	Variants,
 } from 'framer-motion';
-import {
-	Dispatch,
-	ReactNode,
-	SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 
 interface TagButtonProps {
@@ -92,8 +86,25 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	);
 };
 
+const titleContainer: Variants = {
+	initial: {},
+	animate: {
+		transition: { staggerChildren: 0.1, delayChildren: 2 },
+	},
+};
+
+const titleChild: Variants = {
+	initial: {},
+	animate: {
+		textShadow: 'none',
+		color: '#eaeaea',
+		transition: { type: 'spring' },
+	},
+};
+
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const [categoryState, setCategoryState] = useState('film');
+	const dataLength = useRef(389);
 	const rotate = useRef(0);
 	const categories = [
 		{
@@ -119,11 +130,12 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 		},
 	];
 	const count = useMotionValue(0);
-	const ref = useRef<HTMLSpanElement>(null);
+	const ref = useRef<HTMLDivElement>(null);
 	const rounded = useTransform(count, Math.round);
 	useEffect(() => {
-		const animation = animate(count, 100, {
-			duration: 20,
+		const animation = animate(count, dataLength.current, {
+			duration: 2,
+			ease: [0.6, 0, 0.4, 1],
 			onUpdate(value) {
 				if (ref.current) {
 					ref.current.textContent = value.toFixed(0);
@@ -150,46 +162,66 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 		}
 	}, [categoryState, setCategory]);
 	return (
-		<section className='relative inline-block'>
+		<section className='relative'>
 			<motion.div
 				style={{ rotate: rotate.current }}
 				className={
-					'absolute w-[400%] h-full right-0 flex items-center -mr-32 transition-transform duration-1000'
+					'absolute min-w-[1000px] w-[90%] h-full top-0 right-[40vw] flex items-center transition-transform duration-1000'
 				}
 			>
 				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
 			</motion.div>
-			<div className='relative text-[9rem] font-bold leading-none'>
-				<motion.span ref={ref} className='font-light'></motion.span>
-				<span>Works</span>
-			</div>
-			{categories.map((category) => (
-				<div
-					key={category.idx}
-					onClick={() => {
-						setCategoryState(category.kind);
-					}}
-					className={cls(
-						categoryState === category.kind
-							? 'text-palettered'
-							: 'text-[#bababa]',
-						'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
-					)}
-				>
-					{/* {categoryState === category.kind ? (
-						<div className='absolute bg-[#151515] w-full h-[40%]' />
-					) : null} */}
-					<div className='relative text-[2rem] leading-tight'>
-						<div className='inline-block pr-3'>{category.count} </div>
-						{category.title}
+			<div className='relative inline-block'>
+				<motion.div className='relative flex flex-wrap text-[9rem] font-bold leading-none'>
+					<span className='font-light'>
+						<span ref={ref} className='absolute'></span>
+						<span className='invisible'>{dataLength.current}&nbsp;</span>
+					</span>
+					<motion.span
+						initial={'initial'}
+						animate={'animate'}
+						variants={titleContainer}
+						className='flex'
+					>
+						{Array.from('Works').map((spell, idx) => (
+							<motion.span
+								key={idx}
+								variants={titleChild}
+								className='text-stroke-darker text-[#101010]'
+							>
+								{spell}
+							</motion.span>
+						))}
+					</motion.span>
+				</motion.div>
+				{categories.map((category) => (
+					<div
+						key={category.idx}
+						onClick={() => {
+							setCategoryState(category.kind);
+						}}
+						className={cls(
+							categoryState === category.kind
+								? 'text-palettered'
+								: 'text-[#bababa]',
+							'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
+						)}
+					>
+						{/* {categoryState === category.kind ? (
+							<div className='absolute bg-[#151515] w-full h-[40%]' />
+						) : null} */}
+						<div className='relative text-[2rem] leading-tight'>
+							<div className='inline-block pr-3'>{category.count} </div>
+							{category.title}
+						</div>
+						<AnimatePresence>
+							{categoryState === category.kind ? (
+								<TitleSvgPresense explanation={category.explanation} />
+							) : null}
+						</AnimatePresence>
 					</div>
-					<AnimatePresence>
-						{categoryState === category.kind ? (
-							<TitleSvgPresense explanation={category.explanation} />
-						) : null}
-					</AnimatePresence>
-				</div>
-			))}
+				))}
+			</div>
 		</section>
 	);
 };
@@ -653,10 +685,22 @@ const OutroSection = () => {
 	];
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
-		snsLinksAnimate(selector, { color: '#eaeaea' }, { duration: 0.2 });
+		snsLinksAnimate(
+			selector,
+			{ color: '#eaeaea', textShadow: 'none' },
+			{ duration: 0.2 }
+		);
 	};
 	const onLinksLeave = (selector: string) => {
-		snsLinksAnimate(selector, { color: '#101010' }, { duration: 0.2 });
+		snsLinksAnimate(
+			selector,
+			{
+				color: '#101010',
+				textShadow:
+					'-1px -1px 0 #9c9c9c, 1px -1px 0 #9c9c9c, -1px 1px 0 #9c9c9c, 1px 1px 0 #9c9c9c',
+			},
+			{ duration: 0.2 }
+		);
 	};
 	useEffect(() => {
 		if (isLinksInview) {
@@ -747,14 +791,12 @@ export default function Work() {
 	const [category, setCategory] = useState('');
 	return (
 		<Layout seoTitle='Works' nav={{ isShort: true }}>
-			<main className='pt-[100px] font-GmarketSans'>
-				<div className='p-9'>
-					<TitleSection setCategory={setCategory} />
-					<SearchSection />
-					<TagButtonSection />
-					<VideoSection category={category} />
-					<OutroSection />
-				</div>
+			<main className='pt-[100px] p-9 font-GmarketSans'>
+				<TitleSection setCategory={setCategory} />
+				<SearchSection />
+				<TagButtonSection />
+				<VideoSection category={category} />
+				<OutroSection />
 			</main>
 		</Layout>
 	);
