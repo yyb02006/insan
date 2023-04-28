@@ -11,6 +11,7 @@ import {
 	useMotionValue,
 	useTransform,
 	Variants,
+	cubicBezier,
 } from 'framer-motion';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
@@ -37,6 +38,40 @@ interface VideoProps {
 	index: number;
 	waiting: number;
 }
+
+const titleContainer: Variants = {
+	initial: {},
+	animate: {
+		transition: { staggerChildren: 0.1, delayChildren: 1 },
+	},
+};
+
+const titleChild: Variants = {
+	initial: { WebkitTextStroke: '1px #9c9c9c' },
+	animate: {
+		WebkitTextStroke: '0px',
+		color: '#eaeaea',
+		transition: { type: 'spring' },
+	},
+};
+
+const categoryContainer: Variants = {
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.2, delayChildren: 1 },
+	},
+};
+
+const categoryChild: Variants = {
+	hidden: { pointerEvents: 'none', y: -40, opacity: 0 },
+	visible: {
+		pointerEvents: 'all',
+		y: 0,
+		opacity: 1,
+		//스타일에 duration이 이미 있으면 초기화 필수
+		transition: { duration: 0 },
+	},
+};
 
 const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	const [chevron, chevronAnimate] = useAnimate();
@@ -86,40 +121,6 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	);
 };
 
-const titleContainer: Variants = {
-	initial: {},
-	animate: {
-		transition: { staggerChildren: 0.1, delayChildren: 2 },
-	},
-};
-
-const titleChild: Variants = {
-	initial: {},
-	animate: {
-		textShadow: 'none',
-		color: '#eaeaea',
-		transition: { type: 'spring' },
-	},
-};
-
-const categoryContainer: Variants = {
-	hidden: {},
-	visible: {
-		transition: { staggerChildren: 0.2, delayChildren: 2 },
-	},
-};
-
-const categoryChild: Variants = {
-	hidden: { pointerEvents: 'none', y: -40, opacity: 0 },
-	visible: {
-		pointerEvents: 'all',
-		y: 0,
-		opacity: 1,
-		//스타일에 duration이 이미 있으면 초기화 필수
-		transition: { duration: 0 },
-	},
-};
-
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const [categoryState, setCategoryState] = useState('film');
 	const dataLength = useRef(389);
@@ -152,8 +153,8 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const rounded = useTransform(count, Math.round);
 	useEffect(() => {
 		const animation = animate(count, dataLength.current, {
-			duration: 2,
-			ease: [0.6, 0, 0.4, 1],
+			duration: 1,
+			ease: [0.8, 0, 0.2, 1],
 			onUpdate(value) {
 				if (ref.current) {
 					ref.current.textContent = value.toFixed(0);
@@ -184,7 +185,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			<motion.div
 				style={{ rotate: rotate.current }}
 				className={
-					'absolute min-w-[1000px] w-[90%] h-full top-0 right-[40vw] flex items-center transition-transform duration-1000'
+					'absolute min-w-[1000px] w-[calc(1000px+50%)] h-full top-0 left-[-800px] sm:left-[-700px] lg:left-[-800px] flex items-center transition-transform duration-1000'
 				}
 			>
 				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
@@ -205,7 +206,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 							<motion.span
 								key={idx}
 								variants={titleChild}
-								className='text-stroke-darker text-[#101010]'
+								className='text-[#101010]'
 							>
 								{spell}
 							</motion.span>
@@ -708,11 +709,17 @@ const OutroSection = () => {
 			angle: -120,
 		},
 	];
+	//타입스크립트에서 렌더링 없이 데이터변경 때문에 useRef쓸 때 타입 설정
+	/* const textShadow = useRef<{ [key: string]: boolean }>({
+		INSTAGRAM: true,
+		VIMEO: true,
+		YOUTUBE: true,
+	}); */
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
 		snsLinksAnimate(
 			selector,
-			{ color: '#eaeaea', textShadow: 'none' },
+			{ color: '#eaeaea', webkitTextStroke: '0px' },
 			{ duration: 0.2 }
 		);
 	};
@@ -721,8 +728,7 @@ const OutroSection = () => {
 			selector,
 			{
 				color: '#101010',
-				textShadow:
-					'-1px -1px 0 #9c9c9c, 1px -1px 0 #9c9c9c, -1px 1px 0 #9c9c9c, 1px 1px 0 #9c9c9c',
+				webkitTextStroke: '1px #9c9c9c',
 			},
 			{ duration: 0.2 }
 		);
@@ -778,7 +784,7 @@ const OutroSection = () => {
 			</motion.div>
 			<ul
 				ref={snsLinks}
-				className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010] text-stroke-darker'
+				className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010]'
 			>
 				<motion.div initial={{ rotate: -60 }} className='Circles absolute'>
 					{Array.from({ length: 3 }).map((_, idx) => (
@@ -794,7 +800,8 @@ const OutroSection = () => {
 					))}
 				</motion.div>
 				{links.map((link) => (
-					<li
+					<motion.li
+						style={{ WebkitTextStroke: '1px #9c9c9c' }}
 						key={link.title}
 						onMouseEnter={() => {
 							onLinksEnter(link.angle, `.${link.position}`);
@@ -805,7 +812,7 @@ const OutroSection = () => {
 						className={cls(link.position, 'relative')}
 					>
 						{link.title}
-					</li>
+					</motion.li>
 				))}
 			</ul>
 		</section>
