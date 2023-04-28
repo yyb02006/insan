@@ -102,6 +102,24 @@ const titleChild: Variants = {
 	},
 };
 
+const categoryContainer: Variants = {
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.2, delayChildren: 2 },
+	},
+};
+
+const categoryChild: Variants = {
+	hidden: { pointerEvents: 'none', y: -40, opacity: 0 },
+	visible: {
+		pointerEvents: 'all',
+		y: 0,
+		opacity: 1,
+		//스타일에 duration이 이미 있으면 초기화 필수
+		transition: { duration: 0 },
+	},
+};
+
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const [categoryState, setCategoryState] = useState('film');
 	const dataLength = useRef(389);
@@ -194,33 +212,40 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 						))}
 					</motion.span>
 				</motion.div>
-				{categories.map((category) => (
-					<div
-						key={category.idx}
-						onClick={() => {
-							setCategoryState(category.kind);
-						}}
-						className={cls(
-							categoryState === category.kind
-								? 'text-palettered'
-								: 'text-[#bababa]',
-							'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
-						)}
-					>
-						{/* {categoryState === category.kind ? (
-							<div className='absolute bg-[#151515] w-full h-[40%]' />
-						) : null} */}
-						<div className='relative text-[2rem] leading-tight'>
-							<div className='inline-block pr-3'>{category.count} </div>
-							{category.title}
-						</div>
-						<AnimatePresence>
-							{categoryState === category.kind ? (
-								<TitleSvgPresense explanation={category.explanation} />
-							) : null}
-						</AnimatePresence>
-					</div>
-				))}
+				<motion.div
+					initial={'hidden'}
+					animate={'visible'}
+					variants={categoryContainer}
+				>
+					{categories.map((category) => (
+						<motion.div
+							key={category.idx}
+							variants={categoryChild}
+							onClick={() => {
+								setCategoryState(category.kind);
+							}}
+							className={cls(
+								categoryState === category.kind
+									? 'text-palettered'
+									: 'text-[#bababa]',
+								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
+							)}
+						>
+							{/* {categoryState === category.kind ? (
+								<div className='absolute bg-[#151515] w-full h-[40%]' />
+							) : null} */}
+							<div className='relative text-[2rem] leading-tight'>
+								<div className='inline-block pr-3'>{category.count} </div>
+								{category.title}
+							</div>
+							<AnimatePresence>
+								{categoryState === category.kind ? (
+									<TitleSvgPresense explanation={category.explanation} />
+								) : null}
+							</AnimatePresence>
+						</motion.div>
+					))}
+				</motion.div>
 			</div>
 		</section>
 	);
