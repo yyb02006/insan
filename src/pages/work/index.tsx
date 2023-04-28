@@ -6,10 +6,19 @@ import {
 	AnimatePresence,
 	useAnimate,
 	usePresence,
-	Variants,
 	useInView,
+	animate,
+	useMotionValue,
+	useTransform,
 } from 'framer-motion';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+	Dispatch,
+	ReactNode,
+	SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { waveChild, waveContainer } from '..';
 
 interface TagButtonProps {
@@ -36,27 +45,27 @@ interface VideoProps {
 }
 
 const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
-	const [chevron, animate] = useAnimate();
+	const [chevron, chevronAnimate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
-				await animate(
+				await chevronAnimate(
 					chevron.current,
 					{ x: [40, 0], opacity: 1 },
 					{ duration: 0.3 }
 				);
-				await animate('div', { opacity: [0, 1] }, { duration: 0.1 });
+				await chevronAnimate('div', { opacity: [0, 1] }, { duration: 0.1 });
 			};
 			enterAnimation();
 		} else {
 			const exitAnimation = async () => {
-				await animate(
+				await chevronAnimate(
 					chevron.current,
 					{ x: [0, 40], opacity: 0 },
 					{ duration: 0.3 }
 				);
-				await animate('div', { opacity: [1, 0] }, { duration: 0.1 });
+				await chevronAnimate('div', { opacity: [1, 0] }, { duration: 0.1 });
 				safeToRemove();
 			};
 			exitAnimation();
@@ -109,6 +118,20 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			explanation: 'partial',
 		},
 	];
+	const count = useMotionValue(0);
+	const ref = useRef<HTMLSpanElement>(null);
+	const rounded = useTransform(count, Math.round);
+	useEffect(() => {
+		const animation = animate(count, 100, {
+			duration: 20,
+			onUpdate(value) {
+				if (ref.current) {
+					ref.current.textContent = value.toFixed(0);
+				}
+			},
+		});
+		return animation.stop;
+	}, [rounded]);
 	useEffect(() => {
 		setCategory(categoryState);
 		switch (categoryState) {
@@ -137,7 +160,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
 			</motion.div>
 			<div className='relative text-[9rem] font-bold leading-none'>
-				<span className='font-light'>60 </span>
+				<motion.span ref={ref} className='font-light'></motion.span>
 				<span>Works</span>
 			</div>
 			{categories.map((category) => (
@@ -173,11 +196,11 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 
 const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	const [isPresent, safeToRemove] = usePresence();
-	const [button, animate] = useAnimate();
+	const [button, buttonAnimate] = useAnimate();
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
-				await animate(
+				await buttonAnimate(
 					button.current,
 					{ y: [-20, 0], opacity: [0, 1] },
 					{ duration: 0.2, delay: 0.1 }
@@ -186,7 +209,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 			enterAnimation();
 		} else {
 			const exitAnimation = async () => {
-				await animate(
+				await buttonAnimate(
 					button.current,
 					{ y: [0, -20], opacity: [1, 0] },
 					{ duration: 0.1 }
@@ -600,25 +623,79 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 
 const OutroSection = () => {
 	const letterRef = useRef(null);
-	const isinview = useInView(letterRef, {
+	const isletterInview = useInView(letterRef, {
 		amount: 0.6,
 		margin: '50% 0% 0% 0%',
 	});
 	const text = 'You can view my work here too.';
 	const letter = Array.from(text);
-	const [snsLinks, animate] = useAnimate();
+	const [snsLinks, snsLinksAnimate] = useAnimate();
+	const isLinksInview = useInView(snsLinks, {
+		amount: 0.6,
+		margin: '100% 0% 0% 0%',
+	});
+	const links = [
+		{
+			position: 'TopLink',
+			title: 'INSTAGRAM',
+			angle: -60,
+		},
+		{
+			position: 'MiddleLink',
+			title: 'VIMEO',
+			angle: -90,
+		},
+		{
+			position: 'BottomLink',
+			title: 'YOUTUBE',
+			angle: -120,
+		},
+	];
 	const onLinksEnter = (angle: number, selector: string) => {
-		animate('.Circles', { rotate: angle }, { duration: 0.4 });
-		animate(selector, { color: '#eaeaea' }, { duration: 0.4 });
+		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
+		snsLinksAnimate(selector, { color: '#eaeaea' }, { duration: 0.2 });
 	};
 	const onLinksLeave = (selector: string) => {
-		animate(selector, { color: '#101010' }, { duration: 0.4 });
+		snsLinksAnimate(selector, { color: '#101010' }, { duration: 0.2 });
 	};
+	useEffect(() => {
+		if (isLinksInview) {
+			const enterAnimation = async () => {
+				await snsLinksAnimate('.Circle-1', { scale: 1 }, { duration: 0.4 });
+				snsLinksAnimate(
+					'.Circle-0',
+					{ y: [50, 50, 0], opacity: [0, 1, 1] },
+					{ duration: 0.4, times: [0, 0.5, 1] }
+				);
+				await snsLinksAnimate(
+					'.Circle-2',
+					{ y: [-50, -50, 0], opacity: [0, 1, 1] },
+					{ duration: 0.4, times: [0, 0.5, 1] }
+				);
+			};
+			enterAnimation();
+		} else {
+			const leaveAnimation = async () => {
+				snsLinksAnimate(
+					'.Circle-0',
+					{ y: [0, 50, 50], opacity: [1, 1, 0] },
+					{ duration: 0.4, times: [0, 0.5, 1] }
+				);
+				await snsLinksAnimate(
+					'.Circle-2',
+					{ y: [0, -50, -50], opacity: [1, 1, 0] },
+					{ duration: 0.4, times: [0, 0.5, 1] }
+				);
+				await snsLinksAnimate('.Circle-1', { scale: 2 }, { duration: 0.4 });
+			};
+			leaveAnimation();
+		}
+	}, [isLinksInview]);
 	return (
 		<section className='relative bg-[#101010] h-[200vh] flex flex-col items-center font-bold'>
 			<motion.div
 				initial={'hidden'}
-				animate={isinview ? 'visible' : 'hidden'}
+				animate={isletterInview ? 'visible' : 'hidden'}
 				variants={waveContainer}
 				custom={0.05}
 				ref={letterRef}
@@ -636,45 +713,31 @@ const OutroSection = () => {
 			>
 				<motion.div initial={{ rotate: -60 }} className='Circles absolute'>
 					{Array.from({ length: 3 }).map((_, idx) => (
-						<div
+						<motion.div
 							key={idx}
-							className='w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'
+							initial={{ scale: idx === 1 ? 2 : 1, opacity: idx === 1 ? 1 : 0 }}
+							className={cls(
+								idx === 1 ? 'z-[1]' : '',
+								`Circle-${idx}`,
+								'relative w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'
+							)}
 						/>
 					))}
 				</motion.div>
-				<div
-					onMouseEnter={() => {
-						onLinksEnter(-60, '.TopLink');
-					}}
-					onMouseLeave={() => {
-						onLinksLeave('.TopLink');
-					}}
-					className='TopLink relative'
-				>
-					INSTAGRAM
-				</div>
-				<div
-					onMouseEnter={() => {
-						onLinksEnter(-90, '.MiddleLink');
-					}}
-					onMouseLeave={() => {
-						onLinksLeave('.MiddleLink');
-					}}
-					className='MiddleLink relative'
-				>
-					VIMEO
-				</div>
-				<div
-					onMouseEnter={() => {
-						onLinksEnter(-120, '.BottomLink');
-					}}
-					onMouseLeave={() => {
-						onLinksLeave('.BottomLink');
-					}}
-					className='BottomLink relative'
-				>
-					YOUTUBE
-				</div>
+				{links.map((link) => (
+					<li
+						key={link.title}
+						onMouseEnter={() => {
+							onLinksEnter(link.angle, `.${link.position}`);
+						}}
+						onMouseLeave={() => {
+							onLinksLeave(`.${link.position}`);
+						}}
+						className={cls(link.position, 'relative')}
+					>
+						{link.title}
+					</li>
+				))}
 			</ul>
 		</section>
 	);
