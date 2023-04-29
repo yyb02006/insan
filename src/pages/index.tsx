@@ -648,9 +648,10 @@ const VideoContainer = ({
 				>
 					<div className='flex justify-end items-center'>
 						<div
+							style={{ WebkitTextStroke: '1px #9c9c9c' }}
 							className={cls(
 								index === 1 ? '-mr-[60px]' : '',
-								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'
+								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E]'
 							)}
 						>
 							{index}
@@ -899,8 +900,11 @@ const TextSection = () => {
 			</motion.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[10rem] pr-40'>
 				<motion.div
-					style={{ y: y[0], opacity: opacity[0] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[0],
+						opacity: opacity[0],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Moves
 				</motion.div>
@@ -913,15 +917,22 @@ const TextSection = () => {
 					</motion.span>
 				</div>
 				<motion.div
-					style={{ y: y[3], opacity: opacity[3] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[3],
+						opacity: opacity[3],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Client
 				</motion.div>
 				<div className='relative flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
 					<motion.div
-						style={{ y: y[6], opacity: opacity[6] }}
-						className='absolute text-stroke-darker text-[10rem] text-[#101010] -left-16'
+						style={{
+							y: y[6],
+							opacity: opacity[6],
+							WebkitTextStroke: '1px #9c9c9c',
+						}}
+						className='absolute text-[10rem] text-[#101010] -left-16'
 					>
 						&
 					</motion.div>
@@ -939,8 +950,11 @@ const TextSection = () => {
 					</motion.span>
 				</div>
 				<motion.div
-					style={{ y: y[6], opacity: opacity[6] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[6],
+						opacity: opacity[6],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Customer
 				</motion.div>
@@ -985,7 +999,10 @@ const OutroSection = () => {
 						}}
 					/>
 				</div>
-				<span className='Text text-stroke-light relative text-[#101010] text-[10rem] font-GmarketSans font-bold'>
+				<span
+					style={{ WebkitTextStroke: '1px #eaeaea' }}
+					className='Text relative text-[#101010] text-[10rem] font-GmarketSans font-bold'
+				>
 					INSAN
 				</span>
 			</div>
