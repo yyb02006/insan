@@ -1,6 +1,7 @@
 import Chevron from '@/components/chevron';
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
+import useMouseSpring from '@/libs/client/useMouseSpring';
 import { cls } from '@/libs/client/utils';
 import {
 	MotionValue,
@@ -1016,24 +1017,7 @@ export default function Home() {
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackround = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
-	const mouseX = useSpring(0);
-	const mouseY = useSpring(0);
-	const mouseCoord = (opX = 0, opY = 0) => {
-		mouseX.set(opX);
-		mouseY.set(opY);
-	};
-	const onMove = (e: MouseEvent) => {
-		if (e.pageY < 2200) {
-			const offsetX = e.clientX - window.innerWidth / 2;
-			const offsetY = e.clientY - window.innerHeight / 2;
-			mouseCoord(offsetX, offsetY);
-		} else {
-			mouseCoord();
-		}
-	};
-	const onLeave = () => {
-		mouseCoord();
-	};
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
 	return (
 		<div
 			ref={background}
