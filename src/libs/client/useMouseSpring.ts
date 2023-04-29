@@ -1,7 +1,8 @@
 import { SpringOptions, useSpring } from 'framer-motion';
+import { MouseEvent } from 'react';
 
-export default function useMouseCoord(
-	limitHeight: number,
+export default function useMouseSpring(
+	limitHeight: number = window.innerHeight ? window.innerHeight : 1080,
 	xSpringConfig?: SpringOptions,
 	ySpringConfig?: SpringOptions
 ) {
@@ -12,7 +13,7 @@ export default function useMouseCoord(
 		mouseY.set(opY);
 	};
 	const onMove = (e: MouseEvent) => {
-		if (e.pageY < limitHeight) {
+		if (e.pageY < limitHeight || limitHeight === 0) {
 			const offsetX = e.clientX - window.innerWidth / 2;
 			const offsetY = e.clientY - window.innerHeight / 2;
 			mouseCoord(offsetX, offsetY);
