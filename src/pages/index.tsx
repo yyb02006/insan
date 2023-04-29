@@ -191,15 +191,14 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]' },
 	]);
 	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
-
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-	// 	);
-	// }, []);
+	/* useEffect(() => {
+		window.addEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+		window.removeEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+	}, []); */
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>

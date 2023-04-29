@@ -11,7 +11,6 @@ import {
 	useMotionValue,
 	useTransform,
 	Variants,
-	cubicBezier,
 } from 'framer-motion';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
