@@ -1,11 +1,4 @@
-import {
-	AnimatePresence,
-	motion,
-	MotionValue,
-	useTransform,
-	Variants,
-} from 'framer-motion';
-import { useEffect } from 'react';
+import { AnimatePresence, motion, MotionValue, Variants } from 'framer-motion';
 
 interface ChevronProps {
 	scrollYProgress: MotionValue<number>;
@@ -44,14 +37,6 @@ const chevron: Variants = {
 };
 
 export default function Chevron({ scrollYProgress, isInView }: ChevronProps) {
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get() })
-	// 	);
-	// }, []);
 	return (
 		<AnimatePresence>
 			{!isInView && scrollYProgress.get() < 0.4 ? (

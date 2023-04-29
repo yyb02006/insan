@@ -1,6 +1,7 @@
 import Chevron from '@/components/chevron';
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
+import useMouseSpring from '@/libs/client/useMouseSpring';
 import { cls } from '@/libs/client/utils';
 import {
 	MotionValue,
@@ -103,35 +104,17 @@ const wave = (sec: number, reverse: boolean = false) => {
 	}
 };
 
-const sideCircle: Variants = {
-	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
-	hidden: { scale: 0 },
-};
-
-const list: Variants = {
-	initial: {
-		scale: 0,
-	},
-	bigger: {
-		scale: 1,
-		transition: {
-			duration: 0.7,
-			delay: 0.3,
-		},
-	},
-};
-
-const container: Variants = {
+export const waveContainer: Variants = {
 	hidden: {
 		opacity: 0,
 	},
 	visible: (i: number = 1) => ({
 		opacity: 1,
-		transition: { staggerChildren: 0.08, delayChildren: i * 0 },
+		transition: { staggerChildren: i, delayChildren: 0 },
 	}),
 };
 
-const child: Variants = {
+export const waveChild: Variants = {
 	visible: {
 		opacity: 1,
 		y: 0,
@@ -148,6 +131,24 @@ const child: Variants = {
 			type: 'spring',
 			damping: 6,
 			stiffness: 200,
+		},
+	},
+};
+
+const sideCircle: Variants = {
+	visible: { scale: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+	hidden: { scale: 0 },
+};
+
+const list: Variants = {
+	initial: {
+		scale: 0,
+	},
+	bigger: {
+		scale: 1,
+		transition: {
+			duration: 0.7,
+			delay: 0.3,
 		},
 	},
 };
@@ -191,15 +192,14 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]' },
 	]);
 	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
-
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-	// 	);
-	// 	window.removeEventListener('scroll', () =>
-	// 		console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-	// 	);
-	// }, []);
+	/* useEffect(() => {
+		window.addEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+		window.removeEventListener('scroll', () =>
+			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
+		);
+	}, []); */
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
@@ -358,7 +358,8 @@ const Wave = ({
 				style={{ y, visibility }}
 				initial='hidden'
 				animate={isInView ? 'visible' : 'hidden'}
-				variants={container}
+				variants={waveContainer}
+				custom={0.08}
 				className={cls(
 					css,
 					'absolute top-0 flex px-[200px] font-Roboto font-black text-[calc(100px+1vw)] text-[#fafafa] '
@@ -366,12 +367,12 @@ const Wave = ({
 			>
 				{waveReverse
 					? [...letter].reverse().map((test, idx) => (
-							<motion.span variants={child} key={idx}>
+							<motion.span variants={waveChild} key={idx}>
 								{test === ' ' ? '\u00A0' : test}
 							</motion.span>
 					  ))
 					: letter.map((test, idx) => (
-							<motion.span variants={child} key={idx}>
+							<motion.span variants={waveChild} key={idx}>
 								{test === ' ' ? '\u00A0' : test}
 							</motion.span>
 					  ))}
@@ -538,7 +539,11 @@ const Video = ({ videoId }: VideoProps) => {
 							origin: 'http://localhost:3000',
 						}}
 						onReady={onVideoReady}
-						onStateChange={onVideoStateChange}
+						onStateChange={(e) => {
+							if (video) {
+								onVideoStateChange(e);
+							}
+						}}
 						className='relative h-full aspect-video pointer-events-none'
 					/>
 				</div>
@@ -643,9 +648,10 @@ const VideoContainer = ({
 				>
 					<div className='flex justify-end items-center'>
 						<div
+							style={{ WebkitTextStroke: '1px #9c9c9c' }}
 							className={cls(
 								index === 1 ? '-mr-[60px]' : '',
-								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E] text-stroke-darker'
+								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E]'
 							)}
 						>
 							{index}
@@ -894,8 +900,11 @@ const TextSection = () => {
 			</motion.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[10rem] pr-40'>
 				<motion.div
-					style={{ y: y[0], opacity: opacity[0] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[0],
+						opacity: opacity[0],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Moves
 				</motion.div>
@@ -908,15 +917,22 @@ const TextSection = () => {
 					</motion.span>
 				</div>
 				<motion.div
-					style={{ y: y[3], opacity: opacity[3] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[3],
+						opacity: opacity[3],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Client
 				</motion.div>
 				<div className='relative flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
 					<motion.div
-						style={{ y: y[6], opacity: opacity[6] }}
-						className='absolute text-stroke-darker text-[10rem] text-[#101010] -left-16'
+						style={{
+							y: y[6],
+							opacity: opacity[6],
+							WebkitTextStroke: '1px #9c9c9c',
+						}}
+						className='absolute text-[10rem] text-[#101010] -left-16'
 					>
 						&
 					</motion.div>
@@ -934,8 +950,11 @@ const TextSection = () => {
 					</motion.span>
 				</div>
 				<motion.div
-					style={{ y: y[6], opacity: opacity[6] }}
-					className='text-stroke-darker'
+					style={{
+						y: y[6],
+						opacity: opacity[6],
+						WebkitTextStroke: '1px #9c9c9c',
+					}}
 				>
 					Customer
 				</motion.div>
@@ -980,7 +999,10 @@ const OutroSection = () => {
 						}}
 					/>
 				</div>
-				<span className='Text text-stroke-light relative text-[#101010] text-[10rem] font-GmarketSans font-bold'>
+				<span
+					style={{ WebkitTextStroke: '1px #eaeaea' }}
+					className='Text relative text-[#101010] text-[10rem] font-GmarketSans font-bold'
+				>
 					INSAN
 				</span>
 			</div>
@@ -995,24 +1017,7 @@ export default function Home() {
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackround = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
-	const mouseX = useSpring(0);
-	const mouseY = useSpring(0);
-	const mouseCoord = (opX = 0, opY = 0) => {
-		mouseX.set(opX);
-		mouseY.set(opY);
-	};
-	const onMove = (e: MouseEvent) => {
-		if (e.pageY < 2200) {
-			const offsetX = e.clientX - window.innerWidth / 2;
-			const offsetY = e.clientY - window.innerHeight / 2;
-			mouseCoord(offsetX, offsetY);
-		} else {
-			mouseCoord();
-		}
-	};
-	const onLeave = () => {
-		mouseCoord();
-	};
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
 	return (
 		<div
 			ref={background}
