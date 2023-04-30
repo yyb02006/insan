@@ -1,4 +1,5 @@
 import Circles from '@/components/circles';
+import DoubleQuotation from '@/components/doubleQuotaition';
 import Layout from '@/components/layout';
 import Image from 'next/image';
 
@@ -27,38 +28,18 @@ const HeaderSection = () => {
 const ContentsSection = () => {
 	return (
 		<section className='h-[450vh] px-20'>
-			<div className='h-[100vh] px-24 w-full flex justify-start items-center leading-none text-[6.25rem] font-GmarketSans font-bold'>
-				<span className='relative break-keep'>
-					<span
-						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='text-[#101010]'
-					>
-						<Image
-							src='/images/left-double-quotation.svg'
-							alt='quotation'
-							width={60}
-							height={36}
-							className='absolute -left-24 -top-10'
-						/>
+			<div className='h-[100vh] px-24 flex items-center'>
+				<div>
+					<DoubleQuotation globalCss='font-GmarketSans font-bold text-[7rem]'>
 						저는{' '}
-					</span>
-					이런&nbsp;일을{' '}
-					<span
-						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='relative text-[#101010]'
-					>
-						합니다
-						<Image
-							src='/images/right-double-quotation.svg'
-							alt='quotation'
-							width={60}
-							height={36}
-							className='absolute -bottom-4 -right-24'
-						/>
-					</span>
-				</span>
+						<span style={{ WebkitTextStroke: 0 }} className='text-[#eaeaea]'>
+							이런 일
+						</span>
+						을 합니다
+					</DoubleQuotation>
+				</div>
 			</div>
-			<ul className='px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'>
+			<ul className='px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream  font-bold'>
 				<li className='flex justify-end w-full'>
 					새로운 아이디어
 					<span className='font-thin text-[#bababa]'>와</span>
@@ -82,8 +63,18 @@ const ContentsSection = () => {
 					alt='fieldPicture'
 					width={1600}
 					height={900}
-					className='w-full'
+					className='w-full '
 				/>
+			</div>
+			<div>also Product Designer, Drone pilot</div>
+			<div className='px-24'>
+				<DoubleQuotation globalCss='font-GmarketSans font-bold text-[7rem]'>
+					저는 이런{' '}
+					<span style={{ WebkitTextStroke: 0 }} className='text-[#eaeaea]'>
+						디렉터{' '}
+					</span>
+					입니다
+				</DoubleQuotation>
 			</div>
 		</section>
 	);
