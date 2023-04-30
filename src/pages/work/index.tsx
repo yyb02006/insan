@@ -821,7 +821,7 @@ const OutroSection = () => {
 export default function Work() {
 	const [category, setCategory] = useState('');
 	return (
-		<Layout seoTitle='Works' nav={{ isShort: true }}>
+		<Layout seoTitle='Work' nav={{ isShort: true }}>
 			<main className='pt-[100px] p-9 font-GmarketSans'>
 				<TitleSection setCategory={setCategory} />
 				<SearchSection />
