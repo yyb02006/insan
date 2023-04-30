@@ -105,12 +105,12 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 		},
 	];
 	const circles = [
-		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: 12, xRatio: 12 },
+		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: 12, xRatio: 16 },
 		{
 			minimum: 'min-w-[800px]',
 			width: 'w-[50%]',
 			yRatio: 6,
-			xRatio: 6,
+			xRatio: 9,
 		},
 	];
 	const wordsX = (ratio: number) =>
@@ -141,6 +141,20 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 			enterAnimation();
 		} else {
 			const exitAnimation = async () => {
+				animate(
+					'.Circles',
+					{ scale: [1, 1.5], opacity: [1, 0] },
+					{
+						duration: 0.3,
+						ease: 'easeOut',
+						type: 'spring',
+					}
+				);
+				await animate(
+					'.Menu',
+					{ scale: [1, 1.2, 0.7], opacity: [1, 0] },
+					{ duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
+				);
 				animate(
 					scope.current,
 					{ borderRadius: '0% 0% 0% 100%' },
