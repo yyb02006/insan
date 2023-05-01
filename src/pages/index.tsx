@@ -104,6 +104,7 @@ const wave = (sec: number, reverse: boolean = false) => {
 	}
 };
 
+/**flex속성 필수 */
 export const waveContainer: Variants = {
 	hidden: {
 		opacity: 0,

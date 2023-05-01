@@ -1,9 +1,17 @@
 import Circles from '@/components/circles';
 import DoubleQuotation from '@/components/doubleQuotaition';
 import Layout from '@/components/layout';
-import { useAnimate, motion, useScroll, useTransform } from 'framer-motion';
+import {
+	useAnimate,
+	motion,
+	useScroll,
+	useTransform,
+	useInView,
+} from 'framer-motion';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { waveChild, waveContainer } from './index';
+import { cls } from '@/libs/client/utils';
 
 const HeaderSection = () => {
 	const [scope, headerAnimate] = useAnimate();
@@ -82,35 +90,113 @@ const HeaderSection = () => {
 	);
 };
 
-const ContentsSection = () => {
+const WorkIntroduce = () => {
+	const descDatas = [
+		{
+			firstLetter: '새로운 아이디어',
+			secondLetter: '와',
+			scrollEnd: 0.45,
+			distance: '20vh',
+		},
+		{
+			firstLetter: '창의적인 시각',
+			secondLetter: '을 바탕으로',
+			scrollEnd: 0.6,
+			distance: '20vh',
+		},
+		{
+			firstLetter: '다양한 스타일',
+			secondLetter: '과 테마,',
+			scrollEnd: 0.75,
+			distance: '20vh',
+		},
+		{
+			firstLetter: '니즈에 맞는 영상',
+			secondLetter: '을 제작합니다.',
+			scrollEnd: 0.9,
+			distance: '20vh',
+		},
+	];
+	const title = useRef(null);
+	const letters = useRef(null);
+	const desc = useRef(null);
+	const { scrollYProgress } = useScroll({
+		target: desc,
+		offset: ['start end', 'end center'],
+	});
+	const transform = (
+		scrollEnd: number,
+		valueStart: number | string,
+		valueEnd: number | string
+	) => {
+		return useTransform(
+			scrollYProgress,
+			[0, scrollEnd],
+			[valueStart, valueEnd]
+		);
+	};
+	const isTitleInview = useInView(title, { amount: 0.7, once: true });
 	return (
 		<section className='px-20'>
-			<div className='h-[100vh] px-24 flex items-center'>
-				<DoubleQuotation globalCss='font-GmarketSans font-bold text-[7rem]'>
-					저는{' '}
-					<span style={{ WebkitTextStroke: 0 }} className='text-[#eaeaea]'>
-						이런 일
-					</span>
-					을 합니다
+			<div ref={title} className='h-[100vh] px-24 flex items-center'>
+				<DoubleQuotation>
+					<motion.div
+						initial={'hidden'}
+						animate={isTitleInview ? 'visible' : 'hidden'}
+						variants={waveContainer}
+						custom={0.05}
+						ref={letters}
+						className='font-GmarketSans font-bold text-[7rem] flex items-end'
+					>
+						{Array.from('저는 이런 일을 합니다.').map((letter, idx) => {
+							if (idx > 2 && idx < 7) {
+								return (
+									<motion.span
+										variants={waveChild}
+										style={{ WebkitTextStroke: 0 }}
+										className='text-[#eaeaea]'
+										key={idx}
+									>
+										{letter === ' ' ? '\u00A0' : letter}
+									</motion.span>
+								);
+							} else {
+								return (
+									<motion.span
+										variants={waveChild}
+										className='text-[#101010]'
+										key={idx}
+									>
+										{letter === ' ' ? '\u00A0' : letter}
+									</motion.span>
+								);
+							}
+						})}
+					</motion.div>
 				</DoubleQuotation>
 			</div>
-			<ul className='px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'>
-				<li className='flex justify-end w-full'>
-					새로운 아이디어
-					<span className='font-thin text-[#bababa]'>와</span>
-				</li>
-				<li className='flex justify-start w-full'>
-					창의적인 시각
-					<span className='font-thin text-[#bababa]'>을 바탕으로</span>
-				</li>
-				<li className='flex justify-end w-full'>
-					다양한 스타일
-					<span className='font-thin text-[#bababa]'>과 테마,</span>
-				</li>
-				<li className='flex justify-start w-full flex-nowrap'>
-					니즈에 맞는 영상
-					<span className='font-thin text-[#bababa]'>을 제작합니다.</span>
-				</li>
+			<ul
+				ref={desc}
+				className='px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
+			>
+				{descDatas.map((data, idx) => (
+					<motion.li
+						key={idx}
+						style={{
+							y: transform(data.scrollEnd, data.distance, '0vw'),
+							opacity: transform(data.scrollEnd, 0, 1),
+						}}
+						className={cls(
+							idx % 2 === 0 ? 'justify-end' : 'justify-start',
+							'flex  w-full'
+						)}
+					>
+						{data.firstLetter}
+						<span className='font-thin text-[#bababa]'>
+							{data.secondLetter}
+						</span>
+					</motion.li>
+				))}
 			</ul>
 			<div className='relative w-full py-20 aspect-video overflow-hidden'>
 				<Image
@@ -136,6 +222,13 @@ const ContentsSection = () => {
 					입니다
 				</DoubleQuotation>
 			</div>
+		</section>
+	);
+};
+
+const ContentsSection = () => {
+	return (
+		<section className='px-20'>
 			<ul className='relative w-[75%] m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'>
 				<li className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'>
 					<div className='absolute w-full h-full flex justify-center items-center'>
@@ -207,8 +300,9 @@ const ContentsSection = () => {
 export default function About() {
 	return (
 		<Layout seoTitle='About' nav={{ isShort: true }}>
-			<HeaderSection></HeaderSection>
-			<ContentsSection></ContentsSection>
+			<HeaderSection />
+			<WorkIntroduce />
+			<ContentsSection />
 		</Layout>
 	);
 }
