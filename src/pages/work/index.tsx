@@ -680,7 +680,7 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 
 const OutroSection = () => {
 	const letterRef = useRef(null);
-	const isletterInview = useInView(letterRef, {
+	const isLetterInview = useInView(letterRef, {
 		amount: 0.6,
 		margin: '50% 0% 0% 0%',
 	});
@@ -769,15 +769,15 @@ const OutroSection = () => {
 		<section className='relative bg-[#101010] h-[200vh] flex flex-col items-center font-bold'>
 			<motion.div
 				initial={'hidden'}
-				animate={isletterInview ? 'visible' : 'hidden'}
+				animate={isLetterInview ? 'visible' : 'hidden'}
 				variants={waveContainer}
 				custom={0.05}
 				ref={letterRef}
 				className='text-[4.5rem] h-[60vh] flex items-end'
 			>
-				{letter.map((test, idx) => (
+				{letter.map((letter, idx) => (
 					<motion.span variants={waveChild} key={idx}>
-						{test === ' ' ? '\u00A0' : test}
+						{letter === ' ' ? '\u00A0' : letter}
 					</motion.span>
 				))}
 			</motion.div>
