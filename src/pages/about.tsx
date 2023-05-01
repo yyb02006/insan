@@ -1,26 +1,83 @@
 import Circles from '@/components/circles';
 import DoubleQuotation from '@/components/doubleQuotaition';
 import Layout from '@/components/layout';
+import { useAnimate, motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
+import { useEffect } from 'react';
 
 const HeaderSection = () => {
+	const [scope, headerAnimate] = useAnimate();
+	const { scrollYProgress } = useScroll({
+		target: scope,
+		offset: ['start start', 'end start'],
+	});
+	const transform = (scrollEnd: number, valueEnd: number) => {
+		return useTransform(scrollYProgress, [0, scrollEnd], [0, valueEnd]);
+	};
+	useEffect(() => {
+		const enterAnimation = async () => {
+			await headerAnimate(
+				'.Line',
+				{ width: ['0%', '100%'] },
+				{ duration: 0.6, ease: 'easeInOut' }
+			);
+			headerAnimate(
+				'.TopLetter',
+				{ y: [100, 0], opacity: [0, 1] },
+				{ duration: 0.4 }
+			);
+			await headerAnimate(
+				'.BottomLetter',
+				{ y: [-100, 0], opacity: [0, 1] },
+				{ duration: 0.4 }
+			);
+			headerAnimate('.CircleContainer', { scale: [0, 1] }, { duration: 0.4 });
+		};
+		enterAnimation();
+	}, [headerAnimate]);
+	useEffect(() => {
+		window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
+		window.removeEventListener('scroll', () => {});
+	}, []);
 	return (
-		<section className='relative h-screen flex flex-col items-center justify-center leading-none font-GmarketSans font-bold text-[7rem]'>
-			<div className='absolute top-[50%] translate-y-[-50%] px-6 w-full max-w-[716px] aspect-square'>
+		<section
+			ref={scope}
+			className='relative h-screen flex flex-col items-center justify-center leading-none font-GmarketSans font-bold text-[7rem]'
+		>
+			<motion.div
+				initial={{ scale: 0 }}
+				className='CircleContainer absolute px-6 w-full aspect-square max-w-[716px] flex justify-center items-center'
+			>
 				<Image
 					alt='face'
 					width={716}
 					height={716}
 					src='/images/face.png'
-					className='absolute'
+					className='relative'
 				/>
-				<Circles />
-			</div>
-			<p className='relative flex justify-start break-keep w-[73%]'>
+				<motion.div
+					style={{ rotate: transform(1, 360) }}
+					className='absolute w-full h-full origin-center '
+				>
+					<Circles />
+				</motion.div>
+			</motion.div>
+			<motion.p
+				style={{ y: transform(0.5, -800) }}
+				className='TopLetter opacity-0 relative flex justify-start break-keep w-[73%]'
+			>
 				선 좀 넘는 디렉터,
-			</p>
-			<div className='relative border-t w-full'></div>
-			<p className='relative flex mt-5 justify-end w-[73%]'>여인산입니다.</p>
+			</motion.p>
+			<motion.div
+				style={{ y: transform(0.5, -200) }}
+				className='Line relative border-t w-0'
+			></motion.div>
+			<motion.p
+				style={{ y: transform(0.5, -400) }}
+				className='BottomLetter opacity-0 relative flex mt-5 justify-end w-[73%]'
+			>
+				여인산입니다.
+			</motion.p>
 		</section>
 	);
 };
