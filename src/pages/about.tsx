@@ -7,7 +7,6 @@ import {
 	useScroll,
 	useTransform,
 	useInView,
-	MotionValue,
 } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
@@ -269,7 +268,12 @@ const JobIntroSection = () => {
 		},
 	];
 	const title = useRef(null);
+	const desc = useRef(null);
 	const isInview = useInView(title, { amount: 0.5 });
+	const { scrollYProgress } = useScroll({
+		target: desc,
+		offset: ['start end', 'end center'],
+	});
 	return (
 		<section className='px-20'>
 			<div
@@ -311,32 +315,110 @@ const JobIntroSection = () => {
 					</motion.div>
 				</DoubleQuotation>
 			</div>
-			<ul className='relative w-[75%] m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'>
+			<ul
+				ref={desc}
+				className='relative w-[75%] m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
+			>
 				{descDatas.map((data, idx) => (
 					<li
 						key={idx}
 						className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'
 					>
 						<div className='absolute w-full h-full flex justify-center items-center'>
-							<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full' />
+							<motion.div
+								style={{
+									y: useTransform(
+										scrollYProgress,
+										[0.15 * idx, 0.3 + 0.15 * idx],
+										[-300, 0]
+									),
+									opacity: useTransform(
+										scrollYProgress,
+										[0.15 * idx, 0.3 + 0.15 * idx],
+										[0, 1]
+									),
+								}}
+								className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'
+							/>
 						</div>
-						<div className='relative w-full text-[2rem] font-bold'>
+						<motion.div
+							style={{
+								y: useTransform(
+									scrollYProgress,
+									[0.15 * idx, 0.3 + 0.15 * idx],
+									[-100, 0]
+								),
+								opacity: useTransform(
+									scrollYProgress,
+									[0.15 * idx, 0.3 + 0.15 * idx],
+									[0, 1]
+								),
+							}}
+							className='relative w-full text-[2rem] font-bold'
+						>
 							{data.title}
-						</div>
-						<div className='relative font-extralight '>{data.desc}</div>
+						</motion.div>
+						<motion.div
+							style={{
+								y: useTransform(
+									scrollYProgress,
+									[0.15 * idx, 0.3 + 0.15 * idx],
+									[200, 0]
+								),
+								opacity: useTransform(
+									scrollYProgress,
+									[0.15 * idx, 0.3 + 0.15 * idx],
+									[0, 1]
+								),
+							}}
+							className='relative font-extralight '
+						>
+							{data.desc}
+						</motion.div>
 					</li>
 				))}
 			</ul>
-			<div className='relative mb-[320px] w-full h-[100vh] flex justify-center items-end'>
-				<div className='absolute w-[30%] flex justify-center items-center'>
-					<Circles />
-					<span
-						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
-					>
-						Contact
-					</span>
+		</section>
+	);
+};
+
+const OutroSection = () => {
+	const [scope, outroAnimate] = useAnimate();
+	const isInview = useInView(scope, { amount: 0.3 });
+	const onCircleEnter = () => {
+		outroAnimate('.Circle', { scale: 1.2 }, { duration: 0.5 });
+		outroAnimate('.Text', { color: '#eaeaea' }, { duration: 0.5 });
+	};
+	const onCircleLeave = () => {
+		outroAnimate('.Circle', { scale: 1 }, { duration: 0.5 });
+		outroAnimate('.Text', { color: '#101010' }, { duration: 0.2 });
+	};
+	useEffect(() => {
+		if (isInview) {
+			outroAnimate(scope.current, { scale: 1 }, { duration: 0.5 });
+		} else {
+			outroAnimate(scope.current, { scale: 0.5 }, { duration: 0.2 });
+		}
+	}, [isInview]);
+	return (
+		<section
+			ref={scope}
+			className='relative mt-[40vh] w-full h-[100vh] flex justify-center items-center'
+		>
+			<div
+				onMouseEnter={onCircleEnter}
+				onMouseLeave={onCircleLeave}
+				className='relative w-[30%] aspect-square rounded-full flex justify-center items-center'
+			>
+				<div className='Circle absolute w-full aspect-square'>
+					<Circles ulMotion={{ css: 'animate-spin-slow' }} />
 				</div>
+				<span
+					style={{ WebkitTextStroke: '1px #eaeaea' }}
+					className='Text relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
+				>
+					Contact
+				</span>
 			</div>
 		</section>
 	);
@@ -345,11 +427,13 @@ const JobIntroSection = () => {
 export default function About() {
 	return (
 		<Layout seoTitle='About' nav={{ isShort: true }}>
-			<div className='w-full overflow-x-hidden'>
+			{/* overflow-X-hidden시에 스크롤 버그 생김 */}
+			<div className='w-full'>
 				<HeaderSection />
 				<WorkIntroSection />
 				<RoleIntroSection />
 				<JobIntroSection />
+				<OutroSection />
 			</div>
 		</Layout>
 	);
