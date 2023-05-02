@@ -19,6 +19,7 @@ import useMouseSpring from '@/libs/client/useMouseSpring';
 interface LayoutProps {
 	seoTitle: string;
 	children: ReactNode;
+	footerAbsolute?: boolean;
 	nav?: { exist?: boolean; isShort: boolean };
 }
 
@@ -328,6 +329,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 export default function Layout({
 	seoTitle,
 	children,
+	footerAbsolute = false,
 	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
@@ -336,7 +338,7 @@ export default function Layout({
 		<div
 			onMouseMove={(e) => onMove(e)}
 			onMouseLeave={onLeave}
-			className='relative'
+			className='relative min-h-screen h-auto'
 		>
 			<Head>
 				<title>
@@ -371,7 +373,12 @@ export default function Layout({
 				</div>
 			) : null}
 			{children}
-			<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
+			<footer
+				className={cls(
+					footerAbsolute ? 'absolute' : 'relative',
+					'text-[#606060] text-xs flex justify-center items-start h-[5vh] bottom-0 w-full'
+				)}
+			>
 				2023 Insan - all rights reserved
 			</footer>
 		</div>
