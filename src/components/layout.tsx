@@ -19,7 +19,7 @@ import useMouseSpring from '@/libs/client/useMouseSpring';
 interface LayoutProps {
 	seoTitle: string;
 	children: ReactNode;
-	footerAbsolute?: boolean;
+	footerPosition?: string;
 	nav?: { exist?: boolean; isShort: boolean };
 }
 
@@ -329,7 +329,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 export default function Layout({
 	seoTitle,
 	children,
-	footerAbsolute = false,
+	footerPosition = 'relative',
 	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
@@ -375,7 +375,7 @@ export default function Layout({
 			{children}
 			<footer
 				className={cls(
-					footerAbsolute ? 'absolute' : 'relative',
+					footerPosition,
 					'text-[#606060] text-xs flex justify-center items-start h-[5vh] bottom-0 w-full'
 				)}
 			>
