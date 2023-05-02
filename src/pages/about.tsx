@@ -7,6 +7,7 @@ import {
 	useScroll,
 	useTransform,
 	useInView,
+	MotionValue,
 } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
@@ -90,7 +91,7 @@ const HeaderSection = () => {
 	);
 };
 
-const WorkIntroduce = () => {
+const WorkIntroSection = () => {
 	const descDatas = [
 		{
 			firstLetter: '새로운 아이디어',
@@ -118,8 +119,8 @@ const WorkIntroduce = () => {
 		},
 	];
 	const title = useRef(null);
-	const letters = useRef(null);
 	const desc = useRef(null);
+	const isInview = useInView(title, { amount: 0.5 });
 	const { scrollYProgress } = useScroll({
 		target: desc,
 		offset: ['start end', 'end center'],
@@ -135,20 +136,18 @@ const WorkIntroduce = () => {
 			[valueStart, valueEnd]
 		);
 	};
-	const isTitleInview = useInView(title, { amount: 0.7, once: true });
 	return (
 		<section className='px-20'>
 			<div ref={title} className='h-[100vh] px-24 flex items-center'>
 				<DoubleQuotation>
 					<motion.div
 						initial={'hidden'}
-						animate={isTitleInview ? 'visible' : 'hidden'}
+						animate={isInview ? 'visible' : 'hidden'}
 						variants={waveContainer}
 						custom={0.05}
-						ref={letters}
 						className='font-GmarketSans font-bold text-[7rem] flex items-end'
 					>
-						{Array.from('저는 이런 일을 합니다.').map((letter, idx) => {
+						{Array.from('저는 이런 일을 합니다').map((letter, idx) => {
 							if (idx > 2 && idx < 7) {
 								return (
 									<motion.span
@@ -177,7 +176,7 @@ const WorkIntroduce = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
+				className='relative z-[1] px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
 			>
 				{descDatas.map((data, idx) => (
 					<motion.li
@@ -188,7 +187,7 @@ const WorkIntroduce = () => {
 						}}
 						className={cls(
 							idx % 2 === 0 ? 'justify-end' : 'justify-start',
-							'flex  w-full'
+							'flex w-full'
 						)}
 					>
 						{data.firstLetter}
@@ -198,93 +197,139 @@ const WorkIntroduce = () => {
 					</motion.li>
 				))}
 			</ul>
-			<div className='relative w-full py-20 aspect-video overflow-hidden'>
-				<Image
-					src='/images/field.png'
-					alt='fieldPicture'
-					width={1600}
-					height={900}
-					className='w-full'
-				/>
-				<div className='absolute z-[1] font-GmarketSans bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[4rem] font-bold px-6 py-2'>
-					Camera, Director, Video Editor
-				</div>
-			</div>
-			<div className='w-full py-16 text-5xl leading-none font-bold font-GmarketSans flex items-end pl-40'>
-				also Product Designer, Drone pilot
-			</div>
-			<div className='h-[100vh] mt-[10vh] flex justify-end items-center px-24'>
-				<DoubleQuotation globalCss='font-GmarketSans font-bold text-[7rem]'>
-					저는 이런{' '}
-					<span style={{ WebkitTextStroke: 0 }} className='text-[#eaeaea]'>
-						디렉터{' '}
-					</span>
-					입니다
-				</DoubleQuotation>
-			</div>
 		</section>
 	);
 };
 
-const ContentsSection = () => {
+const RoleIntroSection = () => {
+	const [scope, animate] = useAnimate();
+	const isInview = useInView(scope, { amount: 0.3 });
+	const { scrollYProgress } = useScroll({
+		target: scope,
+		offset: ['start end', 'end end'],
+	});
+	useEffect(() => {
+		if (isInview) {
+			animate(
+				'.Image',
+				{ y: 0, scale: 1, opacity: 1 },
+				{ duration: 0.6, ease: 'easeInOut' }
+			);
+		}
+	}, [isInview]);
+	return (
+		<section ref={scope} className='px-20 pb-40'>
+			<div className='relative w-full mt-20 aspect-video'>
+				<motion.div
+					initial={{ y: 200, scale: 0.5, opacity: 0.3 }}
+					className='Image relative w-full aspect-video overflow-hidden'
+				>
+					<Image
+						src='/images/field.png'
+						alt='fieldPicture'
+						width={1600}
+						height={900}
+						className='w-full'
+					/>
+				</motion.div>
+				<motion.div
+					style={{ x: useTransform(scrollYProgress, [0.5, 0.9], [300, 0]) }}
+					className='absolute font-GmarketSans bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[4rem] font-bold px-6 py-2'
+				>
+					Camera, Director, Video Editor
+				</motion.div>
+			</div>
+			<motion.div
+				style={{ x: useTransform(scrollYProgress, [0.6, 1], [-300, 0]) }}
+				className='w-full py-16 text-5xl leading-none font-bold font-GmarketSans flex items-end pl-40'
+			>
+				also Product Designer, Drone pilot
+			</motion.div>
+		</section>
+	);
+};
+
+const JobIntroSection = () => {
+	const descDatas = [
+		{
+			title: '트렌디한 감각',
+			desc: '사람들의 마음을 살 수 있는 감성을 잃지 않으려 노력합니다. 저의 감각은 디자인적 트렌드뿐만 아니라, 드론과 3D촬영같은 기술적 트렌드를 반영하는 것에도 특화되어 있습니다. ',
+		},
+		{
+			title: '융통성 있는 작업과정',
+			desc: '여러 사람이 모여 영상컨텐츠를 만들어내는 과정은 곧 예상치 못한 문제를 해결해내는 과정입니다. 컨텐츠가 완성될 때까지 겪게 되는 모든 어려움에 유연하게 대처하고 팀을 이끌어나갈 수 있습니다. ',
+		},
+		{
+			title: '결과에 대한 집착',
+			desc: '클라이언트의 요구를 만족시키는 일은 결코 운 좋게 눈속임한 퀄리티로 해낼 수 없습니다. 때문에 영상디자이너는 항상 결과물로 말해야한다는 생각으로 작업에 임합니다. ',
+		},
+		{
+			title: '연구를 즐기는 스타일',
+			desc: '영상으로 무언가를 표현한다는 것은 저에게 직업이고 기술이기 이전에, 꿈이자 취미입니다. 메시지를 어떻게 사람들에게 전달할 수 있을지에 대한 고민과 연구를 지금 이 순간에도 하고 있습니다. ',
+		},
+	];
+	const title = useRef(null);
+	const isInview = useInView(title, { amount: 0.5 });
 	return (
 		<section className='px-20'>
+			<div
+				ref={title}
+				className='h-[100vh] pb-32 flex justify-end items-center px-24'
+			>
+				<DoubleQuotation>
+					<motion.div
+						initial={'hidden'}
+						animate={isInview ? 'visible' : 'hidden'}
+						variants={waveContainer}
+						custom={0.05}
+						className='font-GmarketSans font-bold text-[7rem] flex items-end'
+					>
+						{Array.from('저는 이런 디렉터 입니다').map((letter, idx) => {
+							if (idx > 5 && idx < 9) {
+								return (
+									<motion.span
+										variants={waveChild}
+										style={{ WebkitTextStroke: 0 }}
+										className='text-[#eaeaea]'
+										key={idx}
+									>
+										{letter === ' ' ? '\u00A0' : letter}
+									</motion.span>
+								);
+							} else {
+								return (
+									<motion.span
+										variants={waveChild}
+										className='text-[#101010]'
+										key={idx}
+									>
+										{letter === ' ' ? '\u00A0' : letter}
+									</motion.span>
+								);
+							}
+						})}
+					</motion.div>
+				</DoubleQuotation>
+			</div>
 			<ul className='relative w-[75%] m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'>
-				<li className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'>
-					<div className='absolute w-full h-full flex justify-center items-center'>
-						<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'></div>
-					</div>
-					<div className='relative w-full text-[2rem] font-bold'>
-						트렌디한 감각
-					</div>
-					<div className='relative font-extralight '>
-						사람들의 마음을 살 수 있는 감성을 잃지 않으려 노력합니다. 저의
-						감각은 디자인적 트렌드뿐만 아니라, 드론과 3D촬영같은 기술적 트렌드를
-						반영하는 것에도 특화되어 있습니다.
-					</div>
-				</li>
-				<li className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'>
-					<div className='absolute w-full h-full flex justify-center items-center'>
-						<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'></div>
-					</div>
-					<div className='relative text-[2rem] font-bold'>
-						융통성 있는 작업과정
-					</div>
-					<div className='relative font-extralight'>
-						여러 사람이 모여 영상컨텐츠를 만들어내는 과정은 곧 예상치 못한
-						문제를 해결해내는 과정입니다. 컨텐츠가 완성될 때까지 겪게 되는 모든
-						어려움에 유연하게 대처하고 팀을 이끌어나갈 수 있습니다.
-					</div>
-				</li>
-				<li className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'>
-					<div className='absolute w-full h-full flex justify-center items-center'>
-						<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'></div>
-					</div>
-					<div className='relative text-[2rem] font-bold'>결과에 대한 집착</div>
-					<div className='relative font-extralight'>
-						클라이언트의 요구를 만족시키는 일은 결코 운 좋게 눈속임한 퀄리티로
-						해낼 수 없습니다. 때문에 영상디자이너는 항상 결과물로 말해야한다는
-						생각으로 작업에 임합니다.
-					</div>
-				</li>
-				<li className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'>
-					<div className='absolute w-full h-full flex justify-center items-center'>
-						<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'></div>
-					</div>
-					<div className='relative text-[2rem] font-bold'>
-						연구를 즐기는 스타일
-					</div>
-					<div className='relative font-extralight'>
-						영상으로 무언가를 표현한다는 것은 저에게 직업이고 기술이기 이전에,
-						꿈이자 취미입니다. 메시지를 어떻게 사람들에게 전달할 수 있을지에
-						대한 고민과 연구를 지금 이 순간에도 하고 있습니다.
-					</div>
-				</li>
+				{descDatas.map((data, idx) => (
+					<li
+						key={idx}
+						className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'
+					>
+						<div className='absolute w-full h-full flex justify-center items-center'>
+							<div className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full' />
+						</div>
+						<div className='relative w-full text-[2rem] font-bold'>
+							{data.title}
+						</div>
+						<div className='relative font-extralight '>{data.desc}</div>
+					</li>
+				))}
 			</ul>
 			<div className='relative mb-[320px] w-full h-[100vh] flex justify-center items-end'>
 				<div className='absolute w-[30%] flex justify-center items-center'>
 					<Circles />
-
 					<span
 						style={{ WebkitTextStroke: '1px #eaeaea' }}
 						className='relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
@@ -300,9 +345,12 @@ const ContentsSection = () => {
 export default function About() {
 	return (
 		<Layout seoTitle='About' nav={{ isShort: true }}>
-			<HeaderSection />
-			<WorkIntroduce />
-			<ContentsSection />
+			<div className='w-full overflow-x-hidden'>
+				<HeaderSection />
+				<WorkIntroSection />
+				<RoleIntroSection />
+				<JobIntroSection />
+			</div>
 		</Layout>
 	);
 }
