@@ -974,11 +974,11 @@ const OutroSection = () => {
 			animate(scope.current, { scale: 0.5 });
 		}
 	}, [isInView]);
-	const onCircleOver = () => {
+	const onCircleEnter = () => {
 		animate('.Container', { scale: 1.2 }, { duration: 0.5 });
 		animate('.Text', { color: '#eaeaea' }, { duration: 0.5 });
 	};
-	const onCircleOut = () => {
+	const onCircleLeave = () => {
 		animate('.Container', { scale: 1 }, { duration: 0.5 });
 		animate('.Text', { color: '#101010' }, { duration: 0.2 });
 	};
@@ -986,9 +986,9 @@ const OutroSection = () => {
 		<div className='mt-[30vh] h-[100vh] flex justify-center items-center'>
 			<div
 				ref={scope}
-				onMouseOver={onCircleOver}
-				onMouseOut={onCircleOut}
-				className='relative h-[70vh] aspect-square flex justify-center items-center'
+				onMouseEnter={onCircleEnter}
+				onMouseLeave={onCircleLeave}
+				className='relative h-[70vh] aspect-square flex justify-center items-center rounded-full'
 			>
 				<div className='Container absolute h-full aspect-square'>
 					<Circles
