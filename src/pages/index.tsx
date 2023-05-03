@@ -26,9 +26,12 @@ interface MouseEventProps {
 
 interface HeaderProps extends MouseEventProps {
 	inheritRef: MutableRefObject<null>;
+	innerWidth: number;
 }
 
-interface SpringTextProps extends MouseEventProps {}
+interface SpringTextProps extends MouseEventProps {
+	innerWidth: number;
+}
 
 interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
@@ -169,11 +172,20 @@ const snsList: Variants = {
 	},
 };
 
-const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
+const SpringText = ({
+	mouseX,
+	mouseY,
+	scrollYProgress,
+	innerWidth,
+}: SpringTextProps) => {
 	const wordsX = (ratio: number) =>
-		useTransform(mouseX, (offset) => offset / ratio);
+		useTransform(mouseX, (offset) =>
+			innerWidth > 640 ? offset / ratio : null
+		);
 	const wordsY = (ratio: number) =>
-		useTransform(mouseY, (offset) => offset / ratio);
+		useTransform(mouseY, (offset) =>
+			innerWidth > 640 ? offset / ratio : null
+		);
 	const elements = useRef([
 		{ title: 'Future', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 		{
@@ -262,6 +274,7 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 const CircleSection = ({
 	mouseX,
 	mouseY,
+	innerWidth,
 	scrollYProgress,
 	inheritRef,
 }: HeaderProps) => {
@@ -334,6 +347,7 @@ const CircleSection = ({
 						<SpringText
 							mouseX={mouseX}
 							mouseY={mouseY}
+							innerWidth={innerWidth}
 							scrollYProgress={scrollYProgress}
 						></SpringText>
 						{/* <motion.div
@@ -769,23 +783,25 @@ const VideosSection = () => {
 				ref={inner}
 				className='top-0 absolute h-[calc(100%-100vh)] w-full'
 			></div>
-			<motion.div
-				ref={horizental}
-				style={{ x }}
-				className='sticky top-0 text-[200px] h-[100vh] w-[400vw] flex'
-			>
-				{dummyDatas.map((data) => (
-					<VideoContainer
-						key={data.index}
-						index={data.index}
-						title={data.title}
-						role={data.role}
-						description={data.description}
-						date={data.date}
-						videoId={data.videoId}
-					/>
-				))}
-			</motion.div>
+			<div className='sticky top-0 overflow-x-hidden'>
+				<motion.div
+					ref={horizental}
+					style={{ x }}
+					className='text-[200px] h-[100vh] w-[400vw] flex'
+				>
+					{dummyDatas.map((data) => (
+						<VideoContainer
+							key={data.index}
+							index={data.index}
+							title={data.title}
+							role={data.role}
+							description={data.description}
+							date={data.date}
+							videoId={data.videoId}
+						/>
+					))}
+				</motion.div>
+			</div>
 			<AnimatePresence>
 				{isInView ? (
 					<VideoSectionIndicator scrollYProgress={scrollYProgress} />
@@ -1017,7 +1033,7 @@ export default function Home() {
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
-	const [isSmall, setIsSmall] = useState(0);
+	const [innerWidth, setIsSmall] = useState(0);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackground = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
@@ -1044,11 +1060,12 @@ export default function Home() {
 			<Layout
 				seoTitle='INSAN'
 				nav={{
-					isShort: isSmall > 640 ? !isInBackground : true,
+					isShort: innerWidth > 640 ? !isInBackground : true,
 				}}
 			>
 				<CircleSection
 					inheritRef={circle}
+					innerWidth={innerWidth}
 					mouseX={mouseX}
 					mouseY={mouseY}
 					scrollYProgress={scrollYProgress}
