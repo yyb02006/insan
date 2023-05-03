@@ -346,7 +346,7 @@ export default function Layout({
 				</title>
 			</Head>
 			{nav ? (
-				<div className='fixed z-[1000] left-0 mt-6 ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
+				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
 					<Link href={'/'} className='flex justify-center items-center'>
 						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
 						<Image
@@ -361,7 +361,7 @@ export default function Layout({
 				</div>
 			) : null}
 			{nav ? (
-				<div className='fixed z-[999] right-0 mt-6 mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
+				<div className='fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
 					<AnimatePresence>
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>

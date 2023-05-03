@@ -1,5 +1,5 @@
 import Layout from '@/components/layout';
-import { useAnimate, motion, stagger, easeInOut } from 'framer-motion';
+import { useAnimate, motion, stagger } from 'framer-motion';
 import { useEffect } from 'react';
 
 export default function Contact() {
