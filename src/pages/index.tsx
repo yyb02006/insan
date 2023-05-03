@@ -7,7 +7,6 @@ import {
 	MotionValue,
 	Variants,
 	useInView,
-	useSpring,
 	motion,
 	useScroll,
 	useTransform,
@@ -16,13 +15,7 @@ import {
 	AnimatePresence,
 } from 'framer-motion';
 import Link from 'next/link';
-import {
-	MouseEvent,
-	MutableRefObject,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
@@ -182,15 +175,19 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	const wordsY = (ratio: number) =>
 		useTransform(mouseY, (offset) => offset / ratio);
 	const elements = useRef([
-		{ title: 'Future', yRatio: 2.5, text: 'text-[4.5rem]' },
-		{ title: 'Creative', yRatio: 3.5, text: 'text-[5.75rem]' },
-		{ title: 'Emotional', yRatio: 6, text: 'text-[7rem]' },
+		{ title: 'Future', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
+		{
+			title: 'Creative',
+			yRatio: 3.5,
+			text: 'text-[3.75rem] md:text-[5.75rem]',
+		},
+		{ title: 'Emotional', yRatio: 6, text: 'text-[5rem] md:text-[7rem]' },
 		{
 			title: 'Intuitive',
 			yRatio: 3.5,
-			text: 'text-[5.75rem]',
+			text: 'text-[3.75rem] md:text-[5.75rem]',
 		},
-		{ title: 'Trendy', yRatio: 2.5, text: 'text-[4.5rem]' },
+		{ title: 'Trendy', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 	]);
 	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
 	/* useEffect(() => {
@@ -226,6 +223,42 @@ const SpringText = ({ mouseX, mouseY, scrollYProgress }: SpringTextProps) => {
 	);
 };
 
+const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
+	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
+	const visibility = useTransform(scrollYProgress, (value) => {
+		if (value > 0.3) {
+			return 'hidden';
+		} else {
+			return 'visible';
+		}
+	});
+	return (
+		<motion.div
+			style={{ visibility }}
+			className='fixed w-full h-full flex justify-end items-end text-[#efefef]'
+		>
+			<motion.div
+				style={{ scale }}
+				initial='hidden'
+				animate='visible'
+				variants={sideCircle}
+				className='absolute w-[200px] lg:w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
+			/>
+			<motion.ul
+				animate={!isInView ? 'visible' : 'disappear'}
+				variants={snsAnchor}
+				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2'
+			>
+				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
+					<motion.li key={idx} variants={snsList}>
+						<Link href={''}>{arr}</Link>
+					</motion.li>
+				))}
+			</motion.ul>
+		</motion.div>
+	);
+};
+
 const CircleSection = ({
 	mouseX,
 	mouseY,
@@ -247,8 +280,8 @@ const CircleSection = ({
 		(offset) => 1 + Math.abs(offset / 20000)
 	);
 	const logoCircles = useRef([
-		'top-[-220px] left-[-200px] w-[460px]',
-		'top-[-120px] left-[-80px] w-[340px]',
+		'top-[-220px] left-[-200px] w-[360px] lg:w-[460px]',
+		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
 		<motion.section
@@ -285,7 +318,7 @@ const CircleSection = ({
 						}}
 						liMotion={{
 							style: { scale: circleLineScale },
-							css: 'w-[620px]',
+							css: 'md:w-[calc(50px+100%)] w-[calc(30px+100%)]',
 						}}
 					/>
 					<motion.div
@@ -296,7 +329,7 @@ const CircleSection = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#101010] w-[570px] scale-0 aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] md:w-[570px] w-[340px]  scale-0 aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
@@ -355,29 +388,32 @@ const Wave = ({
 				index === 3 ? 'top-[65vh] h-[10vh]' : ''
 			)}
 		>
-			<motion.div
-				style={{ y, visibility }}
-				initial='hidden'
-				animate={isInView ? 'visible' : 'hidden'}
-				variants={waveContainer}
-				custom={0.08}
-				className={cls(
-					css,
-					'absolute top-0 flex px-[200px] font-Roboto font-black text-[calc(100px+1vw)] text-[#fafafa] '
-				)}
-			>
-				{waveReverse
-					? [...letter].reverse().map((test, idx) => (
-							<motion.span variants={waveChild} key={idx}>
-								{test === ' ' ? '\u00A0' : test}
-							</motion.span>
-					  ))
-					: letter.map((test, idx) => (
-							<motion.span variants={waveChild} key={idx}>
-								{test === ' ' ? '\u00A0' : test}
-							</motion.span>
-					  ))}
-			</motion.div>
+			<div className='absolute w-full flex justify-center h-auto'>
+				<motion.div
+					style={{ y, visibility }}
+					initial='hidden'
+					animate={isInView ? 'visible' : 'hidden'}
+					variants={waveContainer}
+					custom={0.08}
+					className={cls(
+						css,
+						'relative w-full max-w-[1920px] top-9 sm:top-7 md:top-5 lg:top-3 xl:top-0 flex px-[10vw] font-Roboto font-black text-[calc(14px+5.5vw)] text-[#fafafa]'
+					)}
+				>
+					{waveReverse
+						? [...letter].reverse().map((test, idx) => (
+								<motion.span variants={waveChild} key={idx}>
+									{test === ' ' ? '\u00A0' : test}
+								</motion.span>
+						  ))
+						: letter.map((test, idx) => (
+								<motion.span variants={waveChild} key={idx}>
+									{test === ' ' ? '\u00A0' : test}
+								</motion.span>
+						  ))}
+				</motion.div>
+			</div>
+			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
 			{/* <motion.div
 		style={{ y, visibility }}
 		className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
@@ -819,42 +855,6 @@ const VideoSectionIndicator = ({
 	);
 };
 
-const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
-	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
-	const visibility = useTransform(scrollYProgress, (value) => {
-		if (value > 0.3) {
-			return 'hidden';
-		} else {
-			return 'visible';
-		}
-	});
-	return (
-		<motion.div
-			style={{ visibility }}
-			className='fixed w-full h-full flex justify-end items-end text-[#efefef]'
-		>
-			<motion.div
-				style={{ scale }}
-				initial='hidden'
-				animate='visible'
-				variants={sideCircle}
-				className='absolute w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
-			/>
-			<motion.ul
-				animate={!isInView ? 'visible' : 'disappear'}
-				variants={snsAnchor}
-				className='pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-lg gap-2'
-			>
-				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
-					<motion.li key={idx} variants={snsList}>
-						<Link href={''}>{arr}</Link>
-					</motion.li>
-				))}
-			</motion.ul>
-		</motion.div>
-	);
-};
-
 const TextSection = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
@@ -984,29 +984,31 @@ const OutroSection = () => {
 	};
 	return (
 		<div className='mt-[30vh] h-[100vh] flex justify-center items-center'>
-			<div
-				ref={scope}
-				onMouseEnter={onCircleEnter}
-				onMouseLeave={onCircleLeave}
-				className='relative h-[70vh] aspect-square flex justify-center items-center rounded-full'
-			>
-				<div className='Container absolute h-full aspect-square'>
-					<Circles
-						ulMotion={{
-							css: cls(
-								isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
-								'transition-all'
-							),
-						}}
-					/>
-				</div>
-				<span
-					style={{ WebkitTextStroke: '1px #eaeaea' }}
-					className='Text relative text-[#101010] text-[10rem] font-GmarketSans font-bold'
+			<Link href='/work'>
+				<div
+					ref={scope}
+					onMouseEnter={onCircleEnter}
+					onMouseLeave={onCircleLeave}
+					className='relative h-[70vh] aspect-square flex justify-center items-center rounded-full'
 				>
-					INSAN
-				</span>
-			</div>
+					<div className='Container absolute h-full aspect-square'>
+						<Circles
+							ulMotion={{
+								css: cls(
+									isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
+									'transition-all'
+								),
+							}}
+						/>
+					</div>
+					<span
+						style={{ WebkitTextStroke: '1px #eaeaea' }}
+						className='Text relative text-[#101010] text-[10rem] font-GmarketSans font-bold'
+					>
+						INSAN
+					</span>
+				</div>
+			</Link>
 		</div>
 	);
 };
@@ -1015,10 +1017,21 @@ export default function Home() {
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
+	const [isSmall, setIsSmall] = useState(0);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
-	const isInBackround = useInView(background, { margin: '0% 0% 100% 0%' });
+	const isInBackground = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
+	const handleResize = () => {
+		setIsSmall(window.innerWidth);
+	};
+	useEffect(() => {
+		setIsSmall(window.innerWidth);
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
 	return (
 		<div
 			ref={background}
@@ -1028,7 +1041,12 @@ export default function Home() {
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
 			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
-			<Layout seoTitle='INSAN' nav={{ isShort: isInBackround ? false : true }}>
+			<Layout
+				seoTitle='INSAN'
+				nav={{
+					isShort: isSmall > 640 ? !isInBackground : true,
+				}}
+			>
 				<CircleSection
 					inheritRef={circle}
 					mouseX={mouseX}

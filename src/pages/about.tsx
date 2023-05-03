@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { waveChild, waveContainer } from './index';
 import { cls } from '@/libs/client/utils';
+import Link from 'next/link';
 
 const HeaderSection = () => {
 	const [scope, headerAnimate] = useAnimate();
@@ -401,25 +402,26 @@ const OutroSection = () => {
 		}
 	}, [isInview]);
 	return (
-		<section
-			ref={scope}
-			className='relative mt-[40vh] w-full h-[100vh] flex justify-center items-center'
-		>
-			<div
-				onMouseEnter={onCircleEnter}
-				onMouseLeave={onCircleLeave}
-				className='relative w-[30%] aspect-square rounded-full flex justify-center items-center'
-			>
-				<div className='Circle absolute w-full aspect-square'>
-					<Circles ulMotion={{ css: 'animate-spin-slow' }} />
+		<section ref={scope}>
+			<Link href='/contact'>
+				<div className='relative mt-[40vh] w-full h-[100vh] flex justify-center items-center'>
+					<div
+						onMouseEnter={onCircleEnter}
+						onMouseLeave={onCircleLeave}
+						className='relative w-[30%] aspect-square rounded-full flex justify-center items-center'
+					>
+						<div className='Circle absolute w-full aspect-square'>
+							<Circles ulMotion={{ css: 'animate-spin-slow' }} />
+						</div>
+						<span
+							style={{ WebkitTextStroke: '1px #eaeaea' }}
+							className='Text relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
+						>
+							Contact
+						</span>
+					</div>
 				</div>
-				<span
-					style={{ WebkitTextStroke: '1px #eaeaea' }}
-					className='Text relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
-				>
-					Contact
-				</span>
-			</div>
+			</Link>
 		</section>
 	);
 };
