@@ -1048,6 +1048,7 @@ export default function Home() {
 			window.removeEventListener('resize', handleResize);
 		};
 	}, []);
+	/* 최적화 할 때 vh값에 따른 넓이값 변화량이 꽤 유동적이라는 것을 염두에 두자*/
 	return (
 		<div
 			ref={background}
