@@ -247,7 +247,7 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	return (
 		<motion.div
 			style={{ visibility }}
-			className='fixed w-full h-full flex justify-end items-end text-[#efefef]'
+			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef]'
 		>
 			<motion.div
 				style={{ scale }}
@@ -297,10 +297,7 @@ const CircleSection = ({
 		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
-		<motion.section
-			className='relative h-[500vh] mb-[100vh] px-10'
-			ref={inheritRef}
-		>
+		<motion.section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
 			<div className='absolute top-0 h-[80%]'>
 				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
@@ -317,23 +314,27 @@ const CircleSection = ({
 					))}
 				</motion.div>
 			</div>
-			<div className='h-full flex justify-center items-start '>
+			<div className='h-full flex justify-center items-start'>
 				<motion.div
 					style={{ scale, y }}
-					className='sticky top-0 h-[100vh] flex items-center'
+					className='sticky top-0 h-[100vh] w-full flex items-center justify-center'
 				>
-					<Circles
-						ulMotion={{
-							style: { rotate },
-							initial: 'initial',
-							animate: 'bigger',
-							variants: list,
-						}}
-						liMotion={{
-							style: { scale: circleLineScale },
-							css: 'md:w-[calc(50px+100%)] w-[calc(30px+100%)]',
-						}}
-					/>
+					<div className='overflow-hidden absolute w-[100vw] aspect-square flex justify-center items-center'>
+						<div className='absolute md:w-[570px] w-[340px] aspect-square'>
+							<Circles
+								ulMotion={{
+									style: { rotate },
+									initial: 'initial',
+									animate: 'bigger',
+									variants: list,
+								}}
+								liMotion={{
+									style: { scale: circleLineScale },
+									css: 'md:w-[calc(50px+100%)] w-[calc(25px+100%)]',
+								}}
+							/>
+						</div>
+					</div>
 					<motion.div
 						animate={{
 							scale: [0, 1],
@@ -342,7 +343,7 @@ const CircleSection = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#101010] md:w-[570px] w-[340px]  scale-0 aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] md:w-[570px] w-[340px] scale-0 aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
@@ -903,19 +904,19 @@ const TextSection = () => {
 	return (
 		<section
 			ref={ref}
-			className='relative mt-[50vh] h-[100vh] flex justify-center'
+			className='relative mt-[50vh] h-[70vh] sm:h-[120vh] flex justify-center overflow-hidden'
 		>
 			<motion.div
 				style={{ scale, rotate }}
-				className='absolute -right-[40vh] top-8 h-[80vh] aspect-square'
+				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] sm:h-[80vh] aspect-square'
 			>
 				<Circles
 					liMotion={{
-						css: 'w-[calc(50px+100%)]',
+						css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]',
 					}}
 				/>
 			</motion.div>
-			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[10rem] pr-40'>
+			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
 				<motion.div
 					style={{
 						y: y[0],
@@ -925,12 +926,14 @@ const TextSection = () => {
 				>
 					Moves
 				</motion.div>
-				<div className='flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
+				<div className='flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
 					<motion.span style={{ y: y[1], opacity: opacity[1] }}>
-						좋은 영상을 <span className='font-extralight'>만든다는 것은,</span>
+						좋은 영상을{' '}
+						<div className='font-extralight sm:inline'>만든다는 것은,</div>
 					</motion.span>
 					<motion.span style={{ y: y[2], opacity: opacity[2] }}>
-						당신께 감동을 <span className='font-extralight'>드린다는 것.</span>
+						당신께 감동을{' '}
+						<div className='font-extralight sm:inline'>드린다는 것.</div>
 					</motion.span>
 				</div>
 				<motion.div
@@ -942,14 +945,14 @@ const TextSection = () => {
 				>
 					Client
 				</motion.div>
-				<div className='relative flex flex-col text-[5rem] text-[#dadada] -mt-6 -mb-2 -ml-16'>
+				<div className='relative flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
 					<motion.div
 						style={{
 							y: y[6],
 							opacity: opacity[6],
 							WebkitTextStroke: '1px #9c9c9c',
 						}}
-						className='absolute text-[10rem] text-[#101010] -left-16'
+						className='absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
 					>
 						&
 					</motion.div>
@@ -957,13 +960,15 @@ const TextSection = () => {
 						style={{ y: y[4], opacity: opacity[4] }}
 						className='relative'
 					>
-						상상이 현실이 <span className='font-extralight'>되는 감동을,</span>
+						상상이 현실이{' '}
+						<div className='font-extralight sm:inline'>되는 감동을,</div>
 					</motion.span>
 					<motion.span
 						style={{ y: y[5], opacity: opacity[5] }}
 						className='relative'
 					>
-						더 나은 컨텐츠로의 <span className='font-extralight'>영감을.</span>
+						더 나은 컨텐츠로의{' '}
+						<div className='font-extralight sm:inline'>영감을.</div>
 					</motion.span>
 				</div>
 				<motion.div
@@ -1005,9 +1010,9 @@ const OutroSection = () => {
 					ref={scope}
 					onMouseEnter={onCircleEnter}
 					onMouseLeave={onCircleLeave}
-					className='relative h-[70vh] aspect-square flex justify-center items-center rounded-full'
+					className='relative w-[55vw] sm:h-[70vh] aspect-square flex justify-center items-center rounded-full'
 				>
-					<div className='Container absolute h-full aspect-square'>
+					<div className='Container absolute w-full sm:w-auto sm:h-full aspect-square'>
 						<Circles
 							ulMotion={{
 								css: cls(
@@ -1015,11 +1020,12 @@ const OutroSection = () => {
 									'transition-all'
 								),
 							}}
+							liMotion={{ css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]' }}
 						/>
 					</div>
 					<span
 						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='Text relative text-[#101010] text-[10rem] font-GmarketSans font-bold'
+						className='Text relative text-[#101010] text-[6rem] sm:text-[10rem] font-GmarketSans font-bold'
 					>
 						INSAN
 					</span>
