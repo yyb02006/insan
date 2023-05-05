@@ -822,7 +822,7 @@ export default function Work() {
 	const [category, setCategory] = useState('');
 	return (
 		<Layout seoTitle='Work' nav={{ isShort: true }}>
-			<main className='pt-[100px]  font-GmarketSans overflow-x-hidden'>
+			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
 				<TitleSection setCategory={setCategory} />
 				<SearchSection />
 				<TagButtonSection />
