@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { MotionStyle, Variants, motion } from 'framer-motion';
+import { MotionStyle, Variants, motion, m } from 'framer-motion';
 import { cls } from '@/libs/client/utils';
 
 interface DefalutMotion {
@@ -25,7 +25,7 @@ export default function Circles({ ulMotion, liMotion, ...rest }: CirclesProps) {
 		'right-0 bottom-0 origin-bottom-right',
 	]);
 	return (
-		<motion.ul
+		<m.ul
 			style={ulMotion?.style}
 			initial={ulMotion?.initial}
 			animate={ulMotion?.animate}
@@ -37,7 +37,7 @@ export default function Circles({ ulMotion, liMotion, ...rest }: CirclesProps) {
 			{...rest}
 		>
 			{mainCircles.current.map((circle, idx) => (
-				<motion.li
+				<m.li
 					key={idx}
 					style={liMotion?.style}
 					initial={liMotion?.initial}
@@ -50,6 +50,6 @@ export default function Circles({ ulMotion, liMotion, ...rest }: CirclesProps) {
 					)}
 				/>
 			))}
-		</motion.ul>
+		</m.ul>
 	);
 }

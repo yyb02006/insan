@@ -1,5 +1,6 @@
 import { cls } from '@/libs/client/utils';
 import '@/styles/globals.css';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import type { AppProps } from 'next/app';
 import { Roboto } from 'next/font/google';
 import { SWRConfig } from 'swr/_internal';
@@ -16,9 +17,11 @@ export default function App({ Component, pageProps }: AppProps) {
 		<SWRConfig
 			value={{ fetcher: (url: string) => fetch(url).then((res) => res.json()) }}
 		>
-			<main className={roboto.variable}>
-				<Component {...pageProps} />
-			</main>
+			<LazyMotion features={domAnimation}>
+				<main className={roboto.variable}>
+					<Component {...pageProps} />
+				</main>
+			</LazyMotion>
 		</SWRConfig>
 	);
 }
