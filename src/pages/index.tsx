@@ -14,6 +14,7 @@ import {
 	usePresence,
 	AnimatePresence,
 } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
@@ -70,8 +71,13 @@ interface VideoContainerProps {
 	videoId: string;
 }
 
+interface VideoSectionProps {
+	innerWidth: number;
+}
+
 interface VideoSectionIndicatorProps {
 	scrollYProgress: MotionValue<number>;
+	innerWidth: number;
 }
 
 const wave = (sec: number, reverse: boolean = false) => {
@@ -320,7 +326,7 @@ const CircleSection = ({
 					className='sticky top-0 h-[100vh] w-full flex items-center justify-center'
 				>
 					<div className='overflow-hidden absolute w-[100vw] aspect-square flex justify-center items-center'>
-						<div className='absolute md:w-[570px] w-[340px] aspect-square'>
+						<div className='absolute md:w-[500px] w-[70%] aspect-square'>
 							<Circles
 								ulMotion={{
 									style: { rotate },
@@ -330,7 +336,7 @@ const CircleSection = ({
 								}}
 								liMotion={{
 									style: { scale: circleLineScale },
-									css: 'md:w-[calc(50px+100%)] w-[calc(25px+100%)]',
+									css: 'md:w-[calc(50px+100%)] w-[calc(28px+100%)]',
 								}}
 							/>
 						</div>
@@ -343,7 +349,7 @@ const CircleSection = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#101010] md:w-[570px] w-[340px] scale-0 aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] md:w-[500px] w-[70%] scale-0 aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
@@ -575,7 +581,7 @@ const Video = ({ videoId }: VideoProps) => {
 						),
 					}}
 					liMotion={{
-						css: 'w-[calc(50px+100%)]',
+						css: 'w-[calc(24px+100%)] sm:w-[calc(50px+100%)]',
 					}}
 				/>
 			</div>
@@ -684,48 +690,54 @@ const VideoContainer = ({
 		<div ref={ref} className='h-[100vh] w-screen'>
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
-					<img
+					<Image
 						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						alt='1'
-						className='relative h-[80vh] aspect-video'
+						width={1600}
+						height={900}
+						style={{ objectFit: 'cover' }}
+						className='relative h-[80vh] aspect-video bg-pink-300'
 					/>
-					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-95' />
+					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-90' />
 				</div>
-				<div ref={videoScope} className='w-[600px] ml-[calc(160px+10vw)]'>
+				<div
+					ref={videoScope}
+					className='w-[100vw-48px] m-auto sm:w-[600px] sm:ml-[calc(20vw)]'
+				>
 					<Video videoId={videoId} />
 				</div>
 				<div
 					ref={textScope}
-					className='font-Roboto font-thin absolute pt-[80px] pb-[140px] flex flex-col justify-between items-end text-[100px] text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square pointer-events-none'
+					className='font-Roboto font-thin absolute py-[100px] sm:pt-[80px] sm:pb-[140px] flex flex-col justify-between items-end  text-[#eaeaea] top-0 left-0 w-[80vw] h-full aspect-square pointer-events-none'
 				>
 					<div className='flex justify-end items-center'>
 						<div
 							style={{ WebkitTextStroke: '1px #9c9c9c' }}
 							className={cls(
-								index === 1 ? '-mr-[60px]' : '',
-								'Index font-extrabold text-[22.5rem] leading-[0.73] text-[#1E1E1E]'
+								index === 1 ? '-mr-[3.9375vw]' : '',
+								'Index font-extrabold text-[calc(23.5vw)] leading-[0.73] text-[#1E1E1E]'
 							)}
 						>
 							{index}
 						</div>
-						<div className='Title font-GmarketSans font-bold absolute'>
+						<div className='Title font-GmarketSans font-bold absolute text-[6.5vw]'>
 							{title}
 						</div>
 					</div>
-					<div className='text-[#9a9a9a] text-5xl -mt-20 flex flex-col items-end'>
-						<div className='Role -ml-20'>{role}</div>
-						<div className='Desc font-GmarketSans font-medium text-base text-[#f4f4f4] -mt-3'>
+					<div className='absolute bottom-[140px] sm:relative text-[#9a9a9a] text-3xl sm:text-5xl -mt-20 flex flex-col items-end'>
+						<div className='Role'>{role}</div>
+						<div className='Desc font-GmarketSans font-medium text-sm sm:text-base text-[#f4f4f4] -mt-3'>
 							{description}
 						</div>
 					</div>
-					<div className='Date text-2xl'>{date}</div>
+					<div className='Date text-sm sm:text-2xl'>{date}</div>
 				</div>
 			</div>
 		</div>
 	);
 };
 
-const VideosSection = () => {
+const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 	const dummyDatas = [
 		{
 			index: 1,
@@ -774,7 +786,6 @@ const VideosSection = () => {
 	// 	window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
 	// 	window.removeEventListener('scroll', () => {});
 	// }, []);
-
 	/**inner를 100vh만큼 줄이고 마진으로 인식범위 최적화 */
 	const inner = useRef(null);
 	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
@@ -805,7 +816,10 @@ const VideosSection = () => {
 			</div>
 			<AnimatePresence>
 				{isInView ? (
-					<VideoSectionIndicator scrollYProgress={scrollYProgress} />
+					<VideoSectionIndicator
+						scrollYProgress={scrollYProgress}
+						innerWidth={innerWidth}
+					/>
 				) : null}
 			</AnimatePresence>
 		</div>
@@ -814,6 +828,7 @@ const VideosSection = () => {
 
 const VideoSectionIndicator = ({
 	scrollYProgress,
+	innerWidth,
 }: VideoSectionIndicatorProps) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
@@ -831,7 +846,7 @@ const VideoSectionIndicator = ({
 			const enterAnimation = async () => {
 				await animate(
 					indicator.current,
-					{ x: 60, opacity: 1 },
+					{ x: innerWidth > 640 ? 60 : 40, opacity: 1 },
 					{ duration: 0.5 }
 				);
 			};
@@ -851,7 +866,7 @@ const VideoSectionIndicator = ({
 	return (
 		<motion.div
 			ref={indicator}
-			className='fixed left-0 top-0 h-full w-[28px] flex items-center '
+			className='fixed left-0 top-0 h-full w-[28px] hidden sm:flex items-center'
 		>
 			<div className='relative bg-[#202020] py-4 box-content rounded-full h-[60vh] w-full flex flex-col justify-between items-center'>
 				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
@@ -1020,7 +1035,7 @@ const OutroSection = () => {
 									'transition-all'
 								),
 							}}
-							liMotion={{ css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]' }}
+							liMotion={{ css: 'w-[calc(20px+100%)] sm:w-[calc(50px+100%)]' }}
 						/>
 					</div>
 					<span
@@ -1039,16 +1054,16 @@ export default function Home() {
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
-	const [innerWidth, setIsSmall] = useState(0);
+	const [innerWidth, setInnerWidth] = useState(0);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackground = useInView(background, { margin: '0% 0% 100% 0%' });
 	const { scrollYProgress } = useScroll({ target: circle });
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
 	const handleResize = () => {
-		setIsSmall(window.innerWidth);
+		setInnerWidth(window.innerWidth);
 	};
 	useEffect(() => {
-		setIsSmall(window.innerWidth);
+		setInnerWidth(window.innerWidth);
 		window.addEventListener('resize', handleResize);
 		return () => {
 			window.removeEventListener('resize', handleResize);
@@ -1078,7 +1093,7 @@ export default function Home() {
 					scrollYProgress={scrollYProgress}
 				/>
 				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
-				<VideosSection />
+				<VideosSection innerWidth={innerWidth} />
 				<TextSection />
 				<OutroSection />
 			</Layout>
