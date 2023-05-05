@@ -13,6 +13,9 @@ import {
 	useAnimate,
 	usePresence,
 	AnimatePresence,
+	LazyMotion,
+	domAnimation,
+	m,
 } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,6 +40,7 @@ interface SpringTextProps extends MouseEventProps {
 interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
 	inheritRef: MutableRefObject<null>;
+	innerWidth: number;
 }
 
 interface WaveProps {
@@ -51,6 +55,7 @@ interface WaveProps {
 	css?: string;
 	letterHeightFix?: number;
 	index: number;
+	innerWidth: number;
 }
 
 interface SnsLinkProps {
@@ -69,6 +74,7 @@ interface VideoContainerProps {
 	description: string;
 	date: string;
 	videoId: string;
+	innerWidth: number;
 }
 
 interface VideoSectionProps {
@@ -118,6 +124,37 @@ export const waveContainer: Variants = {
 };
 
 export const waveChild: Variants = {
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
+	hidden: {
+		opacity: 1,
+		y: 20,
+		transition: {
+			type: 'spring',
+			damping: 6,
+			stiffness: 200,
+		},
+	},
+};
+
+const simpleWaveContainer: Variants = {
+	hidden: {
+		opacity: 0,
+	},
+	visible: (i: number = 1) => ({
+		opacity: 1,
+		transition: { staggerChildren: i, delayChildren: 0 },
+	}),
+};
+
+const simpleWaveChild: Variants = {
 	visible: {
 		opacity: 1,
 		y: 0,
@@ -219,12 +256,12 @@ const SpringText = ({
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
-				<motion.ul
+				<m.ul
 					style={{ y }}
 					className='font-Roboto text-[#efefef] font-extrabold leading-snug text-center '
 				>
 					{elements.current.map((element, idx) => (
-						<motion.li
+						<m.li
 							key={idx}
 							style={{
 								x: wordsX(15),
@@ -233,9 +270,9 @@ const SpringText = ({
 							className={element.text}
 						>
 							{element.title}
-						</motion.li>
+						</m.li>
 					))}
-				</motion.ul>
+				</m.ul>
 			</div>
 		</>
 	);
@@ -251,29 +288,29 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 		}
 	});
 	return (
-		<motion.div
+		<m.div
 			style={{ visibility }}
 			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef]'
 		>
-			<motion.div
+			<m.div
 				style={{ scale }}
 				initial='hidden'
 				animate='visible'
 				variants={sideCircle}
 				className='absolute w-[200px] lg:w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
 			/>
-			<motion.ul
+			<m.ul
 				animate={!isInView ? 'visible' : 'disappear'}
 				variants={snsAnchor}
 				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2'
 			>
 				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
-					<motion.li key={idx} variants={snsList}>
+					<m.li key={idx} variants={snsList}>
 						<Link href={''}>{arr}</Link>
-					</motion.li>
+					</m.li>
 				))}
-			</motion.ul>
-		</motion.div>
+			</m.ul>
+		</m.div>
 	);
 };
 
@@ -303,11 +340,11 @@ const CircleSection = ({
 		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
-		<motion.section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
+		<m.section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
 			<div className='absolute top-0 h-[80%]'>
-				<motion.div style={{ scale: logoCircle }} className='sticky top-0'>
+				<m.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
-						<motion.div
+						<m.div
 							key={idx}
 							initial='hidden'
 							animate='visible'
@@ -318,15 +355,15 @@ const CircleSection = ({
 							)}
 						/>
 					))}
-				</motion.div>
+				</m.div>
 			</div>
 			<div className='h-full flex justify-center items-start'>
-				<motion.div
+				<m.div
 					style={{ scale, y }}
 					className='sticky top-0 h-[100vh] w-full flex items-center justify-center'
 				>
 					<div className='overflow-hidden absolute w-[100vw] aspect-square flex justify-center items-center'>
-						<div className='absolute md:w-[500px] w-[70%] aspect-square'>
+						<div className='absolute md:w-[540px] w-[70%] aspect-square'>
 							<Circles
 								ulMotion={{
 									style: { rotate },
@@ -341,7 +378,7 @@ const CircleSection = ({
 							/>
 						</div>
 					</div>
-					<motion.div
+					<m.div
 						animate={{
 							scale: [0, 1],
 							borderRadius: ['0%', '100%'],
@@ -349,28 +386,18 @@ const CircleSection = ({
 						transition={{
 							duration: 0.7,
 						}}
-						className='relative bg-[#101010] md:w-[500px] w-[70%] scale-0 aspect-square rounded-full flex justify-center items-center'
+						className='relative bg-[#101010] md:w-[540px] w-[70%] scale-0 aspect-square rounded-full flex justify-center items-center'
 					>
 						<SpringText
 							mouseX={mouseX}
 							mouseY={mouseY}
 							innerWidth={innerWidth}
 							scrollYProgress={scrollYProgress}
-						></SpringText>
-						{/* <motion.div
-							style={{ x }}
-							className='whitespace-nowrap absolute left-0 m-w-[100vw] text-[#101010] font-normal font-Roboto text-[132px]'
-						>
-							<span className='text-stroke'>
-								Emotional Creative Trendy Emotional Creative Trendy Emotional
-								Creative Trendy Emotional Creative Trendy Emotional Creative
-								Trendy
-							</span>
-						</motion.div> */}
-					</motion.div>
-				</motion.div>
+						/>
+					</m.div>
+				</m.div>
 			</div>
-		</motion.section>
+		</m.section>
 	);
 };
 
@@ -386,6 +413,7 @@ const Wave = ({
 	css = '',
 	letterHeightFix = -65,
 	index,
+	innerWidth,
 }: WaveProps) => {
 	const y = useTransform(
 		scrollYProgress,
@@ -410,11 +438,11 @@ const Wave = ({
 			)}
 		>
 			<div className='absolute w-full flex justify-center h-auto'>
-				<motion.div
+				<m.div
 					style={{ y, visibility }}
 					initial='hidden'
 					animate={isInView ? 'visible' : 'hidden'}
-					variants={waveContainer}
+					variants={innerWidth > 640 ? waveContainer : {}}
 					custom={0.08}
 					className={cls(
 						css,
@@ -423,36 +451,40 @@ const Wave = ({
 				>
 					{waveReverse
 						? [...letter].reverse().map((test, idx) => (
-								<motion.span variants={waveChild} key={idx}>
+								<m.span variants={innerWidth > 640 ? waveChild : {}} key={idx}>
 									{test === ' ' ? '\u00A0' : test}
-								</motion.span>
+								</m.span>
 						  ))
 						: letter.map((test, idx) => (
-								<motion.span variants={waveChild} key={idx}>
+								<m.span variants={innerWidth > 640 ? waveChild : {}} key={idx}>
 									{test === ' ' ? '\u00A0' : test}
-								</motion.span>
+								</m.span>
 						  ))}
-				</motion.div>
+				</m.div>
 			</div>
 			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			{/* <motion.div
+			{/* <m.div
 		style={{ y, visibility }}
 		className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
 	>
 		Future & Hornesty
-	</motion.div> */}
-			<motion.div
+	</m.div> */}
+			<m.div
 				variants={wave(waveSec, waveReverse)}
 				className={cls(
 					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
 					'relative w-full max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
 				)}
-			></motion.div>
+			></m.div>
 		</div>
 	);
 };
 
-const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
+const WavesSection = ({
+	scrollYProgress,
+	inheritRef,
+	innerWidth,
+}: WaveSectionProps) => {
 	const waveProps = useRef([
 		{
 			index: 1,
@@ -489,7 +521,7 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 	]);
 
 	return (
-		<motion.div
+		<m.div
 			ref={inheritRef}
 			animate='wave'
 			className='absolute top-[200vh] w-full h-[400vh] pb-[50vh]'
@@ -509,6 +541,7 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 						css={prop.css}
 						letterHeightFix={prop.letterHeightFix}
 						index={prop.index}
+						innerWidth={innerWidth}
 					></Wave>
 				) : (
 					<Wave
@@ -521,10 +554,11 @@ const WavesSection = ({ scrollYProgress, inheritRef }: WaveSectionProps) => {
 						stickyCondition={prop.stickyCondition}
 						waveSec={prop.waveSec}
 						index={prop.index}
+						innerWidth={innerWidth}
 					></Wave>
 				)
 			)}
-		</motion.div>
+		</m.div>
 	);
 };
 
@@ -585,7 +619,7 @@ const Video = ({ videoId }: VideoProps) => {
 					}}
 				/>
 			</div>
-			<motion.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+			<m.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					<YouTube
 						videoId={videoId}
@@ -625,7 +659,7 @@ const Video = ({ videoId }: VideoProps) => {
 					/>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
 				</div>
-			</motion.div>
+			</m.div>
 		</div>
 	);
 };
@@ -637,6 +671,7 @@ const VideoContainer = ({
 	description,
 	date,
 	videoId,
+	innerWidth,
 }: VideoContainerProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
@@ -676,14 +711,18 @@ const VideoContainer = ({
 				{ scale: [0.8, 1] },
 				{ duration: 0.4, ease: 'easeOut' }
 			);
-			textMotion();
+			if (innerWidth > 640) {
+				textMotion();
+			}
 		} else {
 			videoAnimate(
 				'.Wrapper',
 				{ scale: [1, 0.8] },
 				{ duration: 0.4, ease: 'easeIn' }
 			);
-			textMotion(true);
+			if (innerWidth > 640) {
+				textMotion(true);
+			}
 		}
 	}, [isInView]);
 	return (
@@ -790,13 +829,13 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 	const inner = useRef(null);
 	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<div ref={vertical} className='relative h-[600vh]'>
+		<div ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
 			<div
 				ref={inner}
 				className='top-0 absolute h-[calc(100%-100vh)] w-full'
 			></div>
 			<div className='sticky top-0 overflow-x-hidden'>
-				<motion.div
+				<m.div
 					ref={horizental}
 					style={{ x }}
 					className='text-[200px] h-[100vh] w-[400vw] flex'
@@ -810,9 +849,10 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 							description={data.description}
 							date={data.date}
 							videoId={data.videoId}
+							innerWidth={innerWidth}
 						/>
 					))}
-				</motion.div>
+				</m.div>
 			</div>
 			<AnimatePresence>
 				{isInView ? (
@@ -864,14 +904,14 @@ const VideoSectionIndicator = ({
 		}
 	}, [isPresent]);
 	return (
-		<motion.div
+		<m.div
 			ref={indicator}
 			className='fixed left-0 top-0 h-full w-[28px] hidden sm:flex items-center'
 		>
 			<div className='relative bg-[#202020] py-4 box-content rounded-full h-[60vh] w-full flex flex-col justify-between items-center'>
 				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
 				<div className='h-[30vh]'>
-					<motion.div
+					<m.div
 						style={{ height }}
 						className='relative w-[4px] bg-[#FE4A5D] rounded-full'
 					/>
@@ -883,7 +923,7 @@ const VideoSectionIndicator = ({
 					Artist
 				</div>
 			</div>
-		</motion.div>
+		</m.div>
 	);
 };
 
@@ -921,7 +961,7 @@ const TextSection = () => {
 			ref={ref}
 			className='relative mt-[50vh] h-[70vh] sm:h-[120vh] flex justify-center overflow-hidden'
 		>
-			<motion.div
+			<m.div
 				style={{ scale, rotate }}
 				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] sm:h-[80vh] aspect-square'
 			>
@@ -930,9 +970,9 @@ const TextSection = () => {
 						css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]',
 					}}
 				/>
-			</motion.div>
+			</m.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
-				<motion.div
+				<m.div
 					style={{
 						y: y[0],
 						opacity: opacity[0],
@@ -940,18 +980,18 @@ const TextSection = () => {
 					}}
 				>
 					Moves
-				</motion.div>
+				</m.div>
 				<div className='flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<motion.span style={{ y: y[1], opacity: opacity[1] }}>
+					<m.span style={{ y: y[1], opacity: opacity[1] }}>
 						좋은 영상을{' '}
 						<div className='font-extralight sm:inline'>만든다는 것은,</div>
-					</motion.span>
-					<motion.span style={{ y: y[2], opacity: opacity[2] }}>
+					</m.span>
+					<m.span style={{ y: y[2], opacity: opacity[2] }}>
 						당신께 감동을{' '}
 						<div className='font-extralight sm:inline'>드린다는 것.</div>
-					</motion.span>
+					</m.span>
 				</div>
-				<motion.div
+				<m.div
 					style={{
 						y: y[3],
 						opacity: opacity[3],
@@ -959,9 +999,9 @@ const TextSection = () => {
 					}}
 				>
 					Client
-				</motion.div>
+				</m.div>
 				<div className='relative flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<motion.div
+					<m.div
 						style={{
 							y: y[6],
 							opacity: opacity[6],
@@ -970,23 +1010,17 @@ const TextSection = () => {
 						className='absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
 					>
 						&
-					</motion.div>
-					<motion.span
-						style={{ y: y[4], opacity: opacity[4] }}
-						className='relative'
-					>
+					</m.div>
+					<m.span style={{ y: y[4], opacity: opacity[4] }} className='relative'>
 						상상이 현실이{' '}
 						<div className='font-extralight sm:inline'>되는 감동을,</div>
-					</motion.span>
-					<motion.span
-						style={{ y: y[5], opacity: opacity[5] }}
-						className='relative'
-					>
+					</m.span>
+					<m.span style={{ y: y[5], opacity: opacity[5] }} className='relative'>
 						더 나은 컨텐츠로의{' '}
 						<div className='font-extralight sm:inline'>영감을.</div>
-					</motion.span>
+					</m.span>
 				</div>
-				<motion.div
+				<m.div
 					style={{
 						y: y[6],
 						opacity: opacity[6],
@@ -994,7 +1028,7 @@ const TextSection = () => {
 					}}
 				>
 					Customer
-				</motion.div>
+				</m.div>
 			</div>
 		</section>
 	);
@@ -1092,7 +1126,11 @@ export default function Home() {
 					mouseY={mouseY}
 					scrollYProgress={scrollYProgress}
 				/>
-				<WavesSection inheritRef={wave} scrollYProgress={scrollYProgress} />
+				<WavesSection
+					inheritRef={wave}
+					scrollYProgress={scrollYProgress}
+					innerWidth={innerWidth}
+				/>
 				<VideosSection innerWidth={innerWidth} />
 				<TextSection />
 				<OutroSection />
