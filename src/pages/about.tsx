@@ -51,24 +51,26 @@ const HeaderSection = () => {
 	return (
 		<section
 			ref={scope}
-			className='relative h-screen flex flex-col items-center justify-center leading-none font-GmarketSans font-bold text-[7rem]'
+			className='relative h-screen text-[calc(60px+2.8vw)] flex flex-col items-center justify-center leading-none font-GmarketSans font-bold'
 		>
 			<motion.div
 				initial={{ scale: 0 }}
-				className='CircleContainer absolute px-6 w-full aspect-square max-w-[716px] flex justify-center items-center'
+				className='CircleContainer absolute w-[70vw] max-w-[716px] aspect-square flex justify-center items-center'
 			>
 				<Image
 					alt='face'
 					width={716}
 					height={716}
 					src='/images/face.png'
-					className='relative'
+					className='relative w-full'
 				/>
 				<motion.div
 					style={{ rotate: transform(1, 360) }}
-					className='absolute w-full h-full origin-center '
+					className='absolute w-full h-full origin-center'
 				>
-					<Circles />
+					<Circles
+						liMotion={{ css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]' }}
+					/>
 				</motion.div>
 			</motion.div>
 			<motion.p
@@ -83,9 +85,11 @@ const HeaderSection = () => {
 			></motion.div>
 			<motion.p
 				style={{ y: transform(0.5, -400) }}
-				className='BottomLetter opacity-0 relative flex mt-5 justify-end w-[73%]'
+				className='BottomLetter opacity-0 relative flex mt-5 break-keep justify-end w-[73%]'
 			>
-				여인산입니다.
+				여인산
+				<wbr />
+				입니다.
 			</motion.p>
 		</section>
 	);
@@ -137,15 +141,18 @@ const WorkIntroSection = () => {
 		);
 	};
 	return (
-		<section className='px-20'>
-			<div ref={title} className='h-[100vh] px-24 flex items-center'>
+		<section className=''>
+			<div
+				ref={title}
+				className='h-[30vh] sm:h-[100vh] px-16 sm:px-32 flex items-start sm:items-center'
+			>
 				<DoubleQuotation>
 					<motion.div
 						initial={'hidden'}
 						animate={isInview ? 'visible' : 'hidden'}
 						variants={waveContainer}
 						custom={0.05}
-						className='font-GmarketSans font-bold text-[7rem] flex items-end'
+						className='font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end'
 					>
 						{Array.from('저는 이런 일을 합니다').map((letter, idx) => {
 							if (idx > 2 && idx < 7) {
@@ -176,7 +183,7 @@ const WorkIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative z-[1] px-44 text-[5.125rem] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
+				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
 			>
 				{descDatas.map((data, idx) => (
 					<motion.li
@@ -218,8 +225,8 @@ const RoleIntroSection = () => {
 		}
 	}, [isInview]);
 	return (
-		<section ref={scope} className='px-20 pb-40'>
-			<div className='relative w-full mt-20 aspect-video'>
+		<section ref={scope} className='sm:px-[9vw] pb-40'>
+			<div className='relative w-full mt-8 sm:mt-20 aspect-video'>
 				<motion.div
 					initial={{ y: 200, scale: 0.5, opacity: 0.3 }}
 					className='Image relative w-full aspect-video overflow-hidden'
@@ -234,14 +241,16 @@ const RoleIntroSection = () => {
 				</motion.div>
 				<motion.div
 					style={{ x: useTransform(scrollYProgress, [0.5, 0.9], [300, 0]) }}
-					className='absolute font-GmarketSans bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[4rem] font-bold px-6 py-2'
+					className='relative sm:absolute font-GmarketSans top-0 sm:top-auto sm:bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[calc(40px+1.3vw)] font-bold px-6 py-2'
 				>
-					Camera, Director, Video Editor
+					<span className='block sm:inline'>Camera,</span>{' '}
+					<span className='block sm:inline'>Director,</span>{' '}
+					<span className='block sm:inline'>Video&nbsp;Editor</span>
 				</motion.div>
 			</div>
 			<motion.div
 				style={{ x: useTransform(scrollYProgress, [0.6, 1], [-300, 0]) }}
-				className='w-full py-16 text-5xl leading-none font-bold font-GmarketSans flex items-end pl-40'
+				className='w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end pl-40'
 			>
 				also Product Designer, Drone pilot
 			</motion.div>
@@ -276,10 +285,10 @@ const JobIntroSection = () => {
 		offset: ['start end', 'end center'],
 	});
 	return (
-		<section className='px-20'>
+		<section className=''>
 			<div
 				ref={title}
-				className='h-[100vh] pb-32 flex justify-end items-center px-24'
+				className='h-[80vh] sm:h-[100vh] pt-32 sm:pt-0 pb-32 flex justify-center sm:justify-end items-start sm:items-center sm:px-32'
 			>
 				<DoubleQuotation>
 					<motion.div
@@ -287,7 +296,7 @@ const JobIntroSection = () => {
 						animate={isInview ? 'visible' : 'hidden'}
 						variants={waveContainer}
 						custom={0.05}
-						className='font-GmarketSans font-bold text-[7rem] flex items-end'
+						className='font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end'
 					>
 						{Array.from('저는 이런 디렉터 입니다').map((letter, idx) => {
 							if (idx > 5 && idx < 9) {
@@ -318,12 +327,12 @@ const JobIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative w-[75%] m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
+				className='relative w-full sm:w-[75%] gap-y-[20vh] sm:gap-0 m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
 			>
 				{descDatas.map((data, idx) => (
 					<li
 						key={idx}
-						className='relative xl:w-[340px] md:w-[280px] w-[220px] h-[250px] aspect-square flex flex-col justify-between'
+						className='relative xl:w-[340px] md:w-[280px] sm:w-[220px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between'
 					>
 						<div className='absolute w-full h-full flex justify-center items-center'>
 							<motion.div
@@ -408,14 +417,17 @@ const OutroSection = () => {
 					<div
 						onMouseEnter={onCircleEnter}
 						onMouseLeave={onCircleLeave}
-						className='relative w-[30%] aspect-square rounded-full flex justify-center items-center'
+						className='relative w-[calc(160px+20vw)] aspect-square rounded-full flex justify-center items-center'
 					>
 						<div className='Circle absolute w-full aspect-square'>
-							<Circles ulMotion={{ css: 'animate-spin-slow' }} />
+							<Circles
+								ulMotion={{ css: 'animate-spin-slow' }}
+								liMotion={{ css: 'w-[110%]' }}
+							/>
 						</div>
 						<span
 							style={{ WebkitTextStroke: '1px #eaeaea' }}
-							className='Text relative font-GmarketSans font-bold text-[10rem] text-[#101010]'
+							className='Text relative font-GmarketSans font-bold text-[calc(40px+8.2vw)] text-[#101010]'
 						>
 							Contact
 						</span>
@@ -430,13 +442,13 @@ export default function About() {
 	return (
 		<Layout seoTitle='About' nav={{ isShort: true }}>
 			{/* overflow-X-hidden시에 스크롤 버그 생김 */}
-			<div className='w-full'>
+			<main className='w-full overflow-x-hidden scrollbar-hide'>
 				<HeaderSection />
 				<WorkIntroSection />
 				<RoleIntroSection />
 				<JobIntroSection />
 				<OutroSection />
-			</div>
+			</main>
 		</Layout>
 	);
 }

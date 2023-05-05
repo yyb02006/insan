@@ -25,7 +25,7 @@ export default function DoubleQuotation({
 					alt='quotation'
 					width={60}
 					height={36}
-					className='absolute -left-24 -top-10'
+					className='absolute -left-12 sm:-left-24 -top-8 sm:-top-10 w-[30px] h-[18px] sm:w-[60px] sm:h-[36px]'
 				/>
 				{children}
 				<Image
@@ -33,7 +33,7 @@ export default function DoubleQuotation({
 					alt='quotation'
 					width={60}
 					height={36}
-					className='absolute -bottom-4 -right-24'
+					className='absolute -bottom-4 -right-12 sm:-right-24 w-[30px] h-[18px] sm:w-[60px] sm:h-[36px]'
 				/>
 			</span>
 		</div>
