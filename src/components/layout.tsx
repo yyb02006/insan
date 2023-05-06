@@ -60,7 +60,7 @@ const ListMenu = () => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, animate, safeToRemove]);
 	return (
 		<ul
 			ref={navRef}
@@ -101,23 +101,23 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 		{
 			name: 'Contact',
 			redWord: 'email',
-			whiteletter: ' dlstks97@naver.com',
+			whiteletter: ' nokedny1117@gmail.com',
 			href: '/contact',
 		},
 	];
+	const x1 = useTransform(mouseX, (offset) => offset / 16);
+	const x2 = useTransform(mouseX, (offset) => offset / 9);
+	const y1 = useTransform(mouseY, (offset) => offset / 12);
+	const y2 = useTransform(mouseY, (offset) => offset / 6);
 	const circles = [
-		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: 12, xRatio: 16 },
+		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: y1, xRatio: x1 },
 		{
 			minimum: 'min-w-[800px]',
 			width: 'w-[50%]',
-			yRatio: 6,
-			xRatio: 9,
+			yRatio: y2,
+			xRatio: x2,
 		},
 	];
-	const wordsX = (ratio: number) =>
-		useTransform(mouseX, (offset) => offset / ratio);
-	const wordsY = (ratio: number) =>
-		useTransform(mouseY, (offset) => offset / ratio);
 	useEffect(() => {
 		if (ispresent) {
 			const enterAnimation = async () => {
@@ -166,7 +166,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 			};
 			exitAnimation();
 		}
-	}, [ispresent]);
+	}, [ispresent, animate, safeToRemove, scope]);
 	const onLinksEnter = (selector: string) => {
 		animate(
 			`.${selector}`,
@@ -233,10 +233,14 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 						</li>
 					))}
 				</ul>
+				{/* 컴포넌트를 쪼개서 만드는 수밖에... */}
 				{circles.map((element, idx) => (
 					<motion.div
 						key={idx}
-						style={{ x: wordsX(element.xRatio), y: wordsY(element.yRatio) }}
+						style={{
+							x: element.xRatio,
+							y: element.yRatio,
+						}}
 						className={cls(
 							element.width,
 							element.minimum,
@@ -280,7 +284,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, animate, safeToRemove]);
 	useEffect(() => {
 		if (isOpen && isPresent) {
 			animate('.top', { y: 11.5, rotate: -45 });
@@ -291,7 +295,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 			animate('.bottom', { y: 0, rotate: 0 });
 			animate('.middle', { opacity: 1 });
 		}
-	}, [isOpen, isPresent]);
+	}, [isOpen, isPresent, animate]);
 	return (
 		<ul
 			ref={navRef}

@@ -373,7 +373,7 @@ const CircleSection = ({
 								}}
 								liMotion={{
 									style: { scale: circleLineScale },
-									css: 'md:w-[calc(50px+100%)] w-[calc(28px+100%)]',
+									css: 'md:w-[calc(50px+100%)] w-[calc(112%)]',
 								}}
 							/>
 						</div>
@@ -615,7 +615,7 @@ const Video = ({ videoId }: VideoProps) => {
 						),
 					}}
 					liMotion={{
-						css: 'w-[calc(24px+100%)] sm:w-[calc(50px+100%)]',
+						css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]',
 					}}
 				/>
 			</div>

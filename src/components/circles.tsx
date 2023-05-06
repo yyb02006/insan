@@ -45,7 +45,7 @@ export default function Circles({ ulMotion, liMotion, ...rest }: CirclesProps) {
 					variants={liMotion?.variants}
 					className={cls(
 						circle,
-						'border rounded-full border-[#bababa] w-[calc(50px+100%)] aspect-square absolute z-0',
+						'border rounded-full border-[#bababa] aspect-square absolute z-0',
 						liMotion?.css ? liMotion?.css : ''
 					)}
 				/>
