@@ -19,7 +19,14 @@ import {
 } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import {
+	Children,
+	MutableRefObject,
+	ReactNode,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
@@ -215,20 +222,48 @@ const snsList: Variants = {
 	},
 };
 
+interface springTextMotionLiProps {
+	mouseX: MotionValue<any>;
+	mouseY: MotionValue<any>;
+	innerWidth: number;
+	ratio: number;
+	css: string;
+	children?: ReactNode;
+}
+
+const SpringTextMotionLi = ({
+	mouseX,
+	mouseY,
+	innerWidth,
+	ratio,
+	css,
+	children,
+}: springTextMotionLiProps) => {
+	const x = useTransform(mouseX, (offset) =>
+		innerWidth > 640 ? offset / 15 : null
+	);
+	const y = useTransform(mouseY, (offset) =>
+		innerWidth > 640 ? offset / ratio : null
+	);
+	return (
+		<m.li
+			style={{
+				x,
+				y,
+			}}
+			className={css}
+		>
+			{children}
+		</m.li>
+	);
+};
+
 const SpringText = ({
 	mouseX,
 	mouseY,
 	scrollYProgress,
 	innerWidth,
 }: SpringTextProps) => {
-	const wordsX = (ratio: number) =>
-		useTransform(mouseX, (offset) =>
-			innerWidth > 640 ? offset / ratio : null
-		);
-	const wordsY = (ratio: number) =>
-		useTransform(mouseY, (offset) =>
-			innerWidth > 640 ? offset / ratio : null
-		);
 	const elements = useRef([
 		{ title: 'Future', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 		{
@@ -261,16 +296,16 @@ const SpringText = ({
 					className='font-Roboto text-[#efefef] font-extrabold leading-snug text-center '
 				>
 					{elements.current.map((element, idx) => (
-						<m.li
+						<SpringTextMotionLi
 							key={idx}
-							style={{
-								x: wordsX(15),
-								y: wordsY(element.yRatio),
-							}}
-							className={element.text}
+							innerWidth={innerWidth}
+							mouseX={mouseX}
+							mouseY={mouseY}
+							ratio={element.yRatio}
+							css={element.text}
 						>
 							{element.title}
-						</m.li>
+						</SpringTextMotionLi>
 					))}
 				</m.ul>
 			</div>
@@ -603,7 +638,7 @@ const Video = ({ videoId }: VideoProps) => {
 		}
 	}, [videoState]); */
 	return (
-		<div ref={ref} className='relative'>
+		<article ref={ref} className='relative h-full'>
 			<div className='Wrapper absolute w-full aspect-square'>
 				<Circles
 					ulMotion={{
@@ -652,15 +687,17 @@ const Video = ({ videoId }: VideoProps) => {
 						'absolute top-0 h-full aspect-video cursor-pointer'
 					)}
 				>
-					<img
+					<Image
 						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-						alt='1'
+						width={1600}
+						height={900}
+						alt={`${videoId}유튜브영상`}
 						className='absolute h-full aspect-video'
 					/>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
 				</div>
 			</m.div>
-		</div>
+		</article>
 	);
 };
 
@@ -677,34 +714,39 @@ const VideoContainer = ({
 	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
 	const [videoScope, videoAnimate] = useAnimate();
-	const motionInfos = [
-		{ kind: '.Index', move: 'up', range: 100 },
-		{ kind: '.Title', move: 'down', range: 100 },
-		{ kind: '.Role', move: 'down', range: 100 },
-		{ kind: '.Desc', move: 'up', range: 100 },
-		{ kind: '.Date', move: 'up', range: 100 },
-	];
-	const textMotion = (reverse = false) => {
-		motionInfos.forEach((motionInfo) => {
-			textAnimate(
-				motionInfo.kind,
-				{
-					opacity: reverse ? [1, 0] : [0, 1],
-					y: reverse
-						? [
-								0,
-								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
-						  ]
-						: [
-								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
-								0,
-						  ],
-				},
-				{ duration: 0.6, ease: 'easeOut' }
-			);
-		});
-	};
+
 	useEffect(() => {
+		const motionInfos = [
+			{ kind: '.Index', move: 'up', range: 100 },
+			{ kind: '.Title', move: 'down', range: 100 },
+			{ kind: '.Role', move: 'down', range: 100 },
+			{ kind: '.Desc', move: 'up', range: 100 },
+			{ kind: '.Date', move: 'up', range: 100 },
+		];
+		const textMotion = (reverse = false) => {
+			motionInfos.forEach((motionInfo) => {
+				textAnimate(
+					motionInfo.kind,
+					{
+						opacity: reverse ? [1, 0] : [0, 1],
+						y: reverse
+							? [
+									0,
+									motionInfo.move === 'up'
+										? motionInfo.range
+										: -motionInfo.range,
+							  ]
+							: [
+									motionInfo.move === 'up'
+										? motionInfo.range
+										: -motionInfo.range,
+									0,
+							  ],
+					},
+					{ duration: 0.6, ease: 'easeOut' }
+				);
+			});
+		};
 		if (isInView) {
 			videoAnimate(
 				'.Wrapper',
@@ -724,7 +766,7 @@ const VideoContainer = ({
 				textMotion(true);
 			}
 		}
-	}, [isInView]);
+	}, [isInView, innerWidth, textAnimate, videoAnimate]);
 	return (
 		<div ref={ref} className='h-[100vh] w-screen'>
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
@@ -902,7 +944,7 @@ const VideoSectionIndicator = ({
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, indicator, innerWidth, animate, safeToRemove]);
 	return (
 		<m.div
 			ref={indicator}
@@ -927,33 +969,49 @@ const VideoSectionIndicator = ({
 	);
 };
 
+interface TextSectionMotionProps {
+	scrollYProgress: MotionValue<number>;
+	scrollStart: number;
+	scrollEnd: number;
+	isStroke?: boolean;
+	css?: string;
+	children?: ReactNode;
+}
+
+const TextSectionMotionSpan = ({
+	scrollYProgress,
+	scrollStart,
+	scrollEnd,
+	css,
+	children,
+	isStroke = false,
+}: TextSectionMotionProps) => {
+	const y = useTransform(scrollYProgress, [scrollStart, scrollEnd], [100, 0]);
+	const opacity = useTransform(
+		scrollYProgress,
+		[scrollStart, scrollEnd],
+		[0, 1]
+	);
+	return (
+		<m.span
+			style={{
+				y,
+				opacity,
+				WebkitTextStroke: isStroke ? '1px #9c9c9c' : undefined,
+			}}
+			className={css}
+		>
+			{children}
+		</m.span>
+	);
+};
+
 const TextSection = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
 		offset: ['start end', 'end start'],
 	});
-	const y: MotionValue[] = [];
-	const opacity: MotionValue[] = [];
-	const setTiming = (start: number, end: number, term: number) => {
-		for (let i = 0; i < 7; i++) {
-			y.push(
-				useTransform(
-					scrollYProgress,
-					[0.1 * (i * term + start), 0.1 * (i * term + end)],
-					[100, 0]
-				)
-			);
-			opacity.push(
-				useTransform(
-					scrollYProgress,
-					[0.1 * (i * term + start), 0.1 * (i * term + end)],
-					[0, 1]
-				)
-			);
-		}
-	};
-	setTiming(1, 2, 5 / 8);
 	const scale = useTransform(scrollYProgress, [0, 0.4], [0.5, 1]);
 	const rotate = useTransform(scrollYProgress, [0, 0.4], [90, 0]);
 	return (
@@ -972,63 +1030,80 @@ const TextSection = () => {
 				/>
 			</m.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
-				<m.div
-					style={{
-						y: y[0],
-						opacity: opacity[0],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.1}
+					scrollEnd={0.2}
+					css='block'
+					isStroke={true}
 				>
 					Moves
-				</m.div>
+				</TextSectionMotionSpan>
 				<div className='flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<m.span style={{ y: y[1], opacity: opacity[1] }}>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.15}
+						scrollEnd={0.25}
+					>
 						좋은 영상을{' '}
 						<div className='font-extralight sm:inline'>만든다는 것은,</div>
-					</m.span>
-					<m.span style={{ y: y[2], opacity: opacity[2] }}>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.2}
+						scrollEnd={0.3}
+					>
 						당신께 감동을{' '}
 						<div className='font-extralight sm:inline'>드린다는 것.</div>
-					</m.span>
+					</TextSectionMotionSpan>
 				</div>
-				<m.div
-					style={{
-						y: y[3],
-						opacity: opacity[3],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.25}
+					scrollEnd={0.35}
+					css='block'
+					isStroke={true}
 				>
 					Client
-				</m.div>
+				</TextSectionMotionSpan>
 				<div className='relative flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<m.div
-						style={{
-							y: y[6],
-							opacity: opacity[6],
-							WebkitTextStroke: '1px #9c9c9c',
-						}}
-						className='absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.3}
+						scrollEnd={0.4}
+						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+						isStroke={true}
 					>
 						&
-					</m.div>
-					<m.span style={{ y: y[4], opacity: opacity[4] }} className='relative'>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.3}
+						scrollEnd={0.4}
+						css='relative'
+					>
 						상상이 현실이{' '}
 						<div className='font-extralight sm:inline'>되는 감동을,</div>
-					</m.span>
-					<m.span style={{ y: y[5], opacity: opacity[5] }} className='relative'>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.37}
+						scrollEnd={0.47}
+						css='relative'
+					>
 						더 나은 컨텐츠로의{' '}
 						<div className='font-extralight sm:inline'>영감을.</div>
-					</m.span>
+					</TextSectionMotionSpan>
 				</div>
-				<m.div
-					style={{
-						y: y[6],
-						opacity: opacity[6],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.42}
+					scrollEnd={0.52}
+					css='block'
+					isStroke={true}
 				>
 					Customer
-				</m.div>
+				</TextSectionMotionSpan>
 			</div>
 		</section>
 	);
@@ -1043,7 +1118,7 @@ const OutroSection = () => {
 		} else {
 			animate(scope.current, { scale: 0.5 });
 		}
-	}, [isInView]);
+	}, [isInView, scope, animate]);
 	const onCircleEnter = () => {
 		animate('.Container', { scale: 1.2 }, { duration: 0.5 });
 		animate('.Text', { color: '#eaeaea' }, { duration: 0.5 });

@@ -486,7 +486,7 @@ const OutroSection = () => {
 		} else {
 			outroAnimate(scope.current, { scale: 0.5 }, { duration: 0.2 });
 		}
-	}, [isInview, outroAnimate]);
+	}, [isInview, outroAnimate, scope]);
 	return (
 		<section ref={scope}>
 			<Link href='/contact'>
