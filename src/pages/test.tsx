@@ -1,4 +1,4 @@
-import { useScroll, useTransform, motion } from 'framer-motion';
+import { useScroll, useTransform, m } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
 export default function Test() {
@@ -28,22 +28,22 @@ export default function Test() {
 				ref={ref}
 				className='w-full h-[200vh] flex justify-center items-start bg-indigo-500'
 			>
-				<motion.div
+				<m.div
 					initial={{ scale: 0 }}
 					style={{ scale }}
 					className='sticky top-0 w-[400px] aspect-square rounded-full border border-[#101010]'
 				/>
-				<motion.div
+				<m.div
 					initial={{ scale: 0 }}
 					style={{ scale }}
 					className='sticky top-0 w-[400px] aspect-square rounded-full border border-[#101010]'
 				/>
-				<motion.div
+				<m.div
 					initial={{ scale: 0 }}
 					style={{ scale }}
 					className='sticky top-0 w-[400px] aspect-square rounded-full border border-[#101010]'
 				/>
-				<motion.div
+				<m.div
 					initial={{ scale: 0 }}
 					style={{ scale }}
 					className='sticky top-0 w-[400px] aspect-square rounded-full border border-[#101010]'

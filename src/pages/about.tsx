@@ -7,12 +7,46 @@ import {
 	useScroll,
 	useTransform,
 	useInView,
+	MotionValue,
 } from 'framer-motion';
 import Image from 'next/image';
-import { useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { waveChild, waveContainer } from './index';
 import { cls } from '@/libs/client/utils';
 import Link from 'next/link';
+
+interface TransFormYProps {
+	scrollYProgress: MotionValue<number>;
+	scrollEnd: number;
+	valueStart: number;
+	valueEnd: number;
+	transform: string;
+	css: string;
+	children?: ReactNode;
+}
+
+const ScrollTransformDiv = ({
+	scrollYProgress,
+	scrollEnd,
+	valueStart,
+	valueEnd,
+	css,
+	transform,
+	children,
+}: TransFormYProps) => {
+	const y = useTransform(
+		scrollYProgress,
+		[0, scrollEnd],
+		[valueStart, valueEnd]
+	);
+	const key: { [key: string]: MotionValue } = {};
+	key[transform] = y;
+	return (
+		<motion.div style={key} className={css}>
+			{children}
+		</motion.div>
+	);
+};
 
 const HeaderSection = () => {
 	const [scope, headerAnimate] = useAnimate();
@@ -20,9 +54,6 @@ const HeaderSection = () => {
 		target: scope,
 		offset: ['start start', 'end start'],
 	});
-	const transform = (scrollEnd: number, valueEnd: number) => {
-		return useTransform(scrollYProgress, [0, scrollEnd], [0, valueEnd]);
-	};
 	useEffect(() => {
 		const enterAnimation = async () => {
 			await headerAnimate(
@@ -47,7 +78,7 @@ const HeaderSection = () => {
 	useEffect(() => {
 		window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
 		window.removeEventListener('scroll', () => {});
-	}, []);
+	}, [scrollYProgress]);
 	return (
 		<section
 			ref={scope}
@@ -64,34 +95,81 @@ const HeaderSection = () => {
 					src='/images/face.png'
 					className='relative w-full'
 				/>
-				<motion.div
-					style={{ rotate: transform(1, 360) }}
-					className='absolute w-full h-full origin-center'
+				<ScrollTransformDiv
+					scrollYProgress={scrollYProgress}
+					scrollEnd={1}
+					valueStart={0}
+					valueEnd={360}
+					transform='rotate'
+					css='absolute w-full h-full origin-center'
 				>
 					<Circles
 						liMotion={{ css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]' }}
 					/>
-				</motion.div>
+				</ScrollTransformDiv>
 			</motion.div>
-			<motion.p
-				style={{ y: transform(0.5, -800) }}
-				className='TopLetter opacity-0 relative flex justify-start break-keep w-[73%]'
+			<ScrollTransformDiv
+				scrollYProgress={scrollYProgress}
+				scrollEnd={0.5}
+				valueStart={0}
+				valueEnd={-800}
+				transform='y'
+				css='TopLetter opacity-0 relative flex justify-start break-keep w-[73%]'
 			>
 				선 좀 넘는 디렉터,
-			</motion.p>
-			<motion.div
-				style={{ y: transform(0.5, -200) }}
-				className='Line relative border-t w-0'
-			></motion.div>
-			<motion.p
-				style={{ y: transform(0.5, -400) }}
-				className='BottomLetter opacity-0 relative flex mt-5 break-keep justify-end w-[73%]'
+			</ScrollTransformDiv>
+			<ScrollTransformDiv
+				scrollYProgress={scrollYProgress}
+				scrollEnd={0.5}
+				valueStart={0}
+				valueEnd={-200}
+				transform={'y'}
+				css='Line relative border-t w-0'
+			/>
+			<ScrollTransformDiv
+				scrollYProgress={scrollYProgress}
+				scrollEnd={0.5}
+				valueStart={0}
+				valueEnd={-400}
+				transform={'y'}
+				css='BottomLetter opacity-0 relative flex mt-5 break-keep justify-end w-[73%]'
 			>
 				여인산
 				<wbr />
 				입니다.
-			</motion.p>
+			</ScrollTransformDiv>
 		</section>
+	);
+};
+
+interface WorkIntroSectionMotionLiProps {
+	scrollYProgress: MotionValue<number>;
+	scrollEnd: number;
+	valueStart: number | string;
+	css: string;
+	children?: ReactNode;
+}
+
+const WorkIntroSectionMotionLi = ({
+	scrollYProgress,
+	scrollEnd,
+	valueStart,
+	children,
+	css,
+}: WorkIntroSectionMotionLiProps) => {
+	const y = useTransform(scrollYProgress, [0, scrollEnd], [valueStart, '0vw']);
+	const opacity = useTransform(scrollYProgress, [0, scrollEnd], [0, 1]);
+
+	return (
+		<motion.li
+			style={{
+				y,
+				opacity,
+			}}
+			className={css}
+		>
+			{children}
+		</motion.li>
 	);
 };
 
@@ -129,17 +207,6 @@ const WorkIntroSection = () => {
 		target: desc,
 		offset: ['start end', 'end center'],
 	});
-	const transform = (
-		scrollEnd: number,
-		valueStart: number | string,
-		valueEnd: number | string
-	) => {
-		return useTransform(
-			scrollYProgress,
-			[0, scrollEnd],
-			[valueStart, valueEnd]
-		);
-	};
 	return (
 		<section className=''>
 			<div
@@ -186,13 +253,12 @@ const WorkIntroSection = () => {
 				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
 			>
 				{descDatas.map((data, idx) => (
-					<motion.li
+					<WorkIntroSectionMotionLi
 						key={idx}
-						style={{
-							y: transform(data.scrollEnd, data.distance, '0vw'),
-							opacity: transform(data.scrollEnd, 0, 1),
-						}}
-						className={cls(
+						scrollYProgress={scrollYProgress}
+						scrollEnd={data.scrollEnd}
+						valueStart={data.distance}
+						css={cls(
 							idx % 2 === 0 ? 'justify-end' : 'justify-start',
 							'flex w-full'
 						)}
@@ -201,7 +267,7 @@ const WorkIntroSection = () => {
 						<span className='font-thin text-[#bababa]'>
 							{data.secondLetter}
 						</span>
-					</motion.li>
+					</WorkIntroSectionMotionLi>
 				))}
 			</ul>
 		</section>
@@ -223,7 +289,7 @@ const RoleIntroSection = () => {
 				{ duration: 0.6, ease: 'easeInOut' }
 			);
 		}
-	}, [isInview]);
+	}, [isInview, animate]);
 	return (
 		<section ref={scope} className='sm:px-[9vw] pb-40'>
 			<div className='relative w-full mt-8 sm:mt-20 aspect-video'>
@@ -255,6 +321,44 @@ const RoleIntroSection = () => {
 				also Product Designer, Drone pilot
 			</motion.div>
 		</section>
+	);
+};
+
+interface JobIntroSectionMotionDivProps {
+	scrollYProgress: MotionValue<number>;
+	idx: number;
+	startValue: number;
+	css: string;
+	children?: ReactNode;
+}
+
+const JobIntroSectionMotionDiv = ({
+	scrollYProgress,
+	idx,
+	startValue,
+	css,
+	children,
+}: JobIntroSectionMotionDivProps) => {
+	const y = useTransform(
+		scrollYProgress,
+		[0.15 * idx, 0.3 + 0.15 * idx],
+		[startValue, 0]
+	);
+	const opacity = useTransform(
+		scrollYProgress,
+		[0.15 * idx, 0.3 + 0.15 * idx],
+		[0, 1]
+	);
+	return (
+		<motion.div
+			style={{
+				y,
+				opacity,
+			}}
+			className={css}
+		>
+			{children}
+		</motion.div>
 	);
 };
 
@@ -335,56 +439,29 @@ const JobIntroSection = () => {
 						className='relative xl:w-[340px] md:w-[280px] sm:w-[220px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between'
 					>
 						<div className='absolute w-full h-full flex justify-center items-center'>
-							<motion.div
-								style={{
-									y: useTransform(
-										scrollYProgress,
-										[0.15 * idx, 0.3 + 0.15 * idx],
-										[-300, 0]
-									),
-									opacity: useTransform(
-										scrollYProgress,
-										[0.15 * idx, 0.3 + 0.15 * idx],
-										[0, 1]
-									),
-								}}
-								className='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'
+							<JobIntroSectionMotionDiv
+								scrollYProgress={scrollYProgress}
+								idx={idx}
+								startValue={-300}
+								css='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'
 							/>
 						</div>
-						<motion.div
-							style={{
-								y: useTransform(
-									scrollYProgress,
-									[0.15 * idx, 0.3 + 0.15 * idx],
-									[-100, 0]
-								),
-								opacity: useTransform(
-									scrollYProgress,
-									[0.15 * idx, 0.3 + 0.15 * idx],
-									[0, 1]
-								),
-							}}
-							className='relative w-full text-[2rem] font-bold'
+						<JobIntroSectionMotionDiv
+							scrollYProgress={scrollYProgress}
+							idx={idx}
+							startValue={-100}
+							css='relative w-full text-[2rem] font-bold'
 						>
 							{data.title}
-						</motion.div>
-						<motion.div
-							style={{
-								y: useTransform(
-									scrollYProgress,
-									[0.15 * idx, 0.3 + 0.15 * idx],
-									[200, 0]
-								),
-								opacity: useTransform(
-									scrollYProgress,
-									[0.15 * idx, 0.3 + 0.15 * idx],
-									[0, 1]
-								),
-							}}
-							className='relative font-extralight '
+						</JobIntroSectionMotionDiv>
+						<JobIntroSectionMotionDiv
+							scrollYProgress={scrollYProgress}
+							idx={idx}
+							startValue={200}
+							css='relative font-extralight'
 						>
 							{data.desc}
-						</motion.div>
+						</JobIntroSectionMotionDiv>
 					</li>
 				))}
 			</ul>
@@ -409,7 +486,7 @@ const OutroSection = () => {
 		} else {
 			outroAnimate(scope.current, { scale: 0.5 }, { duration: 0.2 });
 		}
-	}, [isInview]);
+	}, [isInview, outroAnimate]);
 	return (
 		<section ref={scope}>
 			<Link href='/contact'>
