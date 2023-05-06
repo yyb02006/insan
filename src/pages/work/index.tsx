@@ -98,7 +98,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, chevron, chevronAnimate, safeToRemove]);
 	return (
 		<div ref={chevron} className='relative opacity-0 flex items-center'>
 			<svg
@@ -161,7 +161,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			},
 		});
 		return animation.stop;
-	}, [rounded]);
+	}, [rounded, count]);
 	useEffect(() => {
 		setCategory(categoryState);
 		switch (categoryState) {
@@ -275,7 +275,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, button, buttonAnimate, safeToRemove]);
 	return (
 		<div ref={button}>
 			<button
@@ -427,7 +427,7 @@ const VideoTitlePresense = () => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, animate, safeToRemove]);
 	return (
 		<div
 			ref={title}
@@ -462,7 +462,7 @@ const Video = ({ index, waiting }: VideoProps) => {
 			};
 			exitAnimation();
 		}
-	}, [titleScreen]);
+	}, [titleScreen, thumnail, thumnailAnimate]);
 	return (
 		<motion.article
 			initial={{ opacity: 1 }}
@@ -764,7 +764,7 @@ const OutroSection = () => {
 			};
 			leaveAnimation();
 		}
-	}, [isLinksInview]);
+	}, [isLinksInview, snsLinksAnimate]);
 	return (
 		<section className='relative bg-[#101010] h-auto flex flex-col items-center font-bold'>
 			<motion.div
