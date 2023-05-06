@@ -19,6 +19,7 @@ import useMouseSpring from '@/libs/client/useMouseSpring';
 interface LayoutProps {
 	seoTitle: string;
 	children: ReactNode;
+	footerPosition?: string;
 	nav?: { exist?: boolean; isShort: boolean };
 }
 
@@ -105,12 +106,12 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 		},
 	];
 	const circles = [
-		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: 12, xRatio: 12 },
+		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: 12, xRatio: 16 },
 		{
 			minimum: 'min-w-[800px]',
 			width: 'w-[50%]',
 			yRatio: 6,
-			xRatio: 6,
+			xRatio: 9,
 		},
 	];
 	const wordsX = (ratio: number) =>
@@ -141,6 +142,20 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 			enterAnimation();
 		} else {
 			const exitAnimation = async () => {
+				animate(
+					'.Circles',
+					{ scale: [1, 1.5], opacity: [1, 0] },
+					{
+						duration: 0.3,
+						ease: 'easeOut',
+						type: 'spring',
+					}
+				);
+				await animate(
+					'.Menu',
+					{ scale: [1, 1.2, 0.7], opacity: [1, 0] },
+					{ duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
+				);
 				animate(
 					scope.current,
 					{ borderRadius: '0% 0% 0% 100%' },
@@ -314,6 +329,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 export default function Layout({
 	seoTitle,
 	children,
+	footerPosition = 'relative',
 	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
@@ -322,7 +338,7 @@ export default function Layout({
 		<div
 			onMouseMove={(e) => onMove(e)}
 			onMouseLeave={onLeave}
-			className='relative'
+			className='relative min-h-screen h-auto'
 		>
 			<Head>
 				<title>
@@ -330,7 +346,7 @@ export default function Layout({
 				</title>
 			</Head>
 			{nav ? (
-				<div className='fixed z-[1000] left-0 mt-6 ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
+				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
 					<Link href={'/'} className='flex justify-center items-center'>
 						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
 						<Image
@@ -345,7 +361,7 @@ export default function Layout({
 				</div>
 			) : null}
 			{nav ? (
-				<div className='fixed z-[999] right-0 mt-6 mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
+				<div className='fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
 					<AnimatePresence>
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>
@@ -357,7 +373,12 @@ export default function Layout({
 				</div>
 			) : null}
 			{children}
-			<footer className='text-[#606060] text-xs flex justify-center items-start h-[5vh]'>
+			<footer
+				className={cls(
+					footerPosition,
+					'text-[#606060] text-xs flex justify-center items-start h-[5vh] bottom-0 w-full'
+				)}
+			>
 				2023 Insan - all rights reserved
 			</footer>
 		</div>

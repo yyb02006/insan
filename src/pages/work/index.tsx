@@ -180,7 +180,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 		}
 	}, [categoryState, setCategory]);
 	return (
-		<section className='relative'>
+		<section className='relative px-9'>
 			<motion.div
 				style={{ rotate: rotate.current }}
 				className={
@@ -190,7 +190,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
 			</motion.div>
 			<div className='relative inline-block'>
-				<motion.div className='relative flex flex-wrap text-[9rem] font-bold leading-none'>
+				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
 					<span className='font-light'>
 						<span ref={ref} className='absolute'></span>
 						<span className='invisible'>{dataLength.current}&nbsp;</span>
@@ -234,7 +234,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 							{/* {categoryState === category.kind ? (
 								<div className='absolute bg-[#151515] w-full h-[40%]' />
 							) : null} */}
-							<div className='relative text-[2rem] leading-tight'>
+							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
 								<div className='inline-block pr-3'>{category.count} </div>
 								{category.title}
 							</div>
@@ -339,7 +339,7 @@ const TagButtonSection = () => {
 		}
 	}, [tags]); */
 	return (
-		<section className='relative bg-[#101010] py-6 flex justify-between'>
+		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
 				<AnimatePresence>
 					{tags.selected.map((tag) => (
@@ -372,7 +372,7 @@ const TagButtonSection = () => {
 
 const SearchSection = () => {
 	return (
-		<section className='mt-[10vh] font-bold flex gap-2 pb-2 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'>
+		<section className='mt-[10vh] mx-9 font-bold flex gap-2 pb-2 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'>
 			<svg
 				xmlns='http://www.w3.org/2000/svg'
 				fill='none'
@@ -534,7 +534,7 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 		ref.current[index].style.zIndex = '0';
 	}; */
 	return (
-		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010]'>
+		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
 				{['film', 'short', 'outsource'].map((data) =>
 					category === data
@@ -680,7 +680,7 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 
 const OutroSection = () => {
 	const letterRef = useRef(null);
-	const isletterInview = useInView(letterRef, {
+	const isLetterInview = useInView(letterRef, {
 		amount: 0.6,
 		margin: '50% 0% 0% 0%',
 	});
@@ -766,24 +766,24 @@ const OutroSection = () => {
 		}
 	}, [isLinksInview]);
 	return (
-		<section className='relative bg-[#101010] h-[200vh] flex flex-col items-center font-bold'>
+		<section className='relative bg-[#101010] h-auto flex flex-col items-center font-bold'>
 			<motion.div
 				initial={'hidden'}
-				animate={isletterInview ? 'visible' : 'hidden'}
+				animate={isLetterInview ? 'visible' : 'hidden'}
 				variants={waveContainer}
 				custom={0.05}
 				ref={letterRef}
-				className='text-[4.5rem] h-[60vh] flex items-end'
+				className='text-[calc(10px+3vw)] h-[40vh] sm:h-[60vh] flex items-end'
 			>
-				{letter.map((test, idx) => (
+				{letter.map((letter, idx) => (
 					<motion.span variants={waveChild} key={idx}>
-						{test === ' ' ? '\u00A0' : test}
+						{letter === ' ' ? '\u00A0' : letter}
 					</motion.span>
 				))}
 			</motion.div>
 			<ul
 				ref={snsLinks}
-				className='text-[7.75rem] h-[140vh] flex flex-col justify-center items-center text-[#101010]'
+				className='text-[calc(40px+3.5vw)] h-[100vh] sm:h-[140vh] flex flex-col justify-center items-center text-[#101010]'
 			>
 				<motion.div initial={{ rotate: -60 }} className='Circles absolute'>
 					{Array.from({ length: 3 }).map((_, idx) => (
@@ -793,7 +793,7 @@ const OutroSection = () => {
 							className={cls(
 								idx === 1 ? 'z-[1]' : '',
 								`Circle-${idx}`,
-								'relative w-[20vw] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'
+								'relative w-[calc(60px+17vw)] aspect-square rounded-full border border-[#9c9c9c] bg-[#101010]'
 							)}
 						/>
 					))}
@@ -821,8 +821,8 @@ const OutroSection = () => {
 export default function Work() {
 	const [category, setCategory] = useState('');
 	return (
-		<Layout seoTitle='Works' nav={{ isShort: true }}>
-			<main className='pt-[100px] p-9 font-GmarketSans'>
+		<Layout seoTitle='Work' nav={{ isShort: true }}>
+			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
 				<TitleSection setCategory={setCategory} />
 				<SearchSection />
 				<TagButtonSection />
