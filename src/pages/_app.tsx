@@ -1,4 +1,3 @@
-import { cls } from '@/libs/client/utils';
 import '@/styles/globals.css';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import type { AppProps } from 'next/app';

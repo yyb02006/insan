@@ -7,20 +7,16 @@ import {
 	MotionValue,
 	Variants,
 	useInView,
-	motion,
 	useScroll,
 	useTransform,
 	useAnimate,
 	usePresence,
 	AnimatePresence,
-	LazyMotion,
-	domAnimation,
 	m,
 } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-	Children,
 	MutableRefObject,
 	ReactNode,
 	useEffect,
@@ -93,11 +89,11 @@ interface VideoSectionIndicatorProps {
 	innerWidth: number;
 }
 
-const wave = (sec: number, reverse: boolean = false) => {
+const wave = (sec: number, reverse: boolean = false): Variants => {
 	if (reverse) {
 		return {
 			wave: {
-				backgroundPositionX: '-100vw',
+				x: '-100vw',
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -108,7 +104,7 @@ const wave = (sec: number, reverse: boolean = false) => {
 	} else {
 		return {
 			wave: {
-				backgroundPositionX: `100vw`,
+				x: `0vw`,
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -131,37 +127,6 @@ export const waveContainer: Variants = {
 };
 
 export const waveChild: Variants = {
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-	hidden: {
-		opacity: 1,
-		y: 20,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-};
-
-const simpleWaveContainer: Variants = {
-	hidden: {
-		opacity: 0,
-	},
-	visible: (i: number = 1) => ({
-		opacity: 1,
-		transition: { staggerChildren: i, delayChildren: 0 },
-	}),
-};
-
-const simpleWaveChild: Variants = {
 	visible: {
 		opacity: 1,
 		y: 0,
@@ -375,7 +340,7 @@ const CircleSection = ({
 		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
-		<m.section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
+		<section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
 			<div className='absolute top-0 h-[80%]'>
 				<m.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
@@ -432,7 +397,7 @@ const CircleSection = ({
 					</m.div>
 				</m.div>
 			</div>
-		</m.section>
+		</section>
 	);
 };
 
@@ -460,7 +425,6 @@ const Wave = ({
 	const visibility = useTransform(scrollYProgress, (value) =>
 		value > startHeight ? 'visible' : 'hidden'
 	);
-	// const test = `top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`;
 	return (
 		<div
 			ref={parent}
@@ -498,17 +462,12 @@ const Wave = ({
 				</m.div>
 			</div>
 			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			{/* <m.div
-		style={{ y, visibility }}
-		className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
-	>
-		Future & Hornesty
-	</m.div> */}
 			<m.div
+				initial={{ x: waveReverse ? 0 : '-100vw' }}
 				variants={wave(waveSec, waveReverse)}
 				className={cls(
 					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-					'relative w-full max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
+					'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
 				)}
 			></m.div>
 		</div>
@@ -625,20 +584,8 @@ const Video = ({ videoId }: VideoProps) => {
 			setThumnail((p) => !p);
 		}
 	}, [isInView, videoState]);
-	/* controls.start와 controls.stop을 반복하면 점점 느려지는 버그
-	const ref = useRef<HTMLUListElement | null>(null);
-	const controls = useAnimationControls();
-	useEffect(() => {
-		if (videoState === 1) {
-			controls.start('start');
-		}
-		if (videoState !== 1) {
-			controls.stop();
-			return;
-		}
-	}, [videoState]); */
 	return (
-		<article ref={ref} className='relative h-full'>
+		<article ref={ref} className='relative'>
 			<div className='Wrapper absolute w-full aspect-square'>
 				<Circles
 					ulMotion={{
@@ -654,7 +601,7 @@ const Video = ({ videoId }: VideoProps) => {
 					}}
 				/>
 			</div>
-			<m.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					<YouTube
 						videoId={videoId}
@@ -674,29 +621,25 @@ const Video = ({ videoId }: VideoProps) => {
 						className='relative h-full aspect-video pointer-events-none'
 					/>
 				</div>
-				<div
+				<m.div
 					onClick={() => {
 						if (video) {
 							setThumnail((p) => !p);
 						}
 					}}
-					className={cls(
-						thumnail
-							? 'opacity-100'
-							: 'opacity-0 transition-opacity duration-300',
-						'absolute top-0 h-full aspect-video cursor-pointer'
-					)}
+					style={{ opacity: thumnail ? 1 : 0 }}
+					className='absolute top-0 h-full aspect-video cursor-pointer duration-300'
 				>
 					<Image
 						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						width={1600}
 						height={900}
-						alt={`${videoId}유튜브영상`}
+						alt={`${videoId}유튜브영상 썸네일`}
 						className='absolute h-full aspect-video'
 					/>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
-				</div>
-			</m.div>
+				</m.div>
+			</div>
 		</article>
 	);
 };
@@ -768,7 +711,7 @@ const VideoContainer = ({
 		}
 	}, [isInView, innerWidth, textAnimate, videoAnimate]);
 	return (
-		<div ref={ref} className='h-[100vh] w-screen'>
+		<section ref={ref} className='h-[100vh] w-screen'>
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
 					<Image
@@ -814,7 +757,7 @@ const VideoContainer = ({
 					<div className='Date text-sm sm:text-2xl'>{date}</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 };
 
@@ -863,20 +806,15 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 		}
 	}, [horizental.current?.offsetWidth]);
 	const x = useTransform(scrollYProgress, [0.1, 0.9], [0, -range]);
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
-	// 	window.removeEventListener('scroll', () => {});
-	// }, []);
-	/**inner를 100vh만큼 줄이고 마진으로 인식범위 최적화 */
 	const inner = useRef(null);
 	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<div ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
+		<section ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
 			<div
 				ref={inner}
 				className='top-0 absolute h-[calc(100%-100vh)] w-full'
 			></div>
-			<div className='sticky top-0 overflow-x-hidden'>
+			<div className='sticky top-0 overflow-hidden'>
 				<m.div
 					ref={horizental}
 					style={{ x }}
@@ -904,7 +842,7 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 					/>
 				) : null}
 			</AnimatePresence>
-		</div>
+		</section>
 	);
 };
 
@@ -914,15 +852,7 @@ const VideoSectionIndicator = ({
 }: VideoSectionIndicatorProps) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
-	const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-	// const opacity = useTransform(
-	// 	scrollYProgress,
-	// 	[
-	// 		0.13, 0.15, 0.24, 0.26, 0.39, 0.41, 0.5, 0.52, 0.65, 0.67, 0.76, 0.78,
-	// 		0.91,
-	// 	],
-	// 	[1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1]
-	// );
+	const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
@@ -946,7 +876,7 @@ const VideoSectionIndicator = ({
 		}
 	}, [isPresent, indicator, innerWidth, animate, safeToRemove]);
 	return (
-		<m.div
+		<div
 			ref={indicator}
 			className='fixed left-0 top-0 h-full w-[28px] hidden sm:flex items-center'
 		>
@@ -954,8 +884,8 @@ const VideoSectionIndicator = ({
 				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
 				<div className='h-[30vh]'>
 					<m.div
-						style={{ height }}
-						className='relative w-[4px] bg-[#FE4A5D] rounded-full'
+						style={{ scaleY }}
+						className='relative h-full w-[4px] origin-top bg-[#FE4A5D] rounded-full'
 					/>
 				</div>
 				<div
@@ -965,7 +895,7 @@ const VideoSectionIndicator = ({
 					Artist
 				</div>
 			</div>
-		</m.div>
+		</div>
 	);
 };
 
@@ -1141,7 +1071,7 @@ const OutroSection = () => {
 							ulMotion={{
 								css: cls(
 									isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
-									'transition-all'
+									'transition-transform'
 								),
 							}}
 							liMotion={{ css: 'w-[calc(20px+100%)] sm:w-[calc(50px+100%)]' }}
