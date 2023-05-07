@@ -1,6 +1,11 @@
+import dynamic from 'next/dynamic';
 import Chevron from '@/components/chevron';
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
+const VideosSection = dynamic(() => import('../components/video'));
+const WavesSection = dynamic(() => import('../components/wave'));
+const TextSection = dynamic(() => import('../components/text'));
+const OutroSection = dynamic(() => import('../components/outro'));
 import useMouseSpring from '@/libs/client/useMouseSpring';
 import { cls } from '@/libs/client/utils';
 import {
@@ -9,12 +14,8 @@ import {
 	useInView,
 	useScroll,
 	useTransform,
-	useAnimate,
-	usePresence,
-	AnimatePresence,
 	m,
 } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
 	MutableRefObject,
@@ -23,7 +24,6 @@ import {
 	useRef,
 	useState,
 } from 'react';
-import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -40,7 +40,7 @@ interface SpringTextProps extends MouseEventProps {
 	innerWidth: number;
 }
 
-interface WaveSectionProps {
+/* interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
 	inheritRef: MutableRefObject<null>;
 	innerWidth: number;
@@ -59,14 +59,14 @@ interface WaveProps {
 	letterHeightFix?: number;
 	index: number;
 	innerWidth: number;
-}
+} */
 
 interface SnsLinkProps {
 	scrollYProgress: MotionValue<number>;
 	isInView?: boolean;
 }
 
-interface VideoProps {
+/* interface VideoProps {
 	videoId: string;
 }
 
@@ -87,9 +87,9 @@ interface VideoSectionProps {
 interface VideoSectionIndicatorProps {
 	scrollYProgress: MotionValue<number>;
 	innerWidth: number;
-}
+} */
 
-const wave = (sec: number, reverse: boolean = false): Variants => {
+export const wave = (sec: number, reverse: boolean = false): Variants => {
 	if (reverse) {
 		return {
 			wave: {
@@ -401,7 +401,7 @@ const CircleSection = ({
 	);
 };
 
-const Wave = ({
+/* const Wave = ({
 	scrollYProgress,
 	letter,
 	startHeight,
@@ -462,14 +462,16 @@ const Wave = ({
 				</m.div>
 			</div>
 			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			<m.div
-				initial={{ x: waveReverse ? 0 : '-100vw' }}
-				variants={wave(waveSec, waveReverse)}
-				className={cls(
-					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-					'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
-				)}
-			></m.div>
+			<div className='w-[100vw] overflow-x-hidden'>
+				<m.div
+					initial={{ x: waveReverse ? 0 : '-100vw' }}
+					variants={wave(waveSec, waveReverse)}
+					className={cls(
+						waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
+						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
+					)}
+				></m.div>
+			</div>
 		</div>
 	);
 };
@@ -513,7 +515,6 @@ const WavesSection = ({
 			waveReverse: false,
 		},
 	]);
-
 	return (
 		<m.div
 			ref={inheritRef}
@@ -554,9 +555,9 @@ const WavesSection = ({
 			)}
 		</m.div>
 	);
-};
+}; */
 
-const Video = ({ videoId }: VideoProps) => {
+/* const Video = ({ videoId }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
@@ -897,9 +898,9 @@ const VideoSectionIndicator = ({
 			</div>
 		</div>
 	);
-};
+}; */
 
-interface TextSectionMotionProps {
+/* interface TextSectionMotionProps {
 	scrollYProgress: MotionValue<number>;
 	scrollStart: number;
 	scrollEnd: number;
@@ -1087,7 +1088,7 @@ const OutroSection = () => {
 			</Link>
 		</div>
 	);
-};
+}; */
 
 export default function Home() {
 	const wave = useRef(null);
