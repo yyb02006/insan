@@ -1,11 +1,6 @@
-import dynamic from 'next/dynamic';
 import Chevron from '@/components/chevron';
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-const VideosSection = dynamic(() => import('../components/video'));
-const WavesSection = dynamic(() => import('../components/wave'));
-const TextSection = dynamic(() => import('../components/text'));
-const OutroSection = dynamic(() => import('../components/outro'));
 import useMouseSpring from '@/libs/client/useMouseSpring';
 import { cls } from '@/libs/client/utils';
 import {
@@ -15,6 +10,9 @@ import {
 	useScroll,
 	useTransform,
 	m,
+	useAnimate,
+	usePresence,
+	AnimatePresence,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -24,6 +22,8 @@ import {
 	useRef,
 	useState,
 } from 'react';
+import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
+import Image from 'next/image';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -40,7 +40,21 @@ interface SpringTextProps extends MouseEventProps {
 	innerWidth: number;
 }
 
-/* interface WaveSectionProps {
+interface SnsLinkProps {
+	scrollYProgress: MotionValue<number>;
+	isInView?: boolean;
+}
+
+interface springTextMotionLiProps {
+	mouseX: MotionValue<any>;
+	mouseY: MotionValue<any>;
+	innerWidth: number;
+	ratio: number;
+	css: string;
+	children?: ReactNode;
+}
+
+interface WaveSectionProps {
 	scrollYProgress: MotionValue<number>;
 	inheritRef: MutableRefObject<null>;
 	innerWidth: number;
@@ -59,14 +73,9 @@ interface WaveProps {
 	letterHeightFix?: number;
 	index: number;
 	innerWidth: number;
-} */
-
-interface SnsLinkProps {
-	scrollYProgress: MotionValue<number>;
-	isInView?: boolean;
 }
 
-/* interface VideoProps {
+interface VideoProps {
 	videoId: string;
 }
 
@@ -87,7 +96,16 @@ interface VideoSectionProps {
 interface VideoSectionIndicatorProps {
 	scrollYProgress: MotionValue<number>;
 	innerWidth: number;
-} */
+}
+
+interface TextSectionMotionProps {
+	scrollYProgress: MotionValue<number>;
+	scrollStart: number;
+	scrollEnd: number;
+	isStroke?: boolean;
+	css?: string;
+	children?: ReactNode;
+}
 
 export const wave = (sec: number, reverse: boolean = false): Variants => {
 	if (reverse) {
@@ -186,15 +204,6 @@ const snsList: Variants = {
 		transition: { duration: 0.4 },
 	},
 };
-
-interface springTextMotionLiProps {
-	mouseX: MotionValue<any>;
-	mouseY: MotionValue<any>;
-	innerWidth: number;
-	ratio: number;
-	css: string;
-	children?: ReactNode;
-}
 
 const SpringTextMotionLi = ({
 	mouseX,
@@ -401,7 +410,7 @@ const CircleSection = ({
 	);
 };
 
-/* const Wave = ({
+const Wave = ({
 	scrollYProgress,
 	letter,
 	startHeight,
@@ -462,13 +471,13 @@ const CircleSection = ({
 				</m.div>
 			</div>
 			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			<div className='w-[100vw] overflow-x-hidden'>
+			<div className='w-[100vw] overflow-hidden'>
 				<m.div
 					initial={{ x: waveReverse ? 0 : '-100vw' }}
 					variants={wave(waveSec, waveReverse)}
 					className={cls(
 						waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
+						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw] bg-repeat-x'
 					)}
 				></m.div>
 			</div>
@@ -555,22 +564,31 @@ const WavesSection = ({
 			)}
 		</m.div>
 	);
-}; */
+};
 
-/* const Video = ({ videoId }: VideoProps) => {
+const Video = ({ videoId }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
+	const [videoLoad, setVideoLoad] = useState(false);
+	const [isLoad, setIsLoad] = useState(false);
 	const [video, setVideo] = useState<YouTubeEvent>();
 	const [videoState, setVideoState] = useState<number>(-1);
 	const onVideoReady: YouTubeProps['onReady'] = (e) => {
 		setVideo(e);
+		setVideoLoad(true);
 	};
 	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
 		setVideoState(e.data);
+		console.log(e.data);
 	};
 	useEffect(() => {
-		if (!thumnail && video && (videoState < 1 || videoState === 2)) {
+		if (
+			!thumnail &&
+			video &&
+			videoLoad &&
+			(videoState < 1 || videoState === 2)
+		) {
 			video.target.playVideo();
 		} else if (thumnail && video && videoState === 1) {
 			video.target.pauseVideo();
@@ -586,7 +604,7 @@ const WavesSection = ({
 		}
 	}, [isInView, videoState]);
 	return (
-		<article ref={ref} className='relative'>
+		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
 			<div className='Wrapper absolute w-full aspect-square'>
 				<Circles
 					ulMotion={{
@@ -604,39 +622,42 @@ const WavesSection = ({
 			</div>
 			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
-					<YouTube
-						videoId={videoId}
-						opts={{
-							width: '100%',
-							height: '100%',
-							playerVars: { rel: 0, modestbranding: 1 },
-							host: 'https://www.youtube-nocookie.com',
-							origin: 'http://localhost:3000',
-						}}
-						onReady={onVideoReady}
-						onStateChange={(e) => {
-							if (video) {
-								onVideoStateChange(e);
-							}
-						}}
-						className='relative h-full aspect-video pointer-events-none'
-					/>
+					{isLoad ? (
+						<YouTube
+							videoId={videoId}
+							opts={{
+								width: '100%',
+								height: '100%',
+								playerVars: { rel: 0, modestbranding: 1 },
+								host: 'https://www.youtube-nocookie.com',
+								origin: 'http://localhost:3000',
+							}}
+							loading='lazy'
+							onReady={onVideoReady}
+							onStateChange={(e) => {
+								if (video) {
+									onVideoStateChange(e);
+								}
+							}}
+							className='relative h-full aspect-video pointer-events-none'
+						/>
+					) : null}
 				</div>
 				<m.div
 					onClick={() => {
-						if (video) {
-							setThumnail((p) => !p);
-						}
+						setThumnail((p) => !p);
+						setIsLoad(true);
 					}}
 					style={{ opacity: thumnail ? 1 : 0 }}
-					className='absolute top-0 h-full aspect-video cursor-pointer duration-300'
+					className='absolute top-0 h-full bg-pink-400 aspect-video cursor-pointer duration-300'
 				>
 					<Image
 						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
 						width={1600}
 						height={900}
 						alt={`${videoId}유튜브영상 썸네일`}
-						className='absolute h-full aspect-video'
+						className='absolute w-auto h-full aspect-video'
+						priority
 					/>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
 				</m.div>
@@ -898,16 +919,7 @@ const VideoSectionIndicator = ({
 			</div>
 		</div>
 	);
-}; */
-
-/* interface TextSectionMotionProps {
-	scrollYProgress: MotionValue<number>;
-	scrollStart: number;
-	scrollEnd: number;
-	isStroke?: boolean;
-	css?: string;
-	children?: ReactNode;
-}
+};
 
 const TextSectionMotionSpan = ({
 	scrollYProgress,
@@ -1088,7 +1100,7 @@ const OutroSection = () => {
 			</Link>
 		</div>
 	);
-}; */
+};
 
 export default function Home() {
 	const wave = useRef(null);
