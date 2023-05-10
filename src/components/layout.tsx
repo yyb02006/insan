@@ -28,10 +28,6 @@ interface mouseCoord {
 	mouseY: MotionValue<any>;
 }
 
-interface ExtendedNavProps extends mouseCoord {}
-
-interface HamburgerMenuProps extends mouseCoord {}
-
 const ListMenu = () => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [navRef, animate] = useAnimate();
@@ -82,7 +78,8 @@ const ListMenu = () => {
 	);
 };
 
-const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
+const ExtendedNav = () => {
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(0);
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
 	const menu = [
@@ -110,9 +107,9 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 	const y1 = useTransform(mouseY, (offset) => offset / 12);
 	const y2 = useTransform(mouseY, (offset) => offset / 6);
 	const circles = [
-		{ minimum: 'min-w-[1200px]', width: 'w-[75%]', yRatio: y1, xRatio: x1 },
+		{ minimum: 'min-w-[900px]', width: 'w-[75%]', yRatio: y1, xRatio: x1 },
 		{
-			minimum: 'min-w-[800px]',
+			minimum: 'min-w-[600px]',
 			width: 'w-[50%]',
 			yRatio: y2,
 			xRatio: x2,
@@ -173,7 +170,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 			{ color: '#eaeaea', webkitTextStroke: '0px' },
 			{ duration: 0.2 }
 		);
-		animate(`.${selector}Letter`, { y: 40 });
+		animate(`.${selector}Letter`, { y: '110%' });
 		animate(`.${selector}Line`, { width: '100%' });
 	};
 	const onLinksLeave = (selector: string) => {
@@ -185,23 +182,25 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 			},
 			{ duration: 0.2 }
 		);
-		animate(`.${selector}Letter`, { y: 0 });
+		animate(`.${selector}Letter`, { y: '0%' });
 		animate(`.${selector}Line`, { width: 0 });
 	};
 	return (
 		<motion.div
 			ref={scope}
 			initial={{ scale: 0 }}
+			onMouseMove={onMove}
+			onMouseLeave={onLeave}
 			className='origin-top-right box-content fixed rounded-es-full left-0 top-0 w-[100vw] h-[100vh] bg-[#101010]'
 		>
-			<div className='text-[8rem] text-[#101010] font-bold font-GmarketSans flex flex-col items-center justify-center w-full h-full'>
+			<div className='font-bold font-GmarketSans flex flex-col items-center justify-center w-full h-full'>
 				<ul className='flex flex-col justify-center items-center leading-none space-y-14'>
 					{menu.map((menu, idx) => (
 						<li key={idx} className='opacity-0 Menu relative'>
 							<motion.div
 								className={cls(
 									`${menu.name}Letter`,
-									'absolute bottom-0 right-0 text-2xl font-extralight text-[#eaeaea] text-right mt-2'
+									'absolute bottom-0 right-0 text-[calc(10px+0.75vw)] leading-normal font-extralight text-[#eaeaea] text-right'
 								)}
 							>
 								<span className='text-palettered'>{menu.redWord}</span>
@@ -218,7 +217,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 									style={{ WebkitTextStroke: '1px #eaeaea' }}
 									className={cls(
 										menu.name,
-										'relative bg-[#101010] text-[#101010]'
+										'relative bg-[#101010] text-[#101010] text-[calc(50px+4vw)]'
 									)}
 								>
 									{menu.name}
@@ -227,7 +226,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 							<motion.div
 								className={cls(
 									`${menu.name}Line`,
-									'relative w-0 border-t border-[#eaeaea] rounded-full -mt-2'
+									'relative w-0 border-t border-[#eaeaea] rounded-full'
 								)}
 							/>
 						</li>
@@ -247,7 +246,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 							'Circles opacity-0 absolute aspect-square pointer-events-none'
 						)}
 					>
-						<Circles liMotion={{ css: 'w-[calc(110%)]' }} />
+						<Circles liMotion={{ css: 'w-[calc(108%)]' }} />
 					</motion.div>
 				))}
 			</div>
@@ -255,7 +254,7 @@ const ExtendedNav = ({ mouseX, mouseY }: ExtendedNavProps) => {
 	);
 };
 
-const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
+const HamburgerMenu = () => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [isOpen, setIsOpen] = useState(false);
 	const [navRef, animate] = useAnimate();
@@ -301,9 +300,7 @@ const HamburgerMenu = ({ mouseX, mouseY }: HamburgerMenuProps) => {
 			ref={navRef}
 			className='absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
-			<AnimatePresence>
-				{isOpen ? <ExtendedNav mouseX={mouseX} mouseY={mouseY} /> : null}
-			</AnimatePresence>
+			<AnimatePresence>{isOpen ? <ExtendedNav /> : null}</AnimatePresence>
 			<div
 				onClick={() => {
 					setIsOpen((p) => !p);
@@ -337,13 +334,8 @@ export default function Layout({
 	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
-	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(0);
 	return (
-		<div
-			onMouseMove={(e) => onMove(e)}
-			onMouseLeave={onLeave}
-			className='relative min-h-screen h-auto'
-		>
+		<div className='relative min-h-screen h-auto'>
 			<Head>
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
@@ -370,9 +362,7 @@ export default function Layout({
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>
 					<AnimatePresence>
-						{nav.isShort ? (
-							<HamburgerMenu mouseX={mouseX} mouseY={mouseY} />
-						) : null}
+						{nav.isShort ? <HamburgerMenu /> : null}
 					</AnimatePresence>
 				</div>
 			) : null}
