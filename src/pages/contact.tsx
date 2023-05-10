@@ -22,7 +22,7 @@ export default function Contact() {
 				{ duration: 0.3 }
 			);
 			await animate(
-				'.Links > li',
+				'.Links li',
 				{ x: [-50, 0], opacity: [0, 1] },
 				{ delay: stagger(0.1) }
 			);
@@ -48,13 +48,13 @@ export default function Contact() {
 		>
 			<section
 				ref={scope}
-				className='relative w-full h-screen flex gap-10 font-GmarketSans overflow-hidden'
+				className='relative w-full h-auto min-h-screen lg:h-screen lg:grid lg:grid-cols-2 gap-10 font-GmarketSans overflow-hidden lg:overflow-hidden'
 			>
-				<div className='relative w-full h-full flex items-center'>
-					<div className='relative w-full min-h-[900px] max-h-[1100px] h-full py-40 flex flex-col items-end justify-between text-right'>
+				<div className='relative z-[1] w-full lg:h-full flex items-center'>
+					<div className='relative w-full lg:h-full lg:max-h-[1100px] pt-[120px] pb-[40px] lg:py-40 flex flex-col items-center lg:items-end justify-between text-right lg:gap-10'>
 						<motion.div
 							style={{ WebkitTextStroke: '1px #eaeaea' }}
-							className='Title opacity-0 font-bold text-[11.25rem] text-[#101010] leading-[8rem]'
+							className='Title opacity-0 font-bold text-[calc(17.5vw)] sm:text-[calc(40px+7.4vw)] lg:text-[9.5vw] 2xl:text-[11.25rem] text-[#101010] leading-[70%]'
 						>
 							<div>
 								{Array.from('Contact').map((arr, idx) => (
@@ -67,24 +67,28 @@ export default function Contact() {
 								))}
 							</div>
 						</motion.div>
-						<div className='Letters opacity-0 font-SCoreDream font-extralight text-4xl'>
-							당신의{' '}
-							<span className='font-bold'>
-								상상이 <br />
-								현실이
-							</span>{' '}
-							될 수 있도록
+						<div className='Letters opacity-0 font-SCoreDream font-extralight text-[calc(10px+1.3vw)] leading-tight'>
+							<div className='lg:block hidden'>
+								당신의{' '}
+								<span className='font-bold'>
+									상상이 <br />
+									현실이
+								</span>{' '}
+								될 수 있도록
+							</div>
 						</div>
-						<ul className='Links font-light text-2xl leading-none space-y-6'>
-							<li className='opacity-0 text-sm -mb-2'>and more</li>
-							<li className='opacity-0'>INSTAGRAM</li>
-							<li className='opacity-0'>VIMEO</li>
-							<li className='opacity-0'>YOUTUBE</li>
-						</ul>
+						<div className='Links font-light text-[calc(10px+0.75vw)] leading-none '>
+							<ul className='lg:block hidden space-y-6'>
+								<li className='opacity-0 text-sm -mb-2'>and more</li>
+								<li className='opacity-0'>INSTAGRAM</li>
+								<li className='opacity-0'>VIMEO</li>
+								<li className='opacity-0'>YOUTUBE</li>
+							</ul>
+						</div>
 					</div>
 				</div>
-				<div className='w-full flex flex-col justify-center'>
-					<div className='ml-[140px] mr-[260px] flex flex-col items-end min-w-[400px] space-y-4'>
+				<div className='relative w-full flex items-center justify-center'>
+					<div className='mx-10 lg:mx-[60px] flex flex-col items-end max-w-[600px] w-full space-y-4'>
 						<input
 							placeholder='Name'
 							type='text'
