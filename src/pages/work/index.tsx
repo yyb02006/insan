@@ -98,7 +98,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent, chevron, chevronAnimate, safeToRemove]);
+	}, [isPresent, chevron, chevronAnimate]);
 	return (
 		<div ref={chevron} className='relative opacity-0 flex items-center'>
 			<svg
@@ -115,7 +115,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 					d='M15.75 19.5L8.25 12l7.5-7.5'
 				/>
 			</svg>
-			<div className='text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
+			<div className='Desc text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
 		</div>
 	);
 };
@@ -187,7 +187,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 					'absolute min-w-[1000px] w-[calc(1000px+50%)] h-full top-0 left-[-800px] sm:left-[-700px] lg:left-[-800px] flex items-center transition-transform duration-1000'
 				}
 			>
-				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
+				<Circles liMotion={{ css: 'w-[calc(50px+100%)]' }} />
 			</motion.div>
 			<div className='relative inline-block'>
 				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
