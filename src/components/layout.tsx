@@ -23,11 +23,6 @@ interface LayoutProps {
 	nav?: { exist?: boolean; isShort: boolean };
 }
 
-interface mouseCoord {
-	mouseX: MotionValue<any>;
-	mouseY: MotionValue<any>;
-}
-
 const ListMenu = () => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [navRef, animate] = useAnimate();
@@ -79,6 +74,7 @@ const ListMenu = () => {
 };
 
 const ExtendedNav = () => {
+	const router = useRouter();
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(0);
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
@@ -87,19 +83,19 @@ const ExtendedNav = () => {
 			name: 'Work',
 			redWord: '142',
 			whiteletter: ' video works',
-			href: '/work',
+			path: '/work',
 		},
 		{
 			name: 'About',
 			redWord: 'director',
 			whiteletter: ' editor designer',
-			href: '/about',
+			path: '/about',
 		},
 		{
 			name: 'Contact',
 			redWord: 'email',
 			whiteletter: ' nokedny1117@gmail.com',
-			href: '/contact',
+			path: '/contact',
 		},
 	];
 	const x1 = useTransform(mouseX, (offset) => offset / 16);
@@ -164,7 +160,7 @@ const ExtendedNav = () => {
 			exitAnimation();
 		}
 	}, [ispresent, animate, safeToRemove, scope]);
-	const onLinksEnter = (selector: string) => {
+	const onLinkEnter = (selector: string) => {
 		animate(
 			`.${selector}`,
 			{ color: '#eaeaea', webkitTextStroke: '0px' },
@@ -173,7 +169,7 @@ const ExtendedNav = () => {
 		animate(`.${selector}Letter`, { y: '110%' });
 		animate(`.${selector}Line`, { width: '100%' });
 	};
-	const onLinksLeave = (selector: string) => {
+	const onLinkLeave = (selector: string) => {
 		animate(
 			`.${selector}`,
 			{
@@ -184,6 +180,11 @@ const ExtendedNav = () => {
 		);
 		animate(`.${selector}Letter`, { y: '0%' });
 		animate(`.${selector}Line`, { width: 0 });
+	};
+	const onLinkClick = (path: string) => {
+		if (router.pathname === path) {
+			router.reload();
+		}
 	};
 	return (
 		<motion.div
@@ -206,13 +207,16 @@ const ExtendedNav = () => {
 								<span className='text-palettered'>{menu.redWord}</span>
 								{menu.whiteletter}
 							</motion.div>
-							<Link href={menu.href}>
+							<Link href={menu.path}>
 								<div
+									onClick={() => {
+										onLinkClick(menu.path);
+									}}
 									onMouseLeave={() => {
-										onLinksLeave(menu.name);
+										onLinkLeave(menu.name);
 									}}
 									onMouseEnter={() => {
-										onLinksEnter(menu.name);
+										onLinkEnter(menu.name);
 									}}
 									style={{ WebkitTextStroke: '1px #eaeaea' }}
 									className={cls(
