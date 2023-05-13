@@ -13,6 +13,7 @@ import {
 	useAnimate,
 	usePresence,
 	AnimatePresence,
+	useMotionValueEvent,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -874,7 +875,19 @@ const VideoSectionIndicator = ({
 }: VideoSectionIndicatorProps) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
+	const [role, setRole] = useState('');
 	const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+	useMotionValueEvent(scrollYProgress, 'change', (prev) => {
+		if (prev >= 0 && prev < 0.3) {
+			setRole('Director');
+		} else if (prev >= 0.3 && prev < 0.5) {
+			setRole('Camera');
+		} else if (prev >= 0.5 && prev < 0.7) {
+			setRole('Art');
+		} else if (prev >= 0.7 && prev <= 1) {
+			setRole('Drone');
+		}
+	});
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
@@ -914,7 +927,7 @@ const VideoSectionIndicator = ({
 					className='tracking-[1rem] text-lg text-[#eaeaea]'
 					style={{ writingMode: 'vertical-rl' }}
 				>
-					Artist
+					{role}
 				</div>
 			</div>
 		</div>
