@@ -882,9 +882,9 @@ const VideoSectionIndicator = ({
 			setRole('Director');
 		} else if (prev >= 0.3 && prev < 0.5) {
 			setRole('Camera');
-		} else if (prev >= 0.5 && prev < 0.7) {
+		} else if (prev >= 0.5 && prev < 0.8) {
 			setRole('Art');
-		} else if (prev >= 0.7 && prev <= 1) {
+		} else if (prev >= 0.8 && prev <= 1) {
 			setRole('Drone');
 		}
 	});
