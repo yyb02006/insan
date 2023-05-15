@@ -1,5 +1,6 @@
 import Layout from '@/components/layout';
 import { useAnimate, motion, stagger } from 'framer-motion';
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 export default function Contact() {
@@ -80,9 +81,17 @@ export default function Contact() {
 						<div className='Links font-light text-[calc(10px+0.75vw)] leading-none '>
 							<ul className='lg:block hidden space-y-6'>
 								<li className='opacity-0 text-sm -mb-2'>and more</li>
-								<li className='opacity-0'>INSTAGRAM</li>
-								<li className='opacity-0'>VIMEO</li>
-								<li className='opacity-0'>YOUTUBE</li>
+								<li className='opacity-0'>
+									<Link href='https://www.instagram.com/yarg__gray'>
+										INSTAGRAM
+									</Link>
+								</li>
+								<li className='opacity-0'>
+									<Link href=''>VIMEO</Link>
+								</li>
+								<li className='opacity-0'>
+									<Link href='https://www.youtube.com/@insan8871'>YOUTUBE</Link>
+								</li>
 							</ul>
 						</div>
 					</div>
