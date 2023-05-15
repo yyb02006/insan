@@ -81,16 +81,26 @@ export default function Contact() {
 						<div className='Links font-light text-[calc(10px+0.75vw)] leading-none '>
 							<ul className='lg:block hidden space-y-6'>
 								<li className='opacity-0 text-sm -mb-2'>and more</li>
-								<li className='opacity-0'>
-									<Link href='https://www.instagram.com/yarg__gray'>
+								<li className='opacity-0 hover:text-palettered transition-colors'>
+									<Link
+										href='https://www.instagram.com/yarg__gray'
+										target='_blank'
+									>
 										INSTAGRAM
 									</Link>
 								</li>
-								<li className='opacity-0'>
-									<Link href=''>VIMEO</Link>
+								<li className='opacity-0 hover:text-palettered transition-colors'>
+									<Link href='' target='_blank'>
+										VIMEO
+									</Link>
 								</li>
-								<li className='opacity-0'>
-									<Link href='https://www.youtube.com/@insan8871'>YOUTUBE</Link>
+								<li className='opacity-0 hover:text-palettered transition-colors'>
+									<Link
+										href='https://www.youtube.com/@insan8871'
+										target='_blank'
+									>
+										YOUTUBE
+									</Link>
 								</li>
 							</ul>
 						</div>

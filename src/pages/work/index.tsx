@@ -12,6 +12,7 @@ import {
 	useTransform,
 	Variants,
 } from 'framer-motion';
+import Link from 'next/link';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 
@@ -694,18 +695,21 @@ const OutroSection = () => {
 	const links = [
 		{
 			position: 'TopLink',
-			title: 'INSTAGRAM',
+			name: 'INSTAGRAM',
 			angle: -60,
+			href: 'https://www.instagram.com/yarg__gray',
 		},
 		{
 			position: 'MiddleLink',
-			title: 'VIMEO',
+			name: 'VIMEO',
 			angle: -90,
+			href: '',
 		},
 		{
 			position: 'BottomLink',
-			title: 'YOUTUBE',
+			name: 'YOUTUBE',
 			angle: -120,
+			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
 	//타입스크립트에서 렌더링 없이 데이터변경 때문에 useRef쓸 때 타입 설정
@@ -799,19 +803,21 @@ const OutroSection = () => {
 					))}
 				</motion.div>
 				{links.map((link) => (
-					<motion.li
-						style={{ WebkitTextStroke: '1px #9c9c9c' }}
-						key={link.title}
-						onMouseEnter={() => {
-							onLinksEnter(link.angle, `.${link.position}`);
-						}}
-						onMouseLeave={() => {
-							onLinksLeave(`.${link.position}`);
-						}}
-						className={cls(link.position, 'relative')}
-					>
-						{link.title}
-					</motion.li>
+					<Link href={link.href} target='_blank'>
+						<motion.li
+							style={{ WebkitTextStroke: '1px #9c9c9c' }}
+							key={link.name}
+							onMouseEnter={() => {
+								onLinksEnter(link.angle, `.${link.position}`);
+							}}
+							onMouseLeave={() => {
+								onLinksLeave(`.${link.position}`);
+							}}
+							className={cls(link.position, 'relative')}
+						>
+							{link.name}
+						</motion.li>
+					</Link>
 				))}
 			</ul>
 		</section>

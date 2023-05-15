@@ -300,7 +300,7 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	return (
 		<m.div
 			style={{ visibility }}
-			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef]'
+			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef] z-[1]'
 		>
 			<m.div
 				style={{ scale }}
@@ -312,11 +312,17 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 			<m.ul
 				animate={!isInView ? 'visible' : 'disappear'}
 				variants={snsAnchor}
-				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2'
+				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2 z-[1]'
 			>
-				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
-					<m.li key={idx} variants={snsList}>
-						<Link href={''}>{arr}</Link>
+				{[
+					{ name: 'Instagram', href: 'https://www.instagram.com/yarg__gray' },
+					{ name: 'Vimeo', href: '' },
+					{ name: 'YouTube', href: 'https://www.youtube.com/@insan8871' },
+				].map((arr, idx) => (
+					<m.li key={idx} variants={snsList} className='hover:text-palettered'>
+						<Link href={arr.href} target='_blank'>
+							{arr.name}
+						</Link>
 					</m.li>
 				))}
 			</m.ul>
@@ -1134,7 +1140,7 @@ export default function Home() {
 			window.removeEventListener('resize', handleResize);
 		};
 	}, []);
-	/* 최적화 할 때 vh값에 따른 넓이값 변화량이 꽤 유동적이라는 것을 염두에 두자*/
+	/* 반응형 대응 할 때 vh값에 따른 넓이값 변화량이 꽤 유동적이라는 것을 염두에 두자*/
 	return (
 		<div
 			ref={background}
