@@ -339,7 +339,7 @@ export default function Layout({
 }: LayoutProps) {
 	const router = useRouter();
 	return (
-		<div className='relative min-h-screen h-auto'>
+		<section className='relative min-h-screen h-auto'>
 			<Head>
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
@@ -379,6 +379,6 @@ export default function Layout({
 			>
 				2023 Insan - all rights reserved
 			</footer>
-		</div>
+		</section>
 	);
 }

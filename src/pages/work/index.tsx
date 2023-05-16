@@ -803,10 +803,9 @@ const OutroSection = () => {
 					))}
 				</motion.div>
 				{links.map((link) => (
-					<Link href={link.href} target='_blank'>
+					<Link key={link.name} href={link.href} target='_blank'>
 						<motion.li
 							style={{ WebkitTextStroke: '1px #9c9c9c' }}
-							key={link.name}
 							onMouseEnter={() => {
 								onLinksEnter(link.angle, `.${link.position}`);
 							}}

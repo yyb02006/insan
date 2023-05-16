@@ -1,7 +1,7 @@
 import Layout from '@/components/layout';
 import { useAnimate, motion, stagger } from 'framer-motion';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Contact() {
 	const [scope, animate] = useAnimate();
@@ -41,6 +41,26 @@ export default function Contact() {
 		};
 		enterAnimation();
 	}, [animate]);
+	const [inputDatas, setInputDatas] = useState({
+		title: '',
+		email: '',
+		message: '',
+	});
+	const onChange = (
+		e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
+		const { value, name } = e.currentTarget;
+		setInputDatas((p) => ({
+			...p,
+			[name]: value,
+		}));
+	};
+	const onSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!inputDatas.email) {
+			console.log('!!!!!!!!');
+		}
+	};
 	return (
 		<Layout
 			seoTitle='Contact'
@@ -49,7 +69,7 @@ export default function Contact() {
 		>
 			<section
 				ref={scope}
-				className='relative w-full h-auto min-h-screen lg:h-screen lg:grid lg:grid-cols-2 gap-10 font-GmarketSans overflow-hidden lg:overflow-hidden'
+				className='relative w-full h-auto min-h-screen lg:h-screen lg:grid lg:grid-cols-2 gap-10 font-GmarketSans overflow-hidden lg:overflow-x-hidden lg:overflow-y-scroll scrollbar-hide'
 			>
 				<div className='relative z-[1] w-full lg:h-full flex items-center'>
 					<div className='relative w-full lg:h-full lg:max-h-[1100px] pt-[120px] pb-[40px] lg:py-40 flex flex-col items-center lg:items-end justify-between text-right lg:gap-10'>
@@ -107,20 +127,28 @@ export default function Contact() {
 					</div>
 				</div>
 				<div className='relative w-full flex items-center justify-center'>
-					<div className='mx-10 lg:mx-[60px] flex flex-col items-end max-w-[600px] w-full space-y-4'>
+					<form
+						onSubmit={onSubmit}
+						className='mx-10 lg:mx-[60px] flex flex-col items-end max-w-[600px] w-full space-y-4'
+					>
 						<input
-							placeholder='Name'
+							onChange={onChange}
+							name='title'
+							placeholder='Title'
 							type='text'
 							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
 						/>
 						<input
+							onChange={onChange}
+							name='email'
 							placeholder='Your E-mail address'
-							type='text'
+							type='email'
 							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
 						/>
 						<textarea
+							onChange={onChange}
+							name='message'
 							placeholder='Type your message'
-							name=''
 							rows={9}
 							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full block bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0 resize-none'
 						></textarea>
@@ -129,7 +157,7 @@ export default function Contact() {
 								SEND
 							</div>
 						</button>
-					</div>
+					</form>
 					<div className='absolute w-full h-full flex justify-start items-center pointer-events-none'>
 						<div className='relative w-[1080px] h-[1080px]'>
 							<div className='absolute w-[1920px] top-[-46%] aspect-square rounded-full border border-[#707070]' />
