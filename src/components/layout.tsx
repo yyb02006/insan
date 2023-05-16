@@ -18,6 +18,7 @@ import useMouseSpring from '@/libs/client/useMouseSpring';
 interface LayoutProps {
 	seoTitle: string;
 	children: ReactNode;
+	css?: string;
 	footerPosition?: string;
 	nav?: { exist?: boolean; isShort: boolean };
 }
@@ -333,12 +334,13 @@ const HamburgerMenu = () => {
 export default function Layout({
 	seoTitle,
 	children,
+	css,
 	footerPosition = 'relative',
 	nav = { exist: true, isShort: false },
 }: LayoutProps) {
 	const router = useRouter();
 	return (
-		<section className='relative min-h-screen h-auto'>
+		<section className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
 			<Head>
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}

@@ -90,11 +90,7 @@ export default function Contact() {
 	};
 
 	return (
-		<Layout
-			seoTitle='Contact'
-			nav={{ isShort: true }}
-			footerPosition='absolute'
-		>
+		<Layout seoTitle='Contact' nav={{ isShort: true }} footerPosition='hidden'>
 			<section
 				ref={scope}
 				className='relative w-full h-auto min-h-screen lg:h-screen lg:grid lg:grid-cols-2 gap-10 font-GmarketSans overflow-hidden lg:overflow-x-hidden lg:overflow-y-scroll scrollbar-hide'
