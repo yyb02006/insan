@@ -6,7 +6,6 @@ import {
 	usePresence,
 	motion,
 	useTransform,
-	MotionValue,
 } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
