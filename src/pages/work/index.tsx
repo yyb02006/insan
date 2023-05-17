@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
+import Input from '@/components/input';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -30,13 +31,27 @@ interface TitleSectionProps {
 	setCategory: Dispatch<SetStateAction<string>>;
 }
 
+interface TagButtonSectionProps {
+	setSelectedTags: Dispatch<SetStateAction<string[]>>;
+}
+
+interface SearchSectionProp {
+	setKeyWords: Dispatch<SetStateAction<keyWordsState>>;
+}
+
 interface VideoSectionProps {
 	category: string;
+	keywords: keyWordsState;
 }
 
 interface VideoProps {
 	index: number;
 	waiting: number;
+}
+
+interface keyWordsState {
+	searchWord: string;
+	selectedTags: string[];
 }
 
 const titleContainer: Variants = {
@@ -291,7 +306,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	);
 };
 
-const TagButtonSection = () => {
+const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	const [tags, setTags] = useState({
 		selected: ['All'],
 		tagList: [
@@ -325,20 +340,9 @@ const TagButtonSection = () => {
 				})
 		);
 	};
-	/* useEffect(() => {
-		if (tags.selected.length > 1 && tags.selected.includes('all')) {
-			setTags(
-				(p) =>
-					(p = {
-						selected: p.selected.filter((arr) => arr !== 'all'),
-						notSelected: p.notSelected.map((arr) => ({
-							name: arr.name,
-							isSelected: arr.name === 'all' ? false : arr.isSelected,
-						})),
-					})
-			);
-		}
-	}, [tags]); */
+	useEffect(() => {
+		setSelectedTags(tags.selected);
+	}, [tags]);
 	return (
 		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
@@ -371,24 +375,50 @@ const TagButtonSection = () => {
 	);
 };
 
-const SearchSection = () => {
+const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
+	const [selectedTags, setSelectedTags] = useState(['']);
+	const [searchWord, setSearchWord] = useState('');
+	const onChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+		setSearchWord(e.currentTarget.value);
+	};
+	const onsubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setKeyWords((p) => ({ ...p, searchWord }));
+	};
+	useEffect(() => {
+		setKeyWords((p) => ({ ...p, selectedTags }));
+	}, [selectedTags]);
 	return (
-		<section className='mt-[10vh] mx-9 font-bold flex gap-2 pb-2 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'>
-			<svg
-				xmlns='http://www.w3.org/2000/svg'
-				fill='none'
-				viewBox='0 0 24 24'
-				strokeWidth={2}
-				stroke='currentColor'
-				className='w-6 h-6'
+		<section>
+			<form
+				onSubmit={onsubmit}
+				className='relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
 			>
-				<path
-					strokeLinecap='round'
-					strokeLinejoin='round'
-					d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+				<button>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={2}
+						stroke='currentColor'
+						className='w-6 h-6'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+						/>
+					</svg>
+				</button>
+				<Input
+					name='search'
+					type='text'
+					placeholder='search'
+					css='border-none placeholder:font-bold bg-transparent'
+					onChange={onChange}
 				/>
-			</svg>
-			search
+			</form>
+			<TagButtonSection setSelectedTags={setSelectedTags} />
 		</section>
 	);
 };
@@ -496,7 +526,7 @@ const Video = ({ index, waiting }: VideoProps) => {
 	);
 };
 
-const VideoSection = ({ category }: VideoSectionProps) => {
+const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	// const ref = useRef<HTMLDivElement[]>([]);
 	const videoDatas = [
 		{ category: 'film', direction: 'horizental', index: 1 },
@@ -825,13 +855,19 @@ const OutroSection = () => {
 
 export default function Work() {
 	const [category, setCategory] = useState('');
+	const [keyWords, setKeyWords] = useState<keyWordsState>({
+		searchWord: '',
+		selectedTags: [''],
+	});
+	useEffect(() => {
+		console.log(keyWords);
+	}, [keyWords]);
 	return (
 		<Layout seoTitle='Work' nav={{ isShort: true }}>
 			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
 				<TitleSection setCategory={setCategory} />
-				<SearchSection />
-				<TagButtonSection />
-				<VideoSection category={category} />
+				<SearchSection setKeyWords={setKeyWords} />
+				<VideoSection category={category} keywords={keyWords} />
 				<OutroSection />
 			</main>
 		</Layout>
