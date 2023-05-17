@@ -1,3 +1,4 @@
+import Input from '@/components/input';
 import Layout from '@/components/layout';
 import { useAnimate, motion, stagger } from 'framer-motion';
 import Link from 'next/link';
@@ -155,27 +156,28 @@ export default function Contact() {
 						onSubmit={onSubmit}
 						className='mx-10 lg:mx-[60px] flex flex-col items-end max-w-[600px] w-full space-y-4'
 					>
-						<input
-							onChange={onChange}
+						<Input
+							type='text'
 							name='title'
 							placeholder='Title'
-							type='text'
-							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
-						/>
-						<input
 							onChange={onChange}
+							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+						/>
+						<Input
+							type='text'
 							name='email'
 							placeholder='Your E-mail address'
-							type='text'
-							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
-						/>
-						<textarea
 							onChange={onChange}
+							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+						/>
+						<Input
+							type='textarea'
 							name='message'
 							placeholder='Type your message'
 							rows={9}
-							className='Input font-light placeholder:text-[#eaeaea] opacity-0 w-full block bg-[#101010] border-[#cacaca] border-b border-t-0 border-r-0 border-l-0 resize-none'
-						></textarea>
+							onChange={onChange}
+							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+						/>
 						<div className='space-x-4'>
 							<span className='font-SCoreDream font-medium text-sm text-palettered'>
 								{errors.message}
