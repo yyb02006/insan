@@ -550,162 +550,26 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 		{ category: 'film', direction: 'horizental', index: 19 },
 		{ category: 'short', direction: 'vertical', index: 20 },
 	];
-	const newDatas = {
+	const newVideoDatas = {
 		film: videoDatas.filter((data) => data.category === 'film'),
 		short: videoDatas.filter((data) => data.category === 'short'),
 		outsource: videoDatas.filter((data) => data.category === 'outsource'),
 	};
-	type test = typeof newDatas & {
+	type datas = typeof newVideoDatas & {
 		[key: string]: { category: string; direction: string; index: number }[];
 	};
-	/* const testover = (index: number) => {
-		ref.current[index].style.zIndex = '1';
-	};
-	const testout = (index: number) => {
-		ref.current[index].style.zIndex = '0';
-	}; */
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
 				{['film', 'short', 'outsource'].map((data) =>
 					category === data
-						? (newDatas as test)[data].map((arr, idx) => (
+						? (newVideoDatas as datas)[data].map((arr, idx) => (
 								<Video key={arr.index} index={arr.index} waiting={idx} />
 						  ))
 						: null
 				)}
 			</AnimatePresence>
 		</section>
-		/**Layout 3 플렉스로 조절(서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법) */
-		/* <section className='relative w-full h-auto'>
-			<div className='flex flex-wrap grow gap-2 w-full'>
-				{videoDatas.map((arr) => (
-					<div
-						key={arr.index}
-						className={cls(
-							arr.direction === 'horizental'
-								? 'aspect-[16/9] grow-[256]'
-								: 'aspect-[9/16] grow-[81]',
-							'lg:min-h-[400px] h-full sm:min-h-[220px] min-h-[200px] bg-indigo-500'
-						)}
-					>
-						{arr.index}
-					</div>
-				))}
-			</div>
-		</section> */
-		/**Layout 2 마우스오버시 늘리기 */
-		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
-			{videoDatas.map((data) => {
-				if (data.direction === 'horizental') {
-					return data.index % 4 === 0 ? (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					) : (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				} else if (data.direction === 'vertical') {
-					return (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				}
-			})}
-		</section> */
-		/**Layout 1 자동 배치 */
-		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-3 md:grid-cols-2'>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				1
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				2
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				3
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				4
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				5
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				6
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				7
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				8
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				9
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				10
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				11
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				12
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				13
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				14
-			</div>
-		</section> */
 	);
 };
 
