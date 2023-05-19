@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
+import Image from 'next/image';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -28,7 +29,7 @@ interface TitleSvgPresenseProps {
 }
 
 interface TitleSectionProps {
-	setCategory: Dispatch<SetStateAction<string>>;
+	setCategory: Dispatch<SetStateAction<'film' | 'short' | 'outsource'>>;
 }
 
 interface TagButtonSectionProps {
@@ -40,13 +41,16 @@ interface SearchSectionProp {
 }
 
 interface VideoSectionProps {
-	category: string;
+	category: 'film' | 'short' | 'outsource';
 	keywords: keyWordsState;
 }
 
 interface VideoProps {
-	index: number;
+	index: string;
 	waiting: number;
+	thumbnail: { url: string; width: number; height: number };
+	title: string;
+	description: string;
 }
 
 interface keyWordsState {
@@ -470,30 +474,32 @@ const VideoTitlePresense = () => {
 	);
 };
 
-const Video = ({ index, waiting }: VideoProps) => {
+const Video = ({
+	index,
+	waiting,
+	thumbnail,
+	title,
+	description,
+}: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
-	const [thumnail, thumnailAnimate] = useAnimate();
+	const [cover, coverAnimate] = useAnimate();
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
-				await thumnailAnimate(
-					thumnail.current,
-					{ opacity: 0 },
-					{ duration: 0.4 }
-				);
+				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
 			};
 			enterAnimaition();
 		} else {
 			const exitAnimation = async () => {
-				await thumnailAnimate(
-					thumnail.current,
+				await coverAnimate(
+					cover.current,
 					{ opacity: 1 },
 					{ duration: 0.4, delay: 0.4 }
 				);
 			};
 			exitAnimation();
 		}
-	}, [titleScreen, thumnail, thumnailAnimate]);
+	}, [titleScreen, cover, coverAnimate]);
 	return (
 		<motion.article
 			initial={{ opacity: 1 }}
@@ -512,22 +518,52 @@ const Video = ({ index, waiting }: VideoProps) => {
 			key={index}
 			className='relative flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
 		>
-			<button className='absolute w-32 aspect-square bg-indigo-400'></button>
+			<Image
+				src={thumbnail.url}
+				alt='thumbnail(will fixed)'
+				width={thumbnail.width}
+				height={thumbnail.height}
+			/>
 			<AnimatePresence>
 				{titleScreen ? <VideoTitlePresense /> : null}
 			</AnimatePresence>
 			<div
-				ref={thumnail}
+				ref={cover}
 				className='relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center pointer-events-none'
-			>
-				Thumnail{index}
-			</div>
+			></div>
 		</motion.article>
 	);
 };
 
+interface videoGenreState {
+	category: 'film' | 'short' | 'outsource';
+	id: string;
+	thumbnails: { url: string; width: number; height: number };
+	title: string;
+	description: string;
+}
+
+interface VideoState {
+	film: videoGenreState[];
+	short: videoGenreState[];
+	outsource: videoGenreState[];
+}
+
+interface GapiItems {
+	id: { kind: string; videoId: string };
+	snippet: {
+		channelTitle: string;
+		description: string;
+		thumbnails: {
+			default: { url: string; width: number; height: number };
+			high: { url: string; width: number; height: number };
+			medium: { url: string; width: number; height: number };
+		};
+		title: string;
+	};
+}
+
 const VideoSection = ({ category, keywords }: VideoSectionProps) => {
-	// const ref = useRef<HTMLDivElement[]>([]);
 	const videoDatas = [
 		{ category: 'film', direction: 'horizental', index: 1 },
 		{ category: 'short', direction: 'vertical', index: 2 },
@@ -550,6 +586,11 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 		{ category: 'film', direction: 'horizental', index: 19 },
 		{ category: 'short', direction: 'vertical', index: 20 },
 	];
+	const [videos, setVideos] = useState<VideoState>({
+		film: [],
+		outsource: [],
+		short: [],
+	});
 	const newVideoDatas = {
 		film: videoDatas.filter((data) => data.category === 'film'),
 		short: videoDatas.filter((data) => data.category === 'short'),
@@ -558,16 +599,55 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	type datas = typeof newVideoDatas & {
 		[key: string]: { category: string; direction: string; index: number }[];
 	};
+	const youtube = (category: 'film' | 'short' | 'outsource') => {
+		fetch(
+			`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
+		)
+			.then((response) => response.json())
+			.then((data) => {
+				const { items } = data;
+				const newItems: videoGenreState[] = items.map((element: GapiItems) => {
+					const newItem: videoGenreState = {
+						category,
+						id: element.id.videoId,
+						thumbnails: element.snippet.thumbnails.default,
+						description: element.snippet.description,
+						title: element.snippet.title,
+					};
+					return newItem;
+				});
+				setVideos((p) => ({ ...p, [category]: newItems }));
+			});
+	};
+	useEffect(() => {
+		youtube(category);
+		// switch (category) {
+		// 	case 'film':
+		// 		setVideos(p => );
+		// 		break;
+		// }
+	}, []);
+	console.log(videos);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
-				{['film', 'short', 'outsource'].map((data) =>
+				{videos.film.map((data, idx) => (
+					<Video
+						key={data.id}
+						index={data.id}
+						waiting={idx}
+						thumbnail={data.thumbnails}
+						title={data.title}
+						description={data.description}
+					/>
+				))}
+				{/* {['film', 'short', 'outsource'].map((data) =>
 					category === data
 						? (newVideoDatas as datas)[data].map((arr, idx) => (
 								<Video key={arr.index} index={arr.index} waiting={idx} />
 						  ))
 						: null
-				)}
+				)} */}
 			</AnimatePresence>
 		</section>
 	);
@@ -718,7 +798,9 @@ const OutroSection = () => {
 };
 
 export default function Work() {
-	const [category, setCategory] = useState('');
+	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
+		'film'
+	);
 	const [keyWords, setKeyWords] = useState<keyWordsState>({
 		searchWord: '',
 		selectedTags: [''],
