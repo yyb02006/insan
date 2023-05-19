@@ -10,6 +10,8 @@ module.exports = withBundleAnalyzer({
 			{
 				hostname: 'img.youtube.com',
 			},
+			{ protocol: 'https', hostname: 'i.ytimg.com' },
 		],
 	},
 });
+// i.ytimg.com/vi/qOa0xIE8LWY/default.jpg
