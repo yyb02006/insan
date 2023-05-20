@@ -17,6 +17,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
+import fetchApi from '@/libs/client/useFetchApi';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -549,10 +550,9 @@ interface VideoState {
 	outsource: videoGenreState[];
 }
 
-interface GapiItems {
-	id: { kind: string; videoId: string };
+interface GapiItem {
+	id: string;
 	snippet: {
-		channelTitle: string;
 		description: string;
 		thumbnails: {
 			default: { url: string; width: number; height: number };
@@ -561,6 +561,15 @@ interface GapiItems {
 		};
 		title: string;
 	};
+}
+
+interface GapiLists {
+	items: {
+		id: string;
+		snippet: {
+			title: string;
+		};
+	}[];
 }
 
 const VideoSection = ({ category, keywords }: VideoSectionProps) => {
@@ -599,35 +608,65 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	type datas = typeof newVideoDatas & {
 		[key: string]: { category: string; direction: string; index: number }[];
 	};
-	const youtube = (category: 'film' | 'short' | 'outsource') => {
-		fetch(
-			`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
-		)
-			.then((response) => response.json())
-			.then((data) => {
-				const { items } = data;
-				const newItems: videoGenreState[] = items.map((element: GapiItems) => {
-					const newItem: videoGenreState = {
-						category,
-						id: element.id.videoId,
-						thumbnails: element.snippet.thumbnails.default,
-						description: element.snippet.description,
-						title: element.snippet.title,
-					};
-					return newItem;
-				});
-				setVideos((p) => ({ ...p, [category]: newItems }));
-			});
+	// const youtube = (category: 'film' | 'short' | 'outsource') => {
+	// 	fetch(
+	// 		`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
+	// 	)
+	// 		.then((response) => response.json())
+	// 		.then((data) => {
+	// 			const { items } = data;
+	// 			const newItems: videoGenreState[] = items.map((element: GapiItems) => {
+	// 				const newItem: videoGenreState = {
+	// 					category,
+	// 					id: element.id.videoId,
+	// 					thumbnails: element.snippet.thumbnails.default,
+	// 					description: element.snippet.description,
+	// 					title: element.snippet.title,
+	// 				};
+	// 				return newItem;
+	// 			});
+	// 			setVideos((p) => ({ ...p, [category]: newItems }));
+	// 		});
+	// };
+	const [itemsIds, setItemsIds] = useState<GapiItem[]>([]);
+	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
+	const test = <T,>(
+		method: string,
+		maxResult: string,
+		setFunc: (value: T) => void,
+		fields?: string,
+		playlistId?: string
+	) => {
+		const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+		fetchApi(
+			`https://www.googleapis.com/youtube/v3/${method}?key=${apiKey}&part=snippet&maxResults=${maxResult}${
+				method === 'playlists' ? '&channelId=UCwy8JhA4eDumalKwKrvrxQA' : ''
+			}${method === 'playlistItems' ? `&playlistId=${playlistId}` : ''}${
+				fields ? `&fields=${fields}` : ''
+			}`,
+			setFunc
+		);
 	};
 	useEffect(() => {
-		youtube(category);
-		// switch (category) {
-		// 	case 'film':
-		// 		setVideos(p => );
-		// 		break;
-		// }
+		test('playlists', '10', setPlaylistIds, '(items(id,snippet(title)))');
 	}, []);
-	console.log(videos);
+	useEffect(() => {
+		if (!playlistIds) return;
+		if (playlistIds.items.length === 7) {
+			playlistIds.items.forEach((item) =>
+				test(
+					'playlistItems',
+					'9',
+					(data: { items: GapiItem[] }) => {
+						setItemsIds((p) => [...p, ...data.items]);
+					},
+					'(items(id,snippet(title,description,thumbnails)))',
+					item.id
+				)
+			);
+		}
+	}, [playlistIds]);
+	console.log(itemsIds);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
