@@ -427,8 +427,16 @@ const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
 	);
 };
 
-const VideoTitlePresense = () => {
-	const [title, animate] = useAnimate();
+interface VideoTitlePresenseProps {
+	title: string;
+	description: string;
+}
+
+const VideoTitlePresense = ({
+	title,
+	description,
+}: VideoTitlePresenseProps) => {
+	const [intro, animate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
 		if (isPresent) {
@@ -465,11 +473,11 @@ const VideoTitlePresense = () => {
 	}, [isPresent, animate, safeToRemove]);
 	return (
 		<div
-			ref={title}
+			ref={intro}
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
-			<div className='Title'>Video Title</div>
-			<div className='Desc font-medium text-3xl'>Description</div>
+			<div className='Title'>{title}</div>
+			<div className='Desc font-medium text-3xl'>description</div>
 		</div>
 	);
 };
@@ -482,24 +490,6 @@ const Video = ({
 	description,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
-	const [cover, coverAnimate] = useAnimate();
-	useEffect(() => {
-		if (titleScreen) {
-			const enterAnimaition = async () => {
-				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
-			};
-			enterAnimaition();
-		} else {
-			const exitAnimation = async () => {
-				await coverAnimate(
-					cover.current,
-					{ opacity: 1 },
-					{ duration: 0.4, delay: 0.4 }
-				);
-			};
-			exitAnimation();
-		}
-	}, [titleScreen, cover, coverAnimate]);
 	return (
 		<motion.article
 			initial={{ opacity: 1 }}
@@ -516,21 +506,21 @@ const Video = ({
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
+			className='relative w-full flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
 		>
 			<Image
 				src={thumbnail.url}
 				alt='thumbnail(will fixed)'
 				width={thumbnail.width}
 				height={thumbnail.height}
+				priority
+				className='relative w-full'
 			/>
 			<AnimatePresence>
-				{titleScreen ? <VideoTitlePresense /> : null}
+				{titleScreen ? (
+					<VideoTitlePresense title={title} description={description} />
+				) : null}
 			</AnimatePresence>
-			<div
-				ref={cover}
-				className='relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center pointer-events-none'
-			></div>
 		</motion.article>
 	);
 };
@@ -543,20 +533,12 @@ interface videoGenreState {
 	description: string;
 }
 
-interface VideoState {
-	film: videoGenreState[];
-	short: videoGenreState[];
-	outsource: videoGenreState[];
-}
-
 interface GapiItem {
 	id: string;
 	snippet: {
 		description: string;
 		thumbnails: {
-			default: { url: string; width: number; height: number };
-			high: { url: string; width: number; height: number };
-			medium: { url: string; width: number; height: number };
+			[key: string]: { url: string; width: number; height: number };
 		};
 		title: string;
 	};
@@ -594,18 +576,10 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 		{ category: 'film', direction: 'horizental', index: 19 },
 		{ category: 'short', direction: 'vertical', index: 20 },
 	];
-	const [videos, setVideos] = useState<VideoState>({
-		film: [],
-		outsource: [],
-		short: [],
-	});
 	const newVideoDatas = {
 		film: videoDatas.filter((data) => data.category === 'film'),
 		short: videoDatas.filter((data) => data.category === 'short'),
 		outsource: videoDatas.filter((data) => data.category === 'outsource'),
-	};
-	type datas = typeof newVideoDatas & {
-		[key: string]: { category: string; direction: string; index: number }[];
 	};
 	// const youtube = (category: 'film' | 'short' | 'outsource') => {
 	// 	fetch(
@@ -627,7 +601,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	// 			setVideos((p) => ({ ...p, [category]: newItems }));
 	// 		});
 	// };
-	const [itemsIds, setItemsIds] = useState<GapiItem[]>([]);
+	const [items, setItems] = useState<GapiItem[]>([]);
 	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
 	useEffect(() => {
 		fetchYouTubeApi(
@@ -637,34 +611,67 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			'(items(id,snippet(title)))'
 		);
 	}, []);
-	// useEffect(() => {
-	// 	if (!playlistIds) return;
-	// 	if (playlistIds.items.length === 7) {
-	// 		playlistIds.items.forEach((item) => {
-	// 			if (item.snippet.title === 'shorts')
-	// 			useYouTubeApi(
-	// 					'playlistItems',
-	// 					'9',
-	// 					(data: { items: GapiItem[] }) => {
-	// 						setItemsIds((p) => [...p, ...data.items]);
-	// 					},
-	// 					'(items(id,snippet(title,description,thumbnails)))',
-	// 					item.id
-	// 				);
-	// 		});
-	// 	}
-	// }, [playlistIds]);
+	useEffect(() => {
+		if (!playlistIds) return;
+		if (category === 'film') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (
+					item.snippet.title !== 'shorts' &&
+					item.snippet.title !== '참여 촬영'
+				)
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		} else if (category === 'short') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (item.snippet.title === 'shorts')
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		} else if (category === 'outsource') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (item.snippet.title === '참여 촬영')
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		}
+	}, [playlistIds, category]);
+	console.log(items);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
-				{videos.film.map((data, idx) => (
+				{items.map((data, idx) => (
 					<Video
-						key={data.id}
+						key={idx}
 						index={data.id}
 						waiting={idx}
-						thumbnail={data.thumbnails}
-						title={data.title}
-						description={data.description}
+						thumbnail={data.snippet.thumbnails.medium}
+						title={data.snippet.title}
+						description={data.snippet.description}
 					/>
 				))}
 				{/* {['film', 'short', 'outsource'].map((data) =>
