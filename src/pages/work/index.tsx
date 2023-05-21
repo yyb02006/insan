@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls } from '@/libs/client/utils';
+import { cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -17,7 +17,6 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
-import fetchApi from '@/libs/client/useFetchApi';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -630,43 +629,31 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	// };
 	const [itemsIds, setItemsIds] = useState<GapiItem[]>([]);
 	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
-	const test = <T,>(
-		method: string,
-		maxResult: string,
-		setFunc: (value: T) => void,
-		fields?: string,
-		playlistId?: string
-	) => {
-		const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-		fetchApi(
-			`https://www.googleapis.com/youtube/v3/${method}?key=${apiKey}&part=snippet&maxResults=${maxResult}${
-				method === 'playlists' ? '&channelId=UCwy8JhA4eDumalKwKrvrxQA' : ''
-			}${method === 'playlistItems' ? `&playlistId=${playlistId}` : ''}${
-				fields ? `&fields=${fields}` : ''
-			}`,
-			setFunc
+	useEffect(() => {
+		fetchYouTubeApi(
+			'playlists',
+			'10',
+			setPlaylistIds,
+			'(items(id,snippet(title)))'
 		);
-	};
-	useEffect(() => {
-		test('playlists', '10', setPlaylistIds, '(items(id,snippet(title)))');
 	}, []);
-	useEffect(() => {
-		if (!playlistIds) return;
-		if (playlistIds.items.length === 7) {
-			playlistIds.items.forEach((item) =>
-				test(
-					'playlistItems',
-					'9',
-					(data: { items: GapiItem[] }) => {
-						setItemsIds((p) => [...p, ...data.items]);
-					},
-					'(items(id,snippet(title,description,thumbnails)))',
-					item.id
-				)
-			);
-		}
-	}, [playlistIds]);
-	console.log(itemsIds);
+	// useEffect(() => {
+	// 	if (!playlistIds) return;
+	// 	if (playlistIds.items.length === 7) {
+	// 		playlistIds.items.forEach((item) => {
+	// 			if (item.snippet.title === 'shorts')
+	// 			useYouTubeApi(
+	// 					'playlistItems',
+	// 					'9',
+	// 					(data: { items: GapiItem[] }) => {
+	// 						setItemsIds((p) => [...p, ...data.items]);
+	// 					},
+	// 					'(items(id,snippet(title,description,thumbnails)))',
+	// 					item.id
+	// 				);
+	// 		});
+	// 	}
+	// }, [playlistIds]);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
