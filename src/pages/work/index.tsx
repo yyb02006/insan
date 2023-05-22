@@ -490,6 +490,24 @@ const Video = ({
 	description,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
+	const [cover, coverAnimate] = useAnimate();
+	useEffect(() => {
+		if (titleScreen) {
+			const enterAnimaition = async () => {
+				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
+			};
+			enterAnimaition();
+		} else {
+			const exitAnimation = async () => {
+				await coverAnimate(
+					cover.current,
+					{ opacity: 0.4 },
+					{ duration: 0.4, delay: 0.4 }
+				);
+			};
+			exitAnimation();
+		}
+	}, [titleScreen, cover, coverAnimate]);
 	return (
 		<motion.article
 			initial={{ opacity: 1 }}
@@ -506,7 +524,7 @@ const Video = ({
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative w-full flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
+			className='relative w-full flex justify-center items-center aspect-video text-5xl border'
 		>
 			<Image
 				src={thumbnail.url}
@@ -521,6 +539,10 @@ const Video = ({
 					<VideoTitlePresense title={title} description={description} />
 				) : null}
 			</AnimatePresence>
+			<div
+				ref={cover}
+				className='absolute w-full h-full bg-[#101010] opacity-40 text-5xl font-bold flex justify-center items-center pointer-events-none'
+			></div>
 		</motion.article>
 	);
 };
@@ -669,7 +691,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 						key={idx}
 						index={data.id}
 						waiting={idx}
-						thumbnail={data.snippet.thumbnails.medium}
+						thumbnail={data.snippet.thumbnails.high}
 						title={data.snippet.title}
 						description={data.snippet.description}
 					/>
