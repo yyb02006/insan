@@ -555,7 +555,7 @@ interface videoGenreState {
 	description: string;
 }
 
-interface GapiItem {
+export interface GapiItem {
 	id: string;
 	snippet: {
 		description: string;
@@ -563,6 +563,7 @@ interface GapiItem {
 			[key: string]: { url: string; width: number; height: number };
 		};
 		title: string;
+		resourceId?: { videoId: string };
 	};
 }
 
@@ -682,7 +683,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			});
 		}
 	}, [playlistIds, category]);
-	console.log(items);
+	console.log(playlistIds);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
