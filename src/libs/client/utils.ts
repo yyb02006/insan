@@ -22,7 +22,7 @@ export function fetchApi<T>(
  * YouTubeFetch를 처리해주는 함수
  */
 export function fetchYouTubeApi<T>(
-	method: string,
+	method: 'playlists' | 'playlistItems',
 	maxResult: string,
 	setFunc: (value: T) => void,
 	fields?: string,
