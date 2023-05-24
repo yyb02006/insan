@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { GapiItem } from '.';
+import Input from '@/components/input';
 
 export default function Write() {
 	const lists = [
@@ -25,6 +26,7 @@ export default function Write() {
 		});
 	}, []);
 	console.log(test.length);
+	const InputChange = () => {};
 	return (
 		<section className='grid grid-cols-3'>
 			{test.map((data, arr) => (
@@ -42,6 +44,12 @@ export default function Write() {
 						className='w-full object-cover'
 					/>
 					{data.snippet.title}/{data.snippet.resourceId?.videoId}
+					<Input
+						name='title'
+						type='text'
+						placeholder='타이틀'
+						onChange={InputChange}
+					/>
 				</div>
 			))}
 			{/* <YouTube
