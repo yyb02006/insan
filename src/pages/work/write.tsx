@@ -50,6 +50,12 @@ export default function Write() {
 						placeholder='타이틀'
 						onChange={InputChange}
 					/>
+					<Input
+						name='description'
+						type='text'
+						placeholder='설명'
+						onChange={InputChange}
+					/>
 				</div>
 			))}
 			{/* <YouTube
