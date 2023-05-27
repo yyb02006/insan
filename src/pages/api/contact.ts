@@ -1,3 +1,4 @@
+import withHandler from '@/libs/server/withHandler';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
 
@@ -16,12 +17,6 @@ const transporter = nodemailer.createTransport({
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const { title, email, message } = req.body;
-	console.log(title, email, message);
-
-	if (req.method !== 'POST') {
-		res.status(405).end();
-		return;
-	}
 	await transporter.sendMail(
 		{
 			from: process.env.NAVER_USER,
@@ -40,4 +35,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 	res.status(202).end();
 }
 
-export default handler;
+export default withHandler({ methods: 'POST', handlerFunc: handler });
