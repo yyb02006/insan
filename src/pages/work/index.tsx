@@ -140,11 +140,21 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	);
 };
 
+type categories = {
+	title: string;
+	kind: 'film' | 'short' | 'outsource';
+	count: number;
+	idx: number;
+	explanation: string;
+};
+
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
-	const [categoryState, setCategoryState] = useState('film');
+	const [categoryState, setCategoryState] = useState<
+		'film' | 'short' | 'outsource'
+	>('film');
 	const dataLength = useRef(389);
 	const rotate = useRef(0);
-	const categories = [
+	const categories: categories[] = [
 		{
 			title: 'Film & AD',
 			kind: 'film',
