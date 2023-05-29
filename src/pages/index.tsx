@@ -7,20 +7,24 @@ import {
 	MotionValue,
 	Variants,
 	useInView,
-	motion,
 	useScroll,
 	useTransform,
+	m,
 	useAnimate,
 	usePresence,
 	AnimatePresence,
-	LazyMotion,
-	domAnimation,
-	m,
+	useMotionValueEvent,
 } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
-import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
+import {
+	MutableRefObject,
+	ReactNode,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
+import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
+import Image from 'next/image';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -35,6 +39,20 @@ interface HeaderProps extends MouseEventProps {
 
 interface SpringTextProps extends MouseEventProps {
 	innerWidth: number;
+}
+
+interface SnsLinkProps {
+	scrollYProgress: MotionValue<number>;
+	isInView?: boolean;
+}
+
+interface springTextMotionLiProps {
+	mouseX: MotionValue<any>;
+	mouseY: MotionValue<any>;
+	innerWidth: number;
+	ratio: number;
+	css: string;
+	children?: ReactNode;
 }
 
 interface WaveSectionProps {
@@ -56,11 +74,6 @@ interface WaveProps {
 	letterHeightFix?: number;
 	index: number;
 	innerWidth: number;
-}
-
-interface SnsLinkProps {
-	scrollYProgress: MotionValue<number>;
-	isInView?: boolean;
 }
 
 interface VideoProps {
@@ -86,11 +99,20 @@ interface VideoSectionIndicatorProps {
 	innerWidth: number;
 }
 
-const wave = (sec: number, reverse: boolean = false) => {
+interface TextSectionMotionProps {
+	scrollYProgress: MotionValue<number>;
+	scrollStart: number;
+	scrollEnd: number;
+	isStroke?: boolean;
+	css?: string;
+	children?: ReactNode;
+}
+
+export const wave = (sec: number, reverse: boolean = false): Variants => {
 	if (reverse) {
 		return {
 			wave: {
-				backgroundPositionX: '-100vw',
+				x: '-100vw',
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -101,7 +123,7 @@ const wave = (sec: number, reverse: boolean = false) => {
 	} else {
 		return {
 			wave: {
-				backgroundPositionX: `100vw`,
+				x: `0vw`,
 				transition: {
 					ease: 'linear',
 					duration: sec,
@@ -124,37 +146,6 @@ export const waveContainer: Variants = {
 };
 
 export const waveChild: Variants = {
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-	hidden: {
-		opacity: 1,
-		y: 20,
-		transition: {
-			type: 'spring',
-			damping: 6,
-			stiffness: 200,
-		},
-	},
-};
-
-const simpleWaveContainer: Variants = {
-	hidden: {
-		opacity: 0,
-	},
-	visible: (i: number = 1) => ({
-		opacity: 1,
-		transition: { staggerChildren: i, delayChildren: 0 },
-	}),
-};
-
-const simpleWaveChild: Variants = {
 	visible: {
 		opacity: 1,
 		y: 0,
@@ -215,20 +206,39 @@ const snsList: Variants = {
 	},
 };
 
+const SpringTextMotionLi = ({
+	mouseX,
+	mouseY,
+	innerWidth,
+	ratio,
+	css,
+	children,
+}: springTextMotionLiProps) => {
+	const x = useTransform(mouseX, (offset) =>
+		innerWidth > 640 ? offset / 15 : null
+	);
+	const y = useTransform(mouseY, (offset) =>
+		innerWidth > 640 ? offset / ratio : null
+	);
+	return (
+		<m.li
+			style={{
+				x,
+				y,
+			}}
+			className={css}
+		>
+			{children}
+		</m.li>
+	);
+};
+
 const SpringText = ({
 	mouseX,
 	mouseY,
 	scrollYProgress,
 	innerWidth,
 }: SpringTextProps) => {
-	const wordsX = (ratio: number) =>
-		useTransform(mouseX, (offset) =>
-			innerWidth > 640 ? offset / ratio : null
-		);
-	const wordsY = (ratio: number) =>
-		useTransform(mouseY, (offset) =>
-			innerWidth > 640 ? offset / ratio : null
-		);
 	const elements = useRef([
 		{ title: 'Future', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 		{
@@ -261,16 +271,16 @@ const SpringText = ({
 					className='font-Roboto text-[#efefef] font-extrabold leading-snug text-center '
 				>
 					{elements.current.map((element, idx) => (
-						<m.li
+						<SpringTextMotionLi
 							key={idx}
-							style={{
-								x: wordsX(15),
-								y: wordsY(element.yRatio),
-							}}
-							className={element.text}
+							innerWidth={innerWidth}
+							mouseX={mouseX}
+							mouseY={mouseY}
+							ratio={element.yRatio}
+							css={element.text}
 						>
 							{element.title}
-						</m.li>
+						</SpringTextMotionLi>
 					))}
 				</m.ul>
 			</div>
@@ -290,7 +300,7 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	return (
 		<m.div
 			style={{ visibility }}
-			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef]'
+			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef] z-[1]'
 		>
 			<m.div
 				style={{ scale }}
@@ -302,11 +312,17 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 			<m.ul
 				animate={!isInView ? 'visible' : 'disappear'}
 				variants={snsAnchor}
-				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2'
+				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2 z-[1]'
 			>
-				{['Instagram', 'Vimeo', 'YouTube'].map((arr, idx) => (
-					<m.li key={idx} variants={snsList}>
-						<Link href={''}>{arr}</Link>
+				{[
+					{ name: 'Instagram', href: 'https://www.instagram.com/yarg__gray' },
+					{ name: 'Vimeo', href: '' },
+					{ name: 'YouTube', href: 'https://www.youtube.com/@insan8871' },
+				].map((arr, idx) => (
+					<m.li key={idx} variants={snsList} className='hover:text-palettered'>
+						<Link href={arr.href} target='_blank'>
+							{arr.name}
+						</Link>
 					</m.li>
 				))}
 			</m.ul>
@@ -340,7 +356,7 @@ const CircleSection = ({
 		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
-		<m.section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
+		<section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
 			<div className='absolute top-0 h-[80%]'>
 				<m.div style={{ scale: logoCircle }} className='sticky top-0'>
 					{logoCircles.current.map((arr, idx) => (
@@ -373,7 +389,7 @@ const CircleSection = ({
 								}}
 								liMotion={{
 									style: { scale: circleLineScale },
-									css: 'md:w-[calc(50px+100%)] w-[calc(28px+100%)]',
+									css: 'md:w-[calc(50px+100%)] w-[calc(112%)]',
 								}}
 							/>
 						</div>
@@ -397,7 +413,7 @@ const CircleSection = ({
 					</m.div>
 				</m.div>
 			</div>
-		</m.section>
+		</section>
 	);
 };
 
@@ -425,7 +441,6 @@ const Wave = ({
 	const visibility = useTransform(scrollYProgress, (value) =>
 		value > startHeight ? 'visible' : 'hidden'
 	);
-	// const test = `top-[${stickyCondition.top}vh] h-[${stickyCondition.height}vh]`;
 	return (
 		<div
 			ref={parent}
@@ -463,19 +478,16 @@ const Wave = ({
 				</m.div>
 			</div>
 			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			{/* <m.div
-		style={{ y, visibility }}
-		className='absolute w-full px-[200px] font-Roboto font-black top-0 text-[calc(100px+1vw)] text-[#fafafa] '
-	>
-		Future & Hornesty
-	</m.div> */}
-			<m.div
-				variants={wave(waveSec, waveReverse)}
-				className={cls(
-					waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
-					'relative w-full max-h-[400px] aspect-[1920/400] bg-[length:100vw]'
-				)}
-			></m.div>
+			<div className='w-[100vw] overflow-hidden'>
+				<m.div
+					initial={{ x: waveReverse ? 0 : '-100vw' }}
+					variants={wave(waveSec, waveReverse)}
+					className={cls(
+						waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
+						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw] bg-repeat-x'
+					)}
+				></m.div>
+			</div>
 		</div>
 	);
 };
@@ -519,7 +531,6 @@ const WavesSection = ({
 			waveReverse: false,
 		},
 	]);
-
 	return (
 		<m.div
 			ref={inheritRef}
@@ -566,16 +577,25 @@ const Video = ({ videoId }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
+	const [videoLoad, setVideoLoad] = useState(false);
+	const [isLoad, setIsLoad] = useState(false);
 	const [video, setVideo] = useState<YouTubeEvent>();
 	const [videoState, setVideoState] = useState<number>(-1);
 	const onVideoReady: YouTubeProps['onReady'] = (e) => {
 		setVideo(e);
+		setVideoLoad(true);
 	};
 	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
 		setVideoState(e.data);
+		console.log(e.data);
 	};
 	useEffect(() => {
-		if (!thumnail && video && (videoState < 1 || videoState === 2)) {
+		if (
+			!thumnail &&
+			video &&
+			videoLoad &&
+			(videoState < 1 || videoState === 2)
+		) {
 			video.target.playVideo();
 		} else if (thumnail && video && videoState === 1) {
 			video.target.pauseVideo();
@@ -590,20 +610,8 @@ const Video = ({ videoId }: VideoProps) => {
 			setThumnail((p) => !p);
 		}
 	}, [isInView, videoState]);
-	/* controls.start와 controls.stop을 반복하면 점점 느려지는 버그
-	const ref = useRef<HTMLUListElement | null>(null);
-	const controls = useAnimationControls();
-	useEffect(() => {
-		if (videoState === 1) {
-			controls.start('start');
-		}
-		if (videoState !== 1) {
-			controls.stop();
-			return;
-		}
-	}, [videoState]); */
 	return (
-		<div ref={ref} className='relative'>
+		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
 			<div className='Wrapper absolute w-full aspect-square'>
 				<Circles
 					ulMotion={{
@@ -615,52 +623,53 @@ const Video = ({ videoId }: VideoProps) => {
 						),
 					}}
 					liMotion={{
-						css: 'w-[calc(24px+100%)] sm:w-[calc(50px+100%)]',
+						css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]',
 					}}
 				/>
 			</div>
-			<m.div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
+			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
-					<YouTube
-						videoId={videoId}
-						opts={{
-							width: '100%',
-							height: '100%',
-							playerVars: { rel: 0, modestbranding: 1 },
-							host: 'https://www.youtube-nocookie.com',
-							origin: 'http://localhost:3000',
-						}}
-						onReady={onVideoReady}
-						onStateChange={(e) => {
-							if (video) {
-								onVideoStateChange(e);
-							}
-						}}
-						className='relative h-full aspect-video pointer-events-none'
-					/>
+					{isLoad ? (
+						<YouTube
+							videoId={videoId}
+							opts={{
+								width: '100%',
+								height: '100%',
+								playerVars: { rel: 0, modestbranding: 1 },
+								host: 'https://www.youtube-nocookie.com',
+								origin: 'http://localhost:3000',
+							}}
+							loading='lazy'
+							onReady={onVideoReady}
+							onStateChange={(e) => {
+								if (video) {
+									onVideoStateChange(e);
+								}
+							}}
+							className='relative h-full aspect-video pointer-events-none'
+						/>
+					) : null}
 				</div>
-				<div
+				<m.div
 					onClick={() => {
-						if (video) {
-							setThumnail((p) => !p);
-						}
+						setThumnail((p) => !p);
+						setIsLoad(true);
 					}}
-					className={cls(
-						thumnail
-							? 'opacity-100'
-							: 'opacity-0 transition-opacity duration-300',
-						'absolute top-0 h-full aspect-video cursor-pointer'
-					)}
+					style={{ opacity: thumnail ? 1 : 0 }}
+					className='absolute top-0 h-full bg-pink-400 aspect-video cursor-pointer duration-300'
 				>
-					<img
+					<Image
 						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-						alt='1'
-						className='absolute h-full aspect-video'
+						width={1600}
+						height={900}
+						alt={`${videoId}유튜브영상 썸네일`}
+						className='absolute w-auto h-full aspect-video'
+						priority
 					/>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
-				</div>
-			</m.div>
-		</div>
+				</m.div>
+			</div>
+		</article>
 	);
 };
 
@@ -677,34 +686,39 @@ const VideoContainer = ({
 	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
 	const [videoScope, videoAnimate] = useAnimate();
-	const motionInfos = [
-		{ kind: '.Index', move: 'up', range: 100 },
-		{ kind: '.Title', move: 'down', range: 100 },
-		{ kind: '.Role', move: 'down', range: 100 },
-		{ kind: '.Desc', move: 'up', range: 100 },
-		{ kind: '.Date', move: 'up', range: 100 },
-	];
-	const textMotion = (reverse = false) => {
-		motionInfos.forEach((motionInfo) => {
-			textAnimate(
-				motionInfo.kind,
-				{
-					opacity: reverse ? [1, 0] : [0, 1],
-					y: reverse
-						? [
-								0,
-								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
-						  ]
-						: [
-								motionInfo.move === 'up' ? motionInfo.range : -motionInfo.range,
-								0,
-						  ],
-				},
-				{ duration: 0.6, ease: 'easeOut' }
-			);
-		});
-	};
+
 	useEffect(() => {
+		const motionInfos = [
+			{ kind: '.Index', move: 'up', range: 100 },
+			{ kind: '.Title', move: 'down', range: 100 },
+			{ kind: '.Role', move: 'down', range: 100 },
+			{ kind: '.Desc', move: 'up', range: 100 },
+			{ kind: '.Date', move: 'up', range: 100 },
+		];
+		const textMotion = (reverse = false) => {
+			motionInfos.forEach((motionInfo) => {
+				textAnimate(
+					motionInfo.kind,
+					{
+						opacity: reverse ? [1, 0] : [0, 1],
+						y: reverse
+							? [
+									0,
+									motionInfo.move === 'up'
+										? motionInfo.range
+										: -motionInfo.range,
+							  ]
+							: [
+									motionInfo.move === 'up'
+										? motionInfo.range
+										: -motionInfo.range,
+									0,
+							  ],
+					},
+					{ duration: 0.6, ease: 'easeOut' }
+				);
+			});
+		};
 		if (isInView) {
 			videoAnimate(
 				'.Wrapper',
@@ -724,9 +738,9 @@ const VideoContainer = ({
 				textMotion(true);
 			}
 		}
-	}, [isInView]);
+	}, [isInView, innerWidth, textAnimate, videoAnimate]);
 	return (
-		<div ref={ref} className='h-[100vh] w-screen'>
+		<section ref={ref} className='h-[100vh] w-screen'>
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
 					<Image
@@ -772,7 +786,7 @@ const VideoContainer = ({
 					<div className='Date text-sm sm:text-2xl'>{date}</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 };
 
@@ -821,20 +835,15 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 		}
 	}, [horizental.current?.offsetWidth]);
 	const x = useTransform(scrollYProgress, [0.1, 0.9], [0, -range]);
-	// useEffect(() => {
-	// 	window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
-	// 	window.removeEventListener('scroll', () => {});
-	// }, []);
-	/**inner를 100vh만큼 줄이고 마진으로 인식범위 최적화 */
 	const inner = useRef(null);
 	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<div ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
+		<section ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
 			<div
 				ref={inner}
 				className='top-0 absolute h-[calc(100%-100vh)] w-full'
 			></div>
-			<div className='sticky top-0 overflow-x-hidden'>
+			<div className='sticky top-0 overflow-hidden'>
 				<m.div
 					ref={horizental}
 					style={{ x }}
@@ -862,7 +871,7 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 					/>
 				) : null}
 			</AnimatePresence>
-		</div>
+		</section>
 	);
 };
 
@@ -872,15 +881,19 @@ const VideoSectionIndicator = ({
 }: VideoSectionIndicatorProps) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
-	const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-	// const opacity = useTransform(
-	// 	scrollYProgress,
-	// 	[
-	// 		0.13, 0.15, 0.24, 0.26, 0.39, 0.41, 0.5, 0.52, 0.65, 0.67, 0.76, 0.78,
-	// 		0.91,
-	// 	],
-	// 	[1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1]
-	// );
+	const [role, setRole] = useState('');
+	const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+	useMotionValueEvent(scrollYProgress, 'change', (prev) => {
+		if (prev >= 0 && prev < 0.3) {
+			setRole('Director');
+		} else if (prev >= 0.3 && prev < 0.5) {
+			setRole('Camera');
+		} else if (prev >= 0.5 && prev < 0.8) {
+			setRole('Art');
+		} else if (prev >= 0.8 && prev <= 1) {
+			setRole('Drone');
+		}
+	});
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
@@ -902,9 +915,9 @@ const VideoSectionIndicator = ({
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, indicator, innerWidth, animate, safeToRemove]);
 	return (
-		<m.div
+		<div
 			ref={indicator}
 			className='fixed left-0 top-0 h-full w-[28px] hidden sm:flex items-center'
 		>
@@ -912,18 +925,46 @@ const VideoSectionIndicator = ({
 				<div className='border border-[#707070] w-[4px] h-[30vh] rounded-full absolute top-0 mt-4' />
 				<div className='h-[30vh]'>
 					<m.div
-						style={{ height }}
-						className='relative w-[4px] bg-[#FE4A5D] rounded-full'
+						style={{ scaleY }}
+						className='relative h-full w-[4px] origin-top bg-[#FE4A5D] rounded-full'
 					/>
 				</div>
 				<div
 					className='tracking-[1rem] text-lg text-[#eaeaea]'
 					style={{ writingMode: 'vertical-rl' }}
 				>
-					Artist
+					{role}
 				</div>
 			</div>
-		</m.div>
+		</div>
+	);
+};
+
+const TextSectionMotionSpan = ({
+	scrollYProgress,
+	scrollStart,
+	scrollEnd,
+	css,
+	children,
+	isStroke = false,
+}: TextSectionMotionProps) => {
+	const y = useTransform(scrollYProgress, [scrollStart, scrollEnd], [100, 0]);
+	const opacity = useTransform(
+		scrollYProgress,
+		[scrollStart, scrollEnd],
+		[0, 1]
+	);
+	return (
+		<m.span
+			style={{
+				y,
+				opacity,
+				WebkitTextStroke: isStroke ? '1px #9c9c9c' : undefined,
+			}}
+			className={css}
+		>
+			{children}
+		</m.span>
 	);
 };
 
@@ -933,27 +974,6 @@ const TextSection = () => {
 		target: ref,
 		offset: ['start end', 'end start'],
 	});
-	const y: MotionValue[] = [];
-	const opacity: MotionValue[] = [];
-	const setTiming = (start: number, end: number, term: number) => {
-		for (let i = 0; i < 7; i++) {
-			y.push(
-				useTransform(
-					scrollYProgress,
-					[0.1 * (i * term + start), 0.1 * (i * term + end)],
-					[100, 0]
-				)
-			);
-			opacity.push(
-				useTransform(
-					scrollYProgress,
-					[0.1 * (i * term + start), 0.1 * (i * term + end)],
-					[0, 1]
-				)
-			);
-		}
-	};
-	setTiming(1, 2, 5 / 8);
 	const scale = useTransform(scrollYProgress, [0, 0.4], [0.5, 1]);
 	const rotate = useTransform(scrollYProgress, [0, 0.4], [90, 0]);
 	return (
@@ -972,63 +992,80 @@ const TextSection = () => {
 				/>
 			</m.div>
 			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
-				<m.div
-					style={{
-						y: y[0],
-						opacity: opacity[0],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.1}
+					scrollEnd={0.2}
+					css='block'
+					isStroke={true}
 				>
 					Moves
-				</m.div>
+				</TextSectionMotionSpan>
 				<div className='flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<m.span style={{ y: y[1], opacity: opacity[1] }}>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.15}
+						scrollEnd={0.25}
+					>
 						좋은 영상을{' '}
 						<div className='font-extralight sm:inline'>만든다는 것은,</div>
-					</m.span>
-					<m.span style={{ y: y[2], opacity: opacity[2] }}>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.2}
+						scrollEnd={0.3}
+					>
 						당신께 감동을{' '}
 						<div className='font-extralight sm:inline'>드린다는 것.</div>
-					</m.span>
+					</TextSectionMotionSpan>
 				</div>
-				<m.div
-					style={{
-						y: y[3],
-						opacity: opacity[3],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.25}
+					scrollEnd={0.35}
+					css='block'
+					isStroke={true}
 				>
 					Client
-				</m.div>
+				</TextSectionMotionSpan>
 				<div className='relative flex flex-col text-[calc(16px+4vw)] text-[#dadada] -mt-0 space-y-2 sm:space-y-0 sm:-mt-6 mb-2 sm:-mb-2 -ml-6 sm:-ml-16'>
-					<m.div
-						style={{
-							y: y[6],
-							opacity: opacity[6],
-							WebkitTextStroke: '1px #9c9c9c',
-						}}
-						className='absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.3}
+						scrollEnd={0.4}
+						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+						isStroke={true}
 					>
 						&
-					</m.div>
-					<m.span style={{ y: y[4], opacity: opacity[4] }} className='relative'>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.3}
+						scrollEnd={0.4}
+						css='relative'
+					>
 						상상이 현실이{' '}
 						<div className='font-extralight sm:inline'>되는 감동을,</div>
-					</m.span>
-					<m.span style={{ y: y[5], opacity: opacity[5] }} className='relative'>
+					</TextSectionMotionSpan>
+					<TextSectionMotionSpan
+						scrollYProgress={scrollYProgress}
+						scrollStart={0.37}
+						scrollEnd={0.47}
+						css='relative'
+					>
 						더 나은 컨텐츠로의{' '}
 						<div className='font-extralight sm:inline'>영감을.</div>
-					</m.span>
+					</TextSectionMotionSpan>
 				</div>
-				<m.div
-					style={{
-						y: y[6],
-						opacity: opacity[6],
-						WebkitTextStroke: '1px #9c9c9c',
-					}}
+				<TextSectionMotionSpan
+					scrollYProgress={scrollYProgress}
+					scrollStart={0.42}
+					scrollEnd={0.52}
+					css='block'
+					isStroke={true}
 				>
 					Customer
-				</m.div>
+				</TextSectionMotionSpan>
 			</div>
 		</section>
 	);
@@ -1043,7 +1080,7 @@ const OutroSection = () => {
 		} else {
 			animate(scope.current, { scale: 0.5 });
 		}
-	}, [isInView]);
+	}, [isInView, scope, animate]);
 	const onCircleEnter = () => {
 		animate('.Container', { scale: 1.2 }, { duration: 0.5 });
 		animate('.Text', { color: '#eaeaea' }, { duration: 0.5 });
@@ -1066,7 +1103,7 @@ const OutroSection = () => {
 							ulMotion={{
 								css: cls(
 									isInView ? 'animate-spin-slow' : 'animate-spin-slow pause',
-									'transition-all'
+									'transition-transform'
 								),
 							}}
 							liMotion={{ css: 'w-[calc(20px+100%)] sm:w-[calc(50px+100%)]' }}
@@ -1103,7 +1140,7 @@ export default function Home() {
 			window.removeEventListener('resize', handleResize);
 		};
 	}, []);
-	/* 최적화 할 때 vh값에 따른 넓이값 변화량이 꽤 유동적이라는 것을 염두에 두자*/
+	/* 반응형 대응 할 때 vh값에 따른 넓이값 변화량이 꽤 유동적이라는 것을 염두에 두자*/
 	return (
 		<div
 			ref={background}

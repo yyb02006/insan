@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls } from '@/libs/client/utils';
+import { cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -12,8 +12,11 @@ import {
 	useTransform,
 	Variants,
 } from 'framer-motion';
+import Link from 'next/link';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
+import Input from '@/components/input';
+import Image from 'next/image';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -26,16 +29,33 @@ interface TitleSvgPresenseProps {
 }
 
 interface TitleSectionProps {
-	setCategory: Dispatch<SetStateAction<string>>;
+	setCategory: Dispatch<SetStateAction<'film' | 'short' | 'outsource'>>;
+}
+
+interface TagButtonSectionProps {
+	setSelectedTags: Dispatch<SetStateAction<string[]>>;
+}
+
+interface SearchSectionProp {
+	setKeyWords: Dispatch<SetStateAction<keyWordsState>>;
 }
 
 interface VideoSectionProps {
-	category: string;
+	category: 'film' | 'short' | 'outsource';
+	keywords: keyWordsState;
 }
 
 interface VideoProps {
-	index: number;
+	index: string;
 	waiting: number;
+	thumbnail: { url: string; width: number; height: number };
+	title: string;
+	description: string;
+}
+
+interface keyWordsState {
+	searchWord: string;
+	selectedTags: string[];
 }
 
 const titleContainer: Variants = {
@@ -98,7 +118,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, chevron, chevronAnimate]);
 	return (
 		<div ref={chevron} className='relative opacity-0 flex items-center'>
 			<svg
@@ -115,7 +135,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 					d='M15.75 19.5L8.25 12l7.5-7.5'
 				/>
 			</svg>
-			<div className='text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
+			<div className='Desc text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
 		</div>
 	);
 };
@@ -161,7 +181,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			},
 		});
 		return animation.stop;
-	}, [rounded]);
+	}, [rounded, count]);
 	useEffect(() => {
 		setCategory(categoryState);
 		switch (categoryState) {
@@ -187,7 +207,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 					'absolute min-w-[1000px] w-[calc(1000px+50%)] h-full top-0 left-[-800px] sm:left-[-700px] lg:left-[-800px] flex items-center transition-transform duration-1000'
 				}
 			>
-				<Circles liMotion={{ css: 'w-[calc(140px+100%)]' }} />
+				<Circles liMotion={{ css: 'w-[calc(50px+100%)]' }} />
 			</motion.div>
 			<div className='relative inline-block'>
 				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
@@ -275,7 +295,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, button, buttonAnimate, safeToRemove]);
 	return (
 		<div ref={button}>
 			<button
@@ -290,7 +310,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	);
 };
 
-const TagButtonSection = () => {
+const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	const [tags, setTags] = useState({
 		selected: ['All'],
 		tagList: [
@@ -324,20 +344,9 @@ const TagButtonSection = () => {
 				})
 		);
 	};
-	/* useEffect(() => {
-		if (tags.selected.length > 1 && tags.selected.includes('all')) {
-			setTags(
-				(p) =>
-					(p = {
-						selected: p.selected.filter((arr) => arr !== 'all'),
-						notSelected: p.notSelected.map((arr) => ({
-							name: arr.name,
-							isSelected: arr.name === 'all' ? false : arr.isSelected,
-						})),
-					})
-			);
-		}
-	}, [tags]); */
+	useEffect(() => {
+		setSelectedTags(tags.selected);
+	}, [tags]);
 	return (
 		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
@@ -370,30 +379,64 @@ const TagButtonSection = () => {
 	);
 };
 
-const SearchSection = () => {
+const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
+	const [selectedTags, setSelectedTags] = useState(['']);
+	const [searchWord, setSearchWord] = useState('');
+	const onChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+		setSearchWord(e.currentTarget.value);
+	};
+	const onsubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setKeyWords((p) => ({ ...p, searchWord }));
+	};
+	useEffect(() => {
+		setKeyWords((p) => ({ ...p, selectedTags }));
+	}, [selectedTags]);
 	return (
-		<section className='mt-[10vh] mx-9 font-bold flex gap-2 pb-2 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'>
-			<svg
-				xmlns='http://www.w3.org/2000/svg'
-				fill='none'
-				viewBox='0 0 24 24'
-				strokeWidth={2}
-				stroke='currentColor'
-				className='w-6 h-6'
+		<section>
+			<form
+				onSubmit={onsubmit}
+				className='relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
 			>
-				<path
-					strokeLinecap='round'
-					strokeLinejoin='round'
-					d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+				<button>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={2}
+						stroke='currentColor'
+						className='w-6 h-6'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+						/>
+					</svg>
+				</button>
+				<Input
+					name='search'
+					type='text'
+					placeholder='search'
+					css='border-none placeholder:font-bold bg-transparent'
+					onChange={onChange}
 				/>
-			</svg>
-			search
+			</form>
+			<TagButtonSection setSelectedTags={setSelectedTags} />
 		</section>
 	);
 };
 
-const VideoTitlePresense = () => {
-	const [title, animate] = useAnimate();
+interface VideoTitlePresenseProps {
+	title: string;
+	description: string;
+}
+
+const VideoTitlePresense = ({
+	title,
+	description,
+}: VideoTitlePresenseProps) => {
+	const [intro, animate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
 		if (isPresent) {
@@ -427,42 +470,44 @@ const VideoTitlePresense = () => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent]);
+	}, [isPresent, animate, safeToRemove]);
 	return (
 		<div
-			ref={title}
+			ref={intro}
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
-			<div className='Title'>Video Title</div>
-			<div className='Desc font-medium text-3xl'>Description</div>
+			<div className='Title'>{title}</div>
+			<div className='Desc font-medium text-3xl'>description</div>
 		</div>
 	);
 };
 
-const Video = ({ index, waiting }: VideoProps) => {
+const Video = ({
+	index,
+	waiting,
+	thumbnail,
+	title,
+	description,
+}: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
-	const [thumnail, thumnailAnimate] = useAnimate();
+	const [cover, coverAnimate] = useAnimate();
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
-				await thumnailAnimate(
-					thumnail.current,
-					{ opacity: 0 },
-					{ duration: 0.4 }
-				);
+				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
 			};
 			enterAnimaition();
 		} else {
 			const exitAnimation = async () => {
-				await thumnailAnimate(
-					thumnail.current,
-					{ opacity: 1 },
+				await coverAnimate(
+					cover.current,
+					{ opacity: 0.4 },
 					{ duration: 0.4, delay: 0.4 }
 				);
 			};
 			exitAnimation();
 		}
-	}, [titleScreen]);
+	}, [titleScreen, cover, coverAnimate]);
 	return (
 		<motion.article
 			initial={{ opacity: 1 }}
@@ -479,24 +524,59 @@ const Video = ({ index, waiting }: VideoProps) => {
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative flex justify-center items-center aspect-video text-5xl bg-pink-400 border'
+			className='relative w-full flex justify-center items-center aspect-video text-5xl border'
 		>
-			<button className='absolute w-32 aspect-square bg-indigo-400'></button>
+			<Image
+				src={thumbnail.url}
+				alt='thumbnail(will fixed)'
+				width={thumbnail.width}
+				height={thumbnail.height}
+				priority
+				className='relative w-full'
+			/>
 			<AnimatePresence>
-				{titleScreen ? <VideoTitlePresense /> : null}
+				{titleScreen ? (
+					<VideoTitlePresense title={title} description={description} />
+				) : null}
 			</AnimatePresence>
 			<div
-				ref={thumnail}
-				className='relative w-full h-full bg-amber-400 text-5xl font-bold flex justify-center items-center pointer-events-none'
-			>
-				Thumnail{index}
-			</div>
+				ref={cover}
+				className='absolute w-full h-full bg-[#101010] opacity-40 text-5xl font-bold flex justify-center items-center pointer-events-none'
+			></div>
 		</motion.article>
 	);
 };
 
-const VideoSection = ({ category }: VideoSectionProps) => {
-	// const ref = useRef<HTMLDivElement[]>([]);
+interface videoGenreState {
+	category: 'film' | 'short' | 'outsource';
+	id: string;
+	thumbnails: { url: string; width: number; height: number };
+	title: string;
+	description: string;
+}
+
+export interface GapiItem {
+	id: string;
+	snippet: {
+		description: string;
+		thumbnails: {
+			[key: string]: { url: string; width: number; height: number };
+		};
+		title: string;
+		resourceId?: { videoId: string };
+	};
+}
+
+interface GapiLists {
+	items: {
+		id: string;
+		snippet: {
+			title: string;
+		};
+	}[];
+}
+
+const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	const videoDatas = [
 		{ category: 'film', direction: 'horizental', index: 1 },
 		{ category: 'short', direction: 'vertical', index: 2 },
@@ -519,162 +599,113 @@ const VideoSection = ({ category }: VideoSectionProps) => {
 		{ category: 'film', direction: 'horizental', index: 19 },
 		{ category: 'short', direction: 'vertical', index: 20 },
 	];
-	const newDatas = {
+	const newVideoDatas = {
 		film: videoDatas.filter((data) => data.category === 'film'),
 		short: videoDatas.filter((data) => data.category === 'short'),
 		outsource: videoDatas.filter((data) => data.category === 'outsource'),
 	};
-	type test = typeof newDatas & {
-		[key: string]: { category: string; direction: string; index: number }[];
-	};
-	/* const testover = (index: number) => {
-		ref.current[index].style.zIndex = '1';
-	};
-	const testout = (index: number) => {
-		ref.current[index].style.zIndex = '0';
-	}; */
+	// const youtube = (category: 'film' | 'short' | 'outsource') => {
+	// 	fetch(
+	// 		`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
+	// 	)
+	// 		.then((response) => response.json())
+	// 		.then((data) => {
+	// 			const { items } = data;
+	// 			const newItems: videoGenreState[] = items.map((element: GapiItems) => {
+	// 				const newItem: videoGenreState = {
+	// 					category,
+	// 					id: element.id.videoId,
+	// 					thumbnails: element.snippet.thumbnails.default,
+	// 					description: element.snippet.description,
+	// 					title: element.snippet.title,
+	// 				};
+	// 				return newItem;
+	// 			});
+	// 			setVideos((p) => ({ ...p, [category]: newItems }));
+	// 		});
+	// };
+	const [items, setItems] = useState<GapiItem[]>([]);
+	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
+	useEffect(() => {
+		fetchYouTubeApi(
+			'playlists',
+			'10',
+			setPlaylistIds,
+			'(items(id,snippet(title)))'
+		);
+	}, []);
+	useEffect(() => {
+		if (!playlistIds) return;
+		if (category === 'film') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (
+					item.snippet.title !== 'shorts' &&
+					item.snippet.title !== '참여 촬영'
+				)
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		} else if (category === 'short') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (item.snippet.title === 'shorts')
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		} else if (category === 'outsource') {
+			setItems((p) => (p = []));
+			playlistIds.items.forEach((item) => {
+				if (item.snippet.title === '참여 촬영')
+					fetchYouTubeApi(
+						'playlistItems',
+						'9',
+						(data: { items: GapiItem[] }) => {
+							setItems((p) => [...p, ...data.items]);
+						},
+						'(items(id,snippet(title,description,thumbnails)))',
+						item.id
+					);
+			});
+		}
+	}, [playlistIds, category]);
+	console.log(playlistIds);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
-				{['film', 'short', 'outsource'].map((data) =>
+				{items.map((data, idx) => (
+					<Video
+						key={idx}
+						index={data.id}
+						waiting={idx}
+						thumbnail={data.snippet.thumbnails.high}
+						title={data.snippet.title}
+						description={data.snippet.description}
+					/>
+				))}
+				{/* {['film', 'short', 'outsource'].map((data) =>
 					category === data
-						? (newDatas as test)[data].map((arr, idx) => (
+						? (newVideoDatas as datas)[data].map((arr, idx) => (
 								<Video key={arr.index} index={arr.index} waiting={idx} />
 						  ))
 						: null
-				)}
+				)} */}
 			</AnimatePresence>
 		</section>
-		/**Layout 3 플렉스로 조절(서로 다른 비율의 영상이나 사진을 함께 보여주는 최적의 방법) */
-		/* <section className='relative w-full h-auto'>
-			<div className='flex flex-wrap grow gap-2 w-full'>
-				{videoDatas.map((arr) => (
-					<div
-						key={arr.index}
-						className={cls(
-							arr.direction === 'horizental'
-								? 'aspect-[16/9] grow-[256]'
-								: 'aspect-[9/16] grow-[81]',
-							'lg:min-h-[400px] h-full sm:min-h-[220px] min-h-[200px] bg-indigo-500'
-						)}
-					>
-						{arr.index}
-					</div>
-				))}
-			</div>
-		</section> */
-		/**Layout 2 마우스오버시 늘리기 */
-		/* <section className='relative w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-4 md:grid-cols-2 grid-cols-1'>
-			{videoDatas.map((data) => {
-				if (data.direction === 'horizental') {
-					return data.index % 4 === 0 ? (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute right-0 h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					) : (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute h-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[16/9]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				} else if (data.direction === 'vertical') {
-					return (
-						<div key={data.index} className='relative w-full aspect-[1/1] '>
-							<div
-								onMouseOver={() => {
-									testover(data.index - 1);
-								}}
-								onMouseOut={() => {
-									testout(data.index - 1);
-								}}
-								ref={(el) =>
-									el !== null ? (ref.current[data.index - 1] = el) : null
-								}
-								className={
-									'absolute w-full aspect-square bg-pink-500 border-4 border-[#eaeaea] transition-all duration-400 hover:delay-300 hover:aspect-[9/16]'
-								}
-							>
-								{data.index}
-							</div>
-						</div>
-					);
-				}
-			})}
-		</section> */
-		/**Layout 1 자동 배치 */
-		/* <section className='w-full h-auto gap-2 grid auto-rows-auto grid-flow-dense bg-green-500 xl:grid-cols-3 md:grid-cols-2'>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				1
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				2
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				3
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				4
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				5
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				6
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				7
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				8
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				9
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				10
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				11
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				12
-			</div>
-			<div className='w-full h-full aspect-[2/1] col-[auto_/_span_2] row-[auto_/_span_1] bg-indigo-400 text-3xl'>
-				13
-			</div>
-			<div className='w-full h-full aspect-[1/2] col-[auto_/_span_1] row-[auto_/_span_2] bg-indigo-400 text-3xl'>
-				14
-			</div>
-		</section> */
 	);
 };
 
@@ -694,18 +725,21 @@ const OutroSection = () => {
 	const links = [
 		{
 			position: 'TopLink',
-			title: 'INSTAGRAM',
+			name: 'INSTAGRAM',
 			angle: -60,
+			href: 'https://www.instagram.com/yarg__gray',
 		},
 		{
 			position: 'MiddleLink',
-			title: 'VIMEO',
+			name: 'VIMEO',
 			angle: -90,
+			href: '',
 		},
 		{
 			position: 'BottomLink',
-			title: 'YOUTUBE',
+			name: 'YOUTUBE',
 			angle: -120,
+			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
 	//타입스크립트에서 렌더링 없이 데이터변경 때문에 useRef쓸 때 타입 설정
@@ -764,7 +798,7 @@ const OutroSection = () => {
 			};
 			leaveAnimation();
 		}
-	}, [isLinksInview]);
+	}, [isLinksInview, snsLinksAnimate]);
 	return (
 		<section className='relative bg-[#101010] h-auto flex flex-col items-center font-bold'>
 			<motion.div
@@ -799,19 +833,20 @@ const OutroSection = () => {
 					))}
 				</motion.div>
 				{links.map((link) => (
-					<motion.li
-						style={{ WebkitTextStroke: '1px #9c9c9c' }}
-						key={link.title}
-						onMouseEnter={() => {
-							onLinksEnter(link.angle, `.${link.position}`);
-						}}
-						onMouseLeave={() => {
-							onLinksLeave(`.${link.position}`);
-						}}
-						className={cls(link.position, 'relative')}
-					>
-						{link.title}
-					</motion.li>
+					<Link key={link.name} href={link.href} target='_blank'>
+						<motion.li
+							style={{ WebkitTextStroke: '1px #9c9c9c' }}
+							onMouseEnter={() => {
+								onLinksEnter(link.angle, `.${link.position}`);
+							}}
+							onMouseLeave={() => {
+								onLinksLeave(`.${link.position}`);
+							}}
+							className={cls(link.position, 'relative')}
+						>
+							{link.name}
+						</motion.li>
+					</Link>
 				))}
 			</ul>
 		</section>
@@ -819,14 +854,22 @@ const OutroSection = () => {
 };
 
 export default function Work() {
-	const [category, setCategory] = useState('');
+	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
+		'film'
+	);
+	const [keyWords, setKeyWords] = useState<keyWordsState>({
+		searchWord: '',
+		selectedTags: [''],
+	});
+	useEffect(() => {
+		console.log(keyWords);
+	}, [keyWords]);
 	return (
 		<Layout seoTitle='Work' nav={{ isShort: true }}>
 			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
 				<TitleSection setCategory={setCategory} />
-				<SearchSection />
-				<TagButtonSection />
-				<VideoSection category={category} />
+				<SearchSection setKeyWords={setKeyWords} />
+				<VideoSection category={category} keywords={keyWords} />
 				<OutroSection />
 			</main>
 		</Layout>
