@@ -18,6 +18,5 @@ model Works {
   updatedAt   DateTime @updatedAt
   title       String
   description String
-  resourceId  String
-  thumbnail   String
+  resourceId  String   @unique
 }

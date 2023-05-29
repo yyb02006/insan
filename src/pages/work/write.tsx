@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
+import useMutation from '@/libs/client/useMutation';
 
 interface WorkInfos {
 	title: string;
@@ -16,6 +17,7 @@ export default function Write() {
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
 	const [test, setTest] = useState<GapiItem[]>([]);
+	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
 		lists.forEach((list) => {
@@ -82,6 +84,9 @@ export default function Write() {
 			}
 		}
 	};
+	const onSubmitWrites = () => {
+		sendList(workInfos);
+	};
 	console.log(workInfos);
 	return (
 		<section>
@@ -124,7 +129,9 @@ export default function Write() {
 			</div>
 			<div className='w-[100px] h-[100px] bg-pink-400 fixed right-0 top-0'>
 				<button className='w-full bg-amber-400'>Reset</button>
-				<button className='w-full bg-purple-400'>Add</button>
+				<button onClick={onSubmitWrites} className='w-full bg-purple-400'>
+					Add
+				</button>
 			</div>
 		</section>
 	);
