@@ -1,10 +1,15 @@
-import { fetchApi } from '@/libs/client/utils';
 import { fetchYouTubeApi } from '@/libs/client/utils';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import YouTube from 'react-youtube';
+import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
+
+interface WorkInfos {
+	title: string;
+	description: string;
+	resourceId: string;
+	thumbnail: string;
+}
 
 export default function Write() {
 	const lists = [
@@ -12,6 +17,7 @@ export default function Write() {
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
 	const [test, setTest] = useState<GapiItem[]>([]);
+	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
 		lists.forEach((list) => {
 			fetchYouTubeApi(
@@ -25,8 +31,58 @@ export default function Write() {
 			);
 		});
 	}, []);
-	const InputChange = () => {};
-	const onSubmit = () => {};
+	const InputChange = (e: SyntheticEvent<HTMLInputElement>) => {
+		console.log(e.currentTarget.name);
+		const workIdx = workInfos?.findIndex(
+			(i) => i.resourceId === e.currentTarget.id
+		);
+		console.log(workIdx);
+		if (workIdx !== undefined) {
+			const { value } = e.currentTarget;
+			if (e.currentTarget.name === 'title') {
+				setWorkInfos((p) =>
+					p ? [...p, (p[workIdx] = { ...p[workIdx], title: value })] : undefined
+				);
+			} else if (e.currentTarget.name === 'description') {
+				setWorkInfos((p) =>
+					p
+						? [
+								...p,
+								(p[workIdx] = {
+									...p[workIdx],
+									description: value,
+								}),
+						  ]
+						: undefined
+				);
+			}
+		} else {
+			console.log('here');
+			const { id } = e.currentTarget;
+			setWorkInfos((p) =>
+				p
+					? [
+							...p,
+							{
+								resourceId: id,
+								title: '',
+								description: '',
+								thumbnail: '',
+							},
+					  ]
+					: [
+							{
+								resourceId: id,
+								title: '',
+								description: '',
+								thumbnail: '',
+							},
+					  ]
+			);
+		}
+	};
+	console.log(workInfos);
+
 	return (
 		<section className='grid grid-cols-3'>
 			{test.map((data, arr) => (
@@ -44,20 +100,20 @@ export default function Write() {
 						className='w-full object-cover'
 					/>
 					{data.snippet.title}/{data.snippet.resourceId?.videoId}
-					<form onSubmit={onSubmit}>
-						<Input
-							name='title'
-							type='text'
-							placeholder='타이틀'
-							onChange={InputChange}
-						/>
-						<Input
-							name='description'
-							type='text'
-							placeholder='설명'
-							onChange={InputChange}
-						/>
-					</form>
+					<Input
+						name='title'
+						type='text'
+						placeholder='타이틀'
+						id={data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''}
+						onChange={InputChange}
+					/>
+					<Input
+						name='description'
+						type='text'
+						placeholder='설명'
+						id={data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''}
+						onChange={InputChange}
+					/>
 				</div>
 			))}
 			{/* <YouTube
