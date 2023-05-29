@@ -37,22 +37,22 @@ export default function Write() {
 			(i) => i.resourceId === e.currentTarget.id
 		);
 		console.log(workIdx);
-		if (workIdx !== undefined) {
-			const { value } = e.currentTarget;
-			if (e.currentTarget.name === 'title') {
-				setWorkInfos((p) =>
-					p ? [...p, (p[workIdx] = { ...p[workIdx], title: value })] : undefined
-				);
-			} else if (e.currentTarget.name === 'description') {
+		if (workIdx !== undefined && workIdx >= 0) {
+			const { value, id, name } = e.currentTarget;
+			if (name === 'title') {
 				setWorkInfos((p) =>
 					p
-						? [
-								...p,
-								(p[workIdx] = {
-									...p[workIdx],
-									description: value,
-								}),
-						  ]
+						? p.map((arr) =>
+								arr.resourceId === id ? { ...arr, title: value } : arr
+						  )
+						: undefined
+				);
+			} else if (name === 'description') {
+				setWorkInfos((p) =>
+					p
+						? p.map((arr) =>
+								arr.resourceId === id ? { ...arr, description: value } : arr
+						  )
 						: undefined
 				);
 			}
