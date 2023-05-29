@@ -8,7 +8,6 @@ interface WorkInfos {
 	title: string;
 	description: string;
 	resourceId: string;
-	thumbnail: string;
 }
 
 export default function Write() {
@@ -31,19 +30,20 @@ export default function Write() {
 			);
 		});
 	}, []);
+	const inputDelete = () => {};
 	const InputChange = (e: SyntheticEvent<HTMLInputElement>) => {
-		console.log(e.currentTarget.name);
+		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
-			(i) => i.resourceId === e.currentTarget.id
+			(i) => i.resourceId === dataset.resourceid
 		);
-		console.log(workIdx);
 		if (workIdx !== undefined && workIdx >= 0) {
-			const { value, id, name } = e.currentTarget;
 			if (name === 'title') {
 				setWorkInfos((p) =>
 					p
 						? p.map((arr) =>
-								arr.resourceId === id ? { ...arr, title: value } : arr
+								arr.resourceId === dataset.resourceid
+									? { ...arr, title: value }
+									: arr
 						  )
 						: undefined
 				);
@@ -51,82 +51,81 @@ export default function Write() {
 				setWorkInfos((p) =>
 					p
 						? p.map((arr) =>
-								arr.resourceId === id ? { ...arr, description: value } : arr
+								arr.resourceId === dataset.resourceid
+									? { ...arr, description: value }
+									: arr
 						  )
 						: undefined
 				);
 			}
 		} else {
 			console.log('here');
-			const { id } = e.currentTarget;
-			setWorkInfos((p) =>
-				p
-					? [
-							...p,
-							{
-								resourceId: id,
-								title: '',
-								description: '',
-								thumbnail: '',
-							},
-					  ]
-					: [
-							{
-								resourceId: id,
-								title: '',
-								description: '',
-								thumbnail: '',
-							},
-					  ]
-			);
+			if (name === 'title') {
+				setWorkInfos((p) =>
+					p
+						? [
+								...p,
+								{
+									resourceId: dataset.resourceid ? dataset.resourceid : '',
+									title: '',
+									description: '',
+								},
+						  ]
+						: [
+								{
+									resourceId: dataset.resourceid ? dataset.resourceid : '',
+									title: '',
+									description: '',
+								},
+						  ]
+				);
+			}
 		}
 	};
 	console.log(workInfos);
-
 	return (
-		<section className='grid grid-cols-3'>
-			{test.map((data, arr) => (
-				<div key={arr} className='w-[400px] h-[400px]'>
-					<Image
-						src={
-							test.length !== 0
-								? data.snippet.thumbnails.maxres?.url ||
-								  data.snippet.thumbnails.medium?.url
-								: ''
-						}
-						alt='test'
-						width={1280}
-						height={720}
-						className='w-full object-cover'
-					/>
-					{data.snippet.title}/{data.snippet.resourceId?.videoId}
-					<Input
-						name='title'
-						type='text'
-						placeholder='타이틀'
-						id={data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''}
-						onChange={InputChange}
-					/>
-					<Input
-						name='description'
-						type='text'
-						placeholder='설명'
-						id={data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''}
-						onChange={InputChange}
-					/>
-				</div>
-			))}
-			{/* <YouTube
-				videoId='Vg4aCFlRrsI'
-				opts={{
-					width: '100%',
-					height: '100%',
-					playerVars: { rel: 0, modestbranding: 1 },
-					host: 'https://www.youtube-nocookie.com',
-					origin: 'http://localhost:3000',
-				}}
-				loading='lazy'
-			/> */}
+		<section>
+			<div className='grid grid-cols-3 gap-6 px-20'>
+				{test.map((data, arr) => (
+					<div key={arr} className='w-full aspect-video'>
+						<Image
+							src={
+								test.length !== 0
+									? data.snippet.thumbnails.maxres?.url ||
+									  data.snippet.thumbnails.medium?.url
+									: ''
+							}
+							alt='test'
+							width={1280}
+							height={720}
+							className='w-full object-cover'
+						/>
+						{data.snippet.title}/{data.snippet.resourceId?.videoId}
+						<Input
+							name='title'
+							type='text'
+							placeholder='타이틀'
+							data-resourceid={
+								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
+							}
+							onChange={InputChange}
+						/>
+						<Input
+							name='description'
+							type='text'
+							placeholder='설명'
+							data-resourceid={
+								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
+							}
+							onChange={InputChange}
+						/>
+					</div>
+				))}
+			</div>
+			<div className='w-[100px] h-[100px] bg-pink-400 fixed right-0 top-0'>
+				<button className='w-full bg-amber-400'>Reset</button>
+				<button className='w-full bg-purple-400'>Add</button>
+			</div>
 		</section>
 	);
 }
