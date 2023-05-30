@@ -5,7 +5,7 @@ import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 
-interface WorkInfos {
+export interface WorkInfos {
 	title: string;
 	description: string;
 	resourceId: string;
@@ -16,7 +16,7 @@ export default function Write() {
 		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
-	const [test, setTest] = useState<GapiItem[]>([]);
+	const [list, setList] = useState<GapiItem[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
@@ -25,7 +25,7 @@ export default function Write() {
 				'playlistItems',
 				'10',
 				(data: { items: GapiItem[] }) => {
-					setTest((p) => [...p, ...data.items]);
+					setList((p) => [...p, ...data.items]);
 				},
 				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
 				list.id
@@ -85,17 +85,18 @@ export default function Write() {
 		}
 	};
 	const onSubmitWrites = () => {
+		if (loading) return;
 		sendList(workInfos);
 	};
-	console.log(workInfos);
+	console.log(list);
 	return (
 		<section>
 			<div className='grid grid-cols-3 gap-6 px-20'>
-				{test.map((data, arr) => (
+				{list.map((data, arr) => (
 					<div key={arr} className='w-full aspect-video'>
 						<Image
 							src={
-								test.length !== 0
+								list.length !== 0
 									? data.snippet.thumbnails.maxres?.url ||
 									  data.snippet.thumbnails.medium?.url
 									: ''
