@@ -14,7 +14,7 @@ export function fetchApi<T>(
 	opt?: { [key: string]: any }
 ) {
 	fetch(url, opt)
-		.then((response) => response.json())
+		.then((res) => res.json())
 		.then((data) => setFunc(data));
 }
 

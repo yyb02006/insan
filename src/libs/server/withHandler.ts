@@ -20,3 +20,9 @@ export default function withHandler({ methods, handlerFunc }: config) {
 		}
 	};
 }
+
+export const config = {
+	api: {
+		externalResolver: true,
+	},
+};
