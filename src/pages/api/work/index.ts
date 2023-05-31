@@ -23,9 +23,3 @@ export default withHandler({
 	methods: ['GET', 'POST'],
 	handlerFunc: handler,
 });
-
-export const config = {
-	api: {
-		externalResolver: true,
-	},
-};
