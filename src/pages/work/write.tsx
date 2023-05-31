@@ -175,16 +175,16 @@ export default function Write() {
 						</div>
 					))}
 				</div>
-				<div className='w-[60px] ring-1 ring-palettered rounded-full fixed xl:right-20 sm:right-4 top-[100px]'>
+				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
 						onClick={onReset}
-						className='w-full ring-1 ring-palettered aspect-square rounded-full font-light text-sm hover:text-palettered hover:font-bold'
+						className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 					>
 						Reset
 					</button>
 					<button
 						onClick={onSubmitWrites}
-						className='w-full ring-1 ring-palettered aspect-square rounded-full font-light text-sm hover:text-palettered hover:font-bold'
+						className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 					>
 						Save
 					</button>
