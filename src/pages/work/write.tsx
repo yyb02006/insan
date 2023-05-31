@@ -4,6 +4,7 @@ import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
+import Layout from '@/components/layout';
 
 export interface WorkInfos {
 	title: string;
@@ -93,74 +94,102 @@ export default function Write() {
 	};
 	console.log(workInfos);
 	return (
-		<section>
-			<div className='grid grid-cols-3 gap-6 px-20'>
-				{list.map((data, arr) => (
-					<div key={arr} className='w-full aspect-video'>
-						<Image
-							src={
-								list.length !== 0
-									? data.snippet.thumbnails.maxres?.url ||
-									  data.snippet.thumbnails.medium?.url
-									: ''
-							}
-							alt='test'
-							width={1280}
-							height={720}
-							className='w-full object-cover'
-						/>
-						{data.snippet.title}/{data.snippet.resourceId?.videoId}
-						<Input
-							name='title'
-							type='text'
-							placeholder='타이틀'
-							data-resourceid={
-								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
-							}
-							onChange={InputChange}
-							value={
-								workInfos?.find((arr) => {
-									return arr.resourceId === data.snippet.resourceId?.videoId;
-								})?.title
-									? workInfos.find((arr) => {
+		<Layout seoTitle='Write' footerPosition='hidden' nav={{ isShort: true }}>
+			<section className='relative xl:px-40 sm:px-24 px-16'>
+				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
+					작성하기
+				</div>
+				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+					{list.map((data, arr) => (
+						<div key={arr} className='w-full flex flex-col justify-between'>
+							<div>
+								<Image
+									src={
+										list.length !== 0
+											? data.snippet.thumbnails.maxres?.url ||
+											  data.snippet.thumbnails.medium?.url
+											: ''
+									}
+									alt='test'
+									width={1280}
+									height={720}
+									className='w-full object-cover'
+								/>
+								<div className='mt-2'>
+									<div className='text-sm'>Title : {data.snippet.title}</div>
+									<div className='text-xs font-light'>
+										Id : {data.snippet.resourceId?.videoId}
+									</div>
+								</div>
+							</div>
+							<div className='mt-2'>
+								<Input
+									name='title'
+									type='text'
+									placeholder='타이틀'
+									data-resourceid={
+										data.snippet.resourceId
+											? data.snippet.resourceId?.videoId
+											: ''
+									}
+									onChange={InputChange}
+									value={
+										workInfos?.find((arr) => {
 											return (
 												arr.resourceId === data.snippet.resourceId?.videoId
 											);
-									  })?.title
-									: ''
-							}
-						/>
-						<Input
-							name='description'
-							type='text'
-							placeholder='설명'
-							data-resourceid={
-								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
-							}
-							onChange={InputChange}
-							value={
-								workInfos?.find((arr) => {
-									return arr.resourceId === data.snippet.resourceId?.videoId;
-								})?.description
-									? workInfos.find((arr) => {
+										})?.title
+											? workInfos.find((arr) => {
+													return (
+														arr.resourceId === data.snippet.resourceId?.videoId
+													);
+											  })?.title
+											: ''
+									}
+								/>
+								<Input
+									name='description'
+									type='text'
+									placeholder='설명'
+									data-resourceid={
+										data.snippet.resourceId
+											? data.snippet.resourceId?.videoId
+											: ''
+									}
+									onChange={InputChange}
+									value={
+										workInfos?.find((arr) => {
 											return (
 												arr.resourceId === data.snippet.resourceId?.videoId
 											);
-									  })?.description
-									: ''
-							}
-						/>
-					</div>
-				))}
-			</div>
-			<div className='w-[100px] h-[100px] bg-pink-400 fixed right-0 top-0'>
-				<button onClick={onReset} className='w-full bg-amber-400'>
-					Reset
-				</button>
-				<button onClick={onSubmitWrites} className='w-full bg-purple-400'>
-					Add
-				</button>
-			</div>
-		</section>
+										})?.description
+											? workInfos.find((arr) => {
+													return (
+														arr.resourceId === data.snippet.resourceId?.videoId
+													);
+											  })?.description
+											: ''
+									}
+								/>
+							</div>
+						</div>
+					))}
+				</div>
+				<div className='w-[60px] ring-1 ring-palettered rounded-full fixed xl:right-20 sm:right-4 top-[100px]'>
+					<button
+						onClick={onReset}
+						className='w-full ring-1 ring-palettered aspect-square rounded-full font-light text-sm hover:text-palettered hover:font-bold'
+					>
+						Reset
+					</button>
+					<button
+						onClick={onSubmitWrites}
+						className='w-full ring-1 ring-palettered aspect-square rounded-full font-light text-sm hover:text-palettered hover:font-bold'
+					>
+						Save
+					</button>
+				</div>
+			</section>
+		</Layout>
 	);
 }
