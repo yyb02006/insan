@@ -32,12 +32,12 @@ export default function Write() {
 			);
 		});
 	}, []);
-	const inputDelete = () => {};
 	const InputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
+		console.log(e.currentTarget.value);
 		if (workIdx !== undefined && workIdx >= 0) {
 			if (name === 'title') {
 				setWorkInfos((p) =>
@@ -69,14 +69,14 @@ export default function Write() {
 								...p,
 								{
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
-									title: '',
+									title: value,
 									description: '',
 								},
 						  ]
 						: [
 								{
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
-									title: '',
+									title: value,
 									description: '',
 								},
 						  ]
@@ -88,7 +88,10 @@ export default function Write() {
 		if (loading) return;
 		sendList(workInfos);
 	};
-	console.log(list);
+	const onReset = () => {
+		setWorkInfos([]);
+	};
+	console.log(workInfos);
 	return (
 		<section>
 			<div className='grid grid-cols-3 gap-6 px-20'>
@@ -115,6 +118,17 @@ export default function Write() {
 								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
 							}
 							onChange={InputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === data.snippet.resourceId?.videoId;
+								})?.title
+									? workInfos.find((arr) => {
+											return (
+												arr.resourceId === data.snippet.resourceId?.videoId
+											);
+									  })?.title
+									: ''
+							}
 						/>
 						<Input
 							name='description'
@@ -124,12 +138,25 @@ export default function Write() {
 								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
 							}
 							onChange={InputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === data.snippet.resourceId?.videoId;
+								})?.description
+									? workInfos.find((arr) => {
+											return (
+												arr.resourceId === data.snippet.resourceId?.videoId
+											);
+									  })?.description
+									: ''
+							}
 						/>
 					</div>
 				))}
 			</div>
 			<div className='w-[100px] h-[100px] bg-pink-400 fixed right-0 top-0'>
-				<button className='w-full bg-amber-400'>Reset</button>
+				<button onClick={onReset} className='w-full bg-amber-400'>
+					Reset
+				</button>
 				<button onClick={onSubmitWrites} className='w-full bg-purple-400'>
 					Add
 				</button>
