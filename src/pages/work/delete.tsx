@@ -48,7 +48,7 @@ export default function Delete() {
 	};
 	return (
 		<Layout
-			seoTitle='Write'
+			seoTitle='Delete'
 			footerPosition='hidden'
 			nav={{ isShort: true }}
 			menu={false}
