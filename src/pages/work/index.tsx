@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls, fetchYouTubeApi } from '@/libs/client/utils';
+import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -17,6 +17,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
+import { Works } from '@prisma/client';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -635,6 +636,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	// 		});
 	// };
 	const [items, setItems] = useState<GapiItem[]>([]);
+	const [videos, setVideos] = useState<{ success: boolean; work: Works[] }>();
 	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
 	useEffect(() => {
 		fetchYouTubeApi(
@@ -679,34 +681,38 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			});
 		} else if (category === 'outsource') {
 			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (item.snippet.title === '참여 촬영')
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
+			fetchApi('/api/work/list?kind=outsource', setVideos);
 		}
 	}, [playlistIds, category]);
-	console.log(playlistIds);
+	console.log(items);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
-				{items.map((data, idx) => (
-					<Video
-						key={idx}
-						index={data.id}
-						waiting={idx}
-						thumbnail={data.snippet.thumbnails.high}
-						title={data.snippet.title}
-						description={data.snippet.description}
-					/>
-				))}
+				{category === 'outsource'
+					? videos?.work?.map((data, idx) => (
+							<Video
+								key={idx}
+								index={data.id.toString()}
+								waiting={idx}
+								thumbnail={{
+									url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
+									width: 1280,
+									height: 720,
+								}}
+								title={data.title}
+								description={data.description}
+							/>
+					  ))
+					: items.map((data, idx) => (
+							<Video
+								key={idx}
+								index={data.id}
+								waiting={idx}
+								thumbnail={data.snippet.thumbnails.high}
+								title={data.snippet.title}
+								description={data.snippet.description}
+							/>
+					  ))}
 				{/* {['film', 'short', 'outsource'].map((data) =>
 					category === data
 						? (newVideoDatas as datas)[data].map((arr, idx) => (
