@@ -5,6 +5,7 @@ import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
+import Link from 'next/link';
 
 export interface WorkInfos {
 	title: string;
@@ -94,10 +95,18 @@ export default function Write() {
 	};
 	console.log(workInfos);
 	return (
-		<Layout seoTitle='Write' footerPosition='hidden' nav={{ isShort: true }}>
+		<Layout
+			seoTitle='Write'
+			footerPosition='hidden'
+			nav={{ isShort: true }}
+			menu={false}
+		>
 			<section className='relative xl:px-40 sm:px-24 px-16'>
 				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
-					작성하기
+					추가하기
+				</div>
+				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
+					<Link href={'/work/delete'}>삭제하기</Link>
 				</div>
 				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 					{list.map((data, arr) => (
