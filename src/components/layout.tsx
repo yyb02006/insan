@@ -21,6 +21,8 @@ interface LayoutProps {
 	css?: string;
 	footerPosition?: string;
 	nav?: { exist?: boolean; isShort: boolean };
+	logo?: boolean;
+	menu?: boolean;
 }
 
 const ListMenu = () => {
@@ -337,6 +339,8 @@ export default function Layout({
 	css,
 	footerPosition = 'relative',
 	nav = { exist: true, isShort: false },
+	logo = true,
+	menu = true,
 }: LayoutProps) {
 	const router = useRouter();
 	return (
@@ -346,7 +350,7 @@ export default function Layout({
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
 				</title>
 			</Head>
-			{nav ? (
+			{logo ? (
 				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
 					<Link href={'/'} className='flex justify-center items-center'>
 						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
@@ -361,7 +365,7 @@ export default function Layout({
 					</Link>
 				</div>
 			) : null}
-			{nav ? (
+			{menu ? (
 				<div className='fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
 					<AnimatePresence>
 						{!nav.isShort ? <ListMenu /> : null}
