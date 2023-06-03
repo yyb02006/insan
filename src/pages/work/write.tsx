@@ -105,6 +105,34 @@ export default function Write() {
 				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
 					추가하기
 				</div>
+				<form
+					onSubmit={() => {}}
+					className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
+				>
+					<button>
+						<svg
+							xmlns='http://www.w3.org/2000/svg'
+							fill='none'
+							viewBox='0 0 24 24'
+							strokeWidth={2}
+							stroke='currentColor'
+							className='w-6 h-6'
+						>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+							/>
+						</svg>
+					</button>
+					<Input
+						name='search'
+						type='text'
+						placeholder='search'
+						css='border-none placeholder:font-bold bg-transparent'
+						onChange={() => {}}
+					/>
+				</form>
 				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
 					<Link href={'/work/delete'}>삭제하기</Link>
 				</div>
