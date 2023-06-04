@@ -58,6 +58,9 @@ export default function Delete() {
 				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
 					삭제하기
 				</div>
+				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
+					<Link href={'/work/write'}>추가하기</Link>
+				</div>
 				<form
 					onSubmit={() => {}}
 					className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
@@ -86,9 +89,7 @@ export default function Delete() {
 						onChange={() => {}}
 					/>
 				</form>
-				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
-					<Link href={'/work/write'}>추가하기</Link>
-				</div>
+
 				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 					{list?.map((li) => (
 						<div
