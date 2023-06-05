@@ -18,5 +18,6 @@ model Works {
   updatedAt   DateTime @updatedAt
   title       String
   description String
+  category    String
   resourceId  String   @unique
 }

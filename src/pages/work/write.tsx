@@ -102,9 +102,15 @@ export default function Write() {
 			menu={false}
 		>
 			<section className='relative xl:px-40 sm:px-24 px-16'>
-				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
-					추가하기
+				<div>
+					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
+						추가하기
+					</div>
+					<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
+						<Link href={'/work/delete'}>삭제하기</Link>
+					</div>
 				</div>
+				<div>카테고리</div>
 				<form
 					onSubmit={() => {}}
 					className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
@@ -133,9 +139,6 @@ export default function Write() {
 						onChange={() => {}}
 					/>
 				</form>
-				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
-					<Link href={'/work/delete'}>삭제하기</Link>
-				</div>
 				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 					{list.map((data, arr) => (
 						<div key={arr} className='w-full flex flex-col justify-between'>
