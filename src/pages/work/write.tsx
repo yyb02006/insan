@@ -1,4 +1,4 @@
-import { fetchYouTubeApi } from '@/libs/client/utils';
+import { cls, fetchYouTubeApi } from '@/libs/client/utils';
 import Image from 'next/image';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
@@ -11,6 +11,7 @@ export interface WorkInfos {
 	title: string;
 	description: string;
 	resourceId: string;
+	category: string;
 }
 
 export default function Write() {
@@ -61,6 +62,16 @@ export default function Write() {
 						  )
 						: undefined
 				);
+			} else if (name === 'category') {
+				setWorkInfos((p) =>
+					p
+						? p.map((arr) =>
+								arr.resourceId === dataset.resourceid
+									? { ...arr, category: value }
+									: arr
+						  )
+						: undefined
+				);
 			}
 		} else {
 			console.log('here');
@@ -73,6 +84,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
+									category: '',
 								},
 						  ]
 						: [
@@ -80,6 +92,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
+									category: '',
 								},
 						  ]
 				);
@@ -211,6 +224,69 @@ export default function Write() {
 											: ''
 									}
 								/>
+								<div>
+									<input
+										type='radio'
+										id='film'
+										name='category'
+										value='film'
+										onClick={InputChange}
+										data-resourceid={
+											data.snippet.resourceId
+												? data.snippet.resourceId?.videoId
+												: ''
+										}
+										className='hidden peer'
+									/>
+									<label
+										htmlFor='film'
+										className='peer-checked:text-palettered'
+									>
+										film
+									</label>
+								</div>
+								<div>
+									<input
+										type='radio'
+										id='short'
+										name='category'
+										value='short'
+										onClick={InputChange}
+										data-resourceid={
+											data.snippet.resourceId
+												? data.snippet.resourceId?.videoId
+												: ''
+										}
+										className='hidden peer'
+									/>
+									<label
+										htmlFor='short'
+										className='peer-checked:text-palettered'
+									>
+										short
+									</label>
+								</div>
+								<div>
+									<input
+										type='radio'
+										id='outsource'
+										name='category'
+										value='outsource'
+										onClick={InputChange}
+										data-resourceid={
+											data.snippet.resourceId
+												? data.snippet.resourceId?.videoId
+												: ''
+										}
+										className='hidden peer'
+									/>
+									<label
+										htmlFor='outsource'
+										className='peer-checked:text-palettered'
+									>
+										outsource
+									</label>
+								</div>
 							</div>
 						</div>
 					))}
