@@ -1,14 +1,15 @@
 import { cls } from '@/libs/client/utils';
 
 interface InputProps {
-	type: 'text' | 'number' | 'email' | 'textarea';
+	type: 'text' | 'number' | 'email' | 'textarea' | 'radio';
 	name: string;
-	placeholder: string;
-	onChange:
+	placeholder?: string;
+	onChange?:
 		| ((
 				e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
 		  ) => void)
 		| ((e: React.SyntheticEvent<HTMLInputElement>) => void);
+	value?: string | undefined;
 	rows?: number;
 	css?: string;
 	[key: string]: any;
@@ -19,6 +20,7 @@ export default function Input({
 	name,
 	placeholder,
 	onChange,
+	value,
 	rows,
 	css,
 	...rest
@@ -82,6 +84,15 @@ export default function Input({
 						css ? css : '',
 						'font-light placeholder:text-[#eaeaea] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
 					)}
+					{...rest}
+				/>
+			) : null}
+			{type === 'radio' ? (
+				<input
+					type='radio'
+					name={name}
+					value={value}
+					className={cls(css ? css : '')}
 					{...rest}
 				/>
 			) : null}
