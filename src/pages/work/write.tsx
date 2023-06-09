@@ -224,69 +224,51 @@ export default function Write() {
 											: ''
 									}
 								/>
-								<div>
-									<input
-										type='radio'
-										id='film'
-										name='category'
-										value='film'
-										onClick={InputChange}
-										data-resourceid={
-											data.snippet.resourceId
-												? data.snippet.resourceId?.videoId
-												: ''
-										}
-										className='hidden peer'
-									/>
-									<label
-										htmlFor='film'
-										className='peer-checked:text-palettered'
-									>
-										film
-									</label>
-								</div>
-								<div>
-									<input
-										type='radio'
-										id='short'
-										name='category'
-										value='short'
-										onClick={InputChange}
-										data-resourceid={
-											data.snippet.resourceId
-												? data.snippet.resourceId?.videoId
-												: ''
-										}
-										className='hidden peer'
-									/>
-									<label
-										htmlFor='short'
-										className='peer-checked:text-palettered'
-									>
-										short
-									</label>
-								</div>
-								<div>
-									<input
-										type='radio'
-										id='outsource'
-										name='category'
-										value='outsource'
-										onClick={InputChange}
-										data-resourceid={
-											data.snippet.resourceId
-												? data.snippet.resourceId?.videoId
-												: ''
-										}
-										className='hidden peer'
-									/>
-									<label
-										htmlFor='outsource'
-										className='peer-checked:text-palettered'
-									>
-										outsource
-									</label>
-								</div>
+								<Input
+									type='radio'
+									name='category'
+									value='film'
+									radioId={`${data.id}film`}
+									onClick={InputChange}
+									data-resourceid={
+										data.snippet.resourceId
+											? data.snippet.resourceId?.videoId
+											: ''
+									}
+									css=''
+									labelCss=''
+									labelName='film'
+								/>
+								<Input
+									type='radio'
+									name='category'
+									value='short'
+									radioId={`${data.id}short`}
+									onClick={InputChange}
+									data-resourceid={
+										data.snippet.resourceId
+											? data.snippet.resourceId?.videoId
+											: ''
+									}
+									css=''
+									labelCss=''
+									labelName='short'
+								/>
+								<Input
+									type='radio'
+									name='category'
+									value='outsource'
+									radioId={`${data.id}outsource`}
+									onClick={InputChange}
+									data-resourceid={
+										data.snippet.resourceId
+											? data.snippet.resourceId?.videoId
+											: ''
+									}
+									css=''
+									labelCss=''
+									labelName='outsource'
+								/>
 							</div>
 						</div>
 					))}

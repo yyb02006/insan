@@ -10,8 +10,11 @@ interface InputProps {
 		  ) => void)
 		| ((e: React.SyntheticEvent<HTMLInputElement>) => void);
 	value?: string | undefined;
+	radioId?: string;
 	rows?: number;
 	css?: string;
+	labelCss?: string;
+	labelName?: string;
 	[key: string]: any;
 }
 
@@ -21,8 +24,11 @@ export default function Input({
 	placeholder,
 	onChange,
 	value,
+	radioId,
 	rows,
 	css,
+	labelCss,
+	labelName,
 	...rest
 }: InputProps) {
 	return (
@@ -69,6 +75,27 @@ export default function Input({
 					{...rest}
 				/>
 			) : null}
+			{type === 'radio' ? (
+				<div>
+					<input
+						type='radio'
+						id={radioId}
+						name={name}
+						value={value}
+						className={cls(css ? css : '', 'hidden peer')}
+						{...rest}
+					/>
+					<label
+						htmlFor={radioId}
+						className={cls(
+							labelCss ? labelCss : '',
+							'peer-checked:text-palettered'
+						)}
+					>
+						{labelName}
+					</label>
+				</div>
+			) : null}
 			{type === 'textarea' ? (
 				<textarea
 					onChange={
@@ -84,15 +111,6 @@ export default function Input({
 						css ? css : '',
 						'font-light placeholder:text-[#eaeaea] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
 					)}
-					{...rest}
-				/>
-			) : null}
-			{type === 'radio' ? (
-				<input
-					type='radio'
-					name={name}
-					value={value}
-					className={cls(css ? css : '')}
 					{...rest}
 				/>
 			) : null}
