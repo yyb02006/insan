@@ -713,13 +713,6 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 								description={data.snippet.description}
 							/>
 					  ))}
-				{/* {['film', 'short', 'outsource'].map((data) =>
-					category === data
-						? (newVideoDatas as datas)[data].map((arr, idx) => (
-								<Video key={arr.index} index={arr.index} waiting={idx} />
-						  ))
-						: null
-				)} */}
 			</AnimatePresence>
 		</section>
 	);
