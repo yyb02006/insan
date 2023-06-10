@@ -45,7 +45,7 @@ export default function Write() {
 		);
 		console.log(e.currentTarget.value);
 		if (workIdx !== undefined && workIdx >= 0) {
-			if (name === 'title') {
+			if (name === 'title' && value !== '') {
 				setWorkInfos((p) =>
 					p
 						? p.map((arr) =>
@@ -53,6 +53,12 @@ export default function Write() {
 									? { ...arr, title: value }
 									: arr
 						  )
+						: undefined
+				);
+			} else if (name === 'title' && value === '') {
+				setWorkInfos((p) =>
+					p
+						? p.filter((arr) => arr.resourceId !== dataset.resourceid)
 						: undefined
 				);
 			} else if (name === 'description') {
@@ -87,7 +93,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: '',
+									category: category === 'film&short' ? '' : 'outsource',
 								},
 						  ]
 						: [
@@ -95,7 +101,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: '',
+									category: category === 'film&short' ? '' : 'outsource',
 								},
 						  ]
 				);
@@ -130,6 +136,7 @@ export default function Write() {
 					<button
 						onClick={() => {
 							setCategory('film&short');
+							setWorkInfos(undefined);
 						}}
 						className={cls(
 							category === 'film&short' ? 'text-palettered' : '',
@@ -141,6 +148,7 @@ export default function Write() {
 					<button
 						onClick={() => {
 							setCategory('outsource');
+							setWorkInfos(undefined);
 						}}
 						className={cls(
 							category === 'outsource' ? 'text-palettered' : '',
@@ -257,7 +265,7 @@ export default function Write() {
 													: ''
 											}
 										/>
-										<Input
+										{/* <Input
 											type='radio'
 											name='category'
 											value='film'
@@ -301,7 +309,7 @@ export default function Write() {
 											css=''
 											labelCss=''
 											labelName='outsource'
-										/>
+										/> */}
 									</div>
 								</div>
 							))}

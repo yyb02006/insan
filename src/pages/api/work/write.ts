@@ -13,11 +13,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				title: el.title,
 				resourceId: el.resourceId,
 				description: el.description,
+				category: el.category,
 			},
 			update: {
 				title: el.title,
 				resourceId: el.resourceId,
 				description: el.description,
+				category: el.category,
 			},
 		});
 	});
