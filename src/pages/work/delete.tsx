@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useState } from 'react';
 import { WorkInfos } from './write';
 import { cls, fetchApi } from '@/libs/client/utils';
 import Image from 'next/image';
@@ -25,6 +25,8 @@ export default function Delete() {
 	const [category, setCategory] = useState<'film&short' | 'outsource'>(
 		'film&short'
 	);
+	const [searchWord, setSearchWord] = useState('');
+	const [searchResult, setSearchResult] = useState<listState[]>();
 	const [list, setList] = useState<listState[]>();
 	const [send, { loading, data }] = useMutation<{ success: boolean }>(
 		'/api/work'
@@ -47,8 +49,24 @@ export default function Delete() {
 			router.push('/work/write');
 		}
 	}, [router, data]);
+	useEffect(() => {
+		if (list) {
+			setSearchResult(list);
+		}
+	}, [list]);
 	const onReset = () => {
 		setList((p) => p?.map((arr) => ({ ...arr, selected: false })));
+	};
+	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!searchWord) return;
+		setSearchResult(
+			list?.filter(
+				(el) =>
+					el.title.includes(searchWord) ||
+					el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
+			)
+		);
 	};
 	return (
 		<Layout
@@ -89,10 +107,10 @@ export default function Delete() {
 					</button>
 				</div>
 				<form
-					onSubmit={() => {}}
+					onSubmit={onSearch}
 					className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
 				>
-					<button>
+					<button type='submit'>
 						<svg
 							xmlns='http://www.w3.org/2000/svg'
 							fill='none'
@@ -113,14 +131,16 @@ export default function Delete() {
 						type='text'
 						placeholder='search'
 						css='border-none placeholder:font-bold bg-transparent'
-						onChange={() => {}}
+						onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+							setSearchWord(e.currentTarget.value);
+						}}
 					/>
 				</form>
 				{category === 'film&short' ? <></> : ''}
 				{category === 'outsource' ? (
 					<>
 						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{list?.map((li) => (
+							{searchResult?.map((li) => (
 								<div
 									key={li.id}
 									className={cls(
@@ -128,7 +148,7 @@ export default function Delete() {
 										'ring-palettered'
 									)}
 									onClick={() => {
-										setList((p) =>
+										setSearchResult((p) =>
 											p?.map((list) =>
 												list.id === li.id
 													? { ...list, selected: !list.selected }
@@ -139,7 +159,7 @@ export default function Delete() {
 								>
 									<Image
 										src={
-											list.length !== 0
+											searchResult.length !== 0
 												? `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg` ||
 												  `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
 												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg`
