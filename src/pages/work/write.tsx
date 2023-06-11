@@ -22,6 +22,8 @@ export default function Write() {
 		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
+	const [searchWord, setSearchWord] = useState('');
+	const [searchResult, setSearchResult] = useState<GapiItem[]>([]);
 	const [list, setList] = useState<GapiItem[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
@@ -32,6 +34,7 @@ export default function Write() {
 				'10',
 				(data: { items: GapiItem[] }) => {
 					setList((p) => [...p, ...data.items]);
+					setSearchResult((p) => [...p, ...data.items]);
 				},
 				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
 				list.id
@@ -115,7 +118,21 @@ export default function Write() {
 	const onReset = () => {
 		setWorkInfos([]);
 	};
-	console.log(workInfos);
+	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		console.log(searchWord + 'gegegege');
+		if (!searchWord) return;
+		setSearchResult(
+			list.filter(
+				(el) =>
+					el.snippet.title.includes(searchWord) ||
+					el.snippet.resourceId?.videoId
+						.toLowerCase()
+						.includes(searchWord.toLowerCase())
+			)
+		);
+	};
+	console.log(searchResult);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -158,44 +175,46 @@ export default function Write() {
 						Outsource
 					</button>
 				</div>
+				<form
+					onSubmit={onSearch}
+					className='relative mb-8 mt-4 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
+				>
+					<button type='submit'>
+						<svg
+							xmlns='http://www.w3.org/2000/svg'
+							fill='none'
+							viewBox='0 0 24 24'
+							strokeWidth={2}
+							stroke='currentColor'
+							className='w-6 h-6'
+						>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+							/>
+						</svg>
+					</button>
+					<Input
+						name='search'
+						type='text'
+						placeholder='search'
+						css='border-none placeholder:font-bold bg-transparent'
+						onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+							setSearchWord(e.currentTarget.value);
+						}}
+					/>
+				</form>
 				{category === 'film&short' ? <></> : null}
 				{category === 'outsource' ? (
 					<>
-						<form
-							onSubmit={() => {}}
-							className='relative mb-8 mt-4 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
-						>
-							<button>
-								<svg
-									xmlns='http://www.w3.org/2000/svg'
-									fill='none'
-									viewBox='0 0 24 24'
-									strokeWidth={2}
-									stroke='currentColor'
-									className='w-6 h-6'
-								>
-									<path
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
-									/>
-								</svg>
-							</button>
-							<Input
-								name='search'
-								type='text'
-								placeholder='search'
-								css='border-none placeholder:font-bold bg-transparent'
-								onChange={() => {}}
-							/>
-						</form>
 						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{list.map((data, arr) => (
+							{searchResult.map((data, arr) => (
 								<div key={arr} className='w-full flex flex-col justify-between'>
 									<div>
 										<Image
 											src={
-												list.length !== 0
+												searchResult.length !== 0
 													? data.snippet.thumbnails.maxres?.url ||
 													  data.snippet.thumbnails.medium?.url
 													: ''
