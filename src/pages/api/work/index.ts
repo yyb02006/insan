@@ -26,6 +26,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withHandler({
-	methods: ['GET', 'POST'],
+	methods: ['GET', 'POST', 'DELETE'],
 	handlerFunc: handler,
 });
