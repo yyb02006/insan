@@ -18,6 +18,7 @@ import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
 import { Works } from '@prisma/client';
+import ToTop from '@/components/toTop';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -880,6 +881,7 @@ export default function Work() {
 				<SearchSection setKeyWords={setKeyWords} />
 				<VideoSection category={category} keywords={keyWords} />
 				<OutroSection />
+				<ToTop />
 			</main>
 		</Layout>
 	);
