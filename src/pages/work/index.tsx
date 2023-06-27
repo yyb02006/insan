@@ -13,7 +13,14 @@ import {
 	Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+	Dispatch,
+	MutableRefObject,
+	SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
@@ -867,6 +874,8 @@ export default function Work() {
 	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
 		'film'
 	);
+	const section = useRef<HTMLDivElement>(null);
+	console.log(section);
 	const [keyWords, setKeyWords] = useState<keyWordsState>({
 		searchWord: '',
 		selectedTags: [''],
@@ -876,12 +885,15 @@ export default function Work() {
 	}, [keyWords]);
 	return (
 		<Layout seoTitle='Work' nav={{ isShort: true }}>
-			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
+			<main
+				ref={section}
+				className='pt-[100px] font-GmarketSans overflow-x-hidden'
+			>
 				<TitleSection setCategory={setCategory} />
 				<SearchSection setKeyWords={setKeyWords} />
 				<VideoSection category={category} keywords={keyWords} />
 				<OutroSection />
-				<ToTop />
+				<ToTop toScroll={section} />
 			</main>
 		</Layout>
 	);
