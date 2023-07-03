@@ -41,7 +41,7 @@ export default function Write() {
 			);
 		});
 	}, []);
-	const InputChange = (e: SyntheticEvent<HTMLInputElement>) => {
+	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
@@ -120,7 +120,6 @@ export default function Write() {
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log(searchWord + 'gegegege');
 		if (!searchWord) return;
 		setSearchResult(
 			list.filter(
@@ -243,7 +242,7 @@ export default function Write() {
 													? data.snippet.resourceId?.videoId
 													: ''
 											}
-											onChange={InputChange}
+											onChange={inputChange}
 											value={
 												workInfos?.find((arr) => {
 													return (
@@ -268,7 +267,7 @@ export default function Write() {
 													? data.snippet.resourceId?.videoId
 													: ''
 											}
-											onChange={InputChange}
+											onChange={inputChange}
 											value={
 												workInfos?.find((arr) => {
 													return (
@@ -284,51 +283,6 @@ export default function Write() {
 													: ''
 											}
 										/>
-										{/* <Input
-											type='radio'
-											name='category'
-											value='film'
-											radioId={`${data.id}film`}
-											onClick={InputChange}
-											data-resourceid={
-												data.snippet.resourceId
-													? data.snippet.resourceId?.videoId
-													: ''
-											}
-											css=''
-											labelCss=''
-											labelName='film'
-										/>
-										<Input
-											type='radio'
-											name='category'
-											value='short'
-											radioId={`${data.id}short`}
-											onClick={InputChange}
-											data-resourceid={
-												data.snippet.resourceId
-													? data.snippet.resourceId?.videoId
-													: ''
-											}
-											css=''
-											labelCss=''
-											labelName='short'
-										/>
-										<Input
-											type='radio'
-											name='category'
-											value='outsource'
-											radioId={`${data.id}outsource`}
-											onClick={InputChange}
-											data-resourceid={
-												data.snippet.resourceId
-													? data.snippet.resourceId?.videoId
-													: ''
-											}
-											css=''
-											labelCss=''
-											labelName='outsource'
-										/> */}
 									</div>
 								</div>
 							))}
