@@ -1,11 +1,11 @@
-import { cls, fetchYouTubeApi } from '@/libs/client/utils';
-import Image from 'next/image';
+import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
+import Feed from '@/components/feed';
 
 export interface WorkInfos {
 	title: string;
@@ -40,7 +40,17 @@ export default function Write() {
 				list.id
 			);
 		});
+		fetch('https://api.vimeo.com/me', {
+			method: 'get',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: 'Bearer c8486b7abf7e262fbca068f258f3e423',
+			},
+		})
+			.then((res) => res.json())
+			.then((data) => console.log(data));
 	}, []);
+
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
@@ -131,7 +141,6 @@ export default function Write() {
 			)
 		);
 	};
-	console.log(searchResult);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -206,88 +215,11 @@ export default function Write() {
 				</form>
 				{category === 'film&short' ? <></> : null}
 				{category === 'outsource' ? (
-					<>
-						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{searchResult.map((data, arr) => (
-								<div key={arr} className='w-full flex flex-col justify-between'>
-									<div>
-										<Image
-											src={
-												searchResult.length !== 0
-													? data.snippet.thumbnails.maxres?.url ||
-													  data.snippet.thumbnails.medium?.url
-													: ''
-											}
-											alt='test'
-											width={1280}
-											height={720}
-											className='w-full object-cover'
-										/>
-										<div className='mt-2'>
-											<div className='text-sm'>
-												Title : {data.snippet.title}
-											</div>
-											<div className='text-xs font-light'>
-												Id : {data.snippet.resourceId?.videoId}
-											</div>
-										</div>
-									</div>
-									<div className='mt-2'>
-										<Input
-											name='title'
-											type='text'
-											placeholder='타이틀'
-											data-resourceid={
-												data.snippet.resourceId
-													? data.snippet.resourceId?.videoId
-													: ''
-											}
-											onChange={inputChange}
-											value={
-												workInfos?.find((arr) => {
-													return (
-														arr.resourceId === data.snippet.resourceId?.videoId
-													);
-												})?.title
-													? workInfos.find((arr) => {
-															return (
-																arr.resourceId ===
-																data.snippet.resourceId?.videoId
-															);
-													  })?.title
-													: ''
-											}
-										/>
-										<Input
-											name='description'
-											type='text'
-											placeholder='설명'
-											data-resourceid={
-												data.snippet.resourceId
-													? data.snippet.resourceId?.videoId
-													: ''
-											}
-											onChange={inputChange}
-											value={
-												workInfos?.find((arr) => {
-													return (
-														arr.resourceId === data.snippet.resourceId?.videoId
-													);
-												})?.description
-													? workInfos.find((arr) => {
-															return (
-																arr.resourceId ===
-																data.snippet.resourceId?.videoId
-															);
-													  })?.description
-													: ''
-											}
-										/>
-									</div>
-								</div>
-							))}
-						</div>
-					</>
+					<Feed
+						inputChange={inputChange}
+						searchResult={searchResult}
+						workInfos={workInfos}
+					></Feed>
 				) : null}
 				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
