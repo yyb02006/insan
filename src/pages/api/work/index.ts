@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 	if (req.method === 'POST') {
 		const { body } = req;
-		console.log(body);
+		console.log('this is body' + body);
 		body.forEach(async (el: number) => {
 			await client.works.delete({ where: { id: el } });
 		});

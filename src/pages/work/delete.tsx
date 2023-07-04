@@ -42,7 +42,16 @@ export default function Delete() {
 	}, []);
 	const onSubmitDelete = () => {
 		if (loading) return;
-		send(list?.filter((list) => list.selected === true).map((list) => list.id));
+		console.log(
+			searchResult
+				?.filter((list) => list.selected === true)
+				.map((list) => list.id)
+		);
+		send(
+			searchResult
+				?.filter((list) => list.selected === true)
+				.map((list) => list.id)
+		);
 	};
 	useEffect(() => {
 		if (data?.success) {
@@ -68,6 +77,8 @@ export default function Delete() {
 			)
 		);
 	};
+	console.log(list);
+
 	return (
 		<Layout
 			seoTitle='Delete'
