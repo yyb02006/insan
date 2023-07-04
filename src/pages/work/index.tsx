@@ -496,7 +496,7 @@ const VideoTitlePresense = ({
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
 			<div className='Title'>{title}</div>
-			<div className='Desc font-medium text-3xl'>description</div>
+			<div className='Desc font-medium text-xl'>description</div>
 		</div>
 	);
 };
@@ -543,7 +543,7 @@ const Video = ({
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative w-full flex justify-center items-center aspect-video text-5xl border'
+			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem]  border'
 		>
 			<Image
 				src={thumbnail.url}

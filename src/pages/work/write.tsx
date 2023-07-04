@@ -40,11 +40,11 @@ export default function Write() {
 				list.id
 			);
 		});
-		fetch('https://api.vimeo.com/me', {
+		fetch('https://api.vimeo.com/users/136249834/videos', {
 			method: 'get',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer c8486b7abf7e262fbca068f258f3e423',
+				Authorization: 'Bearer 20914f40ed21172340248f548f8aaade',
 			},
 		})
 			.then((res) => res.json())
