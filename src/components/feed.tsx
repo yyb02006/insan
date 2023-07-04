@@ -10,7 +10,7 @@ interface feedProps {
 	workInfos: WorkInfos[] | undefined;
 }
 
-export default function feed({
+export default function Feed({
 	searchResult,
 	inputChange,
 	workInfos,
