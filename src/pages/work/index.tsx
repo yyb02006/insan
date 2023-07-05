@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls, fetchYouTubeApi } from '@/libs/client/utils';
+import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -13,10 +13,19 @@ import {
 	Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+	Dispatch,
+	MutableRefObject,
+	SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
+import { Works } from '@prisma/client';
+import ToTop from '@/components/toTop';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -140,11 +149,21 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	);
 };
 
+type categories = {
+	title: string;
+	kind: 'film' | 'short' | 'outsource';
+	count: number;
+	idx: number;
+	explanation: string;
+};
+
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
-	const [categoryState, setCategoryState] = useState('film');
+	const [categoryState, setCategoryState] = useState<
+		'film' | 'short' | 'outsource'
+	>('film');
 	const dataLength = useRef(389);
 	const rotate = useRef(0);
-	const categories = [
+	const categories: categories[] = [
 		{
 			title: 'Film & AD',
 			kind: 'film',
@@ -477,7 +496,7 @@ const VideoTitlePresense = ({
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
 			<div className='Title'>{title}</div>
-			<div className='Desc font-medium text-3xl'>description</div>
+			<div className='Desc font-medium text-xl'>description</div>
 		</div>
 	);
 };
@@ -524,7 +543,7 @@ const Video = ({
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative w-full flex justify-center items-center aspect-video text-5xl border'
+			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem]  border'
 		>
 			<Image
 				src={thumbnail.url}
@@ -625,6 +644,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 	// 		});
 	// };
 	const [items, setItems] = useState<GapiItem[]>([]);
+	const [videos, setVideos] = useState<{ success: boolean; work: Works[] }>();
 	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
 	useEffect(() => {
 		fetchYouTubeApi(
@@ -669,41 +689,38 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			});
 		} else if (category === 'outsource') {
 			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (item.snippet.title === '참여 촬영')
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
+			fetchApi('/api/work/list?kind=outsource', setVideos);
 		}
 	}, [playlistIds, category]);
-	console.log(playlistIds);
+	console.log(items);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
-				{items.map((data, idx) => (
-					<Video
-						key={idx}
-						index={data.id}
-						waiting={idx}
-						thumbnail={data.snippet.thumbnails.high}
-						title={data.snippet.title}
-						description={data.snippet.description}
-					/>
-				))}
-				{/* {['film', 'short', 'outsource'].map((data) =>
-					category === data
-						? (newVideoDatas as datas)[data].map((arr, idx) => (
-								<Video key={arr.index} index={arr.index} waiting={idx} />
-						  ))
-						: null
-				)} */}
+				{category === 'outsource'
+					? videos?.work?.map((data, idx) => (
+							<Video
+								key={idx}
+								index={data.id.toString()}
+								waiting={idx}
+								thumbnail={{
+									url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
+									width: 1280,
+									height: 720,
+								}}
+								title={data.title}
+								description={data.description}
+							/>
+					  ))
+					: items.map((data, idx) => (
+							<Video
+								key={idx}
+								index={data.id}
+								waiting={idx}
+								thumbnail={data.snippet.thumbnails.high}
+								title={data.snippet.title}
+								description={data.snippet.description}
+							/>
+					  ))}
 			</AnimatePresence>
 		</section>
 	);
@@ -857,6 +874,8 @@ export default function Work() {
 	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
 		'film'
 	);
+	const section = useRef<HTMLDivElement>(null);
+	console.log(section);
 	const [keyWords, setKeyWords] = useState<keyWordsState>({
 		searchWord: '',
 		selectedTags: [''],
@@ -866,11 +885,15 @@ export default function Work() {
 	}, [keyWords]);
 	return (
 		<Layout seoTitle='Work' nav={{ isShort: true }}>
-			<main className='pt-[100px] font-GmarketSans overflow-x-hidden'>
+			<main
+				ref={section}
+				className='pt-[100px] font-GmarketSans overflow-x-hidden'
+			>
 				<TitleSection setCategory={setCategory} />
 				<SearchSection setKeyWords={setKeyWords} />
 				<VideoSection category={category} keywords={keyWords} />
 				<OutroSection />
+				<ToTop toScroll={section} />
 			</main>
 		</Layout>
 	);

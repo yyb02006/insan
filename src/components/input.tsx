@@ -1,16 +1,20 @@
 import { cls } from '@/libs/client/utils';
 
 interface InputProps {
-	type: 'text' | 'number' | 'email' | 'textarea';
+	type: 'text' | 'number' | 'email' | 'textarea' | 'radio';
 	name: string;
-	placeholder: string;
-	onChange:
+	placeholder?: string;
+	onChange?:
 		| ((
 				e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
 		  ) => void)
 		| ((e: React.SyntheticEvent<HTMLInputElement>) => void);
+	value?: string | undefined;
+	radioId?: string;
 	rows?: number;
 	css?: string;
+	labelCss?: string;
+	labelName?: string;
 	[key: string]: any;
 }
 
@@ -19,8 +23,12 @@ export default function Input({
 	name,
 	placeholder,
 	onChange,
+	value,
+	radioId,
 	rows,
 	css,
+	labelCss,
+	labelName,
 	...rest
 }: InputProps) {
 	return (
@@ -66,6 +74,27 @@ export default function Input({
 					)}
 					{...rest}
 				/>
+			) : null}
+			{type === 'radio' ? (
+				<div>
+					<input
+						type='radio'
+						id={radioId}
+						name={name}
+						value={value}
+						className={cls(css ? css : '', 'hidden peer')}
+						{...rest}
+					/>
+					<label
+						htmlFor={radioId}
+						className={cls(
+							labelCss ? labelCss : '',
+							'peer-checked:text-palettered'
+						)}
+					>
+						{labelName}
+					</label>
+				</div>
 			) : null}
 			{type === 'textarea' ? (
 				<textarea
