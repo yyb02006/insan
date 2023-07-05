@@ -6,6 +6,7 @@ import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
 import Feed from '@/components/feed';
+import ReactPlayer from 'react-player/vimeo';
 
 export interface WorkInfos {
 	title: string;
@@ -25,6 +26,7 @@ export default function Write() {
 	const [searchWord, setSearchWord] = useState('');
 	const [searchResult, setSearchResult] = useState<GapiItem[]>([]);
 	const [list, setList] = useState<GapiItem[]>([]);
+	const [vimeoVideos, setVimeoVideos] = useState();
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
@@ -44,13 +46,12 @@ export default function Write() {
 			method: 'get',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer 20914f40ed21172340248f548f8aaade',
+				Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
 			},
 		})
 			.then((res) => res.json())
-			.then((data) => console.log(data));
+			.then((data) => (setVimeoVideos(data.data), console.log(data.data)));
 	}, []);
-
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
@@ -141,6 +142,8 @@ export default function Write() {
 			)
 		);
 	};
+	console.log(vimeoVideos ? vimeoVideos[0].uri : 'nope');
+
 	return (
 		<Layout
 			seoTitle='Write'
@@ -213,7 +216,17 @@ export default function Write() {
 						}}
 					/>
 				</form>
-				{category === 'film&short' ? <></> : null}
+				{category === 'film&short' && vimeoVideos ? (
+					<>
+						<div className='w-full h-full bg-green-600'>
+							<ReactPlayer
+								url={'https://api.vimeo.com/videos/841589233'}
+								controls
+							></ReactPlayer>
+						</div>
+						ffffffff
+					</>
+				) : null}
 				{category === 'outsource' ? (
 					<Feed
 						inputChange={inputChange}
