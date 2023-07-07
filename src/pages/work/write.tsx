@@ -7,12 +7,20 @@ import Layout from '@/components/layout';
 import Link from 'next/link';
 import Feed from '@/components/feed';
 import ReactPlayer from 'react-player/vimeo';
+import Image from 'next/image';
 
 export interface WorkInfos {
 	title: string;
 	description: string;
 	resourceId: string;
 	category: string;
+}
+
+interface vimeoVideos {
+	uri: string;
+	player_embed_url: string;
+	resource_key: string;
+	pictures: { sizes: { link: string }[] };
 }
 
 export default function Write() {
@@ -26,7 +34,7 @@ export default function Write() {
 	const [searchWord, setSearchWord] = useState('');
 	const [searchResult, setSearchResult] = useState<GapiItem[]>([]);
 	const [list, setList] = useState<GapiItem[]>([]);
-	const [vimeoVideos, setVimeoVideos] = useState();
+	const [vimeoVideos, setVimeoVideos] = useState<vimeoVideos[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
@@ -42,13 +50,16 @@ export default function Write() {
 				list.id
 			);
 		});
-		fetch('https://api.vimeo.com/users/136249834/videos', {
-			method: 'get',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-			},
-		})
+		fetch(
+			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
+			{
+				method: 'get',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+				},
+			}
+		)
 			.then((res) => res.json())
 			.then((data) => (setVimeoVideos(data.data), console.log(data.data)));
 	}, []);
@@ -142,8 +153,7 @@ export default function Write() {
 			)
 		);
 	};
-	console.log(vimeoVideos ? vimeoVideos[0].uri : 'nope');
-
+	console.log(vimeoVideos ? vimeoVideos[0]?.player_embed_url : 'nope');
 	return (
 		<Layout
 			seoTitle='Write'
@@ -216,16 +226,28 @@ export default function Write() {
 						}}
 					/>
 				</form>
-				{category === 'film&short' && vimeoVideos ? (
-					<>
-						<div className='w-full h-full bg-green-600'>
-							<ReactPlayer
-								url={'https://api.vimeo.com/videos/841589233'}
-								controls
-							></ReactPlayer>
-						</div>
-						ffffffff
-					</>
+				{category === 'film&short' && vimeoVideos.length > 0 ? (
+					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+						{vimeoVideos.map((video) => (
+							<div
+								key={video.resource_key}
+								className='w-auto aspect-video bg-green-600'
+							>
+								<Image
+									src={video.pictures.sizes[4].link}
+									alt='picturesAlter'
+									width={960}
+									height={540}
+								></Image>
+								<ReactPlayer
+									url={video.player_embed_url}
+									controls
+									width={'100%'}
+									height={'100%'}
+								></ReactPlayer>
+							</div>
+						))}
+					</div>
 				) : null}
 				{category === 'outsource' ? (
 					<Feed
