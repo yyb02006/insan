@@ -15,7 +15,7 @@ export function fetchApi<T>(
 ) {
 	fetch(url, opt)
 		.then((res) => res.json())
-		.then((data) => setFunc(data));
+		.then((data) => (setFunc(data), console.log(data)));
 }
 
 /**

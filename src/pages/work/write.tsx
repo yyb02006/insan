@@ -1,13 +1,13 @@
-import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
+import { cls, fetchYouTubeApi } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
-import Feed from '@/components/feed';
-import ReactPlayer from 'react-player/vimeo';
+import ThumnailFeed from '@/components/feed';
 import Image from 'next/image';
+import VimeoPlayer from 'react-player/vimeo';
 
 export interface WorkInfos {
 	title: string;
@@ -38,30 +38,37 @@ export default function Write() {
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
-		lists.forEach((list) => {
-			fetchYouTubeApi(
-				'playlistItems',
-				'10',
-				(data: { items: GapiItem[] }) => {
-					setList((p) => [...p, ...data.items]);
-					setSearchResult((p) => [...p, ...data.items]);
-				},
-				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
-				list.id
-			);
-		});
-		fetch(
-			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
-			{
-				method: 'get',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-				},
-			}
-		)
-			.then((res) => res.json())
-			.then((data) => (setVimeoVideos(data.data), console.log(data.data)));
+		if (category === 'film&short') {
+			fetch(
+				'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
+				{
+					method: 'get',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+					},
+				}
+			)
+				.then((res) => res.json())
+				.then((data) => {
+					setVimeoVideos(data.data);
+					setSearchResult(data.data);
+					console.log(data.data);
+				});
+		} else if (category === 'outsource') {
+			lists.forEach((list) => {
+				fetchYouTubeApi(
+					'playlistItems',
+					'10',
+					(data: { items: GapiItem[] }) => {
+						setList((p) => [...p, ...data.items]);
+						setSearchResult((p) => [...p, ...data.items]);
+					},
+					'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
+					list.id
+				);
+			});
+		}
 	}, []);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
@@ -231,30 +238,33 @@ export default function Write() {
 						{vimeoVideos.map((video) => (
 							<div
 								key={video.resource_key}
-								className='w-auto aspect-video bg-green-600'
+								className='relative w-auto aspect-video bg-green-600'
 							>
 								<Image
 									src={video.pictures.sizes[4].link}
 									alt='picturesAlter'
 									width={960}
 									height={540}
+									priority
+									className='absolute top-0 left-0'
 								></Image>
-								<ReactPlayer
+								{/* <VimeoPlayer
 									url={video.player_embed_url}
-									controls
+									controls={true}
 									width={'100%'}
 									height={'100%'}
-								></ReactPlayer>
+								></VimeoPlayer> */}
 							</div>
 						))}
 					</div>
 				) : null}
 				{category === 'outsource' ? (
-					<Feed
+					<ThumnailFeed
+						host='youtube'
 						inputChange={inputChange}
 						searchResult={searchResult}
 						workInfos={workInfos}
-					></Feed>
+					></ThumnailFeed>
 				) : null}
 				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
