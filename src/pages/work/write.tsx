@@ -5,7 +5,7 @@ import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
-import ThumnailFeed from '@/components/feed';
+import ThumnailFeed from '@/components/thumnailFeed';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
 
@@ -16,12 +16,19 @@ export interface WorkInfos {
 	category: string;
 }
 
-interface vimeoVideos {
+export interface VimeoVideos {
 	uri: string;
 	player_embed_url: string;
 	resource_key: string;
 	pictures: { sizes: { link: string }[] };
 }
+
+interface SearchResult {
+	vimeo: VimeoVideos[];
+	youtube: GapiItem[];
+}
+
+export type ResourceHost = 'vimeo' | 'youtube';
 
 export default function Write() {
 	const [category, setCategory] = useState<'film&short' | 'outsource'>(
@@ -32,50 +39,57 @@ export default function Write() {
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
 	const [searchWord, setSearchWord] = useState('');
-	const [searchResult, setSearchResult] = useState<GapiItem[]>([]);
-	const [list, setList] = useState<GapiItem[]>([]);
-	const [vimeoVideos, setVimeoVideos] = useState<vimeoVideos[]>([]);
+	const [searchResult, setSearchResult] = useState<SearchResult>({
+		vimeo: [],
+		youtube: [],
+	});
+	const [youtubeVideos, setYoutubeVideos] = useState<GapiItem[]>([]);
+	const [vimeoVideos, setVimeoVideos] = useState<VimeoVideos[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
-		if (category === 'film&short') {
-			fetch(
-				'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
-				{
-					method: 'get',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-					},
-				}
-			)
-				.then((res) => res.json())
-				.then((data) => {
-					setVimeoVideos(data.data);
-					setSearchResult(data.data);
-					console.log(data.data);
-				});
-		} else if (category === 'outsource') {
-			lists.forEach((list) => {
-				fetchYouTubeApi(
-					'playlistItems',
-					'10',
-					(data: { items: GapiItem[] }) => {
-						setList((p) => [...p, ...data.items]);
-						setSearchResult((p) => [...p, ...data.items]);
-					},
-					'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
-					list.id
-				);
+		fetch(
+			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
+			{
+				method: 'get',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+				},
+			}
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				setVimeoVideos((p) => [...p, ...data.data]);
+				setSearchResult((p) => ({ ...p, vimeo: [...data.data] }));
+				console.log(data.data);
 			});
-		}
+		lists.forEach((list) => {
+			fetchYouTubeApi(
+				'playlistItems',
+				'10',
+				(data: { items: GapiItem[] }) => {
+					setYoutubeVideos((p) => [...p, ...data.items]);
+					setSearchResult((p) => ({ ...p, youtube: [...data.items] }));
+				},
+				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
+				list.id
+			);
+		});
 	}, []);
+	useEffect(() => {
+		setWorkInfos(undefined);
+		if (category === 'film&short' && youtubeVideos.length > 0) {
+			setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
+		} else if (category === 'outsource') {
+			setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
+		}
+	}, [category]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
-		console.log(e.currentTarget.value);
 		if (workIdx !== undefined && workIdx >= 0) {
 			if (name === 'title' && value !== '') {
 				setWorkInfos((p) =>
@@ -115,7 +129,6 @@ export default function Write() {
 				);
 			}
 		} else {
-			console.log('here');
 			if (name === 'title') {
 				setWorkInfos((p) =>
 					p
@@ -150,17 +163,25 @@ export default function Write() {
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		if (!searchWord) return;
-		setSearchResult(
-			list.filter(
-				(el) =>
-					el.snippet.title.includes(searchWord) ||
-					el.snippet.resourceId?.videoId
-						.toLowerCase()
-						.includes(searchWord.toLowerCase())
-			)
-		);
+		const filterResources = (kind: ResourceHost) => {
+			setSearchResult((p) => ({
+				...p,
+				[kind]: youtubeVideos.filter(
+					(el) =>
+						el.snippet.title.includes(searchWord) ||
+						el.snippet.resourceId?.videoId
+							.toLowerCase()
+							.includes(searchWord.toLowerCase())
+				),
+			}));
+		};
+		if (category === 'film&short') {
+			filterResources('vimeo');
+		} else if (category === 'outsource') {
+			filterResources('youtube');
+		}
 	};
-	console.log(vimeoVideos ? vimeoVideos[0]?.player_embed_url : 'nope');
+	console.log(workInfos);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -235,9 +256,9 @@ export default function Write() {
 				</form>
 				{category === 'film&short' && vimeoVideos.length > 0 ? (
 					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-						{vimeoVideos.map((video) => (
+						{vimeoVideos.map((video, arr) => (
 							<div
-								key={video.resource_key}
+								key={arr} /* video.resource_key */
 								className='relative w-auto aspect-video bg-green-600'
 							>
 								<Image
@@ -260,9 +281,8 @@ export default function Write() {
 				) : null}
 				{category === 'outsource' ? (
 					<ThumnailFeed
-						host='youtube'
 						inputChange={inputChange}
-						searchResult={searchResult}
+						resource={searchResult.youtube}
 						workInfos={workInfos}
 					></ThumnailFeed>
 				) : null}
