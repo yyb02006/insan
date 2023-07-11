@@ -5,7 +5,10 @@ import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
-import ThumnailFeed from '@/components/thumnailFeed';
+import {
+	VimeoThumnailFeed,
+	YoutubeThumnailFeed,
+} from '@/components/thumnailFeed';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
 
@@ -17,10 +20,11 @@ export interface WorkInfos {
 }
 
 export interface VimeoVideos {
-	uri: string;
 	player_embed_url: string;
 	resource_key: string;
 	pictures: { sizes: { link: string }[] };
+	name: string;
+	description: string;
 }
 
 interface SearchResult {
@@ -49,7 +53,7 @@ export default function Write() {
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	useEffect(() => {
 		fetch(
-			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link',
+			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description',
 			{
 				method: 'get',
 				headers: {
@@ -255,36 +259,18 @@ export default function Write() {
 					/>
 				</form>
 				{category === 'film&short' && vimeoVideos.length > 0 ? (
-					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-						{vimeoVideos.map((video, arr) => (
-							<div
-								key={arr} /* video.resource_key */
-								className='relative w-auto aspect-video bg-green-600'
-							>
-								<Image
-									src={video.pictures.sizes[4].link}
-									alt='picturesAlter'
-									width={960}
-									height={540}
-									priority
-									className='absolute top-0 left-0'
-								></Image>
-								{/* <VimeoPlayer
-									url={video.player_embed_url}
-									controls={true}
-									width={'100%'}
-									height={'100%'}
-								></VimeoPlayer> */}
-							</div>
-						))}
-					</div>
+					<VimeoThumnailFeed
+						inputChange={inputChange}
+						resource={vimeoVideos}
+						workInfos={workInfos}
+					></VimeoThumnailFeed>
 				) : null}
 				{category === 'outsource' ? (
-					<ThumnailFeed
+					<YoutubeThumnailFeed
 						inputChange={inputChange}
 						resource={searchResult.youtube}
 						workInfos={workInfos}
-					></ThumnailFeed>
+					></YoutubeThumnailFeed>
 				) : null}
 				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
