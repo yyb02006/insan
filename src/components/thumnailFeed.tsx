@@ -1,7 +1,7 @@
 import { GapiItem } from '@/pages/work';
 import Image from 'next/image';
 import Input from './input';
-import { SyntheticEvent } from 'react';
+import { SetStateAction, SyntheticEvent } from 'react';
 import { WorkInfos, VimeoVideos } from '@/pages/work/write';
 
 interface YoutubefeedProps {
@@ -26,16 +26,57 @@ export function VimeoThumnailFeed({
 			{resource.map((video, arr) => (
 				<div
 					key={arr} /* video.resource_key */
-					className='relative w-auto aspect-video bg-green-600'
+					className='relative w-auto aspect-video'
 				>
-					<Image
-						src={video.pictures.sizes[4].link}
-						alt='picturesAlter'
-						width={960}
-						height={540}
-						priority
-						className='absolute top-0 left-0'
-					></Image>
+					<div>
+						<Image
+							src={video.pictures.sizes[4].link}
+							alt='picturesAlter'
+							width={960}
+							height={540}
+							priority
+						></Image>
+						<div className='mt-2'>
+							<div className='text-sm'>Title : {video.name}</div>
+							<div className='text-xs font-light'>
+								Id : {video.resource_key}
+							</div>
+						</div>
+					</div>
+					<div className='mt-2'>
+						<Input
+							name='title'
+							type='text'
+							placeholder='타이틀'
+							data-resourceid={video.player_embed_url}
+							onChange={inputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === video.player_embed_url;
+								})?.title
+									? workInfos.find((arr) => {
+											return arr.resourceId === video.player_embed_url;
+									  })?.title
+									: ''
+							}
+						/>
+						<Input
+							name='description'
+							type='text'
+							placeholder='설명'
+							data-resourceid={video.player_embed_url}
+							onChange={inputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === video.player_embed_url;
+								})?.description
+									? workInfos.find((arr) => {
+											return arr.resourceId === video.player_embed_url;
+									  })?.description
+									: ''
+							}
+						/>
+					</div>
 					{/* <VimeoPlayer
 				url={video.player_embed_url}
 				controls={true}
@@ -48,7 +89,7 @@ export function VimeoThumnailFeed({
 	);
 }
 
-export default function YoutubeThumnailFeed({
+export function YoutubeThumnailFeed({
 	resource,
 	inputChange,
 	workInfos,
