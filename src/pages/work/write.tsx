@@ -17,6 +17,7 @@ export interface WorkInfos {
 	description: string;
 	resourceId: string;
 	category: string;
+	date: string;
 }
 
 export interface VimeoVideos {
@@ -131,6 +132,16 @@ export default function Write() {
 						  )
 						: undefined
 				);
+			} else if (name === 'date') {
+				setWorkInfos((p) =>
+					p
+						? p.map((arr) =>
+								arr.resourceId === dataset.resourceid
+									? { ...arr, date: value }
+									: arr
+						  )
+						: undefined
+				);
 			}
 		} else {
 			if (name === 'title') {
@@ -143,6 +154,7 @@ export default function Write() {
 									title: value,
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
+									date: 'no-date',
 								},
 						  ]
 						: [
@@ -151,6 +163,7 @@ export default function Write() {
 									title: value,
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
+									date: 'no-date',
 								},
 						  ]
 				);
