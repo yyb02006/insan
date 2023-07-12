@@ -92,28 +92,22 @@ export function VimeoThumnailFeed({
 									: ''
 							}
 						/>
-						<label>
-							<input
-								type='radio'
-								name={`${video.resource_key}`}
-								data-resourceid={video.player_embed_url}
-								className='hidden peer'
-								value={'film'}
-								onChange={inputChange}
-							/>
-							<div className='peer-checked:bg-green-500'>Film</div>
-						</label>
-						<label>
-							<input
-								type='radio'
-								name={`${video.resource_key}`}
-								data-resourceid={video.player_embed_url}
-								className='hidden peer'
-								value={'short'}
-								onChange={inputChange}
-							/>
-							<div className='peer-checked:bg-green-500'>Short</div>
-						</label>
+						<Input
+							name={`${video.resource_key}`}
+							type='radio'
+							labelName='Film'
+							value='film'
+							data-resourceid={video.player_embed_url}
+							onClick={inputChange}
+						/>
+						<Input
+							name={`${video.resource_key}`}
+							type='radio'
+							labelName='Short'
+							value='short'
+							data-resourceid={video.player_embed_url}
+							onClick={inputChange}
+						/>
 					</div>
 
 					{/* <VimeoPlayer

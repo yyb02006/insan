@@ -76,7 +76,7 @@ export default function Input({
 				/>
 			) : null}
 			{type === 'radio' ? (
-				<div>
+				<label>
 					<input
 						type='radio'
 						id={radioId}
@@ -85,16 +85,15 @@ export default function Input({
 						className={cls(css ? css : '', 'hidden peer')}
 						{...rest}
 					/>
-					<label
-						htmlFor={radioId}
+					<div
 						className={cls(
 							labelCss ? labelCss : '',
 							'peer-checked:text-palettered'
 						)}
 					>
 						{labelName}
-					</label>
-				</div>
+					</div>
+				</label>
 			) : null}
 			{type === 'textarea' ? (
 				<textarea
