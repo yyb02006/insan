@@ -76,7 +76,46 @@ export function VimeoThumnailFeed({
 									: ''
 							}
 						/>
+						<Input
+							name='date'
+							type='text'
+							placeholder='날짜'
+							data-resourceid={video.player_embed_url}
+							onChange={inputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === video.player_embed_url;
+								})?.date
+									? workInfos.find((arr) => {
+											return arr.resourceId === video.player_embed_url;
+									  })?.date
+									: ''
+							}
+						/>
+						<label>
+							<input
+								type='radio'
+								name={`${video.resource_key}`}
+								data-resourceid={video.player_embed_url}
+								className='hidden peer'
+								value={'film'}
+								onChange={inputChange}
+							/>
+							<div className='peer-checked:bg-green-500'>Film</div>
+						</label>
+						<label>
+							<input
+								type='radio'
+								name={`${video.resource_key}`}
+								data-resourceid={video.player_embed_url}
+								className='hidden peer'
+								value={'short'}
+								onChange={inputChange}
+							/>
+							<div className='peer-checked:bg-green-500'>Short</div>
+						</label>
 					</div>
+
 					{/* <VimeoPlayer
 				url={video.player_embed_url}
 				controls={true}
@@ -156,6 +195,26 @@ export function YoutubeThumnailFeed({
 												arr.resourceId === data.snippet.resourceId?.videoId
 											);
 									  })?.description
+									: ''
+							}
+						/>
+						<Input
+							name='date'
+							type='text'
+							placeholder='날짜'
+							data-resourceid={
+								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
+							}
+							onChange={inputChange}
+							value={
+								workInfos?.find((arr) => {
+									return arr.resourceId === data.snippet.resourceId?.videoId;
+								})?.date
+									? workInfos.find((arr) => {
+											return (
+												arr.resourceId === data.snippet.resourceId?.videoId
+											);
+									  })?.date
 									: ''
 							}
 						/>

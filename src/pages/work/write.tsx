@@ -91,7 +91,7 @@ export default function Write() {
 		}
 	}, [category]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
-		const { value, name, dataset } = e.currentTarget;
+		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
@@ -122,22 +122,22 @@ export default function Write() {
 						  )
 						: undefined
 				);
-			} else if (name === 'category') {
-				setWorkInfos((p) =>
-					p
-						? p.map((arr) =>
-								arr.resourceId === dataset.resourceid
-									? { ...arr, category: value }
-									: arr
-						  )
-						: undefined
-				);
 			} else if (name === 'date') {
 				setWorkInfos((p) =>
 					p
 						? p.map((arr) =>
 								arr.resourceId === dataset.resourceid
 									? { ...arr, date: value }
+									: arr
+						  )
+						: undefined
+				);
+			} else if (type === 'radio') {
+				setWorkInfos((p) =>
+					p
+						? p.map((arr) =>
+								arr.resourceId === dataset.resourceid
+									? { ...arr, category: value }
 									: arr
 						  )
 						: undefined

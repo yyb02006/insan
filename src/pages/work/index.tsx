@@ -496,7 +496,7 @@ const VideoTitlePresense = ({
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
 			<div className='Title'>{title}</div>
-			<div className='Desc font-medium text-xl'>description</div>
+			<div className='Desc font-medium text-xl'>{description}</div>
 		</div>
 	);
 };
@@ -560,7 +560,7 @@ const Video = ({
 			</AnimatePresence>
 			<div
 				ref={cover}
-				className='absolute w-full h-full bg-[#101010] opacity-40 text-5xl font-bold flex justify-center items-center pointer-events-none'
+				className='absolute w-full h-full bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'
 			></div>
 		</motion.article>
 	);
@@ -596,53 +596,6 @@ interface GapiLists {
 }
 
 const VideoSection = ({ category, keywords }: VideoSectionProps) => {
-	const videoDatas = [
-		{ category: 'film', direction: 'horizental', index: 1 },
-		{ category: 'short', direction: 'vertical', index: 2 },
-		{ category: 'film', direction: 'horizental', index: 3 },
-		{ category: 'short', direction: 'vertical', index: 4 },
-		{ category: 'short', direction: 'vertical', index: 5 },
-		{ category: 'film', direction: 'horizental', index: 6 },
-		{ category: 'film', direction: 'horizental', index: 7 },
-		{ category: 'short', direction: 'vertical', index: 8 },
-		{ category: 'film', direction: 'horizental', index: 9 },
-		{ category: 'short', direction: 'vertical', index: 10 },
-		{ category: 'film', direction: 'horizental', index: 11 },
-		{ category: 'short', direction: 'vertical', index: 12 },
-		{ category: 'outsource', direction: 'horizental', index: 13 },
-		{ category: 'film', direction: 'horizental', index: 14 },
-		{ category: 'film', direction: 'horizental', index: 15 },
-		{ category: 'short', direction: 'vertical', index: 16 },
-		{ category: 'outsource', direction: 'horizental', index: 17 },
-		{ category: 'outsource', direction: 'horizental', index: 18 },
-		{ category: 'film', direction: 'horizental', index: 19 },
-		{ category: 'short', direction: 'vertical', index: 20 },
-	];
-	const newVideoDatas = {
-		film: videoDatas.filter((data) => data.category === 'film'),
-		short: videoDatas.filter((data) => data.category === 'short'),
-		outsource: videoDatas.filter((data) => data.category === 'outsource'),
-	};
-	// const youtube = (category: 'film' | 'short' | 'outsource') => {
-	// 	fetch(
-	// 		`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
-	// 	)
-	// 		.then((response) => response.json())
-	// 		.then((data) => {
-	// 			const { items } = data;
-	// 			const newItems: videoGenreState[] = items.map((element: GapiItems) => {
-	// 				const newItem: videoGenreState = {
-	// 					category,
-	// 					id: element.id.videoId,
-	// 					thumbnails: element.snippet.thumbnails.default,
-	// 					description: element.snippet.description,
-	// 					title: element.snippet.title,
-	// 				};
-	// 				return newItem;
-	// 			});
-	// 			setVideos((p) => ({ ...p, [category]: newItems }));
-	// 		});
-	// };
 	const [items, setItems] = useState<GapiItem[]>([]);
 	const [videos, setVideos] = useState<{ success: boolean; work: Works[] }>();
 	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
@@ -692,24 +645,25 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			fetchApi('/api/work/list?kind=outsource', setVideos);
 		}
 	}, [playlistIds, category]);
-	console.log(items);
+	console.log(videos);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
 				{category === 'outsource'
 					? videos?.work?.map((data, idx) => (
-							<Video
-								key={idx}
-								index={data.id.toString()}
-								waiting={idx}
-								thumbnail={{
-									url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
-									width: 1280,
-									height: 720,
-								}}
-								title={data.title}
-								description={data.description}
-							/>
+							<div key={data.id}>
+								<Video
+									index={data.id.toString()}
+									waiting={idx}
+									thumbnail={{
+										url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
+										width: 1280,
+										height: 720,
+									}}
+									title={data.title}
+									description={data.description}
+								/>
+							</div>
 					  ))
 					: items.map((data, idx) => (
 							<Video

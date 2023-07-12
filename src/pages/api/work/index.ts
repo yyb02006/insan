@@ -11,6 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				title: true,
 				description: true,
 				category: true,
+				date: true,
 			},
 		});
 		return res.json({ success: true, list });
