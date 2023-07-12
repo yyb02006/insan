@@ -15,12 +15,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					resourceId: el.resourceId,
 					description: el.description,
 					category: el.category,
+					date: el.date,
 				},
 				update: {
 					title: el.title,
 					resourceId: el.resourceId,
 					description: el.description,
 					category: el.category,
+					date: el.date,
 				},
 			});
 		});
