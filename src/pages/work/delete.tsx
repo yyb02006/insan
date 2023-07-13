@@ -26,8 +26,14 @@ export default function Delete() {
 		'film&short'
 	);
 	const [searchWord, setSearchWord] = useState('');
-	const [searchResult, setSearchResult] = useState<listState[]>();
-	const [list, setList] = useState<listState[]>();
+	const [searchResult, setSearchResult] = useState<{
+		outsource: listState[];
+		film: listState[];
+	}>({ outsource: [], film: [] });
+	const [list, setList] = useState<{
+		outsource: listState[];
+		film: listState[];
+	}>({ outsource: [], film: [] });
 	const [send, { loading, data }] = useMutation<{ success: boolean }>(
 		'/api/work'
 	);
@@ -36,22 +42,32 @@ export default function Delete() {
 		fetchApi(
 			'/api/work',
 			(data: dataState) =>
-				setList(data.list.map((list) => ({ ...list, selected: false }))),
+				setList((p) => ({
+					film: data.list
+						.filter((arr) => arr.category === 'film')
+						.map((list) => ({ ...list, selected: false })),
+					outsource: data.list
+						.filter((arr) => arr.category === 'outsource')
+						.map((list) => ({ ...list, selected: false })),
+				})),
 			{ method: 'GET' }
 		);
 	}, []);
 	const onSubmitDelete = () => {
 		if (loading) return;
-		console.log(
-			searchResult
-				?.filter((list) => list.selected === true)
-				.map((list) => list.id)
-		);
-		send(
-			searchResult
-				?.filter((list) => list.selected === true)
-				.map((list) => list.id)
-		);
+		if (category === 'film&short') {
+			send(
+				searchResult?.film
+					.filter((list) => list.selected === true)
+					.map((list) => list.id)
+			);
+		} else if (category === 'outsource') {
+			send(
+				searchResult?.outsource
+					.filter((list) => list.selected === true)
+					.map((list) => list.id)
+			);
+		}
 	};
 	useEffect(() => {
 		if (data?.success) {
@@ -59,26 +75,32 @@ export default function Delete() {
 		}
 	}, [router, data]);
 	useEffect(() => {
-		if (list) {
-			setSearchResult(list);
-		}
-	}, [list]);
+		setSearchResult((p) => ({
+			...p,
+			[category === 'outsource' ? 'outsource' : 'film']: list.outsource,
+		}));
+	}, [list, category]);
 	const onReset = () => {
-		setList((p) => p?.map((arr) => ({ ...arr, selected: false })));
+		setList((p) => ({
+			...p,
+			[category === 'outsource' ? 'outsource' : 'film']: p.outsource.map(
+				(arr) => ({ ...arr, selected: false })
+			),
+		}));
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		if (!searchWord) return;
-		setSearchResult(
-			list?.filter(
+		setSearchResult((p) => ({
+			...p,
+			[category === 'outsource' ? 'outsource' : 'film']: list?.outsource.filter(
 				(el) =>
 					el.title.includes(searchWord) ||
 					el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
-			)
-		);
+			),
+		}));
 	};
-	console.log(list);
-
+	console.log(searchResult);
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -147,11 +169,10 @@ export default function Delete() {
 						}}
 					/>
 				</form>
-				{category === 'film&short' ? <></> : ''}
-				{category === 'outsource' ? (
+				{category === 'film&short' ? (
 					<>
 						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{searchResult?.map((li) => (
+							{searchResult.film.map((li) => (
 								<div
 									key={li.id}
 									className={cls(
@@ -159,18 +180,74 @@ export default function Delete() {
 										'ring-palettered'
 									)}
 									onClick={() => {
-										setSearchResult((p) =>
-											p?.map((list) =>
+										setSearchResult((p) => ({
+											...p,
+											film: p?.film.map((list) =>
 												list.id === li.id
 													? { ...list, selected: !list.selected }
 													: list
-											)
-										);
+											),
+										}));
+									}}
+								>
+									<Image
+										src={`https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`}
+										alt='picturesAlter'
+										width={960}
+										height={540}
+										priority
+									/>
+									<div className='mt-2'>
+										<div className='text-sm'>Title : {li.title}</div>
+										<div className='text-xs font-light'>
+											Id : {li.resourceId}
+										</div>
+									</div>
+								</div>
+							))}
+							<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
+								<button
+									onClick={onReset}
+									className='w-full ring-1 ring-palettered aspect-square sm:rounded-full bg-[#101010] sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+								>
+									Reset
+								</button>
+								<button
+									onClick={onSubmitDelete}
+									className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+								>
+									Delete
+								</button>
+							</div>
+						</div>
+					</>
+				) : (
+					''
+				)}
+				{category === 'outsource' ? (
+					<>
+						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+							{searchResult?.outsource.map((li) => (
+								<div
+									key={li.id}
+									className={cls(
+										li.selected ? 'ring-2' : 'ring-0',
+										'ring-palettered'
+									)}
+									onClick={() => {
+										setSearchResult((p) => ({
+											...p,
+											outsource: p?.outsource.map((list) =>
+												list.id === li.id
+													? { ...list, selected: !list.selected }
+													: list
+											),
+										}));
 									}}
 								>
 									<Image
 										src={
-											searchResult.length !== 0
+											searchResult.outsource.length !== 0
 												? `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg` ||
 												  `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
 												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg`

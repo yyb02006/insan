@@ -16,11 +16,13 @@ interface VimeofeedProps {
 	workInfos: WorkInfos[] | undefined;
 }
 
-export function VimeoThumnailFeed({
+export function VimeoThumbnailFeed({
 	resource,
 	inputChange,
 	workInfos,
 }: VimeofeedProps) {
+	console.log(resource[0]);
+
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 			{resource.map((video, arr) => (
@@ -35,7 +37,7 @@ export function VimeoThumnailFeed({
 							width={960}
 							height={540}
 							priority
-						></Image>
+						/>
 						<div className='mt-2'>
 							<div className='text-sm'>Title : {video.name}</div>
 							<div className='text-xs font-light'>
@@ -122,7 +124,7 @@ export function VimeoThumnailFeed({
 	);
 }
 
-export function YoutubeThumnailFeed({
+export function YoutubeThumbnailFeed({
 	resource,
 	inputChange,
 	workInfos,
