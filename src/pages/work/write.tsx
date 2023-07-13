@@ -6,9 +6,9 @@ import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import Link from 'next/link';
 import {
-	VimeoThumnailFeed,
-	YoutubeThumnailFeed,
-} from '@/components/thumnailFeed';
+	VimeoThumbnailFeed,
+	YoutubeThumbnailFeed,
+} from '@/components/thumbnailFeed';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
 
@@ -272,18 +272,18 @@ export default function Write() {
 					/>
 				</form>
 				{category === 'film&short' && vimeoVideos.length > 0 ? (
-					<VimeoThumnailFeed
+					<VimeoThumbnailFeed
 						inputChange={inputChange}
 						resource={vimeoVideos}
 						workInfos={workInfos}
-					></VimeoThumnailFeed>
+					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
-					<YoutubeThumnailFeed
+					<YoutubeThumbnailFeed
 						inputChange={inputChange}
 						resource={searchResult.youtube}
 						workInfos={workInfos}
-					></YoutubeThumnailFeed>
+					></YoutubeThumbnailFeed>
 				) : null}
 				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
