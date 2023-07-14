@@ -44,7 +44,9 @@ export default function Delete() {
 			(data: dataState) =>
 				setList((p) => ({
 					film: data.list
-						.filter((arr) => arr.category === 'film')
+						.filter(
+							(arr) => arr.category === 'film' || arr.category === 'short'
+						)
 						.map((list) => ({ ...list, selected: false })),
 					outsource: data.list
 						.filter((arr) => arr.category === 'outsource')
@@ -77,7 +79,8 @@ export default function Delete() {
 	useEffect(() => {
 		setSearchResult((p) => ({
 			...p,
-			[category === 'outsource' ? 'outsource' : 'film']: list.outsource,
+			[category === 'outsource' ? 'outsource' : 'film']:
+				list[category === 'outsource' ? 'outsource' : 'film'],
 		}));
 	}, [list, category]);
 	const onReset = () => {
@@ -100,6 +103,7 @@ export default function Delete() {
 			),
 		}));
 	};
+	console.log(list);
 	console.log(searchResult);
 	return (
 		<Layout
@@ -191,7 +195,7 @@ export default function Delete() {
 									}}
 								>
 									<Image
-										src={`https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`}
+										src={li.thumbnailLink}
 										alt='picturesAlter'
 										width={960}
 										height={540}

@@ -12,12 +12,13 @@ datasource db {
 }
 
 model Works {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  title       String
-  description String
-  category    String
-  date        String   @default("no-date")
-  resourceId  String   @unique
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  title         String
+  description   String
+  category      String
+  date          String   @default("no-date")
+  thumbnailLink String   @default("no-link")
+  resourceId    String   @unique
 }

@@ -530,7 +530,7 @@ const Video = ({
 	}, [titleScreen, cover, coverAnimate]);
 	return (
 		<motion.article
-			initial={{ opacity: 1 }}
+			initial={{ opacity: 0 }}
 			animate={{
 				opacity: [0, 1],
 				y: [80, 0],
@@ -605,12 +605,12 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 			<AnimatePresence>
 				{category === 'film'
 					? videos?.work?.film.map((data, idx) => (
-							<div key={idx}>
+							<div key={data.id}>
 								<Video
 									index={data.id.toString()}
 									waiting={idx}
 									thumbnail={{
-										url: `https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`,
+										url: data.thumbnailLink,
 										width: 960,
 										height: 540,
 									}}
@@ -622,12 +622,12 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 					: null}
 				{category === 'short'
 					? videos?.work?.short.map((data, idx) => (
-							<div key={idx}>
+							<div key={data.id}>
 								<Video
 									index={data.id.toString()}
 									waiting={idx}
 									thumbnail={{
-										url: `https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`,
+										url: data.thumbnailLink,
 										width: 960,
 										height: 540,
 									}}
@@ -639,7 +639,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 					: null}
 				{category === 'outsource'
 					? videos?.work?.outsource.map((data, idx) => (
-							<div key={idx}>
+							<div key={data.id}>
 								<Video
 									index={data.id.toString()}
 									waiting={idx}
