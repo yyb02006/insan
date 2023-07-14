@@ -26,6 +26,7 @@ import Input from '@/components/input';
 import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
+import { data } from 'autoprefixer';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -586,72 +587,59 @@ export interface GapiItem {
 	};
 }
 
-interface GapiLists {
-	items: {
-		id: string;
-		snippet: {
-			title: string;
-		};
-	}[];
+interface VideoResponse {
+	success: boolean;
+	work: { film: Works[]; short: Works[]; outsource: Works[] };
 }
 
 const VideoSection = ({ category, keywords }: VideoSectionProps) => {
-	const [items, setItems] = useState<GapiItem[]>([]);
-	const [videos, setVideos] = useState<{ success: boolean; work: Works[] }>();
-	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
+	const [videos, setVideos] = useState<VideoResponse>();
 	useEffect(() => {
-		fetchYouTubeApi(
-			'playlists',
-			'10',
-			setPlaylistIds,
-			'(items(id,snippet(title)))'
-		);
+		fetch('/api/work/list')
+			.then((res) => res.json())
+			.then((data: VideoResponse) => setVideos(data));
 	}, []);
-	useEffect(() => {
-		if (!playlistIds) return;
-		if (category === 'film') {
-			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (
-					item.snippet.title !== 'shorts' &&
-					item.snippet.title !== '참여 촬영'
-				)
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
-		} else if (category === 'short') {
-			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (item.snippet.title === 'shorts')
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
-		} else if (category === 'outsource') {
-			setItems((p) => (p = []));
-			fetchApi('/api/work/list?kind=outsource', setVideos);
-		}
-	}, [playlistIds, category]);
 	console.log(videos);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
+				{category === 'film'
+					? videos?.work?.film.map((data, idx) => (
+							<div key={idx}>
+								<Video
+									index={data.id.toString()}
+									waiting={idx}
+									thumbnail={{
+										url: `https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`,
+										width: 960,
+										height: 540,
+									}}
+									title={data.title}
+									description={data.description}
+								/>
+							</div>
+					  ))
+					: null}
+				{category === 'short'
+					? videos?.work?.short.map((data, idx) => (
+							<div key={idx}>
+								<Video
+									index={data.id.toString()}
+									waiting={idx}
+									thumbnail={{
+										url: `https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad`,
+										width: 960,
+										height: 540,
+									}}
+									title={data.title}
+									description={data.description}
+								/>
+							</div>
+					  ))
+					: null}
 				{category === 'outsource'
-					? videos?.work?.map((data, idx) => (
-							<div key={data.id}>
+					? videos?.work?.outsource.map((data, idx) => (
+							<div key={idx}>
 								<Video
 									index={data.id.toString()}
 									waiting={idx}
@@ -665,16 +653,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 								/>
 							</div>
 					  ))
-					: items.map((data, idx) => (
-							<Video
-								key={idx}
-								index={data.id}
-								waiting={idx}
-								thumbnail={data.snippet.thumbnails.high}
-								title={data.snippet.title}
-								description={data.snippet.description}
-							/>
-					  ))}
+					: null}
 			</AnimatePresence>
 		</section>
 	);
