@@ -16,6 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					description: el.description,
 					category: el.category,
 					date: el.date,
+					thumbnailLink: el.thumbnailLink,
 				},
 				update: {
 					title: el.title,
@@ -23,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					description: el.description,
 					category: el.category,
 					date: el.date,
+					thumbnailLink: el.thumbnailLink,
 				},
 			});
 		});

@@ -51,6 +51,7 @@ export function VimeoThumbnailFeed({
 							type='text'
 							placeholder='타이틀'
 							data-resourceid={video.player_embed_url}
+							data-thumbnail={video.pictures.sizes[4].link}
 							onChange={inputChange}
 							value={
 								workInfos?.find((arr) => {
@@ -161,6 +162,7 @@ export function YoutubeThumbnailFeed({
 							data-resourceid={
 								data.snippet.resourceId ? data.snippet.resourceId?.videoId : ''
 							}
+							data-thumbnail={'no-link'}
 							onChange={inputChange}
 							value={
 								workInfos?.find((arr) => {

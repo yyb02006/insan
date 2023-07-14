@@ -12,6 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				description: true,
 				category: true,
 				date: true,
+				thumbnailLink: true,
 			},
 		});
 		return res.json({ success: true, list });

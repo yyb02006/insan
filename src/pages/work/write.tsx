@@ -18,6 +18,7 @@ export interface WorkInfos {
 	resourceId: string;
 	category: string;
 	date: string;
+	thumbnailLink: string;
 }
 
 export interface VimeoVideos {
@@ -155,6 +156,7 @@ export default function Write() {
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
 									date: 'no-date',
+									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
 						: [
@@ -164,6 +166,7 @@ export default function Write() {
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
 									date: 'no-date',
+									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
 				);
