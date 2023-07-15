@@ -58,7 +58,7 @@ interface VideoSectionProps {
 interface VideoProps {
 	index: string;
 	waiting: number;
-	thumbnail: { url: string; width: number; height: number };
+	thumbnail: { url: string; width: number; height: number; alt: string };
 	title: string;
 	description: string;
 }
@@ -511,6 +511,7 @@ const Video = ({
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
+	const [error, setError] = useState(false);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -547,12 +548,15 @@ const Video = ({
 			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem]  border'
 		>
 			<Image
-				src={thumbnail.url}
-				alt='thumbnail(will fixed)'
+				src={error ? thumbnail.alt : thumbnail.url}
+				onError={() => {
+					setError(true);
+				}}
+				alt={'will fixed'}
 				width={thumbnail.width}
 				height={thumbnail.height}
 				priority
-				className='relative w-full'
+				className='relative w-full aspect-video object-cover'
 			/>
 			<AnimatePresence>
 				{titleScreen ? (
@@ -611,6 +615,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									waiting={idx}
 									thumbnail={{
 										url: data.thumbnailLink,
+										alt: data.thumbnailLink,
 										width: 960,
 										height: 540,
 									}}
@@ -628,6 +633,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									waiting={idx}
 									thumbnail={{
 										url: data.thumbnailLink,
+										alt: data.thumbnailLink,
 										width: 960,
 										height: 540,
 									}}
@@ -644,7 +650,8 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									index={data.id.toString()}
 									waiting={idx}
 									thumbnail={{
-										url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
+										url: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+										alt: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
 										width: 1280,
 										height: 720,
 									}}
