@@ -61,6 +61,7 @@ interface VideoProps {
 	thumbnail: { url: string; width: number; height: number; alt: string };
 	title: string;
 	description: string;
+	category: 'film' | 'short' | 'outsource';
 }
 
 interface keyWordsState {
@@ -508,6 +509,7 @@ const Video = ({
 	thumbnail,
 	title,
 	description,
+	category,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
@@ -545,7 +547,7 @@ const Video = ({
 				setTitleScreen((p) => (p = false));
 			}}
 			key={index}
-			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem]  border'
+			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 		>
 			<Image
 				src={error ? thumbnail.alt : thumbnail.url}
@@ -558,6 +560,8 @@ const Video = ({
 				priority
 				className='relative w-full aspect-video object-cover'
 			/>
+			{category === 'film' || category === 'short' ? '' : null}
+			{category === 'outsource' ? '' : null}
 			<AnimatePresence>
 				{titleScreen ? (
 					<VideoTitlePresense title={title} description={description} />
