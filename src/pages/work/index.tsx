@@ -26,7 +26,8 @@ import Input from '@/components/input';
 import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
-import { data } from 'autoprefixer';
+import VimeoPlayer from 'react-player/vimeo';
+import YouTubePlayer from 'react-player/youtube';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -62,6 +63,7 @@ interface VideoProps {
 	title: string;
 	description: string;
 	category: 'film' | 'short' | 'outsource';
+	resource: string;
 }
 
 interface keyWordsState {
@@ -503,6 +505,10 @@ const VideoTitlePresense = ({
 	);
 };
 
+const VideoDetail = () => {
+	return null;
+};
+
 const Video = ({
 	index,
 	waiting,
@@ -510,10 +516,13 @@ const Video = ({
 	title,
 	description,
 	category,
+	resource,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
+	const [play, setPlay] = useState(false);
+	const [onDetail, setOnDetail] = useState(false);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -524,13 +533,16 @@ const Video = ({
 			const exitAnimation = async () => {
 				await coverAnimate(
 					cover.current,
-					{ opacity: 0.4 },
+					{ opacity: 1 },
 					{ duration: 0.4, delay: 0.4 }
 				);
 			};
 			exitAnimation();
 		}
 	}, [titleScreen, cover, coverAnimate]);
+	useEffect(() => {
+		titleScreen ? setPlay(true) : setPlay(false);
+	}, [titleScreen]);
 	return (
 		<motion.article
 			initial={{ opacity: 0 }}
@@ -546,31 +558,59 @@ const Video = ({
 			onMouseLeave={() => {
 				setTitleScreen((p) => (p = false));
 			}}
+			onClick={() => {
+				setOnDetail((p) => (p = true));
+			}}
 			key={index}
 			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 		>
-			<Image
-				src={error ? thumbnail.alt : thumbnail.url}
-				onError={() => {
-					setError(true);
-				}}
-				alt={'will fixed'}
-				width={thumbnail.width}
-				height={thumbnail.height}
-				priority
-				className='relative w-full aspect-video object-cover'
-			/>
-			{category === 'film' || category === 'short' ? '' : null}
-			{category === 'outsource' ? '' : null}
+			{category === 'film' || (category === 'short' && play === true) ? (
+				<div className='absolute w-full aspect-video'>
+					<VimeoPlayer
+						url={resource}
+						controls={false}
+						muted={true}
+						playing={play}
+						width={'100%'}
+						height={'100%'}
+					/>
+				</div>
+			) : null}
+			{category === 'outsource' && play === true ? (
+				<div className='absolute w-full aspect-video'>
+					<YouTubePlayer
+						url={`https://www.youtube.com/watch?v=${resource}`}
+						controls={false}
+						muted={true}
+						playing={play}
+						width={'100%'}
+						height={'100%'}
+						config={{
+							embedOptions: { host: 'https://www.youtube-nocookie.com' },
+						}}
+					/>
+				</div>
+			) : null}
+			<div ref={cover} className='absolute w-full h-full '>
+				<Image
+					src={error ? thumbnail.alt : thumbnail.url}
+					onError={() => {
+						setError(true);
+					}}
+					alt={'will fixed'}
+					width={thumbnail.width}
+					height={thumbnail.height}
+					priority
+					className='relative w-full aspect-video object-cover'
+				/>
+				<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
+			</div>
 			<AnimatePresence>
 				{titleScreen ? (
 					<VideoTitlePresense title={title} description={description} />
 				) : null}
 			</AnimatePresence>
-			<div
-				ref={cover}
-				className='absolute w-full h-full bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'
-			></div>
+			{onDetail ? <div></div> : null}
 		</motion.article>
 	);
 };
@@ -625,6 +665,8 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									}}
 									title={data.title}
 									description={data.description}
+									category={category}
+									resource={data.resourceId}
 								/>
 							</div>
 					  ))
@@ -643,6 +685,8 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									}}
 									title={data.title}
 									description={data.description}
+									category={category}
+									resource={data.resourceId}
 								/>
 							</div>
 					  ))
@@ -661,6 +705,8 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									}}
 									title={data.title}
 									description={data.description}
+									category={category}
+									resource={data.resourceId}
 								/>
 							</div>
 					  ))
