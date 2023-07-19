@@ -112,7 +112,6 @@ export function VimeoThumbnailFeed({
 							onClick={inputChange}
 						/>
 					</div>
-
 					{/* <VimeoPlayer
 				url={video.player_embed_url}
 				controls={true}
