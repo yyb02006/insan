@@ -505,7 +505,19 @@ const VideoTitlePresense = ({
 	);
 };
 
-const VideoDetail = () => {
+interface VideoDetailProps {
+	title: string;
+	date: string;
+	description: string;
+	resource: string;
+}
+
+const VideoDetail = ({
+	title,
+	date,
+	description,
+	resource,
+}: VideoDetailProps) => {
 	return null;
 };
 
