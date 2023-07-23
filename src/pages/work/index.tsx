@@ -510,6 +510,7 @@ interface VideoDetailProps {
 	date: string;
 	description: string;
 	resource: string;
+	category: 'film' | 'outsource';
 }
 
 const VideoDetail = ({
@@ -517,8 +518,22 @@ const VideoDetail = ({
 	date,
 	description,
 	resource,
+	category,
 }: VideoDetailProps) => {
-	return null;
+	return (
+		<>
+			{category === 'film' ? (
+				<div>
+					<VimeoPlayer url={resource} controls={true} />
+				</div>
+			) : null}
+			{category === 'outsource' ? (
+				<div>
+					<YouTubePlayer url={resource} controls={true} />
+				</div>
+			) : null}
+		</>
+	);
 };
 
 const Video = ({
@@ -535,6 +550,7 @@ const Video = ({
 	const [error, setError] = useState(false);
 	const [play, setPlay] = useState(false);
 	const [onDetail, setOnDetail] = useState(false);
+	console.log(navigator.userAgent);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
