@@ -522,28 +522,33 @@ const VideoDetail = ({
 	category,
 }: VideoDetailProps) => {
 	return (
-		<div className='fixed top-0 left-0 w-full h-screen p-4 bg-pink-500'>
-			{category === 'film' ? (
-				<div className='w-auto h-full bg-green-500'>
-					<VimeoPlayer
-						url={resource}
-						controls={true}
-						width={'auto'}
-						height={'auto'}
-					/>
-				</div>
-			) : null}
-			{category === 'outsource' ? (
-				<div className='w-auto h-full bg-green-500'>
-					<YouTubePlayer
-						url={resource}
-						controls={true}
-						width={'auto'}
-						height={'auto'}
-					/>
-				</div>
-			) : null}
-		</div>
+		<>
+			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
+			<div className='fixed top-0 left-0 w-full h-screen p-4 bg-transparent'>
+				{category === 'film' ? (
+					<div className='w-full h-full bg-[#101010]'>
+						<VimeoPlayer
+							url={resource}
+							controls={true}
+							width={'100%'}
+							height={'100%'}
+						/>
+					</div>
+				) : null}
+				{category === 'outsource' ? (
+					<div className='w-full h-full bg-green-500'>
+						<YouTubePlayer
+							url={resource}
+							controls={true}
+							width={'auto'}
+							height={'auto'}
+						/>
+					</div>
+				) : null}
+				{title}
+				{description}
+			</div>
+		</>
 	);
 };
 
