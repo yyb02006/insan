@@ -524,15 +524,22 @@ const VideoDetail = ({
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
-			<div className='fixed top-0 left-0 w-full h-screen p-4 bg-transparent'>
+			<div className='fixed top-0 left-0 w-screen h-screen p-4 bg-transparent'>
 				{category === 'film' ? (
-					<div className='w-full h-full bg-[#101010]'>
-						<VimeoPlayer
-							url={resource}
-							controls={true}
-							width={'100%'}
-							height={'100%'}
-						/>
+					<div className='w-full h-full pt-10 flex justify-evenly flex-wrap bg-[#101010]'>
+						<div className='w-full h-auto max-w-[1400px] bg-green-400'>
+							<VimeoPlayer
+								url={resource}
+								controls={true}
+								width={'100%'}
+								height={'auto'}
+								style={{ aspectRatio: 16 / 9, backgroundColor: 'red' }}
+							/>
+						</div>
+						<div className='bg-pink-400'>
+							{title}
+							{description}
+						</div>
 					</div>
 				) : null}
 				{category === 'outsource' ? (
@@ -545,8 +552,6 @@ const VideoDetail = ({
 						/>
 					</div>
 				) : null}
-				{title}
-				{description}
 			</div>
 		</>
 	);
