@@ -54,6 +54,7 @@ interface SearchSectionProp {
 interface VideoSectionProps {
 	category: 'film' | 'short' | 'outsource';
 	keywords: keyWordsState;
+	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
 
 interface VideoProps {
@@ -65,6 +66,16 @@ interface VideoProps {
 	category: 'film' | 'short' | 'outsource';
 	resource: string;
 	date: string;
+	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
+}
+
+interface OnDetail {
+	isOpen: boolean;
+	title: string;
+	description: string;
+	date: string;
+	resource: string;
+	category: 'film' | 'short' | 'outsource';
 }
 
 interface keyWordsState {
@@ -566,12 +577,12 @@ const Video = ({
 	category,
 	resource,
 	date,
+	setOnDetail,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
 	const [play, setPlay] = useState(false);
-	const [onDetail, setOnDetail] = useState(false);
 	console.log(navigator.userAgent);
 	useEffect(() => {
 		if (titleScreen) {
@@ -610,7 +621,15 @@ const Video = ({
 					setTitleScreen((p) => (p = false));
 				}}
 				onClick={() => {
-					setOnDetail((p) => (p = true));
+					setOnDetail((p) => ({
+						...p,
+						isOpen: true,
+						category,
+						date,
+						description,
+						resource,
+						title,
+					}));
 				}}
 				key={index}
 				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
@@ -662,15 +681,6 @@ const Video = ({
 					) : null}
 				</AnimatePresence>
 			</motion.article>
-			{onDetail ? (
-				<VideoDetail
-					title={title}
-					description={description}
-					category={category}
-					resource={resource}
-					date={date}
-				></VideoDetail>
-			) : null}
 			<div className='bg-pink-400 w-[300px] aspect-square'></div>
 		</>
 	);
@@ -701,7 +711,11 @@ interface VideoResponse {
 	work: { film: Works[]; short: Works[]; outsource: Works[] };
 }
 
-const VideoSection = ({ category, keywords }: VideoSectionProps) => {
+const VideoSection = ({
+	category,
+	keywords,
+	setOnDetail,
+}: VideoSectionProps) => {
 	const [videos, setVideos] = useState<VideoResponse>();
 	useEffect(() => {
 		fetch('/api/work/list')
@@ -729,6 +743,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									category={category}
 									resource={data.resourceId}
 									date={data.date}
+									setOnDetail={setOnDetail}
 								/>
 							</div>
 					  ))
@@ -750,6 +765,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									category={category}
 									resource={data.resourceId}
 									date={data.date}
+									setOnDetail={setOnDetail}
 								/>
 							</div>
 					  ))
@@ -771,6 +787,7 @@ const VideoSection = ({ category, keywords }: VideoSectionProps) => {
 									category={category}
 									resource={data.resourceId}
 									date={data.date}
+									setOnDetail={setOnDetail}
 								/>
 							</div>
 					  ))
@@ -925,6 +942,7 @@ const OutroSection = () => {
 };
 
 export default function Work() {
+	const [onDetail, setOnDetail] = useState<OnDetail>();
 	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
 		'film'
 	);
@@ -938,17 +956,33 @@ export default function Work() {
 		console.log(keyWords);
 	}, [keyWords]);
 	return (
-		<Layout seoTitle='Work' nav={{ isShort: true }}>
-			<main
-				ref={section}
-				className='pt-[100px] font-GmarketSans overflow-x-hidden'
-			>
-				<TitleSection setCategory={setCategory} />
-				<SearchSection setKeyWords={setKeyWords} />
-				<VideoSection category={category} keywords={keyWords} />
-				<OutroSection />
-				<ToTop toScroll={section} />
-			</main>
-		</Layout>
+		<>
+			{onDetail && onDetail.isOpen === true ? (
+				<VideoDetail
+					resource={onDetail.resource}
+					category={category}
+					date={onDetail.resource}
+					description={onDetail.description}
+					title={onDetail.title}
+				></VideoDetail>
+			) : (
+				<Layout seoTitle='Work' nav={{ isShort: true }}>
+					<main
+						ref={section}
+						className='pt-[100px] font-GmarketSans overflow-x-hidden'
+					>
+						<TitleSection setCategory={setCategory} />
+						<SearchSection setKeyWords={setKeyWords} />
+						<VideoSection
+							category={category}
+							keywords={keyWords}
+							setOnDetail={setOnDetail}
+						/>
+						<OutroSection />
+						<ToTop toScroll={section} />
+					</main>
+				</Layout>
+			)}
+		</>
 	);
 }
