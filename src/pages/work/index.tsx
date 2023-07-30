@@ -523,6 +523,7 @@ interface VideoDetailProps {
 	description: string;
 	resource: string;
 	category: 'film' | 'short' | 'outsource';
+	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
 
 const VideoDetail = ({
@@ -531,6 +532,7 @@ const VideoDetail = ({
 	description,
 	resource,
 	category,
+	setOnDetail,
 }: VideoDetailProps) => {
 	return (
 		<>
@@ -563,6 +565,14 @@ const VideoDetail = ({
 						/>
 					</div>
 				) : null}
+				<button
+					className='absolute top-0 right-0'
+					onClick={() => {
+						setOnDetail((p) => (p ? { ...p, isOpen: false } : undefined));
+					}}
+				>
+					<div className='w-[100px] aspect-square bg-green-500'></div>
+				</button>
 			</div>
 		</>
 	);
@@ -681,7 +691,6 @@ const Video = ({
 					) : null}
 				</AnimatePresence>
 			</motion.article>
-			<div className='bg-pink-400 w-[300px] aspect-square'></div>
 		</>
 	);
 };
@@ -964,6 +973,7 @@ export default function Work() {
 					date={onDetail.resource}
 					description={onDetail.description}
 					title={onDetail.title}
+					setOnDetail={setOnDetail}
 				></VideoDetail>
 			) : (
 				<Layout seoTitle='Work' nav={{ isShort: true }}>
