@@ -537,21 +537,26 @@ const VideoDetail = ({
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
-			<div className='fixed top-0 left-0 w-screen h-screen p-4 bg-transparent'>
+			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
 				{category === 'film' ? (
-					<div className='w-full h-full pt-10 flex justify-evenly flex-wrap bg-[#101010]'>
-						<div className='w-full h-auto max-w-[1400px] bg-green-400'>
-							<VimeoPlayer
-								url={resource}
-								controls={true}
-								width={'100%'}
-								height={'auto'}
-								style={{ aspectRatio: 16 / 9, backgroundColor: 'red' }}
-							/>
-						</div>
-						<div className='bg-pink-400'>
-							{title}
-							{description}
+					<div className='w-full h-full py-16 bg-[#101010]'>
+						<div className='w-full flex flex-wrap justify-evenly gap-y-4'>
+							<div className='w-full 2xl:max-w-[1400px]'>
+								<VimeoPlayer
+									url={resource}
+									controls={true}
+									width={'100%'}
+									height={'auto'}
+									style={{ aspectRatio: 16 / 9 }}
+								/>
+							</div>
+							<div className='2xl:min-w-[360px] xl:max-w-[500px] xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between'>
+								<div>{title}</div>
+								<div>
+									동해물과백두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우
+								</div>
+								<div>2012.20.30</div>
+							</div>
 						</div>
 					</div>
 				) : null}
@@ -566,12 +571,25 @@ const VideoDetail = ({
 					</div>
 				) : null}
 				<button
-					className='absolute top-0 right-0'
+					className='absolute m-2 top-4 right-4'
 					onClick={() => {
 						setOnDetail((p) => (p ? { ...p, isOpen: false } : undefined));
 					}}
 				>
-					<div className='w-[100px] aspect-square bg-green-500'></div>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={1}
+						stroke='currentColor'
+						className='w-10 h-10 stroke-[#707070]'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M6 18L18 6M6 6l12 12'
+						/>
+					</svg>
 				</button>
 			</div>
 		</>
@@ -964,8 +982,37 @@ export default function Work() {
 	useEffect(() => {
 		console.log(keyWords);
 	}, [keyWords]);
+	useEffect(() => {
+		if (onDetail?.isOpen === true) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'auto';
+		}
+		const currentScrollY = window.scrollY;
+		console.log(currentScrollY);
+	}, [onDetail]);
 	return (
 		<>
+			<Layout
+				seoTitle='Work'
+				nav={{ isShort: true }}
+				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
+			>
+				<main
+					ref={section}
+					className='pt-[100px] font-GmarketSans overflow-x-hidden'
+				>
+					<TitleSection setCategory={setCategory} />
+					<SearchSection setKeyWords={setKeyWords} />
+					<VideoSection
+						category={category}
+						keywords={keyWords}
+						setOnDetail={setOnDetail}
+					/>
+					<OutroSection />
+					<ToTop toScroll={section} />
+				</main>
+			</Layout>
 			{onDetail && onDetail.isOpen === true ? (
 				<VideoDetail
 					resource={onDetail.resource}
@@ -975,24 +1022,7 @@ export default function Work() {
 					title={onDetail.title}
 					setOnDetail={setOnDetail}
 				></VideoDetail>
-			) : (
-				<Layout seoTitle='Work' nav={{ isShort: true }}>
-					<main
-						ref={section}
-						className='pt-[100px] font-GmarketSans overflow-x-hidden'
-					>
-						<TitleSection setCategory={setCategory} />
-						<SearchSection setKeyWords={setKeyWords} />
-						<VideoSection
-							category={category}
-							keywords={keyWords}
-							setOnDetail={setOnDetail}
-						/>
-						<OutroSection />
-						<ToTop toScroll={section} />
-					</main>
-				</Layout>
-			)}
+			) : null}
 		</>
 	);
 }
