@@ -76,6 +76,7 @@ interface OnDetail {
 	date: string;
 	resource: string;
 	category: 'film' | 'short' | 'outsource';
+	imageUrl: string;
 }
 
 interface keyWordsState {
@@ -523,6 +524,7 @@ interface VideoDetailProps {
 	description: string;
 	resource: string;
 	category: 'film' | 'short' | 'outsource';
+	thumbnail: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
 
@@ -532,30 +534,49 @@ const VideoDetail = ({
 	description,
 	resource,
 	category,
+	thumbnail,
 	setOnDetail,
 }: VideoDetailProps) => {
+	const [isLoaded, setIsLoaded] = useState(false);
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
 				{category === 'film' ? (
-					<div className='w-full h-full py-16 bg-[#101010]'>
-						<div className='w-full flex flex-wrap justify-evenly gap-y-4'>
-							<div className='w-full 2xl:max-w-[1400px]'>
+					<div className='w-full h-auto py-16 bg-[#101010]'>
+						<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
+							<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
 								<VimeoPlayer
 									url={resource}
 									controls={true}
 									width={'100%'}
 									height={'auto'}
 									style={{ aspectRatio: 16 / 9 }}
+									onReady={() => {
+										setIsLoaded(true);
+									}}
 								/>
+								{!isLoaded ? (
+									<Image
+										src={thumbnail}
+										alt={'will fixed'}
+										width={960}
+										height={540}
+										priority
+										className='absolute top-0 left-0 w-full aspect-video object-cover'
+									/>
+								) : null}
 							</div>
-							<div className='2xl:min-w-[360px] xl:max-w-[500px] xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between'>
-								<div>{title}</div>
-								<div>
+							<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
+								<div className='font-semibold text-xl self-start'>
+									모스버거 광고
+								</div>
+								<div className='font-light text-sm leading-7'>
 									동해물과백두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우
 								</div>
-								<div>2012.20.30</div>
+								<div className='font-light text-sm self-end text-[#aaaaaa]'>
+									2012.20.30
+								</div>
 							</div>
 						</div>
 					</div>
@@ -657,6 +678,7 @@ const Video = ({
 						description,
 						resource,
 						title,
+						imageUrl: thumbnail.url,
 					}));
 				}}
 				key={index}
@@ -1021,6 +1043,7 @@ export default function Work() {
 					description={onDetail.description}
 					title={onDetail.title}
 					setOnDetail={setOnDetail}
+					thumbnail={onDetail.imageUrl}
 				></VideoDetail>
 			) : null}
 		</>
