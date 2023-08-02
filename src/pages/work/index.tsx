@@ -543,7 +543,7 @@ const VideoDetail = ({
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
 				{category === 'film' ? (
-					<div className='w-full h-auto py-16 bg-[#101010]'>
+					<div className='w-full h-auto xl:max-h-[calc(100vh-32px)] py-16 bg-[#101010]'>
 						<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
 							<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
 								<VimeoPlayer
