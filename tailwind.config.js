@@ -23,6 +23,7 @@ module.exports = {
 			},
 			animation: {
 				'spin-slow': 'spin 10s linear infinite',
+				'spin-middle': 'spin 5s linear infinite',
 			},
 			colors: {
 				transparent: 'transparent',
