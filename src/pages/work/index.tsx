@@ -527,6 +527,14 @@ interface VideoDetailProps {
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
 
+interface youtubeDesc {
+	items: { snippet: description }[];
+}
+
+interface description {
+	description: string;
+}
+
 const VideoDetail = ({
 	title,
 	date,
@@ -536,92 +544,139 @@ const VideoDetail = ({
 	setOnDetail,
 }: VideoDetailProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
-	const [description, setDescription] = useState();
+	const [description, setDescription] = useState<string>();
 	const pattern = /\/([^/]+)\?/;
 	useEffect(() => {
-		fetch(
-			`https://api.vimeo.com/videos/${
-				resource.match(pattern)?.[1]
-			}?fields=description`,
-			{
-				method: 'get',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+		if (category === 'film' || category === 'short') {
+			fetch(
+				`https://api.vimeo.com/videos/${
+					resource.match(pattern)?.[1]
+				}?fields=description`,
+				{
+					method: 'get',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+					},
+				}
+			)
+				.then((res) => res.json())
+				.then((data) => {
+					setDescription(data.description);
+					console.log(data);
+				});
+		} else if (category === 'outsource') {
+			fetchYouTubeApi(
+				'videos',
+				'10',
+				(data: youtubeDesc) => {
+					setDescription(data.items[0].snippet.description);
 				},
-			}
-		)
-			.then((res) => res.json())
-			.then((data) => {
-				setDescription(data.description);
-				console.log(data);
-			});
+				'items(snippet(description))',
+				undefined,
+				resource
+			);
+		}
 	}, []);
+	console.log(resource);
+
 	return (
 		<>
-			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
+			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80' />
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
-				{category === 'film' ? (
-					<div className='w-full h-auto xl:max-h-[calc(100vh-32px)] py-16 bg-[#101010]'>
-						<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
-							<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
-								<VimeoPlayer
-									url={resource}
-									controls={true}
-									width={'100%'}
-									height={'auto'}
-									style={{ aspectRatio: 16 / 9 }}
-									onReady={() => {
-										setInterval(() => {
-											setIsLoaded(true);
-										}, 80);
-									}}
-								/>
-								{!isLoaded ? (
-									<div className='absolute top-0 left-0 w-full aspect-video'>
-										<Image
-											src={thumbnail}
-											alt={'will fixed'}
-											width={960}
-											height={540}
-											priority
-											className='absolute top-0 left-0 w-full aspect-video object-cover'
-										/>
-										<div className='absolute bg-[#000000] opacity-30 w-full h-full'></div>
-										<div className='absolute w-full h-full flex justify-center items-center'>
-											<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
-												<Circles
-													liMotion={{
-														css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
-													}}
-												/>
+				<div className='w-full h-auto py-16 bg-[#101010]'>
+					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
+						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
+							{category === 'film' || category === 'short' ? (
+								<>
+									<VimeoPlayer
+										url={resource}
+										controls={true}
+										width={'100%'}
+										height={'auto'}
+										style={{ aspectRatio: 16 / 9 }}
+										onReady={() => {
+											setInterval(() => {
+												setIsLoaded(true);
+											}, 80);
+										}}
+									/>
+									{!isLoaded ? (
+										<div className='absolute top-0 left-0 w-full aspect-video'>
+											<Image
+												src={thumbnail}
+												alt={'will fixed'}
+												width={960}
+												height={540}
+												priority
+												className='absolute top-0 left-0 w-full aspect-video object-cover'
+											/>
+											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
+											<div className='absolute w-full h-full flex justify-center items-center'>
+												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+													<Circles
+														liMotion={{
+															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+														}}
+													/>
+												</div>
 											</div>
 										</div>
+									) : null}
+								</>
+							) : null}
+							{category === 'outsource' ? (
+								<>
+									<div className='w-full h-full bg-green-500'>
+										<YouTubePlayer
+											url={`https://www.youtube.com/watch?v=${resource}`}
+											controls={true}
+											width={'auto'}
+											height={'full'}
+											style={{ aspectRatio: 16 / 9 }}
+											onReady={() => {
+												setInterval(() => {
+													setIsLoaded(true);
+												}, 80);
+											}}
+										/>
 									</div>
-								) : null}
+									{!isLoaded ? (
+										<div className='absolute top-0 left-0 w-full aspect-video'>
+											<Image
+												src={thumbnail}
+												alt={'will fixed'}
+												width={960}
+												height={540}
+												priority
+												className='absolute top-0 left-0 w-full aspect-video object-cover'
+											/>
+											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
+											<div className='absolute w-full h-full flex justify-center items-center'>
+												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+													<Circles
+														liMotion={{
+															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+														}}
+													/>
+												</div>
+											</div>
+										</div>
+									) : null}
+								</>
+							) : null}
+						</div>
+						<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
+							<div className='font-semibold text-xl self-start'>{title}</div>
+							<div className='font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]'>
+								{description ? description : null}
 							</div>
-							<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
-								<div className='font-semibold text-xl self-start'>{title}</div>
-								<div className='font-light text-sm leading-7'>
-									{description ? description : null}
-								</div>
-								<div className='font-light text-sm self-end text-[#aaaaaa]'>
-									{date}
-								</div>
+							<div className='font-light text-sm self-end text-[#aaaaaa]'>
+								{date}
 							</div>
 						</div>
 					</div>
-				) : null}
-				{category === 'outsource' ? (
-					<div className='w-full h-full bg-green-500'>
-						<YouTubePlayer
-							url={resource}
-							controls={true}
-							width={'auto'}
-							height={'auto'}
-						/>
-					</div>
-				) : null}
+				</div>
 				<button
 					className='absolute m-2 top-4 right-4'
 					onClick={() => {
