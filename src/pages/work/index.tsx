@@ -521,7 +521,6 @@ const VideoTitlePresense = ({
 interface VideoDetailProps {
 	title: string;
 	date: string;
-	description: string;
 	resource: string;
 	category: 'film' | 'short' | 'outsource';
 	thumbnail: string;
@@ -531,13 +530,33 @@ interface VideoDetailProps {
 const VideoDetail = ({
 	title,
 	date,
-	description,
 	resource,
 	category,
 	thumbnail,
 	setOnDetail,
 }: VideoDetailProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
+	const [description, setDescription] = useState();
+	const pattern = /\/([^/]+)\?/;
+	useEffect(() => {
+		fetch(
+			`https://api.vimeo.com/videos/${
+				resource.match(pattern)?.[1]
+			}?fields=description`,
+			{
+				method: 'get',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+				},
+			}
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				setDescription(data.description);
+				console.log(data);
+			});
+	}, []);
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80'></div>
@@ -553,29 +572,41 @@ const VideoDetail = ({
 									height={'auto'}
 									style={{ aspectRatio: 16 / 9 }}
 									onReady={() => {
-										setIsLoaded(true);
+										setInterval(() => {
+											setIsLoaded(true);
+										}, 80);
 									}}
 								/>
 								{!isLoaded ? (
-									<Image
-										src={thumbnail}
-										alt={'will fixed'}
-										width={960}
-										height={540}
-										priority
-										className='absolute top-0 left-0 w-full aspect-video object-cover'
-									/>
+									<div className='absolute top-0 left-0 w-full aspect-video'>
+										<Image
+											src={thumbnail}
+											alt={'will fixed'}
+											width={960}
+											height={540}
+											priority
+											className='absolute top-0 left-0 w-full aspect-video object-cover'
+										/>
+										<div className='absolute bg-[#000000] opacity-30 w-full h-full'></div>
+										<div className='absolute w-full h-full flex justify-center items-center'>
+											<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+												<Circles
+													liMotion={{
+														css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+													}}
+												/>
+											</div>
+										</div>
+									</div>
 								) : null}
 							</div>
 							<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
-								<div className='font-semibold text-xl self-start'>
-									모스버거 광고
-								</div>
+								<div className='font-semibold text-xl self-start'>{title}</div>
 								<div className='font-light text-sm leading-7'>
-									동해물과백두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우두산이마르고닳도록하느님이보우
+									{description ? description : null}
 								</div>
 								<div className='font-light text-sm self-end text-[#aaaaaa]'>
-									2012.20.30
+									{date}
 								</div>
 							</div>
 						</div>
@@ -1039,8 +1070,7 @@ export default function Work() {
 				<VideoDetail
 					resource={onDetail.resource}
 					category={category}
-					date={onDetail.resource}
-					description={onDetail.description}
+					date={onDetail.date}
 					title={onDetail.title}
 					setOnDetail={setOnDetail}
 					thumbnail={onDetail.imageUrl}
