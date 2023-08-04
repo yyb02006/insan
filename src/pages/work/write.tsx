@@ -184,16 +184,27 @@ export default function Write() {
 		e.preventDefault();
 		if (!searchWord) return;
 		const filterResources = (kind: ResourceHost) => {
-			setSearchResult((p) => ({
-				...p,
-				[kind]: youtubeVideos.filter(
-					(el) =>
-						el.snippet.title.includes(searchWord) ||
-						el.snippet.resourceId?.videoId
-							.toLowerCase()
-							.includes(searchWord.toLowerCase())
-				),
-			}));
+			if (kind === 'vimeo') {
+				setSearchResult((p) => ({
+					...p,
+					[kind]: vimeoVideos.filter(
+						(el) =>
+							el.name.includes(searchWord) ||
+							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
+					),
+				}));
+			} else if (kind === 'youtube') {
+				setSearchResult((p) => ({
+					...p,
+					[kind]: youtubeVideos.filter(
+						(el) =>
+							el.snippet.title.includes(searchWord) ||
+							el.snippet.resourceId?.videoId
+								.toLowerCase()
+								.includes(searchWord.toLowerCase())
+					),
+				}));
+			}
 		};
 		if (category === 'film&short') {
 			filterResources('vimeo');
@@ -201,7 +212,8 @@ export default function Write() {
 			filterResources('youtube');
 		}
 	};
-	console.log(workInfos);
+	console.log(searchResult);
+	console.log(searchWord);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -277,7 +289,7 @@ export default function Write() {
 				{category === 'film&short' && vimeoVideos.length > 0 ? (
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
-						resource={vimeoVideos}
+						resource={searchResult.vimeo}
 						workInfos={workInfos}
 					></VimeoThumbnailFeed>
 				) : null}
@@ -300,6 +312,9 @@ export default function Write() {
 						className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 					>
 						Save
+					</button>
+					<button className='w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'>
+						List
 					</button>
 				</div>
 			</section>
