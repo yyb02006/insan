@@ -212,8 +212,27 @@ export default function Write() {
 			filterResources('youtube');
 		}
 	};
+	const onUpdatedListClick = () => {
+		if (category === 'film&short') {
+			setSearchResult((p) => ({
+				...p,
+				vimeo: vimeoVideos.filter((info) =>
+					workInfos?.some((video) => video.resourceId === info.player_embed_url)
+				),
+			}));
+		} else if (category === 'outsource') {
+			setSearchResult((p) => ({
+				...p,
+				youtube: youtubeVideos.filter((info) =>
+					workInfos?.some(
+						(video) => video.resourceId === info.snippet.resourceId?.videoId
+					)
+				),
+			}));
+		}
+	};
+	console.log(workInfos);
 	console.log(searchResult);
-	console.log(searchWord);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -313,8 +332,12 @@ export default function Write() {
 					>
 						Save
 					</button>
-					<button className='w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'>
-						List
+					<button
+						onClick={onUpdatedListClick}
+						className='hidden sm:inline-block w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+					>
+						<div>{workInfos ? workInfos.length : '0'}</div>
+						<div>Lists</div>
 					</button>
 				</div>
 			</section>
