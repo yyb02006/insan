@@ -21,14 +21,20 @@ export function VimeoThumbnailFeed({
 	inputChange,
 	workInfos,
 }: VimeofeedProps) {
-	console.log(resource[0]);
+	console.log(resource, workInfos);
 
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 			{resource.map((video, arr) => (
 				<div
 					key={arr} /* video.resource_key */
-					className='relative w-auto aspect-video'
+					className={`relative w-auto aspect-video ${
+						workInfos?.filter(
+							(info) => info.resourceId === video.player_embed_url
+						)[0]?.title
+							? 'ring-1 ring-palettered'
+							: ''
+					}`}
 				>
 					<div>
 						<Image
