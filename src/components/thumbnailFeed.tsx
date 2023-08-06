@@ -32,7 +32,7 @@ export function VimeoThumbnailFeed({
 						workInfos?.filter(
 							(info) => info.resourceId === video.player_embed_url
 						)[0]?.title
-							? 'ring-1 ring-palettered'
+							? 'ring-2 ring-palettered'
 							: ''
 					}`}
 				>
@@ -138,7 +138,16 @@ export function YoutubeThumbnailFeed({
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 			{resource.map((data, arr) => (
-				<div key={arr} className='w-full flex flex-col justify-between'>
+				<div
+					key={arr}
+					className={`w-full flex flex-col justify-between ${
+						workInfos?.filter(
+							(info) => info.resourceId === data.snippet.resourceId?.videoId
+						)[0]?.title
+							? 'ring-2 ring-palettered'
+							: ''
+					}`}
+				>
 					<div>
 						<Image
 							src={

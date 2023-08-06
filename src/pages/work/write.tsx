@@ -213,6 +213,7 @@ export default function Write() {
 		}
 	};
 	const onUpdatedListClick = () => {
+		if (!workInfos || workInfos?.length < 1) return;
 		if (category === 'film&short') {
 			setSearchResult((p) => ({
 				...p,
@@ -319,6 +320,13 @@ export default function Write() {
 						workInfos={workInfos}
 					></YoutubeThumbnailFeed>
 				) : null}
+				<button
+					onClick={onUpdatedListClick}
+					className='absolute sm:inline-block w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+				>
+					<div>{workInfos ? workInfos.length : '0'}</div>
+					<div>Lists</div>
+				</button>
 				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 					<button
 						onClick={onReset}
