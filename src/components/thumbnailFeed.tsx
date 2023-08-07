@@ -23,6 +23,10 @@ export function VimeoThumbnailFeed({
 }: VimeofeedProps) {
 	const [customResource, setCustomResouce] = useState(resource);
 	const [customworkInfos, setCustomWorkInfos] = useState(workInfos);
+	useEffect(() => {
+		setCustomResouce(resource);
+		setCustomWorkInfos(workInfos);
+	}, [resource, workInfos]);
 	console.log(resource, workInfos);
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
