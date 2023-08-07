@@ -1,7 +1,7 @@
 import { GapiItem } from '@/pages/work';
 import Image from 'next/image';
 import Input from './input';
-import { SetStateAction, SyntheticEvent } from 'react';
+import { SetStateAction, SyntheticEvent, useEffect, useState } from 'react';
 import { WorkInfos, VimeoVideos } from '@/pages/work/write';
 
 interface YoutubefeedProps {
@@ -21,11 +21,12 @@ export function VimeoThumbnailFeed({
 	inputChange,
 	workInfos,
 }: VimeofeedProps) {
+	const [customResource, setCustomResouce] = useState(resource);
+	const [customworkInfos, setCustomWorkInfos] = useState(workInfos);
 	console.log(resource, workInfos);
-
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-			{resource.map((video, arr) => (
+			{customResource.map((video, arr) => (
 				<div
 					key={arr} /* video.resource_key */
 					className={`relative w-auto aspect-video ${
@@ -60,10 +61,10 @@ export function VimeoThumbnailFeed({
 							data-thumbnail={video.pictures.sizes[4].link}
 							onChange={inputChange}
 							value={
-								workInfos?.find((arr) => {
+								customworkInfos?.find((arr) => {
 									return arr.resourceId === video.player_embed_url;
 								})?.title
-									? workInfos.find((arr) => {
+									? customworkInfos.find((arr) => {
 											return arr.resourceId === video.player_embed_url;
 									  })?.title
 									: ''

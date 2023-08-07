@@ -246,7 +246,7 @@ export default function Write() {
 					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
 						추가하기
 					</div>
-					<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
+					<div className='absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
 						<Link href={'/work/delete'}>삭제하기</Link>
 					</div>
 				</div>
@@ -322,7 +322,7 @@ export default function Write() {
 				) : null}
 				<button
 					onClick={onUpdatedListClick}
-					className='absolute sm:inline-block w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+					className='fixed sm:hidden bottom-24 right-4 w-16 rounded-full bg-[#101010] ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 				>
 					<div>{workInfos ? workInfos.length : '0'}</div>
 					<div>Lists</div>
