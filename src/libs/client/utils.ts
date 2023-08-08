@@ -27,7 +27,8 @@ export function fetchYouTubeApi<T>(
 	setFunc: (value: T) => void,
 	fields?: string,
 	playlistId?: string,
-	videosId?: string
+	videosId?: string,
+	nextPageToken?: string
 ) {
 	const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 	fetchApi(
@@ -37,7 +38,7 @@ export function fetchYouTubeApi<T>(
 			method === 'playlists' ? '&channelId=UCwy8JhA4eDumalKwKrvrxQA' : ''
 		}${method === 'playlistItems' ? `&playlistId=${playlistId}` : ''}${
 			fields ? `&fields=${fields}` : ''
-		}`,
+		}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`,
 		setFunc
 	);
 }

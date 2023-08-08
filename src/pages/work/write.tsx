@@ -1,5 +1,5 @@
 import { cls, fetchYouTubeApi } from '@/libs/client/utils';
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
@@ -11,6 +11,7 @@ import {
 } from '@/components/thumbnailFeed';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
+import useInfiniteScrollTest from '@/libs/client/useInfiniteScroll';
 
 export interface WorkInfos {
 	title: string;
@@ -45,6 +46,7 @@ export default function Write() {
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
 	const [searchWord, setSearchWord] = useState('');
+	const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
 	const [searchResult, setSearchResult] = useState<SearchResult>({
 		vimeo: [],
 		youtube: [],
@@ -53,9 +55,18 @@ export default function Write() {
 	const [vimeoVideos, setVimeoVideos] = useState<VimeoVideos[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
+	const [nextpageTokenInit, setNextpageTokenInit] = useState<{
+		outsource: string;
+		paticipate: string;
+	}>({ outsource: '', paticipate: '' });
+	const intersectionRef = useInfiniteScrollTest({
+		setVimeoVideos,
+		setYoutubeVideos,
+		category,
+	});
 	useEffect(() => {
 		fetch(
-			'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description',
+			`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10`,
 			{
 				method: 'get',
 				headers: {
@@ -74,23 +85,60 @@ export default function Write() {
 			fetchYouTubeApi(
 				'playlistItems',
 				'10',
-				(data: { items: GapiItem[] }) => {
+				(data: { items: GapiItem[]; nextPageToken: string }) => {
 					setYoutubeVideos((p) => [...p, ...data.items]);
 					setSearchResult((p) => ({ ...p, youtube: [...data.items] }));
+					if (list.title === '외주 작업') {
+						setNextpageTokenInit((p) => ({
+							...p,
+							outsource: data?.nextPageToken,
+						}));
+					} else if (list.title === '참여 촬영') {
+						setNextpageTokenInit((p) => ({
+							...p,
+							paticipate: data?.nextPageToken,
+						}));
+					}
 				},
-				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
+				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)',
 				list.id
 			);
 		});
 	}, []);
+	console.log(nextpageTokenInit);
+
 	useEffect(() => {
 		setWorkInfos(undefined);
 		if (category === 'film&short' && youtubeVideos.length > 0) {
-			setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
+			if (searchWordSnapshot === '') {
+				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
+			} else {
+				setSearchResult((p) => ({
+					...p,
+					vimeo: vimeoVideos.filter(
+						(el) =>
+							el.name.includes(searchWord) ||
+							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
+					),
+				}));
+			}
 		} else if (category === 'outsource') {
-			setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
+			if (searchWordSnapshot === '') {
+				setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
+			} else {
+				setSearchResult((p) => ({
+					...p,
+					youtube: youtubeVideos.filter(
+						(el) =>
+							el.snippet.title.includes(searchWord) ||
+							el.snippet.resourceId?.videoId
+								.toLowerCase()
+								.includes(searchWord.toLowerCase())
+					),
+				}));
+			}
 		}
-	}, [category]);
+	}, [category, youtubeVideos, vimeoVideos]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
@@ -182,6 +230,7 @@ export default function Write() {
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setSearchWordSnapshot(searchWord);
 		if (!searchWord) return;
 		const filterResources = (kind: ResourceHost) => {
 			if (kind === 'vimeo') {
@@ -232,8 +281,6 @@ export default function Write() {
 			}));
 		}
 	};
-	console.log(workInfos);
-	console.log(searchResult);
 	return (
 		<Layout
 			seoTitle='Write'
@@ -311,6 +358,7 @@ export default function Write() {
 						inputChange={inputChange}
 						resource={searchResult.vimeo}
 						workInfos={workInfos}
+						intersectionRef={intersectionRef}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
@@ -318,6 +366,7 @@ export default function Write() {
 						inputChange={inputChange}
 						resource={searchResult.youtube}
 						workInfos={workInfos}
+						intersectionRef={intersectionRef}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<button
