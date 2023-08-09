@@ -37,6 +37,8 @@ interface SearchResult {
 
 export type ResourceHost = 'vimeo' | 'youtube';
 
+export type category = 'film&short' | 'outsource';
+
 export default function Write() {
 	const [category, setCategory] = useState<'film&short' | 'outsource'>(
 		'film&short'
@@ -46,7 +48,10 @@ export default function Write() {
 		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
 	];
 	const [searchWord, setSearchWord] = useState('');
-	const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
+	const [searchWordSnapshot, setSearchWordSnapshot] = useState<{
+		searchWord: string;
+		category: category;
+	}>({ searchWord: '', category: 'film&short' });
 	const [searchResult, setSearchResult] = useState<SearchResult>({
 		vimeo: [],
 		youtube: [],
@@ -56,9 +61,11 @@ export default function Write() {
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
+	const [isScrollLoading, setIsScrollLoading] = useState(false);
 	const intersectionRef = useInfiniteScrollTest({
 		setVimeoVideos,
 		setYoutubeVideos,
+		setIsScrollLoading,
 		category,
 		isInfiniteScrollEnabled,
 	});
@@ -97,8 +104,10 @@ export default function Write() {
 	useEffect(() => {
 		setWorkInfos(undefined);
 		if (category === 'film&short' && youtubeVideos.length > 0) {
-			if (searchWordSnapshot === '') {
+			if (searchWordSnapshot.category !== category) {
 				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
+				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
+				setSearchWord('');
 			} else {
 				setSearchResult((p) => ({
 					...p,
@@ -110,8 +119,10 @@ export default function Write() {
 				}));
 			}
 		} else if (category === 'outsource') {
-			if (searchWordSnapshot === '') {
+			if (searchWordSnapshot.category !== category) {
 				setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
+				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
+				setSearchWord('');
 			} else {
 				setSearchResult((p) => ({
 					...p,
@@ -220,7 +231,7 @@ export default function Write() {
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setSearchWordSnapshot(searchWord);
+		setSearchWordSnapshot({ searchWord, category });
 		if (!searchWord) return;
 		const filterResources = (kind: ResourceHost) => {
 			if (kind === 'vimeo') {
@@ -243,6 +254,7 @@ export default function Write() {
 								.includes(searchWord.toLowerCase())
 					),
 				}));
+				console.log('여기가 실행되고 있음');
 			}
 		};
 		if (category === 'film&short') {
@@ -351,6 +363,7 @@ export default function Write() {
 						resource={searchResult.vimeo}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
+						isScrollLoading={isScrollLoading}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
@@ -359,6 +372,7 @@ export default function Write() {
 						resource={searchResult.youtube}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
+						isScrollLoading={isScrollLoading}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<button
