@@ -1,6 +1,7 @@
 // import { Stream } from '@prisma/client';
 import { VimeoVideos } from '@/pages/work/write';
 import {
+	Dispatch,
 	MutableRefObject,
 	SetStateAction,
 	useEffect,
@@ -17,6 +18,7 @@ type SetYoutubeFunc = (value: SetStateAction<GapiItem[]>) => void;
 interface test {
 	setVimeoVideos: SetVimeoFunc;
 	setYoutubeVideos: SetYoutubeFunc;
+	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
 	category: 'film&short' | 'outsource';
 	isInfiniteScrollEnabled: boolean;
 }
@@ -24,6 +26,7 @@ interface test {
 export default function useInfiniteScrollTest({
 	setVimeoVideos,
 	setYoutubeVideos,
+	setIsScrollLoading,
 	category,
 	isInfiniteScrollEnabled,
 }: test) {
@@ -39,6 +42,9 @@ export default function useInfiniteScrollTest({
 	const [page, setPage] = useState<number>(2);
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] = useState(true);
+	useEffect(() => {
+		setIsScrollLoading(isLoading);
+	}, [isLoading]);
 	const addData = async () => {
 		if (isLoading) return;
 		setIsLoading(true);
@@ -105,44 +111,6 @@ export default function useInfiniteScrollTest({
 						setNextpageToken((p) => ({ ...p, participate: '' }));
 					}
 				}
-				/* 
-				lists.forEach((list) => {
-					fetchYouTubeApi(
-						'playlistItems',
-						'10',
-						(data: { items: GapiItem[]; nextPageToken: string }) => {
-							if (
-								list.title === '외주 작업' &&
-								data.nextPageToken !== nextpageTokenInit.outsource
-							) {
-								setYoutubeVideos((p) => [...p, ...data.items]);
-								setNextpageTokenInit((p) => ({
-									...p,
-									outsource: data.nextPageToken,
-								}));
-								console.log(
-									'dfafdfgghhhhhhhhhhh' + data.nextPageToken,
-									nextpageTokenInit.outsource
-								);
-							} else if (
-								list.title === '참여 촬영' &&
-								data.nextPageToken !== nextpageTokenInit.paticipate
-							) {
-								setYoutubeVideos((p) => [...p, ...data.items]);
-								setNextpageTokenInit((p) => ({
-									...p,
-									paticipate: data.nextPageToken,
-								}));
-							}
-						},
-						'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)',
-						list.id,
-						undefined,
-						list.title === '외주 작업'
-							? nextpageTokenInit.outsource
-							: nextpageTokenInit.paticipate
-					);
-				}); */
 			}
 		} catch (err) {
 			console.log(err);

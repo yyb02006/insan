@@ -2,6 +2,7 @@ import { GapiItem } from '@/pages/work';
 import Image from 'next/image';
 import Input from './input';
 import {
+	Dispatch,
 	MutableRefObject,
 	SetStateAction,
 	SyntheticEvent,
@@ -9,9 +10,11 @@ import {
 	useState,
 } from 'react';
 import { WorkInfos, VimeoVideos } from '@/pages/work/write';
+import Circles from './circles';
 
 interface videoFeedItem {
 	inputChange: (e: SyntheticEvent<HTMLInputElement>) => void;
+	isScrollLoading: boolean;
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
 }
@@ -29,6 +32,7 @@ export function VimeoThumbnailFeed({
 	inputChange,
 	workInfos,
 	intersectionRef,
+	isScrollLoading,
 }: VimeofeedProps) {
 	return (
 		<>
@@ -129,10 +133,19 @@ export function VimeoThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div
-				ref={intersectionRef}
-				className='h-10 bg-green-400 mb-10 order-last'
-			></div>
+			<div ref={intersectionRef} className='h-32 my-10 order-last'>
+				{isScrollLoading ? (
+					<div className='relative w-full h-full flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				) : null}
+			</div>
 		</>
 	);
 }
@@ -142,6 +155,7 @@ export function YoutubeThumbnailFeed({
 	inputChange,
 	workInfos,
 	intersectionRef,
+	isScrollLoading,
 }: YoutubefeedProps) {
 	return (
 		<>
@@ -249,10 +263,19 @@ export function YoutubeThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div
-				ref={intersectionRef}
-				className='h-10 bg-green-400 mb-10 order-last'
-			></div>
+			<div ref={intersectionRef} className='h-10 bg-[#303030] mb-10 order-last'>
+				{isScrollLoading ? (
+					<div className='relative w-full h-full flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				) : null}
+			</div>
 		</>
 	);
 }
