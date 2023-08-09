@@ -21,6 +21,28 @@ interface dataState {
 	list: list[];
 }
 
+interface ThumbnailProps {
+	src: { main: string; sub: string };
+}
+
+const Thumbnail = ({ src }: ThumbnailProps) => {
+	const [error, setError] = useState(false);
+	const handleImageError = () => {
+		setError(true);
+	};
+	return (
+		<Image
+			src={!error ? src.main : src.sub}
+			alt='picturesAlter'
+			width={1280}
+			height={720}
+			priority
+			onError={handleImageError}
+			className='w-full object-cover aspect-video'
+		/>
+	);
+};
+
 export default function Delete() {
 	const [category, setCategory] = useState<'film&short' | 'outsource'>(
 		'film&short'
@@ -249,20 +271,18 @@ export default function Delete() {
 										}));
 									}}
 								>
-									<Image
+									<Thumbnail
 										src={
 											searchResult.outsource.length !== 0
-												? `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg` ||
-												  `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
-												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg`
-												: ''
+												? {
+														main: `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg`,
+														sub: `https://i.ytimg.com/vi/${li.resourceId}/hqdefault.jpg`,
+												  }
+												: { main: '', sub: '' }
 										}
-										alt='test'
-										width={1280}
-										height={720}
-										className='w-full object-cover'
-										priority
 									/>
+									{/* `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
+												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg` */}
 									<div className='mt-2'>
 										<div className='text-sm'>Title : {li.title}</div>
 										<div className='text-xs font-light'>
