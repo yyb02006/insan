@@ -55,15 +55,14 @@ export default function Write() {
 	const [vimeoVideos, setVimeoVideos] = useState<VimeoVideos[]>([]);
 	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
-	const [nextpageTokenInit, setNextpageTokenInit] = useState<{
-		outsource: string;
-		paticipate: string;
-	}>({ outsource: '', paticipate: '' });
+	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const intersectionRef = useInfiniteScrollTest({
 		setVimeoVideos,
 		setYoutubeVideos,
 		category,
+		isInfiniteScrollEnabled,
 	});
+	console.log(isInfiniteScrollEnabled);
 	useEffect(() => {
 		fetch(
 			`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10`,
@@ -79,7 +78,7 @@ export default function Write() {
 			.then((data) => {
 				setVimeoVideos((p) => [...p, ...data.data]);
 				setSearchResult((p) => ({ ...p, vimeo: [...data.data] }));
-				console.log(data.data);
+				// console.log(data.data);
 			});
 		lists.forEach((list) => {
 			fetchYouTubeApi(
@@ -88,25 +87,13 @@ export default function Write() {
 				(data: { items: GapiItem[]; nextPageToken: string }) => {
 					setYoutubeVideos((p) => [...p, ...data.items]);
 					setSearchResult((p) => ({ ...p, youtube: [...data.items] }));
-					if (list.title === '외주 작업') {
-						setNextpageTokenInit((p) => ({
-							...p,
-							outsource: data?.nextPageToken,
-						}));
-					} else if (list.title === '참여 촬영') {
-						setNextpageTokenInit((p) => ({
-							...p,
-							paticipate: data?.nextPageToken,
-						}));
-					}
 				},
 				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)',
 				list.id
 			);
 		});
 	}, []);
-	console.log(nextpageTokenInit);
-
+	// console.log(nextpageTokenInit);
 	useEffect(() => {
 		setWorkInfos(undefined);
 		if (category === 'film&short' && youtubeVideos.length > 0) {
@@ -139,6 +126,9 @@ export default function Write() {
 			}
 		}
 	}, [category, youtubeVideos, vimeoVideos]);
+	useEffect(() => {
+		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+	}, [category]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
@@ -260,8 +250,10 @@ export default function Write() {
 		} else if (category === 'outsource') {
 			filterResources('youtube');
 		}
+		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 	};
 	const onUpdatedListClick = () => {
+		setIsInfiniteScrollEnabled(false);
 		if (!workInfos || workInfos?.length < 1) return;
 		if (category === 'film&short') {
 			setSearchResult((p) => ({
