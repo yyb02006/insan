@@ -18,21 +18,23 @@ interface test {
 	setVimeoVideos: SetVimeoFunc;
 	setYoutubeVideos: SetYoutubeFunc;
 	category: 'film&short' | 'outsource';
+	isInfiniteScrollEnabled: boolean;
 }
 
 export default function useInfiniteScrollTest({
 	setVimeoVideos,
 	setYoutubeVideos,
 	category,
+	isInfiniteScrollEnabled,
 }: test) {
-	const lists = [
-		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
-		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
-	];
-	const [nextpageTokenInit, setNextpageTokenInit] = useState<{
+	const lists = {
+		outsource: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
+		participate: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
+	};
+	const [nextpageToken, setNextpageToken] = useState<{
 		outsource: string;
-		paticipate: string;
-	}>({ outsource: 'EAAaBlBUOkNBbw', paticipate: 'EAAaBlBUOkNBbw' });
+		participate: string;
+	}>({ outsource: 'EAAaBlBUOkNBbw', participate: 'EAAaBlBUOkNBbw' });
 	const intersectionRef = useRef<HTMLDivElement | null>(null);
 	const [page, setPage] = useState<number>(2);
 	const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +63,49 @@ export default function useInfiniteScrollTest({
 					setHasNextPage(false);
 				}
 			} else if (category === 'outsource') {
+				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+				if (nextpageToken.outsource !== '') {
+					const data = await (
+						await fetch(
+							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.outsource}&part=snippet&playlistId=${lists.outsource}&maxResults=10&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
+							{
+								method: 'get',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+							}
+						)
+					).json();
+					if (data.nextPageToken) {
+						setNextpageToken((p) => ({ ...p, outsource: data.nextPageToken }));
+						setYoutubeVideos((p) => [...p, ...data.items]);
+					} else {
+						setNextpageToken((p) => ({ ...p, outsource: '' }));
+					}
+				}
+				if (nextpageToken.participate !== '') {
+					const data = await (
+						await fetch(
+							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.participate}&part=snippet&playlistId=${lists.participate}&maxResults=10&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
+							{
+								method: 'get',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+							}
+						)
+					).json();
+					if (data.nextPageToken) {
+						setNextpageToken((p) => ({
+							...p,
+							participate: data.nextPageToken,
+						}));
+						setYoutubeVideos((p) => [...p, ...data.items]);
+					} else {
+						setNextpageToken((p) => ({ ...p, participate: '' }));
+					}
+				}
+				/* 
 				lists.forEach((list) => {
 					fetchYouTubeApi(
 						'playlistItems',
@@ -97,7 +142,7 @@ export default function useInfiniteScrollTest({
 							? nextpageTokenInit.outsource
 							: nextpageTokenInit.paticipate
 					);
-				});
+				}); */
 			}
 		} catch (err) {
 			console.log(err);
@@ -113,6 +158,7 @@ export default function useInfiniteScrollTest({
 		}
 	};
 	useEffect(() => {
+		if (!isInfiniteScrollEnabled) return;
 		const options: IntersectionObserverInit = {
 			root: null,
 			rootMargin: '0px',
@@ -134,8 +180,11 @@ export default function useInfiniteScrollTest({
 		intersectionRef.current,
 		page,
 		hasNextPage,
-		nextpageTokenInit.outsource,
-		nextpageTokenInit.paticipate,
+		nextpageToken.outsource,
+		nextpageToken.participate,
+		isInfiniteScrollEnabled,
 	]);
+	console.log(isInfiniteScrollEnabled);
+
 	return intersectionRef;
 }
