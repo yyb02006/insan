@@ -50,23 +50,26 @@ export default function useInfiniteScrollTest({
 		setIsLoading(true);
 		try {
 			if (category === 'film&short') {
-				const data = await (
-					await fetch(
-						`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${page}&per_page=10`,
-						{
-							method: 'get',
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-							},
-						}
-					)
-				).json();
-				setVimeoVideos((p) => [...p, ...data.data]);
-				if (data.data.length === 10) {
-					setPage((p) => (p = p + 1));
-				} else {
-					setHasNextPage(false);
+				if (hasNextPage) {
+					const data = await (
+						await fetch(
+							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${page}&per_page=10`,
+							{
+								method: 'get',
+								headers: {
+									'Content-Type': 'application/json',
+									Authorization:
+										process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+								},
+							}
+						)
+					).json();
+					setVimeoVideos((p) => [...p, ...data.data]);
+					if (data.data.length === 10) {
+						setPage((p) => (p = p + 1));
+					} else {
+						setHasNextPage(false);
+					}
 				}
 			} else if (category === 'outsource') {
 				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -120,7 +123,7 @@ export default function useInfiniteScrollTest({
 
 	const observerCallback: IntersectionObserverCallback = (entries) => {
 		const entry = entries[0];
-		if (entry.isIntersecting && hasNextPage) {
+		if (entry.isIntersecting) {
 			console.log('intersecting' + page);
 			addData();
 		}
