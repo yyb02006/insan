@@ -102,7 +102,6 @@ export default function Write() {
 	}, []);
 	// console.log(nextpageTokenInit);
 	useEffect(() => {
-		setWorkInfos(undefined);
 		if (category === 'film&short' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
 				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
@@ -139,6 +138,7 @@ export default function Write() {
 	}, [category, youtubeVideos, vimeoVideos]);
 	useEffect(() => {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+		setWorkInfos(undefined);
 	}, [category]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
@@ -285,6 +285,7 @@ export default function Write() {
 			}));
 		}
 	};
+	console.log(workInfos);
 	return (
 		<Layout
 			seoTitle='Write'

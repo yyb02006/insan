@@ -44,6 +44,7 @@ export default function Input({
 						css ? css : '',
 						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
@@ -58,6 +59,7 @@ export default function Input({
 						css ? css : '',
 						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
@@ -72,6 +74,7 @@ export default function Input({
 						css ? css : '',
 						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}

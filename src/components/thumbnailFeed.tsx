@@ -263,7 +263,7 @@ export function YoutubeThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div ref={intersectionRef} className='h-10 bg-[#303030] mb-10 order-last'>
+			<div ref={intersectionRef} className='h-32 my-10 order-last'>
 				{isScrollLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
