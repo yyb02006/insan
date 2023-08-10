@@ -120,6 +120,20 @@ export function VimeoThumbnailFeed({
 								value='film'
 								data-resourceid={video.player_embed_url}
 								onClick={inputChange}
+								checked={
+									workInfos?.filter(
+										(info) => info.resourceId === video.player_embed_url
+									)[0]?.category === 'film'
+										? true
+										: false
+								}
+								radioDisabled={
+									workInfos?.filter(
+										(info) => info.resourceId === video.player_embed_url
+									)[0]?.title
+										? false
+										: true
+								}
 							/>
 							<Input
 								name={`${video.resource_key}`}
@@ -128,6 +142,20 @@ export function VimeoThumbnailFeed({
 								value='short'
 								data-resourceid={video.player_embed_url}
 								onClick={inputChange}
+								checked={
+									workInfos?.filter(
+										(info) => info.resourceId === video.player_embed_url
+									)[0]?.category === 'short'
+										? true
+										: false
+								}
+								radioDisabled={
+									workInfos?.filter(
+										(info) => info.resourceId === video.player_embed_url
+									)[0]?.title
+										? false
+										: true
+								}
 							/>
 						</div>
 					</div>

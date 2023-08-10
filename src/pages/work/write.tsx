@@ -142,6 +142,8 @@ export default function Write() {
 	}, [category]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
+		console.log(e.currentTarget);
+
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
@@ -204,7 +206,7 @@ export default function Write() {
 									title: value,
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
-									date: 'no-date',
+									date: '',
 									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
@@ -214,7 +216,7 @@ export default function Write() {
 									title: value,
 									description: '',
 									category: category === 'film&short' ? '' : 'outsource',
-									date: 'no-date',
+									date: '',
 									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
@@ -225,6 +227,7 @@ export default function Write() {
 	const onSubmitWrites = () => {
 		if (loading) return;
 		sendList(workInfos);
+		console.log('여기 실행중입니다만!');
 	};
 	const onReset = () => {
 		setWorkInfos([]);
@@ -254,7 +257,6 @@ export default function Write() {
 								.includes(searchWord.toLowerCase())
 					),
 				}));
-				console.log('여기가 실행되고 있음');
 			}
 		};
 		if (category === 'film&short') {
