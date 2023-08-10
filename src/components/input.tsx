@@ -15,6 +15,7 @@ interface InputProps {
 	css?: string;
 	labelCss?: string;
 	labelName?: string;
+	radioDisabled?: boolean;
 	[key: string]: any;
 }
 
@@ -29,6 +30,7 @@ export default function Input({
 	css,
 	labelCss,
 	labelName,
+	radioDisabled,
 	...rest
 }: InputProps) {
 	return (
@@ -85,6 +87,7 @@ export default function Input({
 						id={radioId}
 						name={name}
 						value={value}
+						disabled={radioDisabled}
 						className={cls(css ? css : '', 'hidden peer')}
 						{...rest}
 					/>

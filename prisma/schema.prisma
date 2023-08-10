@@ -17,7 +17,7 @@ model Works {
   updatedAt     DateTime @updatedAt
   title         String
   description   String
-  category      String
+  category      String   @default("film")
   date          String   @default("no-date")
   thumbnailLink String   @default("no-link")
   resourceId    String   @unique
