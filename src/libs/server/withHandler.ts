@@ -13,7 +13,7 @@ export default function withHandler({ methods, handlerFunc }: config) {
 			return res.status(405).end();
 		}
 		try {
-			handlerFunc(req, res);
+			await handlerFunc(req, res);
 		} catch (err) {
 			console.log(err);
 			res.status(500).json(err);
