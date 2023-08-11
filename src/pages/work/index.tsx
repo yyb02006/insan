@@ -512,8 +512,9 @@ const VideoTitlePresense = ({
 			ref={intro}
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
-			<div className='Title'>{title}</div>
-			<div className='Desc font-medium text-xl'>{description}</div>
+			<div className='absolute top-0 left-0 w-full h-full bg-[#101010] opacity-30'></div>
+			<div className='relative Title'>{title}</div>
+			<div className='relative Desc font-medium text-xl'>{description}</div>
 		</div>
 	);
 };
@@ -739,6 +740,8 @@ const Video = ({
 	useEffect(() => {
 		titleScreen ? setPlay(true) : setPlay(false);
 	}, [titleScreen]);
+	console.log(resource);
+
 	return (
 		<>
 			<motion.article
@@ -773,7 +776,7 @@ const Video = ({
 				{(category === 'film' || category === 'short') && play === true ? (
 					<div className='absolute w-full aspect-video'>
 						<VimeoPlayer
-							url={resource}
+							url={`${resource}&quality=540p`}
 							controls={false}
 							muted={true}
 							playing={play}
