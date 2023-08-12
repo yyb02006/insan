@@ -9,9 +9,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			password: body,
 		};
 		await req.session.save();
-		res.status(200).json({ success: true });
+		res.status(200).json({ success: true, message: 'Autorized' });
 	} else {
-		res.status(401).json({ success: true, message: 'Unautorized' });
+		res.status(200).json({ success: false, message: 'Unautorized' });
 	}
 };
 
