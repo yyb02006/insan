@@ -25,6 +25,7 @@ import {
 } from 'react';
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import Image from 'next/image';
+import VimeoPlayer from 'react-player/vimeo';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -78,6 +79,7 @@ interface WaveProps {
 
 interface VideoProps {
 	videoId: string;
+	thumbnailLink: string;
 }
 
 interface VideoContainerProps {
@@ -88,6 +90,7 @@ interface VideoContainerProps {
 	date: string;
 	videoId: string;
 	innerWidth: number;
+	thumbnailLink: string;
 }
 
 interface VideoSectionProps {
@@ -573,7 +576,7 @@ const WavesSection = ({
 	);
 };
 
-const Video = ({ videoId }: VideoProps) => {
+const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 	const ref = useRef(null);
 	const isInView = useInView(ref);
 	const [thumnail, setThumnail] = useState(true);
@@ -581,14 +584,15 @@ const Video = ({ videoId }: VideoProps) => {
 	const [isLoad, setIsLoad] = useState(false);
 	const [video, setVideo] = useState<YouTubeEvent>();
 	const [videoState, setVideoState] = useState<number>(-1);
-	const onVideoReady: YouTubeProps['onReady'] = (e) => {
+	const [play, setPlay] = useState(false);
+	/* const onVideoReady: YouTubeProps['onReady'] = (e) => {
 		setVideo(e);
 		setVideoLoad(true);
 	};
 	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
 		setVideoState(e.data);
 		console.log(e.data);
-	};
+	}; */
 	useEffect(() => {
 		if (
 			!thumnail &&
@@ -610,15 +614,15 @@ const Video = ({ videoId }: VideoProps) => {
 			setThumnail((p) => !p);
 		}
 	}, [isInView, videoState]);
+	console.log(isLoad, play);
+
 	return (
 		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
 			<div className='Wrapper absolute w-full aspect-square'>
 				<Circles
 					ulMotion={{
 						css: cls(
-							videoState === 1
-								? 'animate-spin-slow'
-								: 'animate-spin-slow pause',
+							play ? 'animate-spin-slow' : 'animate-spin-slow pause',
 							'transition-all'
 						),
 					}}
@@ -630,38 +634,50 @@ const Video = ({ videoId }: VideoProps) => {
 			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
 				<div className='h-full aspect-video'>
 					{isLoad ? (
-						<YouTube
-							videoId={videoId}
-							opts={{
-								width: '100%',
-								height: '100%',
-								playerVars: { rel: 0, modestbranding: 1 },
-								host: 'https://www.youtube-nocookie.com',
-								origin: 'http://localhost:3000',
+						<VimeoPlayer
+							url={`https://player.vimeo.com/video/${videoId}`}
+							controls={false}
+							muted={false}
+							playing={play}
+							width={'100%'}
+							height={'100%'}
+							onReady={() => {
+								console.log('ready');
 							}}
-							loading='lazy'
-							onReady={onVideoReady}
-							onStateChange={(e) => {
-								if (video) {
-									onVideoStateChange(e);
-								}
-							}}
-							className='relative h-full aspect-video pointer-events-none'
 						/>
-					) : null}
+					) : // <YouTube
+					// 	videoId={videoId}
+					// 	opts={{
+					// 		width: '100%',
+					// 		height: '100%',
+					// 		playerVars: { rel: 0, modestbranding: 1 },
+					// 		host: 'https://www.youtube-nocookie.com',
+					// 		origin: 'http://localhost:3000',
+					// 	}}
+					// 	loading='lazy'
+					// 	onReady={onVideoReady}
+					// 	onStateChange={(e) => {
+					// 		if (video) {
+					// 			onVideoStateChange(e);
+					// 		}
+					// 	}}
+					// 	className='relative h-full aspect-video pointer-events-none'
+					// />
+					null}
 				</div>
 				<m.div
 					onClick={() => {
 						setThumnail((p) => !p);
 						setIsLoad(true);
+						setPlay((p) => !p);
 					}}
 					style={{ opacity: thumnail ? 1 : 0 }}
 					className='absolute top-0 h-full bg-pink-400 aspect-video cursor-pointer duration-300'
 				>
 					<Image
-						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-						width={1600}
-						height={900}
+						src={thumbnailLink}
+						width={1280}
+						height={720}
 						alt={`${videoId}유튜브영상 썸네일`}
 						className='absolute w-auto h-full aspect-video'
 						priority
@@ -681,6 +697,7 @@ const VideoContainer = ({
 	date,
 	videoId,
 	innerWidth,
+	thumbnailLink,
 }: VideoContainerProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
@@ -744,7 +761,7 @@ const VideoContainer = ({
 			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
 				<div className='absolute w-full h-full flex items-center'>
 					<Image
-						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+						src={thumbnailLink}
 						alt='1'
 						width={1600}
 						height={900}
@@ -757,7 +774,7 @@ const VideoContainer = ({
 					ref={videoScope}
 					className='w-[100vw-48px] m-auto sm:w-[600px] sm:ml-[calc(20vw)]'
 				>
-					<Video videoId={videoId} />
+					<Video videoId={videoId} thumbnailLink={thumbnailLink} />
 				</div>
 				<div
 					ref={textScope}
@@ -798,7 +815,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.22',
-			videoId: 'd4I-0Zv1Lv8',
+			videoId: '852566352',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1707755112-18437e1930810b2d8db1a3018ebed3871d824a547ada768ed8f67d7855ef1cf3-d_1280x720?r=pad',
 		},
 		{
 			index: 2,
@@ -806,7 +825,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Camera',
 			description: '엔터테인먼트와 현실의 연결',
 			date: '2023.2.23',
-			videoId: 'CWBy5PyyMyw',
+			videoId: '844725783',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_1280x720?r=pad',
 		},
 		{
 			index: 3,
@@ -814,7 +835,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Art Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.24',
-			videoId: 'Kzgid8FIjKc',
+			videoId: '844717748',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1696959898-14f7b78bd35137dcd561717429b265947ce7272a735e7b7ed8b4bc56ec229666-d_1280x720?r=pad',
 		},
 		{
 			index: 4,
@@ -822,7 +845,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Lead Developer',
 			description: '영감을 주고 받은 기록',
 			date: '2023.2.25',
-			videoId: 'AuXYLGyEajg',
+			videoId: '852566292',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1707754967-f097f998c5b730464d3e56cfd8c0c7c9fdc9376ca910ed687f63faa3d7c27db2-d_1280x720?r=pad',
 		},
 	];
 	const [range, setRange] = useState(0);
@@ -858,6 +883,7 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 							description={data.description}
 							date={data.date}
 							videoId={data.videoId}
+							thumbnailLink={data.thumbnailLink}
 							innerWidth={innerWidth}
 						/>
 					))}
