@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	);
 	const deniedPathname = ['/work/write', '/work/delete'];
 	console.log(deniedPathname.includes(req.nextUrl.pathname));
-	console.log(prevUrl.href);
+	console.log('refererererererererer', req.headers.get('referer'));
 
 	if (session.admin?.password !== process.env.ADMIN_PASSWORD) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {
