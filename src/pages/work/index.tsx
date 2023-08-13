@@ -719,7 +719,7 @@ const Video = ({
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
 	const [play, setPlay] = useState(false);
-	console.log(navigator.userAgent);
+	const [ready, setReady] = useState(false);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -740,8 +740,6 @@ const Video = ({
 	useEffect(() => {
 		titleScreen ? setPlay(true) : setPlay(false);
 	}, [titleScreen]);
-	console.log(resource);
-
 	return (
 		<>
 			<motion.article
@@ -753,9 +751,11 @@ const Video = ({
 				}}
 				exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onMouseEnter={() => {
+					if (!ready) return;
 					setTitleScreen((p) => (p = true));
 				}}
 				onMouseLeave={() => {
+					if (!ready) return;
 					setTitleScreen((p) => (p = false));
 				}}
 				onClick={() => {
@@ -773,8 +773,8 @@ const Video = ({
 				key={index}
 				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 			>
-				{(category === 'film' || category === 'short') && play === true ? (
-					<div className='absolute w-full aspect-video'>
+				{category === 'film' || category === 'short' ? (
+					<div className='absolute w-full aspect-video bg-black'>
 						<VimeoPlayer
 							url={`${resource}&quality=540p`}
 							controls={false}
@@ -782,10 +782,14 @@ const Video = ({
 							playing={play}
 							width={'100%'}
 							height={'100%'}
+							loop={true}
+							onReady={() => {
+								setReady(true);
+							}}
 						/>
 					</div>
 				) : null}
-				{category === 'outsource' && play === true ? (
+				{category === 'outsource' ? (
 					<div className='absolute w-full aspect-video'>
 						<YouTubePlayer
 							url={`https://www.youtube.com/watch?v=${resource}`}
@@ -796,6 +800,10 @@ const Video = ({
 							height={'100%'}
 							config={{
 								embedOptions: { host: 'https://www.youtube-nocookie.com' },
+							}}
+							loop={true}
+							onReady={() => {
+								setReady(true);
 							}}
 						/>
 					</div>
