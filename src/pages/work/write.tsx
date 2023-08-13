@@ -1,6 +1,6 @@
 import { cls, fetchYouTubeApi } from '@/libs/client/utils';
-import { SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { GapiItem } from '.';
+import { SyntheticEvent, useEffect, useState } from 'react';
+import { GapiItem, VideosCategory } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
@@ -9,9 +9,9 @@ import {
 	VimeoThumbnailFeed,
 	YoutubeThumbnailFeed,
 } from '@/components/thumbnailFeed';
-import Image from 'next/image';
-import VimeoPlayer from 'react-player/vimeo';
-import useInfiniteScrollTest from '@/libs/client/useInfiniteScroll';
+import useInfiniteScroll from '@/libs/client/useInfiniteScroll';
+import Circles from '@/components/circles';
+import { useRouter } from 'next/router';
 
 export interface WorkInfos {
 	title: string;
@@ -35,13 +35,27 @@ interface SearchResult {
 	youtube: GapiItem[];
 }
 
+export interface OwnedVideoItems {
+	title: string;
+	category: VideosCategory;
+	date: string;
+	description: string;
+	resourceId: string;
+}
+
+interface OwnedVideos {
+	filmShort: OwnedVideoItems[];
+	outsource: OwnedVideoItems[];
+}
+
 export type ResourceHost = 'vimeo' | 'youtube';
 
-export type category = 'film&short' | 'outsource';
+export type FlatformsCategory = 'filmShort' | 'outsource';
 
 export default function Write() {
-	const [category, setCategory] = useState<'film&short' | 'outsource'>(
-		'film&short'
+	const router = useRouter();
+	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
+		'filmShort'
 	);
 	const lists = [
 		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
@@ -50,26 +64,31 @@ export default function Write() {
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapshot, setSearchWordSnapshot] = useState<{
 		searchWord: string;
-		category: category;
-	}>({ searchWord: '', category: 'film&short' });
+		category: FlatformsCategory;
+	}>({ searchWord: '', category: 'filmShort' });
 	const [searchResult, setSearchResult] = useState<SearchResult>({
 		vimeo: [],
 		youtube: [],
 	});
 	const [youtubeVideos, setYoutubeVideos] = useState<GapiItem[]>([]);
 	const [vimeoVideos, setVimeoVideos] = useState<VimeoVideos[]>([]);
-	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
+	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
+		'/api/work/write'
+	);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const [isScrollLoading, setIsScrollLoading] = useState(false);
-	const intersectionRef = useInfiniteScrollTest({
+	const [ownedVideos, setOwnedVideos] = useState<OwnedVideos>({
+		filmShort: [],
+		outsource: [],
+	});
+	const intersectionRef = useInfiniteScroll({
 		setVimeoVideos,
 		setYoutubeVideos,
 		setIsScrollLoading,
 		category,
 		isInfiniteScrollEnabled,
 	});
-	console.log(isInfiniteScrollEnabled);
 	useEffect(() => {
 		fetch(
 			`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10`,
@@ -99,10 +118,14 @@ export default function Write() {
 				list.id
 			);
 		});
+		const getVideoListAPI = async () => {
+			const videos = await (await fetch('/api/work/list?from=write')).json();
+			setOwnedVideos(videos.work);
+		};
+		getVideoListAPI();
 	}, []);
-	// console.log(nextpageTokenInit);
 	useEffect(() => {
-		if (category === 'film&short' && youtubeVideos.length > 0) {
+		if (category === 'filmShort' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
 				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
 				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
@@ -140,10 +163,12 @@ export default function Write() {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos(undefined);
 	}, [category]);
+	useEffect(() => {
+		console.log(data?.success);
+		if (data?.success) router.reload();
+	}, [data]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
-		console.log(e.currentTarget);
-
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
@@ -205,7 +230,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: category === 'film&short' ? '' : 'outsource',
+									category: category === 'filmShort' ? '' : 'outsource',
 									date: '',
 									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
@@ -215,7 +240,7 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: category === 'film&short' ? '' : 'outsource',
+									category: category === 'filmShort' ? '' : 'outsource',
 									date: '',
 									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
@@ -227,7 +252,6 @@ export default function Write() {
 	const onSubmitWrites = () => {
 		if (loading) return;
 		sendList(workInfos);
-		console.log('여기 실행중입니다만!');
 	};
 	const onReset = () => {
 		setWorkInfos([]);
@@ -259,7 +283,7 @@ export default function Write() {
 				}));
 			}
 		};
-		if (category === 'film&short') {
+		if (category === 'filmShort') {
 			filterResources('vimeo');
 		} else if (category === 'outsource') {
 			filterResources('youtube');
@@ -269,7 +293,7 @@ export default function Write() {
 	const onUpdatedListClick = () => {
 		setIsInfiniteScrollEnabled(false);
 		if (!workInfos || workInfos?.length < 1) return;
-		if (category === 'film&short') {
+		if (category === 'filmShort') {
 			setSearchResult((p) => ({
 				...p,
 				vimeo: vimeoVideos.filter((info) =>
@@ -288,6 +312,8 @@ export default function Write() {
 		}
 	};
 	console.log(workInfos);
+	console.log(loading);
+
 	return (
 		<Layout
 			seoTitle='Write'
@@ -295,6 +321,18 @@ export default function Write() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
+			{loading ? (
+				<div className='fixed z-[1] w-screen h-screen flex justify-center items-center'>
+					<div className='w-full h-full bg-[#202020] opacity-50' />
+					<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+						<Circles
+							liMotion={{
+								css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+							}}
+						/>
+					</div>
+				</div>
+			) : null}
 			<section className='relative xl:px-40 sm:px-24 px-16'>
 				<div>
 					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
@@ -307,11 +345,11 @@ export default function Write() {
 				<div className='flex py-4'>
 					<button
 						onClick={() => {
-							setCategory('film&short');
+							setCategory('filmShort');
 							setWorkInfos(undefined);
 						}}
 						className={cls(
-							category === 'film&short' ? 'text-palettered' : '',
+							category === 'filmShort' ? 'text-palettered' : '',
 							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
 						)}
 					>
@@ -360,13 +398,14 @@ export default function Write() {
 						}}
 					/>
 				</form>
-				{category === 'film&short' && vimeoVideos.length > 0 ? (
+				{category === 'filmShort' && vimeoVideos.length > 0 ? (
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
 						resource={searchResult.vimeo}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
+						OwnedVideos={ownedVideos.filmShort}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
@@ -376,6 +415,7 @@ export default function Write() {
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
+						OwnedVideos={ownedVideos.outsource}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<button

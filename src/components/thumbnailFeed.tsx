@@ -9,7 +9,7 @@ import {
 	useEffect,
 	useState,
 } from 'react';
-import { WorkInfos, VimeoVideos } from '@/pages/work/write';
+import { WorkInfos, VimeoVideos, OwnedVideoItems } from '@/pages/work/write';
 import Circles from './circles';
 
 interface videoFeedItem {
@@ -17,6 +17,7 @@ interface videoFeedItem {
 	isScrollLoading: boolean;
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
+	OwnedVideos: OwnedVideoItems[];
 }
 
 interface YoutubefeedProps extends videoFeedItem {
@@ -33,18 +34,24 @@ export function VimeoThumbnailFeed({
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
+	OwnedVideos,
 }: VimeofeedProps) {
 	return (
 		<>
-			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12'>
 				{resource.map((video, arr) => (
 					<div
 						key={arr} /* video.resource_key */
-						className={`relative w-auto aspect-video ${
-							workInfos?.filter(
-								(info) => info.resourceId === video.player_embed_url
-							)[0]?.title
+						className={`w-full flex flex-col justify-between ${
+							workInfos?.find(
+								(workInfo) => workInfo.resourceId === video.player_embed_url
+							)?.title
 								? 'ring-2 ring-palettered'
+								: OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === video.player_embed_url
+								  )
+								? 'ring-2 ring-green-500'
 								: ''
 						}`}
 					>
@@ -57,8 +64,10 @@ export function VimeoThumbnailFeed({
 								priority
 							/>
 							<div className='mt-2'>
-								<div className='text-sm'>Title : {video.name}</div>
-								<div className='text-xs font-light'>
+								<div className='text-sm text-[#bababa] '>
+									Title : {video.name}
+								</div>
+								<div className='text-xs font-light text-[#bababa]'>
 									Id : {video.resource_key}
 								</div>
 							</div>
@@ -72,13 +81,14 @@ export function VimeoThumbnailFeed({
 								data-thumbnail={video.pictures.sizes[4].link}
 								onChange={inputChange}
 								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === video.player_embed_url;
-									})?.title
-										? workInfos.find((arr) => {
-												return arr.resourceId === video.player_embed_url;
-										  })?.title
-										: ''
+									workInfos?.find(
+										(workInfo) => workInfo.resourceId === video.player_embed_url
+									)?.title ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === video.player_embed_url
+									)?.title ||
+									''
 								}
 							/>
 							<Input
@@ -90,11 +100,12 @@ export function VimeoThumbnailFeed({
 								value={
 									workInfos?.find((arr) => {
 										return arr.resourceId === video.player_embed_url;
-									})?.description
-										? workInfos.find((arr) => {
-												return arr.resourceId === video.player_embed_url;
-										  })?.description
-										: ''
+									})?.description ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === video.player_embed_url
+									)?.description ||
+									''
 								}
 							/>
 							<Input
@@ -106,11 +117,12 @@ export function VimeoThumbnailFeed({
 								value={
 									workInfos?.find((arr) => {
 										return arr.resourceId === video.player_embed_url;
-									})?.date
-										? workInfos.find((arr) => {
-												return arr.resourceId === video.player_embed_url;
-										  })?.date
-										: ''
+									})?.date ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === video.player_embed_url
+									)?.date ||
+									''
 								}
 							/>
 							<Input
@@ -121,16 +133,25 @@ export function VimeoThumbnailFeed({
 								data-resourceid={video.player_embed_url}
 								onClick={inputChange}
 								checked={
-									workInfos?.filter(
+									workInfos?.find(
 										(info) => info.resourceId === video.player_embed_url
-									)[0]?.category === 'film'
+									)
+										? workInfos?.find(
+												(info) => info.resourceId === video.player_embed_url
+										  )?.category === 'film'
+											? true
+											: false
+										: OwnedVideos.find(
+												(OwnedVideos) =>
+													OwnedVideos.resourceId === video.player_embed_url
+										  )?.category === 'film'
 										? true
 										: false
 								}
 								radioDisabled={
-									workInfos?.filter(
+									workInfos?.find(
 										(info) => info.resourceId === video.player_embed_url
-									)[0]?.title
+									)?.title
 										? false
 										: true
 								}
@@ -143,16 +164,25 @@ export function VimeoThumbnailFeed({
 								data-resourceid={video.player_embed_url}
 								onClick={inputChange}
 								checked={
-									workInfos?.filter(
+									workInfos?.find(
 										(info) => info.resourceId === video.player_embed_url
-									)[0]?.category === 'short'
+									)
+										? workInfos?.find(
+												(info) => info.resourceId === video.player_embed_url
+										  )?.category === 'short'
+											? true
+											: false
+										: OwnedVideos.find(
+												(OwnedVideos) =>
+													OwnedVideos.resourceId === video.player_embed_url
+										  )?.category === 'short'
 										? true
 										: false
 								}
 								radioDisabled={
-									workInfos?.filter(
+									workInfos?.find(
 										(info) => info.resourceId === video.player_embed_url
-									)[0]?.title
+									)?.title
 										? false
 										: true
 								}
@@ -184,6 +214,7 @@ export function YoutubeThumbnailFeed({
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
+	OwnedVideos,
 }: YoutubefeedProps) {
 	return (
 		<>
@@ -213,8 +244,10 @@ export function YoutubeThumbnailFeed({
 								className='w-full object-cover'
 							/>
 							<div className='mt-2'>
-								<div className='text-sm'>Title : {data.snippet.title}</div>
-								<div className='text-xs font-light'>
+								<div className='text-sm text-[#bababa]'>
+									Title : {data.snippet.title}
+								</div>
+								<div className='text-xs font-light text-[#bababa]'>
 									Id : {data.snippet.resourceId?.videoId}
 								</div>
 							</div>
@@ -232,15 +265,15 @@ export function YoutubeThumbnailFeed({
 								data-thumbnail={'no-link'}
 								onChange={inputChange}
 								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === data.snippet.resourceId?.videoId;
-									})?.title
-										? workInfos.find((arr) => {
-												return (
-													arr.resourceId === data.snippet.resourceId?.videoId
-												);
-										  })?.title
-										: ''
+									workInfos?.find(
+										(workInfo) =>
+											workInfo.resourceId === data.snippet.resourceId?.videoId
+									)?.title ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									)?.title ||
+									''
 								}
 							/>
 							<Input
@@ -254,15 +287,15 @@ export function YoutubeThumbnailFeed({
 								}
 								onChange={inputChange}
 								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === data.snippet.resourceId?.videoId;
-									})?.description
-										? workInfos.find((arr) => {
-												return (
-													arr.resourceId === data.snippet.resourceId?.videoId
-												);
-										  })?.description
-										: ''
+									workInfos?.find(
+										(workInfo) =>
+											workInfo.resourceId === data.snippet.resourceId?.videoId
+									)?.description ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									)?.description ||
+									''
 								}
 							/>
 							<Input
@@ -276,15 +309,15 @@ export function YoutubeThumbnailFeed({
 								}
 								onChange={inputChange}
 								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === data.snippet.resourceId?.videoId;
-									})?.date
-										? workInfos.find((arr) => {
-												return (
-													arr.resourceId === data.snippet.resourceId?.videoId
-												);
-										  })?.date
-										: ''
+									workInfos?.find(
+										(workInfo) =>
+											workInfo.resourceId === data.snippet.resourceId?.videoId
+									)?.date ||
+									OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									)?.date ||
+									''
 								}
 							/>
 						</div>

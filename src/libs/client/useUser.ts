@@ -1,4 +1,4 @@
-import { AuthResponse } from '@/pages/admin';
+import { AuthResponse } from '@/pages/enter';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 

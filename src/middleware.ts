@@ -7,6 +7,7 @@ import {
 import { getIronSession } from 'iron-session/edge';
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+	console.log('dddddddddd' + process.env.COOKIE_PASSWORD);
 	const res = NextResponse.next();
 	const { isBot } = userAgent(req);
 	if (isBot) {
@@ -14,8 +15,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	}
 	const session = await getIronSession(req, res, {
 		cookieName: 'insanSession',
-		password:
-			'dsfgsdfjdfljshjdfslkjgsdkljfaisdjaklfdsgsjkfahljkasdafgdshhfgdhsdfkflaj',
+		password: process.env.COOKIE_PASSWORD as string,
 		cookieOptions: {
 			secure: process.env.NODE_ENV === 'production',
 		},
@@ -32,10 +32,10 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 	if (session.admin?.password !== process.env.ADMIN_PASSWORD) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {
-			return NextResponse.redirect(prevUrl.href);
+			return NextResponse.redirect('http://localhost:3000/enter');
 		}
 	} else {
-		if (req.nextUrl.pathname === '/admin') {
+		if (req.nextUrl.pathname === '/enter') {
 			return NextResponse.redirect('http://localhost:3000/work/write');
 		}
 	}
