@@ -22,6 +22,7 @@ import ToTop from '@/components/toTop';
 import VimeoPlayer from 'react-player/vimeo';
 import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
+import { FixedSizeList } from 'react-window';
 
 export type VideosCategory = 'film' | 'short' | 'outsource';
 
@@ -711,6 +712,29 @@ const Video = ({
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
 	const [ready, setReady] = useState(false);
+	const [isIntersecting, setIsIntersecting] = useState(false);
+	const videoRef = useRef<HTMLDivElement>(null);
+	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+		const [entry] = entries;
+		if (entry.isIntersecting) {
+			setIsIntersecting(true);
+		}
+	};
+	useEffect(() => {
+		const observer = new IntersectionObserver(handleIntersection, {
+			root: null,
+			rootMargin: '0px',
+			threshold: 0.5,
+		});
+		if (videoRef.current) {
+			observer.observe(videoRef.current);
+		}
+		return () => {
+			if (videoRef.current) {
+				observer.unobserve(videoRef.current);
+			}
+		};
+	}, []);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -762,19 +786,21 @@ const Video = ({
 				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 			>
 				{category === 'film' || category === 'short' ? (
-					<div className='absolute w-full aspect-video bg-black'>
-						<ReactPlayer
-							url={`${resource}&quality=540p`}
-							controls={false}
-							muted={true}
-							playing={titleScreen}
-							width={'100%'}
-							height={'100%'}
-							loop={true}
-							onReady={() => {
-								setReady(true);
-							}}
-						/>
+					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
+						{isIntersecting ? (
+							<VimeoPlayer
+								url={`${resource}&quality=540p`}
+								controls={false}
+								muted={true}
+								playing={titleScreen}
+								width={'100%'}
+								height={'100%'}
+								loop={true}
+								onReady={() => {
+									setReady(true);
+								}}
+							/>
+						) : null}
 					</div>
 				) : null}
 				{category === 'outsource' ? (
@@ -820,14 +846,6 @@ const Video = ({
 	);
 };
 
-interface videoGenreState {
-	category: VideosCategory;
-	id: string;
-	thumbnails: { url: string; width: number; height: number };
-	title: string;
-	description: string;
-}
-
 export interface GapiItem {
 	id: string;
 	snippet: {
@@ -856,7 +874,6 @@ const VideoSection = ({
 			.then((res) => res.json())
 			.then((data: VideoResponse) => setVideos(data));
 	}, []);
-	console.log(videos);
 	return (
 		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
 			<AnimatePresence>
