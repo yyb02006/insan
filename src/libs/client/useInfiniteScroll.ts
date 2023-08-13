@@ -1,35 +1,27 @@
 // import { Stream } from '@prisma/client';
-import { VimeoVideos } from '@/pages/work/write';
-import {
-	Dispatch,
-	MutableRefObject,
-	SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
-import { fetchYouTubeApi } from './utils';
+import { Category, VimeoVideos } from '@/pages/work/write';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
 
 type SetVimeoFunc = (value: SetStateAction<VimeoVideos[]>) => void;
 
 type SetYoutubeFunc = (value: SetStateAction<GapiItem[]>) => void;
 
-interface test {
+interface UseInfiniteScrollProps {
 	setVimeoVideos: SetVimeoFunc;
 	setYoutubeVideos: SetYoutubeFunc;
 	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
-	category: 'film&short' | 'outsource';
+	category: Category;
 	isInfiniteScrollEnabled: boolean;
 }
 
-export default function useInfiniteScrollTest({
+export default function useInfiniteScroll({
 	setVimeoVideos,
 	setYoutubeVideos,
 	setIsScrollLoading,
 	category,
 	isInfiniteScrollEnabled,
-}: test) {
+}: UseInfiniteScrollProps) {
 	const lists = {
 		outsource: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
 		participate: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
@@ -49,7 +41,7 @@ export default function useInfiniteScrollTest({
 		if (isLoading) return;
 		setIsLoading(true);
 		try {
-			if (category === 'film&short') {
+			if (category === 'filmShort') {
 				if (hasNextPage) {
 					const data = await (
 						await fetch(
@@ -155,7 +147,5 @@ export default function useInfiniteScrollTest({
 		nextpageToken.participate,
 		isInfiniteScrollEnabled,
 	]);
-	console.log(isInfiniteScrollEnabled);
-
 	return intersectionRef;
 }

@@ -44,7 +44,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
 					value={value ? value : ''}
 					{...rest}
@@ -59,7 +59,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
 					value={value ? value : ''}
 					{...rest}
@@ -74,7 +74,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
 					value={value ? value : ''}
 					{...rest}
@@ -94,7 +94,7 @@ export default function Input({
 					<div
 						className={cls(
 							labelCss ? labelCss : '',
-							'peer-checked:text-palettered'
+							'peer-checked:text-palettered text-[#bababa]'
 						)}
 					>
 						{labelName}
@@ -114,7 +114,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
 					)}
 					{...rest}
 				/>

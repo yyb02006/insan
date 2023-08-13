@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
+import { cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -13,21 +13,17 @@ import {
 	Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import {
-	Dispatch,
-	MutableRefObject,
-	SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
 import VimeoPlayer from 'react-player/vimeo';
+import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
+
+export type VideosCategory = 'film' | 'short' | 'outsource';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -40,7 +36,7 @@ interface TitleSvgPresenseProps {
 }
 
 interface TitleSectionProps {
-	setCategory: Dispatch<SetStateAction<'film' | 'short' | 'outsource'>>;
+	setCategory: Dispatch<SetStateAction<VideosCategory>>;
 }
 
 interface TagButtonSectionProps {
@@ -52,7 +48,7 @@ interface SearchSectionProp {
 }
 
 interface VideoSectionProps {
-	category: 'film' | 'short' | 'outsource';
+	category: VideosCategory;
 	keywords: keyWordsState;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
@@ -63,7 +59,7 @@ interface VideoProps {
 	thumbnail: { url: string; width: number; height: number; alt: string };
 	title: string;
 	description: string;
-	category: 'film' | 'short' | 'outsource';
+	category: VideosCategory;
 	resource: string;
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
@@ -75,7 +71,7 @@ interface OnDetail {
 	description: string;
 	date: string;
 	resource: string;
-	category: 'film' | 'short' | 'outsource';
+	category: VideosCategory;
 	imageUrl: string;
 }
 
@@ -168,16 +164,14 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 
 type categories = {
 	title: string;
-	kind: 'film' | 'short' | 'outsource';
+	kind: VideosCategory;
 	count: number;
 	idx: number;
 	explanation: string;
 };
 
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
-	const [categoryState, setCategoryState] = useState<
-		'film' | 'short' | 'outsource'
-	>('film');
+	const [categoryState, setCategoryState] = useState<VideosCategory>('film');
 	const dataLength = useRef(389);
 	const rotate = useRef(0);
 	const categories: categories[] = [
@@ -523,7 +517,7 @@ interface VideoDetailProps {
 	title: string;
 	date: string;
 	resource: string;
-	category: 'film' | 'short' | 'outsource';
+	category: VideosCategory;
 	thumbnail: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
@@ -579,8 +573,6 @@ const VideoDetail = ({
 			);
 		}
 	}, []);
-	console.log(resource);
-
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80' />
@@ -591,7 +583,7 @@ const VideoDetail = ({
 							{category === 'film' || category === 'short' ? (
 								<>
 									<VimeoPlayer
-										url={resource}
+										url={`${resource}`}
 										controls={true}
 										width={'100%'}
 										height={'auto'}
@@ -718,16 +710,17 @@ const Video = ({
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
-	const [play, setPlay] = useState(false);
 	const [ready, setReady] = useState(false);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
+				if (!ready) return;
 				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
 			};
 			enterAnimaition();
 		} else {
 			const exitAnimation = async () => {
+				if (!ready) return;
 				await coverAnimate(
 					cover.current,
 					{ opacity: 1 },
@@ -737,9 +730,6 @@ const Video = ({
 			exitAnimation();
 		}
 	}, [titleScreen, cover, coverAnimate]);
-	useEffect(() => {
-		titleScreen ? setPlay(true) : setPlay(false);
-	}, [titleScreen]);
 	return (
 		<>
 			<motion.article
@@ -751,12 +741,10 @@ const Video = ({
 				}}
 				exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onMouseEnter={() => {
-					if (!ready) return;
-					setTitleScreen((p) => (p = true));
+					setTitleScreen(true);
 				}}
 				onMouseLeave={() => {
-					if (!ready) return;
-					setTitleScreen((p) => (p = false));
+					setTitleScreen(false);
 				}}
 				onClick={() => {
 					setOnDetail((p) => ({
@@ -775,11 +763,11 @@ const Video = ({
 			>
 				{category === 'film' || category === 'short' ? (
 					<div className='absolute w-full aspect-video bg-black'>
-						<VimeoPlayer
+						<ReactPlayer
 							url={`${resource}&quality=540p`}
 							controls={false}
 							muted={true}
-							playing={play}
+							playing={titleScreen}
 							width={'100%'}
 							height={'100%'}
 							loop={true}
@@ -795,7 +783,7 @@ const Video = ({
 							url={`https://www.youtube.com/watch?v=${resource}`}
 							controls={false}
 							muted={true}
-							playing={play}
+							playing={titleScreen}
 							width={'100%'}
 							height={'100%'}
 							config={{
@@ -833,7 +821,7 @@ const Video = ({
 };
 
 interface videoGenreState {
-	category: 'film' | 'short' | 'outsource';
+	category: VideosCategory;
 	id: string;
 	thumbnails: { url: string; width: number; height: number };
 	title: string;
@@ -1089,9 +1077,7 @@ const OutroSection = () => {
 
 export default function Work() {
 	const [onDetail, setOnDetail] = useState<OnDetail>();
-	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
-		'film'
-	);
+	const [category, setCategory] = useState<VideosCategory>('film');
 	const section = useRef<HTMLDivElement>(null);
 	console.log(section);
 	const [keyWords, setKeyWords] = useState<keyWordsState>({

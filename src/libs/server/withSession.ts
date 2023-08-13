@@ -11,10 +11,11 @@ declare module 'iron-session' {
 
 const cookieOptions = {
 	cookieName: 'insanSession',
-	password:
-		'dsfgsdfjdfljshjdfslkjgsdkljfaisdjaklfdsgsjkfahljkasdafgdshhfgdhsdfkflaj',
+	password: process.env.COOKIE_PASSWORD as string,
 };
 
 export function apiSessionWrapper(fn: NextApiHandler) {
+	console.log(process.env.ADMIN_PASSWORD);
+
 	return withIronSessionApiRoute(fn, cookieOptions);
 }

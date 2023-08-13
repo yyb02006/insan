@@ -28,9 +28,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				},
 			});
 		});
-		res.status(200);
+		res.status(200).json({ success: true });
 	} else {
-		res.status(500);
+		res.status(500).json({ success: false });
 	}
 };
 
