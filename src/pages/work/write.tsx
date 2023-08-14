@@ -9,7 +9,7 @@ import {
 	VimeoThumbnailFeed,
 	YoutubeThumbnailFeed,
 } from '@/components/thumbnailFeed';
-import useInfiniteScroll from '@/libs/client/useInfiniteScroll';
+import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import Circles from '@/components/circles';
 import { useRouter } from 'next/router';
 
@@ -82,7 +82,7 @@ export default function Write() {
 		filmShort: [],
 		outsource: [],
 	});
-	const intersectionRef = useInfiniteScroll({
+	const intersectionRef = useInfiniteScrollFromFlatform({
 		setVimeoVideos,
 		setYoutubeVideos,
 		setIsScrollLoading,
