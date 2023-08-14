@@ -73,7 +73,7 @@ interface VideoProps {
 	resource: string;
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
-	setCount?: MutableRefObject<number>;
+	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
 }
 
 interface OnDetail {
@@ -717,7 +717,7 @@ const Video = ({
 	resource,
 	date,
 	setOnDetail,
-	setCount,
+	setAnimationEnd,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
@@ -765,8 +765,13 @@ const Video = ({
 		}
 	}, [titleScreen, cover, coverAnimate]);
 	const onAnimationComplete = () => {
-		if (setCount) setCount.current = setCount.current + 1;
+		if (setAnimationEnd) {
+			console.log('End Last Animation');
+			setAnimationEnd((p) => (p = true));
+		}
 	};
+	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
+
 	return (
 		<>
 			<motion.article
@@ -776,7 +781,7 @@ const Video = ({
 					y: [80, 0],
 					transition: { delay: 0.2 + 0.08 * waiting },
 				}}
-				exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
+				// exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
 					setTitleScreen(true);
@@ -839,7 +844,7 @@ const Video = ({
 									url={`https://www.youtube.com/watch?v=${resource}`}
 									controls={false}
 									muted={true}
-									playing={true}
+									playing={titleScreen}
 									width={'100%'}
 									height={'100%'}
 									config={{
@@ -926,7 +931,7 @@ const VideoSection = ({
 	const [videosInit, setVideosInit] = useState<Videos>();
 	const [page, setPage] = useState(1);
 	const [hasNextPage, setHasNextPage] = useState(false);
-	const renderedVideosCount = useRef(0);
+	const [isAnimationEnd, setIsAnimationEnd] = useState(false);
 	const perPage = 12;
 	useEffect(() => {
 		const getVideosInit = async () => {
@@ -942,7 +947,10 @@ const VideoSection = ({
 		};
 		getVideosInit();
 	}, []);
+	console.log(isAnimationEnd);
 	useEffect(() => {
+		setIsAnimationEnd(false);
+		console.log('restart animation');
 		if (videosInit) {
 			setVideos(videosInit);
 			videosInit[category].length < 12
@@ -952,6 +960,7 @@ const VideoSection = ({
 		setPage(2);
 	}, [category]);
 	const updatePage = () => {
+		if (!isAnimationEnd) return;
 		if (!hasNextPage) return;
 		const getVideos = async () => {
 			setIsLoading(true);
@@ -975,11 +984,13 @@ const VideoSection = ({
 	};
 	const intersectionRef = useInfiniteScrollFromDB<string | number | boolean>({
 		processIntersection: updatePage,
-		dependencyArray: [category, page, hasNextPage],
+		dependencyArray: [category, page, hasNextPage, isAnimationEnd],
 	});
+	console.log(page);
+
 	return (
-		<section className='relative bg-pink-400'>
-			<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 bg-[#101010] grid-cols-1 px-9'>
+		<section className='relative bg-[#101010]'>
+			<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9'>
 				<AnimatePresence>
 					{category === 'film'
 						? videos?.film.map((data, idx) => {
@@ -987,7 +998,7 @@ const VideoSection = ({
 									<div key={data.id}>
 										<Video
 											index={data.id.toString()}
-											waiting={idx - renderedVideosCount.current}
+											waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
 											thumbnail={{
 												url: data.thumbnailLink,
 												alt: data.thumbnailLink,
@@ -1000,7 +1011,11 @@ const VideoSection = ({
 											resource={data.resourceId}
 											date={data.date}
 											setOnDetail={setOnDetail}
-											setCount={renderedVideosCount}
+											setAnimationEnd={
+												idx === videos.film.length - 1
+													? setIsAnimationEnd
+													: undefined
+											}
 										/>
 									</div>
 								);
@@ -1011,7 +1026,7 @@ const VideoSection = ({
 								<div key={data.id}>
 									<Video
 										index={data.id.toString()}
-										waiting={idx}
+										waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
 										thumbnail={{
 											url: data.thumbnailLink,
 											alt: data.thumbnailLink,
@@ -1024,6 +1039,11 @@ const VideoSection = ({
 										resource={data.resourceId}
 										date={data.date}
 										setOnDetail={setOnDetail}
+										setAnimationEnd={
+											idx === videos.film.length - 1
+												? setIsAnimationEnd
+												: undefined
+										}
 									/>
 								</div>
 						  ))
@@ -1033,7 +1053,7 @@ const VideoSection = ({
 								<div key={data.id}>
 									<Video
 										index={data.id.toString()}
-										waiting={idx}
+										waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
 										thumbnail={{
 											url: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
 											alt: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
@@ -1046,6 +1066,11 @@ const VideoSection = ({
 										resource={data.resourceId}
 										date={data.date}
 										setOnDetail={setOnDetail}
+										setAnimationEnd={
+											idx === videos.film.length - 1
+												? setIsAnimationEnd
+												: undefined
+										}
 									/>
 								</div>
 						  ))
@@ -1054,7 +1079,7 @@ const VideoSection = ({
 			</div>
 			<div ref={intersectionRef} className='h-1' />
 			{isLoading ? (
-				<div className='relative w-full h-60 flex justify-center items-center bg-[#101010]'>
+				<div className='relative w-full h-60 flex justify-center items-center'>
 					<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
 						<Circles
 							liMotion={{
