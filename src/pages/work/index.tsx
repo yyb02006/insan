@@ -13,7 +13,14 @@ import {
 	Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+	Dispatch,
+	MutableRefObject,
+	SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
@@ -23,6 +30,8 @@ import VimeoPlayer from 'react-player/vimeo';
 import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
 import { FixedSizeList } from 'react-window';
+import { useInfiniteScrollFromDB } from '@/libs/client/useInfiniteScroll';
+import { VideoResponseItem } from '../api/work/list';
 
 export type VideosCategory = 'film' | 'short' | 'outsource';
 
@@ -64,6 +73,7 @@ interface VideoProps {
 	resource: string;
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
+	setCount?: MutableRefObject<number>;
 }
 
 interface OnDetail {
@@ -707,6 +717,7 @@ const Video = ({
 	resource,
 	date,
 	setOnDetail,
+	setCount,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
@@ -754,6 +765,9 @@ const Video = ({
 			exitAnimation();
 		}
 	}, [titleScreen, cover, coverAnimate]);
+	const onAnimationComplete = () => {
+		if (setCount) setCount.current = setCount.current + 1;
+	};
 	return (
 		<>
 			<motion.article
@@ -764,6 +778,7 @@ const Video = ({
 					transition: { delay: 0.2 + 0.08 * waiting },
 				}}
 				exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
+				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
 					setTitleScreen(true);
 				}}
@@ -860,7 +875,13 @@ export interface GapiItem {
 
 interface VideoResponse {
 	success: boolean;
-	work: { film: Works[]; short: Works[]; outsource: Works[] };
+	works: VideoResponseItem;
+}
+
+interface Videos {
+	film: Works[];
+	short: Works[];
+	outsource: Works[];
 }
 
 const VideoSection = ({
@@ -868,82 +889,153 @@ const VideoSection = ({
 	keywords,
 	setOnDetail,
 }: VideoSectionProps) => {
-	const [videos, setVideos] = useState<VideoResponse>();
+	const [isLoading, setIsLoading] = useState(false);
+	const [videos, setVideos] = useState<Videos>({
+		film: [],
+		short: [],
+		outsource: [],
+	});
+	const [videosInit, setVideosInit] = useState<Videos>();
+	const [page, setPage] = useState(1);
+	const [hasNextPage, setHasNextPage] = useState(false);
+	const renderedVideosCount = useRef(0);
+	const perPage = 12;
 	useEffect(() => {
-		fetch('/api/work/list')
-			.then((res) => res.json())
-			.then((data: VideoResponse) => setVideos(data));
+		const getVideosInit = async () => {
+			setIsLoading(true);
+			const response: VideoResponse = await (
+				await fetch(`/api/work/list?page=${page}&per_page=${perPage}`)
+			).json();
+			setVideos(response.works);
+			setVideosInit(response.works);
+			setHasNextPage(true);
+			setPage(2);
+			setIsLoading(false);
+		};
+		getVideosInit();
 	}, []);
+	useEffect(() => {
+		if (videosInit) {
+			setVideos(videosInit);
+			videosInit[category].length < 12
+				? setHasNextPage(false)
+				: setHasNextPage(true);
+		}
+		setPage(2);
+	}, [category]);
+	const updatePage = () => {
+		if (!hasNextPage) return;
+		const getVideos = async () => {
+			setIsLoading(true);
+			const response: VideoResponse = await (
+				await fetch(
+					`/api/work/list?page=${page}&per_page=${perPage}&category=${category}`
+				)
+			).json();
+			console.log(response.works);
+			if (response.works[category].length < perPage) {
+				setHasNextPage(false);
+			}
+			setVideos((p) => ({
+				...p,
+				[category]: [...p[category], ...response.works[category]],
+			}));
+			setPage((p) => p + 1);
+			setIsLoading(false);
+		};
+		getVideos();
+	};
+	const intersectionRef = useInfiniteScrollFromDB<string | number | boolean>({
+		processIntersection: updatePage,
+		dependencyArray: [category, page, hasNextPage],
+	});
 	return (
-		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
-			<AnimatePresence>
-				{category === 'film'
-					? videos?.work?.film.map((data, idx) => (
-							<div key={data.id}>
-								<Video
-									index={data.id.toString()}
-									waiting={idx}
-									thumbnail={{
-										url: data.thumbnailLink,
-										alt: data.thumbnailLink,
-										width: 960,
-										height: 540,
-									}}
-									title={data.title}
-									description={data.description}
-									category={category}
-									resource={data.resourceId}
-									date={data.date}
-									setOnDetail={setOnDetail}
-								/>
-							</div>
-					  ))
-					: null}
-				{category === 'short'
-					? videos?.work?.short.map((data, idx) => (
-							<div key={data.id}>
-								<Video
-									index={data.id.toString()}
-									waiting={idx}
-									thumbnail={{
-										url: data.thumbnailLink,
-										alt: data.thumbnailLink,
-										width: 960,
-										height: 540,
-									}}
-									title={data.title}
-									description={data.description}
-									category={category}
-									resource={data.resourceId}
-									date={data.date}
-									setOnDetail={setOnDetail}
-								/>
-							</div>
-					  ))
-					: null}
-				{category === 'outsource'
-					? videos?.work?.outsource.map((data, idx) => (
-							<div key={data.id}>
-								<Video
-									index={data.id.toString()}
-									waiting={idx}
-									thumbnail={{
-										url: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
-										alt: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-										width: 1280,
-										height: 720,
-									}}
-									title={data.title}
-									description={data.description}
-									category={category}
-									resource={data.resourceId}
-									date={data.date}
-									setOnDetail={setOnDetail}
-								/>
-							</div>
-					  ))
-					: null}
-			</AnimatePresence>
+		<section className='relative bg-pink-400'>
+			<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 bg-[#101010] grid-cols-1 px-9'>
+				<AnimatePresence>
+					{category === 'film'
+						? videos?.film.map((data, idx) => {
+								return (
+									<div key={data.id}>
+										<Video
+											index={data.id.toString()}
+											waiting={idx - renderedVideosCount.current}
+											thumbnail={{
+												url: data.thumbnailLink,
+												alt: data.thumbnailLink,
+												width: 960,
+												height: 540,
+											}}
+											title={data.title}
+											description={data.description}
+											category={category}
+											resource={data.resourceId}
+											date={data.date}
+											setOnDetail={setOnDetail}
+											setCount={renderedVideosCount}
+										/>
+									</div>
+								);
+						  })
+						: null}
+					{category === 'short'
+						? videos?.short.map((data, idx) => (
+								<div key={data.id}>
+									<Video
+										index={data.id.toString()}
+										waiting={idx}
+										thumbnail={{
+											url: data.thumbnailLink,
+											alt: data.thumbnailLink,
+											width: 960,
+											height: 540,
+										}}
+										title={data.title}
+										description={data.description}
+										category={category}
+										resource={data.resourceId}
+										date={data.date}
+										setOnDetail={setOnDetail}
+									/>
+								</div>
+						  ))
+						: null}
+					{category === 'outsource'
+						? videos?.outsource.map((data, idx) => (
+								<div key={data.id}>
+									<Video
+										index={data.id.toString()}
+										waiting={idx}
+										thumbnail={{
+											url: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+											alt: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
+											width: 1280,
+											height: 720,
+										}}
+										title={data.title}
+										description={data.description}
+										category={category}
+										resource={data.resourceId}
+										date={data.date}
+										setOnDetail={setOnDetail}
+									/>
+								</div>
+						  ))
+						: null}
+				</AnimatePresence>
+			</div>
+			<div ref={intersectionRef} className='h-1' />
+			{isLoading ? (
+				<div className='relative w-full h-60 flex justify-center items-center bg-[#101010]'>
+					<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+						<Circles
+							liMotion={{
+								css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+							}}
+						/>
+					</div>
+				</div>
+			) : null}
 		</section>
 	);
 };

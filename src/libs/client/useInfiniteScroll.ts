@@ -1,5 +1,5 @@
 // import { Stream } from '@prisma/client';
-import { Category, VimeoVideos } from '@/pages/work/write';
+import { FlatformsCategory, VimeoVideos } from '@/pages/work/write';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
 
@@ -7,21 +7,21 @@ type SetVimeoFunc = (value: SetStateAction<VimeoVideos[]>) => void;
 
 type SetYoutubeFunc = (value: SetStateAction<GapiItem[]>) => void;
 
-interface UseInfiniteScrollProps {
+interface UseInfiniteScrollFromFlatFormProps {
 	setVimeoVideos: SetVimeoFunc;
 	setYoutubeVideos: SetYoutubeFunc;
 	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
-	category: Category;
+	category: FlatformsCategory;
 	isInfiniteScrollEnabled: boolean;
 }
 
-export default function useInfiniteScroll({
+export default function useInfiniteScrollFromFlatform({
 	setVimeoVideos,
 	setYoutubeVideos,
 	setIsScrollLoading,
 	category,
 	isInfiniteScrollEnabled,
-}: UseInfiniteScrollProps) {
+}: UseInfiniteScrollFromFlatFormProps) {
 	const lists = {
 		outsource: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
 		participate: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
@@ -147,5 +147,46 @@ export default function useInfiniteScroll({
 		nextpageToken.participate,
 		isInfiniteScrollEnabled,
 	]);
+	return intersectionRef;
+}
+
+interface ObserverHandlerConfig {
+	root?: Element | Document | null | undefined;
+	rootMargin?: string | undefined;
+	threshold?: number | number[] | undefined;
+}
+
+interface UseInfiniteScrollFromDB<T> {
+	processIntersection: () => void;
+	observerHandlerConfig?: ObserverHandlerConfig;
+	dependencyArray?: T[];
+}
+
+export function useInfiniteScrollFromDB<T = unknown>({
+	processIntersection,
+	observerHandlerConfig = { root: null, rootMargin: '0px', threshold: 0.5 },
+	dependencyArray = [],
+}: UseInfiniteScrollFromDB<T>) {
+	const intersectionRef = useRef<HTMLDivElement>(null);
+	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+		const [entry] = entries;
+		if (entry.isIntersecting) {
+			processIntersection();
+		}
+	};
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			handleIntersection,
+			observerHandlerConfig
+		);
+		if (intersectionRef.current) {
+			observer.observe(intersectionRef.current);
+		}
+		return () => {
+			if (intersectionRef.current) {
+				observer.unobserve(intersectionRef.current);
+			}
+		};
+	}, [intersectionRef, ...dependencyArray]);
 	return intersectionRef;
 }
