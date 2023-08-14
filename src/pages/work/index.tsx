@@ -723,6 +723,7 @@ const Video = ({
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
 	const [ready, setReady] = useState(false);
+	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
 	const [isIntersecting, setIsIntersecting] = useState(false);
 	const videoRef = useRef<HTMLDivElement>(null);
 	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
@@ -749,13 +750,11 @@ const Video = ({
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
-				if (!ready) return;
 				await coverAnimate(cover.current, { opacity: 0 }, { duration: 0.4 });
 			};
 			enterAnimaition();
 		} else {
 			const exitAnimation = async () => {
-				if (!ready) return;
 				await coverAnimate(
 					cover.current,
 					{ opacity: 1 },
@@ -781,6 +780,7 @@ const Video = ({
 				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
 					setTitleScreen(true);
+					setIsVideoLoadable(true);
 				}}
 				onMouseLeave={() => {
 					setTitleScreen(false);
@@ -802,39 +802,67 @@ const Video = ({
 			>
 				{category === 'film' || category === 'short' ? (
 					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
-						{isIntersecting ? (
-							<VimeoPlayer
-								url={`${resource}&quality=540p`}
-								controls={false}
-								muted={true}
-								playing={titleScreen}
-								width={'100%'}
-								height={'100%'}
-								loop={true}
-								onReady={() => {
-									setReady(true);
-								}}
-							/>
+						{isIntersecting && isVideoLoadable ? (
+							<>
+								<VimeoPlayer
+									url={`${resource}&quality=540p`}
+									controls={false}
+									muted={true}
+									playing={titleScreen}
+									width={'100%'}
+									height={'100%'}
+									loop={true}
+									onReady={() => {
+										setReady(true);
+									}}
+								/>
+								{!ready ? (
+									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+											<Circles
+												liMotion={{
+													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+												}}
+											/>
+										</div>
+									</div>
+								) : null}
+							</>
 						) : null}
 					</div>
 				) : null}
 				{category === 'outsource' ? (
-					<div className='absolute w-full aspect-video'>
-						<YouTubePlayer
-							url={`https://www.youtube.com/watch?v=${resource}`}
-							controls={false}
-							muted={true}
-							playing={titleScreen}
-							width={'100%'}
-							height={'100%'}
-							config={{
-								embedOptions: { host: 'https://www.youtube-nocookie.com' },
-							}}
-							loop={true}
-							onReady={() => {
-								setReady(true);
-							}}
-						/>
+					<div ref={videoRef} className='absolute w-full aspect-video'>
+						{isIntersecting && isVideoLoadable ? (
+							<>
+								<YouTubePlayer
+									url={`https://www.youtube.com/watch?v=${resource}`}
+									controls={false}
+									muted={true}
+									playing={true}
+									width={'100%'}
+									height={'100%'}
+									config={{
+										embedOptions: { host: 'https://www.youtube-nocookie.com' },
+									}}
+									loop={true}
+									onReady={() => {
+										setReady(true);
+									}}
+								/>
+								{!ready ? (
+									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+											<Circles
+												liMotion={{
+													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+												}}
+											/>
+										</div>
+									</div>
+								) : null}
+							</>
+						) : null}
 					</div>
 				) : null}
 				<div ref={cover} className='absolute w-full h-full '>
