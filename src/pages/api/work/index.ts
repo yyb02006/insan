@@ -1,5 +1,6 @@
 import client from '@/libs/server/client';
 import withHandler from '@/libs/server/withHandler';
+import { apiSessionWrapper } from '@/libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -34,8 +35,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 };
 
-export default withHandler({
-	methods: ['GET', 'POST', 'DELETE'],
-	handlerFunc: handler,
-	inspection: { targetMethods: ['POST', 'DELETE'], onInspection: true },
-});
+export default apiSessionWrapper(
+	withHandler({
+		methods: ['GET', 'POST', 'DELETE'],
+		handlerFunc: handler,
+		inspection: { targetMethods: ['POST', 'DELETE'], onInspection: true },
+	})
+);
