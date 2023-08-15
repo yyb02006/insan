@@ -12,10 +12,6 @@ interface list extends WorkInfos {
 	id: number;
 }
 
-interface listState extends list {
-	selected: boolean;
-}
-
 interface dataState {
 	success: boolean;
 	list: list[];
@@ -223,8 +219,8 @@ export const SearchForm = ({
 };
 
 interface searchResultItems {
-	outsource: listState[];
-	filmShort: listState[];
+	outsource: list[];
+	filmShort: list[];
 }
 
 export default function Delete() {
@@ -246,48 +242,48 @@ export default function Delete() {
 	useEffect(() => {
 		fetchApi(
 			'/api/work',
-			(data: dataState) =>
+			(data: dataState) => {
 				setList((p) => ({
-					filmShort: data.list
-						.filter(
-							(arr) => arr.category === 'film' || arr.category === 'short'
-						)
-						.map((list) => ({ ...list, selected: false })),
-					outsource: data.list
-						.filter((arr) => arr.category === 'outsource')
-						.map((list) => ({ ...list, selected: false })),
-				})),
+					filmShort: data.list.filter(
+						(arr) => arr.category === 'film' || arr.category === 'short'
+					),
+					outsource: data.list.filter((arr) => arr.category === 'outsource'),
+				}));
+				setSearchResult((p) => ({
+					...p,
+					[category]: data.list.filter((arr) => {
+						if (category === 'filmShort') {
+							return arr.category === 'film' || arr.category === 'short';
+						} else {
+							return arr.category === 'outsource';
+						}
+					}),
+				}));
+			},
 			{ method: 'GET' }
 		);
 	}, []);
 	useEffect(() => {
 		setDeleteIdList([]);
+		if (list[category].length > 0) {
+			setSearchResult((p) => ({
+				...p,
+				[category]: list[category],
+			}));
+		}
 	}, [category]);
 	useEffect(() => {
 		if (data?.success) {
 			router.push('/work/write');
 		}
 	}, [router, data]);
-	useEffect(() => {
-		setSearchResult((p) => ({
-			...p,
-			[category]: list[category],
-		}));
-	}, [list, category]);
 	const onSubmitDelete = () => {
 		if (loading) return;
-		send(
-			searchResult[category]
-				.filter((list) => list.selected === true)
-				.map((list) => list.id)
-		);
+		send(deleteIdList);
 	};
 	const onReset = () => {
 		setDeleteIdList([]);
-		setList((p) => ({
-			...p,
-			[category]: p[category].map((arr) => ({ ...arr, selected: false })),
-		}));
+		setSearchResult((p) => ({ ...p, [category]: list[category] }));
 	};
 	const onUpdatedListClick = () => {
 		if (!deleteIdList || deleteIdList?.length < 1) return;
@@ -307,6 +303,11 @@ export default function Delete() {
 					el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
 			),
 		}));
+	};
+	const onClick = (id: number) => {
+		setDeleteIdList((p) =>
+			p.includes(id) ? p.filter((item) => item !== id) : [...p, id]
+		);
 	};
 	console.log(list);
 	console.log(searchResult);
@@ -339,32 +340,12 @@ export default function Delete() {
 							<Works
 								key={li.id}
 								category={category}
-								selected={li.selected}
+								selected={deleteIdList.includes(li.id)}
 								resourceId={li.resourceId}
 								title={li.title}
 								thumbnailLink={li.thumbnailLink}
 								onClick={() => {
-									setDeleteIdList((p) =>
-										p.includes(li.id)
-											? p.filter((item) => item !== li.id)
-											: [...p, li.id]
-									);
-									setList((p) => ({
-										...p,
-										[category]: p[category].map((list) =>
-											list.id === li.id
-												? { ...list, selected: !list.selected }
-												: list
-										),
-									}));
-									setSearchResult((p) => ({
-										...p,
-										[category]: p[category].map((list) =>
-											list.id === li.id
-												? { ...list, selected: !list.selected }
-												: list
-										),
-									}));
+									onClick(li.id);
 								}}
 								searchResult={searchResult}
 							/>
@@ -378,32 +359,12 @@ export default function Delete() {
 							<Works
 								key={li.id}
 								category={category}
-								selected={li.selected}
+								selected={deleteIdList.includes(li.id)}
 								resourceId={li.resourceId}
 								title={li.title}
 								thumbnailLink={li.thumbnailLink}
 								onClick={() => {
-									setDeleteIdList((p) =>
-										p.includes(li.id)
-											? p.filter((item) => item !== li.id)
-											: [...p, li.id]
-									);
-									setList((p) => ({
-										...p,
-										[category]: p[category].map((list) =>
-											list.id === li.id
-												? { ...list, selected: !list.selected }
-												: list
-										),
-									}));
-									setSearchResult((p) => ({
-										...p,
-										[category]: p[category].map((list) =>
-											list.id === li.id
-												? { ...list, selected: !list.selected }
-												: list
-										),
-									}));
+									onClick(li.id);
 								}}
 								searchResult={searchResult}
 							/>
