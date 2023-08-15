@@ -67,8 +67,9 @@ export function VimeoThumbnailFeed({
 								<div className='text-sm text-[#bababa] '>
 									Title : {video.name}
 								</div>
-								<div className='text-xs font-light text-[#bababa]'>
-									Id : {video.resource_key}
+								<div className='text-xs font-light text-[#bababa] break-words'>
+									<span className='whitespace-nowrap'>Id : </span>
+									{video.resource_key}
 								</div>
 							</div>
 						</div>

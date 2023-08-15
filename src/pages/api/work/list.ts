@@ -51,6 +51,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				skip,
 				take,
 			});
+		} else if (category === 'filmShort') {
+			works.film = await client.works.findMany({
+				where: { OR: [{ category: 'film' }, { category: 'short' }] },
+				skip,
+				take,
+			});
 		} else if (category === 'outsource') {
 			works.outsource = await client.works.findMany({
 				where: { category: 'outsource' },
