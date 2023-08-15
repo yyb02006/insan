@@ -4,7 +4,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 /** @type {import('next').NextConfig} */
 module.exports = withBundleAnalyzer({
-	reactStrictMode: false,
+	reactStrictMode: true,
 	env: {
 		YOUTUBE_API_KEY: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
 	},

@@ -30,7 +30,7 @@ import VimeoPlayer from 'react-player/vimeo';
 import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
 import { FixedSizeList } from 'react-window';
-import { useInfiniteScrollFromDB } from '@/libs/client/useInfiniteScroll';
+import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import { VideoResponseItem } from '../api/work/list';
 
 export type VideosCategory = 'film' | 'short' | 'outsource';
@@ -982,7 +982,7 @@ const VideoSection = ({
 		};
 		getVideos();
 	};
-	const intersectionRef = useInfiniteScrollFromDB<string | number | boolean>({
+	const intersectionRef = useInfiniteScroll<string | number | boolean>({
 		processIntersection: updatePage,
 		dependencyArray: [category, page, hasNextPage, isAnimationEnd],
 	});

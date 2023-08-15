@@ -321,18 +321,6 @@ export default function Write() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
-			{loading ? (
-				<div className='fixed z-[1] w-screen h-screen flex justify-center items-center'>
-					<div className='w-full h-full bg-[#202020] opacity-50' />
-					<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
-						<Circles
-							liMotion={{
-								css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
-							}}
-						/>
-					</div>
-				</div>
-			) : null}
 			<section className='relative xl:px-40 sm:px-24 px-16'>
 				<div>
 					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>

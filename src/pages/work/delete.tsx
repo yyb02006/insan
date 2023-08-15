@@ -1,4 +1,4 @@
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { SetStateAction, SyntheticEvent, useEffect, useState } from 'react';
 import { WorkInfos } from './write';
 import { cls, fetchApi } from '@/libs/client/utils';
 import Image from 'next/image';
@@ -43,7 +43,99 @@ const Thumbnail = ({ src }: ThumbnailProps) => {
 	);
 };
 
+interface ControlorProps {
+	onReset: () => void;
+	onSubmitDelete: () => void;
+}
+
+const Controlor = ({ onReset, onSubmitDelete }: ControlorProps) => {
+	return (
+		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
+			<button
+				onClick={onReset}
+				className='w-full ring-1 ring-palettered aspect-square sm:rounded-full bg-[#101010] sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+			>
+				Reset
+			</button>
+			<button
+				onClick={onSubmitDelete}
+				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+			>
+				Delete
+			</button>
+		</div>
+	);
+};
+
+interface WorksProps {
+	setDeleteIdList: (value: SetStateAction<number[]>) => void;
+	setSearchResult: (
+		value: SetStateAction<{
+			outsource: listState[];
+			film: listState[];
+		}>
+	) => void;
+	searchResult: {
+		outsource: listState[];
+		film: listState[];
+	};
+	category: 'outsource' | 'film';
+	id: number;
+	selected: boolean;
+	resourceId: string;
+	title: string;
+	thumbnailLink: string;
+}
+
+const Works = ({
+	category,
+	id,
+	selected,
+	resourceId,
+	title,
+	setDeleteIdList,
+	setSearchResult,
+	searchResult,
+	thumbnailLink,
+}: WorksProps) => {
+	return (
+		<div
+			className={cls(selected ? 'ring-2' : 'ring-0', 'ring-palettered')}
+			onClick={() => {
+				setDeleteIdList((p) => [...p, id]);
+				setSearchResult((p) => ({
+					...p,
+					[category]: p[category].map((list) =>
+						list.id === id ? { ...list, selected: !list.selected } : list
+					),
+				}));
+			}}
+		>
+			<Thumbnail
+				src={
+					searchResult[category].length !== 0
+						? category === 'outsource'
+							? {
+									main: `https://i.ytimg.com/vi/${resourceId}/maxresdefault.jpg`,
+									sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+							  }
+							: {
+									main: thumbnailLink,
+									sub: thumbnailLink,
+							  }
+						: { main: '', sub: '' }
+				}
+			/>
+			<div className='mt-2'>
+				<div className='text-sm'>Title : {title}</div>
+				<div className='text-xs font-light'>Id : {resourceId}</div>
+			</div>
+		</div>
+	);
+};
+
 export default function Delete() {
+	const router = useRouter();
 	const [category, setCategory] = useState<'film&short' | 'outsource'>(
 		'film&short'
 	);
@@ -59,7 +151,8 @@ export default function Delete() {
 	const [send, { loading, data }] = useMutation<{ success: boolean }>(
 		'/api/work'
 	);
-	const router = useRouter();
+	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
+	const props = category === 'outsource' ? 'outsource' : 'film';
 	useEffect(() => {
 		fetchApi(
 			'/api/work',
@@ -77,6 +170,20 @@ export default function Delete() {
 			{ method: 'GET' }
 		);
 	}, []);
+	useEffect(() => {
+		setDeleteIdList([]);
+	}, [category]);
+	useEffect(() => {
+		if (data?.success) {
+			router.push('/work/write');
+		}
+	}, [router, data]);
+	useEffect(() => {
+		setSearchResult((p) => ({
+			...p,
+			[props]: list[props],
+		}));
+	}, [list, category]);
 	const onSubmitDelete = () => {
 		if (loading) return;
 		if (category === 'film&short') {
@@ -93,24 +200,11 @@ export default function Delete() {
 			);
 		}
 	};
-	useEffect(() => {
-		if (data?.success) {
-			router.push('/work/write');
-		}
-	}, [router, data]);
-	useEffect(() => {
-		setSearchResult((p) => ({
-			...p,
-			[category === 'outsource' ? 'outsource' : 'film']:
-				list[category === 'outsource' ? 'outsource' : 'film'],
-		}));
-	}, [list, category]);
 	const onReset = () => {
+		setDeleteIdList([]);
 		setList((p) => ({
 			...p,
-			[category === 'outsource' ? 'outsource' : 'film']: p.outsource.map(
-				(arr) => ({ ...arr, selected: false })
-			),
+			[props]: p[props].map((arr) => ({ ...arr, selected: false })),
 		}));
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
@@ -118,7 +212,7 @@ export default function Delete() {
 		if (!searchWord) return;
 		setSearchResult((p) => ({
 			...p,
-			[category === 'outsource' ? 'outsource' : 'film']: list?.outsource.filter(
+			[props]: list?.outsource.filter(
 				(el) =>
 					el.title.includes(searchWord) ||
 					el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
@@ -196,117 +290,42 @@ export default function Delete() {
 					/>
 				</form>
 				{category === 'film&short' ? (
-					<>
-						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{searchResult.film.map((li) => (
-								<div
-									key={li.id}
-									className={cls(
-										li.selected ? 'ring-2' : 'ring-0',
-										'ring-palettered'
-									)}
-									onClick={() => {
-										setSearchResult((p) => ({
-											...p,
-											film: p?.film.map((list) =>
-												list.id === li.id
-													? { ...list, selected: !list.selected }
-													: list
-											),
-										}));
-									}}
-								>
-									<Image
-										src={li.thumbnailLink}
-										alt='picturesAlter'
-										width={960}
-										height={540}
-										priority
-									/>
-									<div className='mt-2'>
-										<div className='text-sm'>Title : {li.title}</div>
-										<div className='text-xs font-light'>
-											Id : {li.resourceId}
-										</div>
-									</div>
-								</div>
-							))}
-							<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
-								<button
-									onClick={onReset}
-									className='w-full ring-1 ring-palettered aspect-square sm:rounded-full bg-[#101010] sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Reset
-								</button>
-								<button
-									onClick={onSubmitDelete}
-									className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Delete
-								</button>
-							</div>
-						</div>
-					</>
-				) : (
-					''
-				)}
+					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+						{searchResult.film.map((li) => (
+							<Works
+								key={li.id}
+								category={props}
+								id={li.id}
+								selected={li.selected}
+								resourceId={li.resourceId}
+								title={li.title}
+								thumbnailLink={li.thumbnailLink}
+								setDeleteIdList={setDeleteIdList}
+								setSearchResult={setSearchResult}
+								searchResult={searchResult}
+							/>
+						))}
+						<Controlor onReset={onReset} onSubmitDelete={onSubmitDelete} />
+					</div>
+				) : null}
 				{category === 'outsource' ? (
-					<>
-						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{searchResult?.outsource.map((li) => (
-								<div
-									key={li.id}
-									className={cls(
-										li.selected ? 'ring-2' : 'ring-0',
-										'ring-palettered'
-									)}
-									onClick={() => {
-										setSearchResult((p) => ({
-											...p,
-											outsource: p?.outsource.map((list) =>
-												list.id === li.id
-													? { ...list, selected: !list.selected }
-													: list
-											),
-										}));
-									}}
-								>
-									<Thumbnail
-										src={
-											searchResult.outsource.length !== 0
-												? {
-														main: `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg`,
-														sub: `https://i.ytimg.com/vi/${li.resourceId}/hqdefault.jpg`,
-												  }
-												: { main: '', sub: '' }
-										}
-									/>
-									{/* `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
-												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg` */}
-									<div className='mt-2'>
-										<div className='text-sm'>Title : {li.title}</div>
-										<div className='text-xs font-light'>
-											Id : {li.resourceId}
-										</div>
-									</div>
-								</div>
-							))}
-							<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
-								<button
-									onClick={onReset}
-									className='w-full ring-1 ring-palettered aspect-square sm:rounded-full bg-[#101010] sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Reset
-								</button>
-								<button
-									onClick={onSubmitDelete}
-									className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Delete
-								</button>
-							</div>
-						</div>
-					</>
+					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+						{searchResult.outsource.map((li) => (
+							<Works
+								key={li.id}
+								category={props}
+								id={li.id}
+								selected={li.selected}
+								resourceId={li.resourceId}
+								title={li.title}
+								thumbnailLink={li.thumbnailLink}
+								setDeleteIdList={setDeleteIdList}
+								setSearchResult={setSearchResult}
+								searchResult={searchResult}
+							/>
+						))}
+						<Controlor onReset={onReset} onSubmitDelete={onSubmitDelete} />
+					</div>
 				) : (
 					''
 				)}
