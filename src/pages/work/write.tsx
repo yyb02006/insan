@@ -12,6 +12,7 @@ import {
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import Circles from '@/components/circles';
 import { useRouter } from 'next/router';
+import { CategoryTab, MenuBar, SearchForm } from './delete';
 
 export interface WorkInfos {
 	title: string;
@@ -259,7 +260,10 @@ export default function Write() {
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setSearchWordSnapshot({ searchWord, category });
-		if (!searchWord) return;
+		//임시방편 setResult의 infiniteScroll 생각해야함
+		if (!searchWord) {
+			return router.reload();
+		}
 		const filterResources = (kind: ResourceHost) => {
 			if (kind === 'vimeo') {
 				setSearchResult((p) => ({
@@ -322,70 +326,23 @@ export default function Write() {
 			menu={false}
 		>
 			<section className='relative xl:px-40 sm:px-24 px-16'>
-				<div>
-					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
-						추가하기
-					</div>
-					<div className='absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
-						<Link href={'/work/delete'}>삭제하기</Link>
-					</div>
-				</div>
-				<div className='flex py-4'>
-					<button
-						onClick={() => {
-							setCategory('filmShort');
-							setWorkInfos(undefined);
-						}}
-						className={cls(
-							category === 'filmShort' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Film / Short
-					</button>
-					<button
-						onClick={() => {
-							setCategory('outsource');
-							setWorkInfos(undefined);
-						}}
-						className={cls(
-							category === 'outsource' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Outsource
-					</button>
-				</div>
-				<form
-					onSubmit={onSearch}
-					className='relative mb-8 mt-4 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
-				>
-					<button type='submit'>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							fill='none'
-							viewBox='0 0 24 24'
-							strokeWidth={2}
-							stroke='currentColor'
-							className='w-6 h-6'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
-							/>
-						</svg>
-					</button>
-					<Input
-						name='search'
-						type='text'
-						placeholder='search'
-						css='border-none placeholder:font-bold bg-transparent'
-						onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-							setSearchWord(e.currentTarget.value);
-						}}
-					/>
-				</form>
+				<MenuBar currentPage='write' />
+				<CategoryTab
+					category={category}
+					onFilmShortClick={() => {
+						setCategory('filmShort');
+						setWorkInfos(undefined);
+					}}
+					onOutsourceClick={() => {
+						setCategory('outsource');
+						setWorkInfos(undefined);
+					}}
+				/>
+				<SearchForm
+					onSearch={onSearch}
+					searchWord={searchWord}
+					setSearchWord={setSearchWord}
+				/>
 				{category === 'filmShort' && vimeoVideos.length > 0 ? (
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
