@@ -169,7 +169,7 @@ export function useInfiniteScroll<T = unknown>({
 }: UseInfiniteScroll<T>) {
 	const intersectionRef = useRef<HTMLDivElement>(null);
 	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-		const [entry] = entries;
+		const entry = entries[0];
 		if (entry.isIntersecting) {
 			processIntersection();
 		}
@@ -187,6 +187,6 @@ export function useInfiniteScroll<T = unknown>({
 				observer.unobserve(intersectionRef.current);
 			}
 		};
-	}, [intersectionRef, ...dependencyArray]);
+	}, [intersectionRef.current, ...dependencyArray]);
 	return intersectionRef;
 }

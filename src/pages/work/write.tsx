@@ -12,7 +12,13 @@ import {
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import Circles from '@/components/circles';
 import { useRouter } from 'next/router';
-import { CategoryTab, MenuBar, SearchForm } from './delete';
+import {
+	ButtonsController,
+	CategoryTab,
+	MenuBar,
+	SearchForm,
+	SelectedListButton,
+} from './delete';
 
 export interface WorkInfos {
 	title: string;
@@ -363,34 +369,17 @@ export default function Write() {
 						OwnedVideos={ownedVideos.outsource}
 					></YoutubeThumbnailFeed>
 				) : null}
-				<button
+				<SelectedListButton
 					onClick={onUpdatedListClick}
-					className='fixed sm:hidden bottom-24 right-4 w-16 rounded-full bg-[#101010] ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-				>
-					<div>{workInfos ? workInfos.length : '0'}</div>
-					<div>Lists</div>
-				</button>
-				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
-					<button
-						onClick={onReset}
-						className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-					>
-						Reset
-					</button>
-					<button
-						onClick={onSubmitWrites}
-						className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-					>
-						Save
-					</button>
-					<button
-						onClick={onUpdatedListClick}
-						className='hidden sm:inline-block w-full ring-1 ring-palettered aspect-square sm:rounded-full sm:font-light font bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-					>
-						<div>{workInfos ? workInfos.length : '0'}</div>
-						<div>Lists</div>
-					</button>
-				</div>
+					count={workInfos ? workInfos?.length : 0}
+					isMobile={true}
+				/>
+				<ButtonsController
+					onReset={onReset}
+					onSave={onSubmitWrites}
+					onSort={onUpdatedListClick}
+					count={workInfos ? workInfos?.length : 0}
+				/>
 			</section>
 		</Layout>
 	);
