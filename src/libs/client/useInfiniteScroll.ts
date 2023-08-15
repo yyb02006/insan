@@ -156,17 +156,17 @@ interface ObserverHandlerConfig {
 	threshold?: number | number[] | undefined;
 }
 
-interface UseInfiniteScrollFromDB<T> {
+interface UseInfiniteScroll<T> {
 	processIntersection: () => void;
 	observerHandlerConfig?: ObserverHandlerConfig;
 	dependencyArray?: T[];
 }
 
-export function useInfiniteScrollFromDB<T = unknown>({
+export function useInfiniteScroll<T = unknown>({
 	processIntersection,
 	observerHandlerConfig = { root: null, rootMargin: '0px', threshold: 0.5 },
 	dependencyArray = [],
-}: UseInfiniteScrollFromDB<T>) {
+}: UseInfiniteScroll<T>) {
 	const intersectionRef = useRef<HTMLDivElement>(null);
 	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
 		const [entry] = entries;
