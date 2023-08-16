@@ -8,6 +8,7 @@ import Layout from '@/components/layout';
 import Link from 'next/link';
 import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
+import useDeleteRequest from '@/libs/client/useDelete';
 
 interface list extends WorkInfos {
 	id: number;
@@ -287,8 +288,11 @@ export default function Delete() {
 	const [list, setList] = useState<ListItems>({
 		outsource: [],
 		filmShort: [],
-	});
+	}); /* 
 	const [send, { loading, data }] = useMutation<{ success: boolean }>(
+		'/api/work'
+	); */
+	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
 		'/api/work'
 	);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);

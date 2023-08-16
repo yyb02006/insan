@@ -18,20 +18,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		});
 		return res.json({ success: true, list });
 	}
-	if (req.method === 'POST') {
-		const { body } = req;
-		console.log('this is body' + body);
-		await Promise.all(
-			body.map(async (el: number) => {
-				await client.works.delete({ where: { id: el } });
-			})
-		);
-		return res.json({ success: true });
-	}
 	if (req.method === 'DELETE') {
 		const ids = req.headers['ids-to-delete'];
-		console.log(ids);
-		return res.status(200).end();
+
+		if (!ids || Array.isArray(ids))
+			return res.status(500).json({ success: false });
+		const parsedIds = JSON.parse(ids);
+
+		/* iterable한 변수인지 구분법
+		typeof ids[Symbol.iterator] === 'function' */
+
+		await Promise.all(
+			parsedIds.map(async (el: string) => {
+				await client.works.delete({ where: { id: +el } });
+			})
+		);
+		return res.status(200).json({ success: true });
 	}
 };
 

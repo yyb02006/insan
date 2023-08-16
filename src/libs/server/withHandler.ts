@@ -15,14 +15,18 @@ export default function withHandler({
 }: config) {
 	return async function (req: NextApiRequest, res: NextApiResponse) {
 		if (req.method && !methods.includes(req.method as Method)) {
-			return res.status(405).end();
+			return res
+				.status(405)
+				.json({ success: false, message: 'Authentication failed' });
 		}
 		if (
 			inspection?.onInspection &&
 			inspection.targetMethods.includes(req.method as Method) &&
 			req.session.admin?.password !== process.env.ADMIN_PASSWORD
 		) {
-			return res.status(401).end();
+			return res
+				.status(401)
+				.json({ success: false, message: 'Authentication failed' });
 		}
 		try {
 			await handlerFunc(req, res);
