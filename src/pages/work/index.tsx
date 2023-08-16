@@ -726,6 +726,8 @@ const Video = ({
 	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
 	const [isIntersecting, setIsIntersecting] = useState(false);
 	const videoRef = useRef<HTMLDivElement>(null);
+	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+	const [isHovering, setIsHovering] = useState(false);
 	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
 		const [entry] = entries;
 		if (entry.isIntersecting) {
@@ -771,7 +773,22 @@ const Video = ({
 		}
 	};
 	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
-
+	const handleMouseEnter = () => {
+		setTitleScreen(true);
+		setIsVideoLoadable(true);
+		setTimer(
+			setTimeout(() => {
+				setIsHovering(true);
+			}, 1000)
+		);
+	};
+	const handleMouseLeave = () => {
+		setTitleScreen(false);
+		if (timer) {
+			clearTimeout(timer);
+			setTimer(null);
+		}
+	};
 	return (
 		<>
 			<motion.article
@@ -784,11 +801,10 @@ const Video = ({
 				// exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
-					setTitleScreen(true);
-					setIsVideoLoadable(true);
+					handleMouseEnter();
 				}}
 				onMouseLeave={() => {
-					setTitleScreen(false);
+					handleMouseLeave();
 				}}
 				onClick={() => {
 					setOnDetail((p) => ({
@@ -809,18 +825,20 @@ const Video = ({
 					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
 						{isIntersecting && isVideoLoadable ? (
 							<>
-								<VimeoPlayer
-									url={`${resource}&quality=540p`}
-									controls={false}
-									muted={true}
-									playing={titleScreen}
-									width={'100%'}
-									height={'100%'}
-									loop={true}
-									onReady={() => {
-										setReady(true);
-									}}
-								/>
+								{isHovering ? (
+									<VimeoPlayer
+										url={`${resource}&quality=540p`}
+										controls={false}
+										muted={true}
+										playing={titleScreen}
+										width={'100%'}
+										height={'100%'}
+										loop={true}
+										onReady={() => {
+											setReady(true);
+										}}
+									/>
+								) : null}
 								{!ready ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
