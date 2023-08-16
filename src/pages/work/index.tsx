@@ -1,6 +1,11 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { ciIncludes, cls, fetchYouTubeApi } from '@/libs/client/utils';
+import {
+	ciIncludes,
+	cls,
+	fetchApi,
+	fetchYouTubeApi,
+} from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -181,36 +186,66 @@ type categories = {
 
 const TitleSection = ({ setCategory }: TitleSectionProps) => {
 	const [categoryState, setCategoryState] = useState<VideosCategory>('film');
-	const dataLength = useRef(389);
-	const rotate = useRef(0);
-	const categories: categories[] = [
+	const [categoriesInfo, setCategoriesInfo] = useState<categories[]>([
 		{
 			title: 'Film & AD',
 			kind: 'film',
-			count: 225,
+			count: 0,
 			idx: 1,
 			explanation: '16 : 9',
 		},
 		{
 			title: 'Short-form',
 			kind: 'short',
-			count: 22,
+			count: 0,
 			idx: 2,
 			explanation: '9 : 16',
 		},
 		{
 			title: 'Outsource',
 			kind: 'outsource',
-			count: 13,
+			count: 0,
 			idx: 3,
 			explanation: 'partial',
 		},
-	];
+	]);
+	const [totalWorks, setTotalWorks] = useState(0);
+	const dataLength = useRef(389);
+	const rotate = useRef(0);
 	const count = useMotionValue(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const rounded = useTransform(count, Math.round);
 	useEffect(() => {
-		const animation = animate(count, dataLength.current, {
+		const getWorksLength = async () => {
+			const worksLength: {
+				success: boolean;
+				works: { film: number; short: number; outsource: number };
+			} = await (await fetch(`/api/work?purpose=length`)).json();
+			setCategoriesInfo((p) =>
+				p.map((info) => {
+					if (info.kind === 'film') {
+						return { ...info, count: worksLength.works.film };
+					} else if (info.kind === 'short') {
+						return { ...info, count: worksLength.works.short };
+					} else if (info.kind === 'outsource') {
+						return { ...info, count: worksLength.works.outsource };
+					} else {
+						return { ...info };
+					}
+				})
+			);
+			setTotalWorks(
+				worksLength.works.film +
+					worksLength.works.short +
+					worksLength.works.outsource
+			);
+		};
+		getWorksLength();
+	}, []);
+	console.log(categoriesInfo);
+
+	useEffect(() => {
+		const animation = animate(count, totalWorks, {
 			duration: 1,
 			ease: [0.8, 0, 0.2, 1],
 			onUpdate(value) {
@@ -220,7 +255,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			},
 		});
 		return animation.stop;
-	}, [rounded, count]);
+	}, [rounded, count, totalWorks]);
 	useEffect(() => {
 		setCategory(categoryState);
 		switch (categoryState) {
@@ -252,7 +287,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
 					<span className='font-light'>
 						<span ref={ref} className='absolute'></span>
-						<span className='invisible'>{dataLength.current}&nbsp;</span>
+						<span className='invisible'>{totalWorks}&nbsp;</span>
 					</span>
 					<motion.span
 						initial={'initial'}
@@ -276,15 +311,15 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 					animate={'visible'}
 					variants={categoryContainer}
 				>
-					{categories.map((category) => (
+					{categoriesInfo.map((info) => (
 						<motion.div
-							key={category.idx}
+							key={info.idx}
 							variants={categoryChild}
 							onClick={() => {
-								setCategoryState(category.kind);
+								setCategoryState(info.kind);
 							}}
 							className={cls(
-								categoryState === category.kind
+								categoryState === info.kind
 									? 'text-palettered'
 									: 'text-[#bababa]',
 								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
@@ -294,12 +329,12 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 								<div className='absolute bg-[#151515] w-full h-[40%]' />
 							) : null} */}
 							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
-								<div className='inline-block pr-3'>{category.count} </div>
-								{category.title}
+								<div className='inline-block pr-3'>{info.count} </div>
+								{info.title}
 							</div>
 							<AnimatePresence>
-								{categoryState === category.kind ? (
-									<TitleSvgPresense explanation={category.explanation} />
+								{categoryState === info.kind ? (
+									<TitleSvgPresense explanation={info.explanation} />
 								) : null}
 							</AnimatePresence>
 						</motion.div>
