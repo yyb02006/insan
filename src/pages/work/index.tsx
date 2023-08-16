@@ -1150,7 +1150,7 @@ const VideoSection = ({ category, setOnDetail }: VideoSectionProps) => {
 						)}
 					</AnimatePresence>
 				</div>
-				<div ref={intersectionRef} className='h-1 bg-pink-500' />
+				<div ref={intersectionRef} className='h-1' />
 				{fetchLoading ? (
 					<div className='relative w-full h-60 flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>

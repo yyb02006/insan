@@ -14,7 +14,7 @@ export default function ToTop({ toScroll }: ToTopProps) {
 	return (
 		<button
 			onClick={onMoveClick}
-			className='fixed rounded-full bg-green-500 right-6 bottom-6 w-12 aspect-square flex justify-center items-center'
+			className='fixed rounded-full bg-green-500 xl:right-[88px] sm:right-6 right-auto sm:left-auto left-6 sm:bottom-6 bottom-[104px] w-12 aspect-square flex justify-center items-center'
 		>
 			<svg
 				xmlns='http://www.w3.org/2000/svg'

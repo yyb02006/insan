@@ -1,4 +1,10 @@
-import { SetStateAction, SyntheticEvent, useEffect, useState } from 'react';
+import {
+	SetStateAction,
+	SyntheticEvent,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
 import { ciIncludes, cls, fetchApi } from '@/libs/client/utils';
 import Image from 'next/image';
@@ -9,6 +15,7 @@ import Link from 'next/link';
 import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import useDeleteRequest from '@/libs/client/useDelete';
+import ToTop from '@/components/toTop';
 
 interface list extends WorkInfos {
 	id: number;
@@ -274,6 +281,7 @@ interface getListsInitProps {
 
 export default function Delete() {
 	const router = useRouter();
+	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
@@ -477,7 +485,7 @@ export default function Delete() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
-			<section className='relative xl:px-40 sm:px-24 px-16'>
+			<section ref={topElement} className='relative xl:px-40 sm:px-24 px-16'>
 				<MenuBar currentPage='delete' />
 				<CategoryTab
 					category={category}
@@ -511,26 +519,6 @@ export default function Delete() {
 						) : null
 					)}
 				</div>
-				{/* {category === 'outsource' ? (
-					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-						{searchResult.map((li, index) =>
-							index < 12 * (page - 1) ? (
-								<Works
-									key={li.id}
-									category={category}
-									selected={deleteIdList.includes(li.id)}
-									resourceId={li.resourceId}
-									title={li.title}
-									thumbnailLink={li.thumbnailLink}
-									onClick={() => {
-										onClick(li.id);
-									}}
-									searchResult={searchResult}
-								/>
-							) : null
-						)}
-					</div>
-				) : null} */}
 				<div
 					ref={intersectionRef}
 					className='w-full h-1 my-40 bg-pink-600'
@@ -546,6 +534,7 @@ export default function Delete() {
 					onSort={onSelectedListClick}
 					count={deleteIdList.length}
 				/>
+				<ToTop toScroll={topElement} />
 			</section>
 		</Layout>
 	);

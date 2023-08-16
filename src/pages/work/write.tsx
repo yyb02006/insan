@@ -1,5 +1,5 @@
 import { cls, fetchYouTubeApi } from '@/libs/client/utils';
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
@@ -19,6 +19,7 @@ import {
 	SearchForm,
 	SelectedListButton,
 } from './delete';
+import ToTop from '@/components/toTop';
 
 export interface WorkInfos {
 	title: string;
@@ -61,6 +62,7 @@ export type FlatformsCategory = 'filmShort' | 'outsource';
 
 export default function Write() {
 	const router = useRouter();
+	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
 		'filmShort'
 	);
@@ -331,7 +333,7 @@ export default function Write() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
-			<section className='relative xl:px-40 sm:px-24 px-16'>
+			<section ref={topElement} className='relative xl:px-40 sm:px-24 px-16'>
 				<MenuBar currentPage='write' />
 				<CategoryTab
 					category={category}
@@ -381,6 +383,7 @@ export default function Write() {
 					count={workInfos ? workInfos?.length : 0}
 				/>
 			</section>
+			<ToTop toScroll={topElement} />
 		</Layout>
 	);
 }
