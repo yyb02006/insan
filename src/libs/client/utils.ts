@@ -43,6 +43,13 @@ export function fetchYouTubeApi<T>(
 	);
 }
 
+/**
+ * mainString의 문자열이 searchString을 포함하고 있는지 대, 소문자 구분없이 판단하는 함수
+ */
+export function ciIncludes(mainString: string, searchString: string) {
+	return mainString.toUpperCase().includes(searchString.toUpperCase());
+}
+
 /* const useYouTubeApi = <T>(
 	method: string,
 	maxResult: string,

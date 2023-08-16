@@ -1,6 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls, fetchYouTubeApi } from '@/libs/client/utils';
+import { ciIncludes, cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -17,6 +17,7 @@ import {
 	Dispatch,
 	MutableRefObject,
 	SetStateAction,
+	SyntheticEvent,
 	useEffect,
 	useRef,
 	useState,
@@ -54,12 +55,14 @@ interface TagButtonSectionProps {
 }
 
 interface SearchSectionProp {
-	setKeyWords: Dispatch<SetStateAction<keyWordsState>>;
+	setSearchWords: Dispatch<SetStateAction<string>>;
+	setTags: Dispatch<SetStateAction<string[]>>;
+	onSearch: () => void;
+	searchWords: string;
 }
 
 interface VideoSectionProps {
 	category: VideosCategory;
-	keywords: keyWordsState;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 }
 
@@ -84,11 +87,6 @@ interface OnDetail {
 	resource: string;
 	category: VideosCategory;
 	imageUrl: string;
-}
-
-interface keyWordsState {
-	searchWord: string;
-	selectedTags: string[];
 }
 
 const titleContainer: Variants = {
@@ -420,23 +418,23 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	);
 };
 
-const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
-	const [selectedTags, setSelectedTags] = useState(['']);
-	const [searchWord, setSearchWord] = useState('');
-	const onChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-		setSearchWord(e.currentTarget.value);
+const SearchSection = ({
+	setSearchWords,
+	setTags,
+	onSearch,
+	searchWords,
+}: SearchSectionProp) => {
+	const onChange = (e: SyntheticEvent<HTMLInputElement>) => {
+		setSearchWords(e.currentTarget.value);
 	};
-	const onsubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+	const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setKeyWords((p) => ({ ...p, searchWord }));
+		onSearch();
 	};
-	useEffect(() => {
-		setKeyWords((p) => ({ ...p, selectedTags }));
-	}, [selectedTags]);
 	return (
 		<section>
 			<form
-				onSubmit={onsubmit}
+				onSubmit={onSubmit}
 				className='relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
 			>
 				<button>
@@ -461,9 +459,10 @@ const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
 					placeholder='search'
 					css='border-none placeholder:font-bold bg-transparent'
 					onChange={onChange}
+					value={searchWords}
 				/>
 			</form>
-			<TagButtonSection setSelectedTags={setSelectedTags} />
+			<TagButtonSection setSelectedTags={setTags} />
 		</section>
 	);
 };
@@ -769,7 +768,7 @@ const Video = ({
 	const onAnimationComplete = () => {
 		if (setAnimationEnd) {
 			console.log('End Last Animation');
-			setAnimationEnd((p) => (p = true));
+			setAnimationEnd(true);
 		}
 	};
 	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
@@ -929,125 +928,169 @@ interface VideoResponse {
 	works: VideoResponseItem;
 }
 
-interface Videos {
-	film: Works[];
-	short: Works[];
-	outsource: Works[];
+interface Videos<T> {
+	film: T;
+	short: T;
+	outsource: T;
 }
 
-const VideoSection = ({
-	category,
-	keywords,
-	setOnDetail,
-}: VideoSectionProps) => {
-	const [isLoading, setIsLoading] = useState(false);
-	const [videos, setVideos] = useState<Videos>({
+const VideoSection = ({ category, setOnDetail }: VideoSectionProps) => {
+	const [fetchLoading, setFetchLoading] = useState(false);
+	const [videos, setVideos] = useState<Videos<Works[]>>({
 		film: [],
 		short: [],
 		outsource: [],
 	});
-	const [videosInit, setVideosInit] = useState<Videos>();
-	const [page, setPage] = useState(1);
-	const [hasNextPage, setHasNextPage] = useState(false);
+	const [page, setPage] = useState(2);
+	const [apipage, setApiPage] = useState<Videos<number>>({
+		film: 2,
+		short: 2,
+		outsource: 2,
+	});
+	const [hasNextPage, setHasNextPage] = useState<Videos<boolean>>({
+		film: true,
+		short: true,
+		outsource: true,
+	});
+	//isAnimationEnd를 상시 true로 해놓으면 앞의 컴포넌트가 애니메이션이 끝날 때까지 기다리지 않고 새로 나타난 컴포넌트들이 애니메이션된다
 	const [isAnimationEnd, setIsAnimationEnd] = useState(false);
+	const [searchResults, setSearchResults] = useState<Videos<Works[]>>({
+		film: [],
+		short: [],
+		outsource: [],
+	});
+	const [searchWordsSnapShot, setSearchWordsSnapShot] = useState('');
+	const [searchWords, setSearchWords] = useState('');
+	const [tags, setTags] = useState<string[]>([]);
 	const perPage = 12;
+
 	useEffect(() => {
 		const getVideosInit = async () => {
-			setIsLoading(true);
-			const response: VideoResponse = await (
-				await fetch(`/api/work/list?page=${page}&per_page=${perPage}`)
+			setFetchLoading(true);
+			const initialPage = 1;
+			let hasNextPageInit = { film: false, short: false, outsource: false };
+			const lists: VideoResponse = await (
+				await fetch(`/api/work/list?page=${initialPage}&per_page=${perPage}`)
 			).json();
-			setVideos(response.works);
-			setVideosInit(response.works);
-			setHasNextPage(true);
-			setPage(2);
-			setIsLoading(false);
+			setVideos(lists.works);
+			setSearchResults(lists.works);
+			for (const kind of ['film', 'short', 'outsource']) {
+				if (kind === 'film' || kind === 'short' || kind === 'outsource') {
+					hasNextPageInit[kind] =
+						lists.works[kind].length < perPage ? false : true;
+				}
+			}
+			setHasNextPage(hasNextPageInit);
+			setFetchLoading(false);
 		};
 		getVideosInit();
 	}, []);
-	console.log(isAnimationEnd);
+
 	useEffect(() => {
 		setIsAnimationEnd(false);
-		console.log('restart animation');
-		if (videosInit) {
-			setVideos(videosInit);
-			videosInit[category].length < 12
-				? setHasNextPage(false)
-				: setHasNextPage(true);
-		}
 		setPage(2);
+		setSearchResults((p) => ({
+			...p,
+			[category]: videos[category],
+		}));
 	}, [category]);
+
+	const onSearch = () => {
+		//렌더링을 처음부터 다시 시작해야 하기 떄문에 page가 1부터 시작해야 하는데 이때문에 updatePage에 예외가 필요
+		setPage(1);
+		setIsAnimationEnd(false);
+		setSearchWordsSnapShot(searchWords);
+		setSearchResults((p) => ({
+			...p,
+			[category]: videos[category].filter(
+				(video) =>
+					ciIncludes(video.title, searchWords) ||
+					ciIncludes(video.description, searchWords)
+			),
+		}));
+	};
+
 	const updatePage = () => {
-		if (!isAnimationEnd) return;
-		if (!hasNextPage) return;
 		const getVideos = async () => {
-			setIsLoading(true);
-			const response: VideoResponse = await (
+			setFetchLoading(true);
+			const lists: VideoResponse = await (
 				await fetch(
-					`/api/work/list?page=${page}&per_page=${perPage}&category=${category}`
+					`/api/work/list?page=${apipage[category]}&per_page=${perPage}&category=${category}`
 				)
 			).json();
-			console.log(response.works);
-			if (response.works[category].length < perPage) {
-				setHasNextPage(false);
+			if (lists.works[category].length < perPage) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
 			}
 			setVideos((p) => ({
 				...p,
-				[category]: [...p[category], ...response.works[category]],
+				[category]: [...p[category], ...lists.works[category]],
 			}));
-			setPage((p) => p + 1);
-			setIsLoading(false);
+			setSearchResults((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[category].filter(
+						(li) =>
+							ciIncludes(li.title, searchWordsSnapShot) ||
+							ciIncludes(li.description, searchWordsSnapShot)
+					),
+				],
+			}));
+			if (lists.works[category].length < perPage) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
+			}
+			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+			setFetchLoading(false);
 		};
-		getVideos();
+		console.log(isAnimationEnd);
+		if (page > 1 && (!isAnimationEnd || fetchLoading)) return;
+		if (hasNextPage[category]) {
+			getVideos();
+		}
+		if (page <= searchResults[category].length / perPage + 1) {
+			setPage((p) => p + 1);
+		}
 	};
-	const intersectionRef = useInfiniteScroll<string | number | boolean>({
+	console.log(`pages = ${page}, apipage = ${apipage[category]}`);
+	console.log(searchResults[category].length / perPage);
+	console.log(videos[category], searchResults[category]);
+	const intersectionRef = useInfiniteScroll({
 		processIntersection: updatePage,
-		dependencyArray: [category, page, hasNextPage, isAnimationEnd],
+		dependencyArray: [
+			category,
+			page,
+			hasNextPage[category],
+			isAnimationEnd,
+			fetchLoading,
+		],
 	});
-	console.log(page);
 
 	return (
-		<section className='relative bg-[#101010]'>
-			<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9'>
-				<AnimatePresence>
-					{category === 'film'
-						? videos?.film.map((data, idx) => {
-								return (
-									<div key={data.id}>
-										<Video
-											index={data.id.toString()}
-											waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
-											thumbnail={{
-												url: data.thumbnailLink,
-												alt: data.thumbnailLink,
-												width: 960,
-												height: 540,
-											}}
-											title={data.title}
-											description={data.description}
-											category={category}
-											resource={data.resourceId}
-											date={data.date}
-											setOnDetail={setOnDetail}
-											setAnimationEnd={
-												idx === videos.film.length - 1
-													? setIsAnimationEnd
-													: undefined
-											}
-										/>
-									</div>
-								);
-						  })
-						: null}
-					{category === 'short'
-						? videos?.short.map((data, idx) => (
+		<>
+			<SearchSection
+				setSearchWords={setSearchWords}
+				setTags={setTags}
+				onSearch={onSearch}
+				searchWords={searchWords}
+			/>
+			<section className='relative bg-[#101010]'>
+				<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9 '>
+					<AnimatePresence>
+						{searchResults[category].map((data, idx) =>
+							idx < perPage * (page - 1) ? (
 								<div key={data.id}>
 									<Video
 										index={data.id.toString()}
 										waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
 										thumbnail={{
-											url: data.thumbnailLink,
-											alt: data.thumbnailLink,
+											url:
+												category === 'film' || category === 'short'
+													? data.thumbnailLink
+													: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+											alt:
+												category === 'film' || category === 'short'
+													? data.thumbnailLink
+													: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
 											width: 960,
 											height: 540,
 										}}
@@ -1058,56 +1101,34 @@ const VideoSection = ({
 										date={data.date}
 										setOnDetail={setOnDetail}
 										setAnimationEnd={
-											idx === videos.film.length - 1
+											//serachResults가 페이지 제한 때문에 보이는 것보다 많은 상황이면 먹히지 않기때문에 수정됨.
+											idx ===
+											(searchResults[category].length < (page - 1) * perPage
+												? searchResults[category].length - 1
+												: (page - 1) * perPage - 1)
 												? setIsAnimationEnd
 												: undefined
 										}
 									/>
 								</div>
-						  ))
-						: null}
-					{category === 'outsource'
-						? videos?.outsource.map((data, idx) => (
-								<div key={data.id}>
-									<Video
-										index={data.id.toString()}
-										waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
-										thumbnail={{
-											url: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
-											alt: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-											width: 1280,
-											height: 720,
-										}}
-										title={data.title}
-										description={data.description}
-										category={category}
-										resource={data.resourceId}
-										date={data.date}
-										setOnDetail={setOnDetail}
-										setAnimationEnd={
-											idx === videos.film.length - 1
-												? setIsAnimationEnd
-												: undefined
-										}
-									/>
-								</div>
-						  ))
-						: null}
-				</AnimatePresence>
-			</div>
-			<div ref={intersectionRef} className='h-1' />
-			{isLoading ? (
-				<div className='relative w-full h-60 flex justify-center items-center'>
-					<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
-						<Circles
-							liMotion={{
-								css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
-							}}
-						/>
-					</div>
+							) : null
+						)}
+					</AnimatePresence>
 				</div>
-			) : null}
-		</section>
+				<div ref={intersectionRef} className='h-1 bg-pink-500' />
+				{fetchLoading ? (
+					<div className='relative w-full h-60 flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				) : null}
+			</section>
+		</>
 	);
 };
 
@@ -1259,14 +1280,6 @@ export default function Work() {
 	const [onDetail, setOnDetail] = useState<OnDetail>();
 	const [category, setCategory] = useState<VideosCategory>('film');
 	const section = useRef<HTMLDivElement>(null);
-	console.log(section);
-	const [keyWords, setKeyWords] = useState<keyWordsState>({
-		searchWord: '',
-		selectedTags: [''],
-	});
-	useEffect(() => {
-		console.log(keyWords);
-	}, [keyWords]);
 	useEffect(() => {
 		if (onDetail?.isOpen === true) {
 			document.body.style.overflow = 'hidden';
@@ -1288,12 +1301,7 @@ export default function Work() {
 					className='pt-[100px] font-GmarketSans overflow-x-hidden'
 				>
 					<TitleSection setCategory={setCategory} />
-					<SearchSection setKeyWords={setKeyWords} />
-					<VideoSection
-						category={category}
-						keywords={keyWords}
-						setOnDetail={setOnDetail}
-					/>
+					<VideoSection category={category} setOnDetail={setOnDetail} />
 					<OutroSection />
 					<ToTop toScroll={section} />
 				</main>

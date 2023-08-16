@@ -1,6 +1,6 @@
 import { SetStateAction, SyntheticEvent, useEffect, useState } from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
-import { cls, fetchApi } from '@/libs/client/utils';
+import { ciIncludes, cls, fetchApi } from '@/libs/client/utils';
 import Image from 'next/image';
 import useMutation from '@/libs/client/useMutation';
 import { useRouter } from 'next/router';
@@ -212,7 +212,7 @@ export const ButtonsController = ({
 	);
 };
 
-interface WorksProps {
+interface WorkProps {
 	onClick: () => void;
 	searchResult: ListItems;
 	category: FlatformsCategory;
@@ -222,7 +222,7 @@ interface WorksProps {
 	thumbnailLink: string;
 }
 
-const Works = ({
+const Work = ({
 	category,
 	selected,
 	resourceId,
@@ -230,7 +230,7 @@ const Works = ({
 	onClick,
 	searchResult,
 	thumbnailLink,
-}: WorksProps) => {
+}: WorkProps) => {
 	return (
 		<div
 			className={cls(selected ? 'ring-2' : 'ring-0', 'ring-palettered')}
@@ -288,10 +288,7 @@ export default function Delete() {
 	const [list, setList] = useState<ListItems>({
 		outsource: [],
 		filmShort: [],
-	}); /* 
-	const [send, { loading, data }] = useMutation<{ success: boolean }>(
-		'/api/work'
-	); */
+	});
 	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
 		'/api/work'
 	);
@@ -303,7 +300,7 @@ export default function Delete() {
 	}>({ filmShort: 1, outsource: 1 });
 	const perPage = 12;
 	const [onSelectedList, setOnSelectedList] = useState(false);
-	const [apiLoading, setApiLoading] = useState(true);
+	const [fetchLoading, setFetchLoading] = useState(true);
 	const [hasNextPage, setHasNextPage] = useState<{
 		filmShort: boolean;
 		outsource: boolean;
@@ -311,10 +308,10 @@ export default function Delete() {
 
 	useEffect(() => {
 		const getListsInit = async ({ kind, showLoading }: getListsInitProps) => {
-			showLoading && setApiLoading(true);
+			showLoading && setFetchLoading(true);
 			const lists: dataState = await (
 				await fetch(
-					`/api/work/list?page=1&per_page=${perPage}&category=${kind}`
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${kind}`
 				)
 			).json();
 			setList((p) => ({
@@ -326,13 +323,14 @@ export default function Delete() {
 				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
 			}));
 			if (
-				lists.works[kind === 'filmShort' ? 'film' : 'outsource'].length < 12
+				lists.works[kind === 'filmShort' ? 'film' : 'outsource'].length <
+				perPage
 			) {
 				setHasNextPage((p) => ({ ...p, [kind]: false }));
 			}
 			setPage(2);
-			setApiPage((p) => ({ ...p, [category]: 2 }));
-			showLoading && setApiLoading(false);
+			setApiPage({ filmShort: 2, outsource: 2 });
+			showLoading && setFetchLoading(false);
 		};
 		getListsInit({
 			kind: 'filmShort',
@@ -344,53 +342,10 @@ export default function Delete() {
 		});
 	}, []);
 
-	/* 	useEffect(() => {
-		if (apiPage[category] > 1) {
-			const getList = async () => {
-				setApiLoading(true);
-				const lists: dataState = await (
-					await fetch(
-						`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
-					)
-				).json();
-				setList((p) => ({
-					...p,
-					[category]: [
-						...p[category],
-						...lists.works[category === 'filmShort' ? 'film' : 'outsource'],
-					],
-				}));
-				setSearchResult((p) => [
-					...p,
-					...lists.works[
-						category === 'filmShort' ? 'film' : 'outsource'
-					].filter(
-						(li) =>
-							li.title.includes(searchWord) ||
-							li.resourceId.toLowerCase().includes(searchWord.toLowerCase())
-					),
-				]);
-				setApiLoading(false);
-			};
-			getList();
-			console.log('gggggggggggggggghere');
-		}
-	}, [apiPage[category]]); */
-
-	/* useEffect(() => {
-		setSearchResult(
-			list[category].filter(
-				(li) =>
-					li.title.includes(searchWord) ||
-					li.resourceId.toLowerCase().includes(searchWord.toLowerCase())
-			)
-		);
-	}, [list]); */
-
 	useEffect(() => {
 		setOnSelectedList(false);
 		setDeleteIdList([]);
-		setPage(1);
+		setPage(2);
 		setSearchResult((p) => ({
 			...p,
 			[category === 'filmShort' ? 'outsource' : 'filmShort']:
@@ -441,17 +396,17 @@ export default function Delete() {
 				...p,
 				[category]: searchResultSnapShot[category].filter(
 					(result) =>
-						result.title.includes(searchWord) ||
-						result.resourceId.toLowerCase().includes(searchWord.toLowerCase())
+						ciIncludes(result.title, searchWord) ||
+						ciIncludes(result.resourceId, searchWord)
 				),
 			}));
 		} else {
 			setSearchResult((p) => ({
 				...p,
 				[category]: list[category].filter(
-					(el) =>
-						el.title.includes(searchWord) ||
-						el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
+					(li) =>
+						ciIncludes(li.title, searchWord) ||
+						ciIncludes(li.resourceId, searchWord)
 				),
 			}));
 		}
@@ -464,71 +419,57 @@ export default function Delete() {
 	};
 
 	const processIntersection = () => {
-		/* if (
-			!onSelectedList &&
-			list[category].length >= (apiPage[category] - 1) * perPage &&
-			!apiLoading
-		) {
+		const getList = async () => {
+			setFetchLoading(true);
+			const lists: dataState = await (
+				await fetch(
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
+				)
+			).json();
+			if (
+				lists.works[category === 'filmShort' ? 'film' : 'outsource'].length <
+				perPage
+			) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
+			}
+			setList((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[category === 'filmShort' ? 'film' : 'outsource'],
+				],
+			}));
+			setSearchResult((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[
+						category === 'filmShort' ? 'film' : 'outsource'
+					].filter(
+						(li) =>
+							ciIncludes(li.title, searchWordSnapShot) ||
+							ciIncludes(li.resourceId, searchWordSnapShot)
+					),
+				],
+			}));
+			setFetchLoading(false);
 			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
-		}
-		if (list[category].length >= (page - 1) * perPage) {
-			setPage((p) => p + 1);
-		} */
-
-		if (page > 1 && !apiLoading && !onSelectedList && hasNextPage[category]) {
-			const getList = async () => {
-				setApiLoading(true);
-				const lists: dataState = await (
-					await fetch(
-						`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
-					)
-				).json();
-				if (
-					lists.works[category === 'filmShort' ? 'film' : 'outsource'].length <
-					12
-				) {
-					setHasNextPage((p) => ({ ...p, [category]: false }));
-				}
-				setList((p) => ({
-					...p,
-					[category]: [
-						...p[category],
-						...lists.works[category === 'filmShort' ? 'film' : 'outsource'],
-					],
-				}));
-				setSearchResult((p) => ({
-					...p,
-					[category]: [
-						...p[category],
-						...lists.works[
-							category === 'filmShort' ? 'film' : 'outsource'
-						].filter(
-							(li) =>
-								li.title.includes(searchWordSnapShot) ||
-								li.resourceId
-									.toLowerCase()
-									.includes(searchWordSnapShot.toLowerCase())
-						),
-					],
-				}));
-				setApiLoading(false);
-				setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
-				// setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
-			};
+		};
+		if (fetchLoading) return;
+		if (!onSelectedList && hasNextPage[category]) {
 			getList();
 		}
-		if (!apiLoading && page <= searchResult[category].length / 12 + 1) {
+		if (page <= searchResult[category].length / perPage + 1) {
 			setPage((p) => p + 1);
 		}
 	};
 
 	const intersectionRef = useInfiniteScroll({
 		processIntersection,
-		dependencyArray: [page, apiLoading],
+		dependencyArray: [page, fetchLoading],
 	});
 
-	console.log('page=' + page, 'api=' + apiPage[category], apiLoading);
-	console.log(list, searchResult);
+	console.log('page=' + page, 'api=' + apiPage[category], fetchLoading);
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -555,7 +496,7 @@ export default function Delete() {
 				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
 					{searchResult[category].map((li, index) =>
 						index < 12 * (page - 1) ? (
-							<Works
+							<Work
 								key={li.id}
 								category={category}
 								selected={deleteIdList.includes(li.id)}
