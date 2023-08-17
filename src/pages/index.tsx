@@ -614,7 +614,6 @@ const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 			setThumnail((p) => !p);
 		}
 	}, [isInView, videoState]);
-	console.log(isLoad, play);
 
 	return (
 		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
@@ -1005,11 +1004,12 @@ const TextSection = () => {
 	return (
 		<section
 			ref={ref}
-			className='relative mt-[50vh] h-[70vh] sm:h-[120vh] flex justify-center overflow-hidden'
+			//문제 있음 각 사이즈 별로
+			className='relative bg-pink-400 mt-[50vh] min-h-[600px] h-[auto] sm:h-[auto] sm:pb-20 xl:pb-40 flex justify-center overflow-hidden'
 		>
 			<m.div
 				style={{ scale, rotate }}
-				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] sm:h-[80vh] aspect-square'
+				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] xl:h-[80vh] md:h-[60vh] sm:h-[40vh] aspect-square'
 			>
 				<Circles
 					liMotion={{
@@ -1017,7 +1017,7 @@ const TextSection = () => {
 					}}
 				/>
 			</m.div>
-			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
+			<div className='relative font-GmarketSans font-bold leading-[1.1] sm:leading-[1.3] lg:leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pl-10 md:pr-20 '>
 				<TextSectionMotionSpan
 					scrollYProgress={scrollYProgress}
 					scrollStart={0.1}
