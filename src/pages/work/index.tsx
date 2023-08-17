@@ -756,7 +756,7 @@ const Video = ({
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
-	const [ready, setReady] = useState(false);
+	const [start, setStart] = useState(false);
 	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
 	const [isIntersecting, setIsIntersecting] = useState(false);
 	const videoRef = useRef<HTMLDivElement>(null);
@@ -868,12 +868,12 @@ const Video = ({
 										width={'100%'}
 										height={'100%'}
 										loop={true}
-										onReady={() => {
-											setReady(true);
+										onStart={() => {
+											setStart(true);
 										}}
 									/>
 								) : null}
-								{!ready ? (
+								{!start ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
 											<Circles
@@ -903,11 +903,11 @@ const Video = ({
 										embedOptions: { host: 'https://www.youtube-nocookie.com' },
 									}}
 									loop={true}
-									onReady={() => {
-										setReady(true);
+									onStart={() => {
+										setStart(true);
 									}}
 								/>
-								{!ready ? (
+								{!start ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
 											<Circles
