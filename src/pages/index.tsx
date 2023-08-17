@@ -1005,19 +1005,19 @@ const TextSection = () => {
 		<section
 			ref={ref}
 			//문제 있음 각 사이즈 별로
-			className='relative bg-pink-400 mt-[50vh] min-h-[600px] h-[auto] sm:h-[auto] sm:pb-20 xl:pb-40 flex justify-center overflow-hidden'
+			className='relative mt-[50vh] h-[auto] sm:h-[auto] pb-[10vw] flex justify-center overflow-hidden'
 		>
 			<m.div
 				style={{ scale, rotate }}
-				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] xl:h-[80vh] md:h-[60vh] sm:h-[40vh] aspect-square'
+				className='absolute -right-[45vw] sm:-right-[calc(30vw)] top-20 h-[70vw] sm:h-[calc(54vw-80px)] xl:h-[calc(50vw-50px)] aspect-square'
 			>
 				<Circles
 					liMotion={{
-						css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]',
+						css: 'w-[calc(25px+100%)] sm:w-[calc(35px+100%)] lg:w-[calc(50px+100%)]',
 					}}
 				/>
 			</m.div>
-			<div className='relative font-GmarketSans font-bold leading-[1.1] sm:leading-[1.3] lg:leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pl-10 md:pr-20 '>
+			<div className='relative font-GmarketSans font-bold leading-[1.2] sm:leading-[1.4] lg:leading-[1.3] xl:leading-[1.2] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pl-10 md:pr-20 '>
 				<TextSectionMotionSpan
 					scrollYProgress={scrollYProgress}
 					scrollStart={0.1}
@@ -1059,7 +1059,7 @@ const TextSection = () => {
 						scrollYProgress={scrollYProgress}
 						scrollStart={0.3}
 						scrollEnd={0.4}
-						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16 flex items-center h-full sm:h-auto'
 						isStroke={true}
 					>
 						&
