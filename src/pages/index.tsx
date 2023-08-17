@@ -578,13 +578,11 @@ const WavesSection = ({
 
 const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 	const ref = useRef(null);
-	const isInView = useInView(ref);
+	// const isInView = useInView(ref,{once:true,amount:0.8});
 	const [thumnail, setThumnail] = useState(true);
-	const [videoLoad, setVideoLoad] = useState(false);
-	const [isLoad, setIsLoad] = useState(false);
-	const [video, setVideo] = useState<YouTubeEvent>();
-	const [videoState, setVideoState] = useState<number>(-1);
+	const [isLoadable, setIsLoadable] = useState(false);
 	const [play, setPlay] = useState(false);
+	const [start, setStart] = useState(false);
 	/* const onVideoReady: YouTubeProps['onReady'] = (e) => {
 		setVideo(e);
 		setVideoLoad(true);
@@ -592,7 +590,7 @@ const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
 		setVideoState(e.data);
 		console.log(e.data);
-	}; */
+	};
 	useEffect(() => {
 		if (
 			!thumnail &&
@@ -608,79 +606,83 @@ const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 		}
 		if (video && videoState === 1) {
 		}
-	}, [thumnail, video, videoState]);
-	useEffect(() => {
-		if (!isInView && videoState === 1) {
-			setThumnail((p) => !p);
+	}, [thumnail, video, videoState]); */
+	/* useEffect(() => {
+		if (isInView && !isLoad) {
+			setIsLoad(true);
 		}
-	}, [isInView, videoState]);
-
+	}, [isInView]); */
 	return (
-		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
-			<div className='Wrapper absolute w-full aspect-square'>
-				<Circles
-					ulMotion={{
-						css: cls(
-							play ? 'animate-spin-slow' : 'animate-spin-slow pause',
-							'transition-all'
-						),
-					}}
-					liMotion={{
-						css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]',
-					}}
-				/>
+		<article
+			ref={ref}
+			className='relative sm:left-6 lg:left-4 xl:left-0 w-[70vw] sm:w-[calc(20vw+256px)] xl:w-auto'
+		>
+			<div className='Wrapper absolute top-0 w-full aspect-square flex justify-center items-center'>
+				<div className='absolute w-[104%] aspect-square'>
+					<Circles
+						ulMotion={{
+							css: cls(
+								play ? 'animate-spin-slow' : 'animate-spin-slow pause',
+								'transition-all'
+							),
+						}}
+						liMotion={{
+							css: 'w-[calc(28px+100%)] sm:w-[calc(30px+100%)] lg:w-[calc(40px+100%)] xl:w-[calc(50px+100%)]',
+						}}
+					/>
+				</div>
 			</div>
 			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
-				<div className='h-full aspect-video'>
-					{isLoad ? (
-						<VimeoPlayer
-							url={`https://player.vimeo.com/video/${videoId}`}
-							controls={false}
-							muted={false}
-							playing={play}
-							width={'100%'}
-							height={'100%'}
-							onReady={() => {
-								console.log('ready');
-							}}
-						/>
-					) : // <YouTube
-					// 	videoId={videoId}
-					// 	opts={{
-					// 		width: '100%',
-					// 		height: '100%',
-					// 		playerVars: { rel: 0, modestbranding: 1 },
-					// 		host: 'https://www.youtube-nocookie.com',
-					// 		origin: 'http://localhost:3000',
-					// 	}}
-					// 	loading='lazy'
-					// 	onReady={onVideoReady}
-					// 	onStateChange={(e) => {
-					// 		if (video) {
-					// 			onVideoStateChange(e);
-					// 		}
-					// 	}}
-					// 	className='relative h-full aspect-video pointer-events-none'
-					// />
-					null}
+				<div className='relative h-full aspect-video'>
+					{isLoadable ? (
+						<>
+							<VimeoPlayer
+								url={`https://player.vimeo.com/video/${videoId}`}
+								controls={false}
+								muted={false}
+								playing={play}
+								width={'100%'}
+								height={'100%'}
+								onStart={() => {
+									setStart(true);
+								}}
+							/>
+							{!start ? (
+								<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+									<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+										<Circles
+											liMotion={{
+												css: 'w-[calc(20px+100%)] border-[#eaeaea] border-1',
+											}}
+										/>
+									</div>
+								</div>
+							) : null}
+						</>
+					) : null}
 				</div>
 				<m.div
 					onClick={() => {
 						setThumnail((p) => !p);
-						setIsLoad(true);
+						isLoadable || setIsLoadable(true);
 						setPlay((p) => !p);
+						if (isLoadable && !start) {
+							setIsLoadable(false);
+						}
 					}}
 					style={{ opacity: thumnail ? 1 : 0 }}
-					className='absolute top-0 h-full bg-pink-400 aspect-video cursor-pointer duration-300'
+					className='absolute top-0 w-auto h-full aspect-video cursor-pointer duration-300'
 				>
-					<Image
-						src={thumbnailLink}
-						width={1280}
-						height={720}
-						alt={`${videoId}유튜브영상 썸네일`}
-						className='absolute w-auto h-full aspect-video'
-						priority
-					/>
+					<div className='relative w-full h-0 aspect-video'>
+						<Image
+							src={thumbnailLink}
+							width={1280}
+							height={720}
+							alt={`${videoId}유튜브영상 썸네일`}
+							className='absolute top-0 left-0'
+							priority
+						/>
+					</div>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
 				</m.div>
 			</div>
@@ -757,15 +759,15 @@ const VideoContainer = ({
 	}, [isInView, innerWidth, textAnimate, videoAnimate]);
 	return (
 		<section ref={ref} className='h-[100vh] w-screen'>
-			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
-				<div className='absolute w-full h-full flex items-center'>
+			<div className='relative h-[100vh] flex justify-start items-center'>
+				<div className='absolute w-full h-full px-8 sm:px-0 flex items-center'>
 					<Image
 						src={thumbnailLink}
 						alt='1'
 						width={1600}
 						height={900}
 						style={{ objectFit: 'cover' }}
-						className='relative h-[80vh] aspect-video bg-pink-300'
+						className='relative h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-90' />
 				</div>
