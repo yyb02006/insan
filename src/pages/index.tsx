@@ -1122,7 +1122,7 @@ const OutroSection = () => {
 					ref={scope}
 					onMouseEnter={onCircleEnter}
 					onMouseLeave={onCircleLeave}
-					className='relative w-[55vw] sm:h-[70vh] aspect-square flex justify-center items-center rounded-full'
+					className='relative w-[55vw] sm:h-[55vw] lg:h-[35vw] xl:h-[30vw] max-h-[800px] aspect-square flex justify-center items-center rounded-full'
 				>
 					<div className='Container absolute w-full sm:w-auto sm:h-full aspect-square'>
 						<Circles
@@ -1132,12 +1132,14 @@ const OutroSection = () => {
 									'transition-transform'
 								),
 							}}
-							liMotion={{ css: 'w-[calc(20px+100%)] sm:w-[calc(50px+100%)]' }}
+							liMotion={{
+								css: 'w-[calc(30px+100%)] sm:w-[calc(40px+100%)] lg:w-[calc(50px+100%)]',
+							}}
 						/>
 					</div>
 					<span
 						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='Text relative text-[#101010] text-[6rem] sm:text-[10rem] font-GmarketSans font-bold'
+						className='Text relative text-[#101010] text-[6rem] sm:text-[7.375rem] lg:text-[8.625rem] xl:text-[10rem] font-GmarketSans font-bold'
 					>
 						INSAN
 					</span>
