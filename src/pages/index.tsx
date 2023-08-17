@@ -26,6 +26,7 @@ import {
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
+import { NextPage } from 'next';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -209,14 +210,14 @@ const snsList: Variants = {
 	},
 };
 
-const SpringTextMotionLi = ({
+const SpringTextMotionLi: NextPage<springTextMotionLiProps> = ({
 	mouseX,
 	mouseY,
 	innerWidth,
 	ratio,
 	css,
 	children,
-}: springTextMotionLiProps) => {
+}) => {
 	const x = useTransform(mouseX, (offset) =>
 		innerWidth > 640 ? offset / 15 : null
 	);
@@ -291,7 +292,7 @@ const SpringText = ({
 	);
 };
 
-const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
+const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
 	const visibility = useTransform(scrollYProgress, (value) => {
 		if (value > 0.3) {
@@ -333,13 +334,13 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	);
 };
 
-const CircleSection = ({
+const CircleSection: NextPage<HeaderProps> = ({
 	mouseX,
 	mouseY,
 	innerWidth,
 	scrollYProgress,
 	inheritRef,
-}: HeaderProps) => {
+}) => {
 	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
 		clamp: false,
 	});
@@ -420,20 +421,19 @@ const CircleSection = ({
 	);
 };
 
-const Wave = ({
+const Wave: NextPage<WaveProps> = ({
 	scrollYProgress,
 	letter,
 	startHeight,
 	endHeigth,
 	inViewCondition,
-	stickyCondition,
 	waveSec,
 	waveReverse = false,
 	css = '',
 	letterHeightFix = -65,
 	index,
 	innerWidth,
-}: WaveProps) => {
+}) => {
 	const y = useTransform(
 		scrollYProgress,
 		[startHeight, endHeigth],
@@ -495,11 +495,11 @@ const Wave = ({
 	);
 };
 
-const WavesSection = ({
+const WavesSection: NextPage<WaveSectionProps> = ({
 	scrollYProgress,
 	inheritRef,
 	innerWidth,
-}: WaveSectionProps) => {
+}) => {
 	const waveProps = useRef([
 		{
 			index: 1,
@@ -576,7 +576,7 @@ const WavesSection = ({
 	);
 };
 
-const Video = ({ videoId, thumbnailLink }: VideoProps) => {
+const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 	const ref = useRef(null);
 	// const isInView = useInView(ref,{once:true,amount:0.8});
 	const [thumnail, setThumnail] = useState(true);
@@ -690,7 +690,7 @@ const Video = ({ videoId, thumbnailLink }: VideoProps) => {
 	);
 };
 
-const VideoContainer = ({
+const VideoContainer: NextPage<VideoContainerProps> = ({
 	index,
 	title,
 	role,
@@ -699,7 +699,7 @@ const VideoContainer = ({
 	videoId,
 	innerWidth,
 	thumbnailLink,
-}: VideoContainerProps) => {
+}) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
@@ -808,7 +808,7 @@ const VideoContainer = ({
 	);
 };
 
-const VideosSection = ({ innerWidth }: VideoSectionProps) => {
+const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 	const dummyDatas = [
 		{
 			index: 1,
@@ -902,10 +902,10 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 	);
 };
 
-const VideoSectionIndicator = ({
+const VideoSectionIndicator: NextPage<VideoSectionIndicatorProps> = ({
 	scrollYProgress,
 	innerWidth,
-}: VideoSectionIndicatorProps) => {
+}) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
 	const [role, setRole] = useState('');
@@ -967,14 +967,14 @@ const VideoSectionIndicator = ({
 	);
 };
 
-const TextSectionMotionSpan = ({
+const TextSectionMotionSpan: NextPage<TextSectionMotionProps> = ({
 	scrollYProgress,
 	scrollStart,
 	scrollEnd,
 	css,
 	children,
 	isStroke = false,
-}: TextSectionMotionProps) => {
+}) => {
 	const y = useTransform(scrollYProgress, [scrollStart, scrollEnd], [100, 0]);
 	const opacity = useTransform(
 		scrollYProgress,
@@ -995,7 +995,7 @@ const TextSectionMotionSpan = ({
 	);
 };
 
-const TextSection = () => {
+const TextSection: NextPage = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
@@ -1099,7 +1099,7 @@ const TextSection = () => {
 	);
 };
 
-const OutroSection = () => {
+const OutroSection: NextPage = () => {
 	const [scope, animate] = useAnimate();
 	const isInView = useInView(scope, { amount: 0.3 });
 	useEffect(() => {
@@ -1151,7 +1151,7 @@ const OutroSection = () => {
 	);
 };
 
-export default function Home() {
+const Home: NextPage = () => {
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
@@ -1204,4 +1204,6 @@ export default function Home() {
 			</Layout>
 		</div>
 	);
-}
+};
+
+export default Home;
