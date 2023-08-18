@@ -38,7 +38,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			short: [],
 			outsource: [],
 		};
-		console.log(take, skip);
 		if (category === 'film') {
 			works.film = await client.works.findMany({
 				where: { category: 'film' },

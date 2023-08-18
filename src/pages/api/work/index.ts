@@ -4,10 +4,11 @@ import { apiSessionWrapper } from '@/libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+	const {
+		query: { purpose, secret },
+	} = req;
+
 	if (req.method === 'GET') {
-		const {
-			query: { purpose },
-		} = req;
 		if (purpose === 'length') {
 			const works = {
 				film: await client.works.count({ where: { category: 'film' } }),
@@ -24,22 +25,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			});
 		}
 	}
+
 	if (req.method === 'DELETE') {
-		const ids = req.headers['ids-to-delete'];
+		try {
+			if (secret !== process.env.ODR_SECRET_TOKEN) {
+				return res
+					.status(401)
+					.json({ success: false, message: 'Invalid token' });
+			}
 
-		if (!ids || Array.isArray(ids))
+			const ids = req.headers['ids-to-delete'];
+
+			if (!ids || Array.isArray(ids))
+				return res.status(500).json({ success: false });
+			const parsedIds = JSON.parse(ids);
+
+			/* iterable한 변수인지 구분법
+			typeof ids[Symbol.iterator] === 'function' */
+
+			await Promise.all(
+				parsedIds.map(async (el: string) => {
+					await client.works.delete({ where: { id: +el } });
+				})
+			);
+
+			await res.revalidate('/work');
+			return res.status(200).json({ success: true });
+		} catch (error) {
 			return res.status(500).json({ success: false });
-		const parsedIds = JSON.parse(ids);
-
-		/* iterable한 변수인지 구분법
-		typeof ids[Symbol.iterator] === 'function' */
-
-		await Promise.all(
-			parsedIds.map(async (el: string) => {
-				await client.works.delete({ where: { id: +el } });
-			})
-		);
-		return res.status(200).json({ success: true });
+		}
 	}
 };
 

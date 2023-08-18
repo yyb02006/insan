@@ -224,10 +224,15 @@ export function YoutubeThumbnailFeed({
 					<div
 						key={arr}
 						className={`w-full flex flex-col justify-between ${
-							workInfos?.filter(
+							workInfos?.find(
 								(info) => info.resourceId === data.snippet.resourceId?.videoId
-							)[0]?.title
+							)?.title
 								? 'ring-2 ring-palettered'
+								: OwnedVideos.find(
+										(OwnedVideo) =>
+											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+								  )
+								? 'ring-2 ring-green-500'
 								: ''
 						}`}
 					>

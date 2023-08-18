@@ -36,7 +36,7 @@ export default function useInfiniteScrollFromFlatform({
 	const [hasNextPage, setHasNextPage] = useState(true);
 	useEffect(() => {
 		setIsScrollLoading(isLoading);
-	}, [isLoading]);
+	}, [isLoading, setIsScrollLoading]);
 	const addData = async () => {
 		if (isLoading) return;
 		setIsLoading(true);
@@ -113,13 +113,13 @@ export default function useInfiniteScrollFromFlatform({
 		setIsLoading(false);
 	};
 
-	const observerCallback: IntersectionObserverCallback = (entries) => {
+	const handleIntersection: IntersectionObserverCallback = (entries) => {
 		const entry = entries[0];
 		if (entry.isIntersecting) {
-			console.log('intersecting' + page);
 			addData();
 		}
 	};
+
 	useEffect(() => {
 		if (!isInfiniteScrollEnabled) return;
 		const options: IntersectionObserverInit = {
@@ -127,20 +127,20 @@ export default function useInfiniteScrollFromFlatform({
 			rootMargin: '0px',
 			threshold: 0.5,
 		};
-		const observer = new IntersectionObserver(observerCallback, options);
-		if (intersectionRef.current) {
-			observer.observe(intersectionRef.current);
+		const observer = new IntersectionObserver(handleIntersection, options);
+		const currentIntersectionRef = intersectionRef.current;
+		if (currentIntersectionRef) {
+			observer.observe(currentIntersectionRef);
 			console.log('observe');
 		} else {
 			console.log('failed');
 		}
 		return () => {
-			if (intersectionRef.current) {
-				observer.unobserve(intersectionRef.current);
+			if (currentIntersectionRef) {
+				observer.unobserve(currentIntersectionRef);
 			}
 		};
 	}, [
-		intersectionRef.current,
 		page,
 		hasNextPage,
 		nextpageToken.outsource,
@@ -168,6 +168,7 @@ export function useInfiniteScroll<T = unknown>({
 	dependencyArray = [],
 }: UseInfiniteScroll<T>) {
 	const intersectionRef = useRef<HTMLDivElement>(null);
+	const dependency = [...dependencyArray];
 	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
 		const entry = entries[0];
 		if (entry.isIntersecting) {
@@ -179,14 +180,15 @@ export function useInfiniteScroll<T = unknown>({
 			handleIntersection,
 			observerHandlerConfig
 		);
-		if (intersectionRef.current) {
-			observer.observe(intersectionRef.current);
+		const currentIntersectionRef = intersectionRef.current;
+		if (currentIntersectionRef) {
+			observer.observe(currentIntersectionRef);
 		}
 		return () => {
-			if (intersectionRef.current) {
-				observer.unobserve(intersectionRef.current);
+			if (currentIntersectionRef) {
+				observer.unobserve(currentIntersectionRef);
 			}
 		};
-	}, [intersectionRef.current, ...dependencyArray]);
+	}, [observerHandlerConfig, dependency]);
 	return intersectionRef;
 }
