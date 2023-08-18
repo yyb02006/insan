@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			),
 			outsource: lists.filter((list) => list.category === 'outsource'),
 		};
-		res.status(200).json({ success: true, work });
+		return res.status(200).json({ success: true, work });
 	} else {
 		const { page, per_page, category } = query;
 		if (!page || !per_page) return;
@@ -81,7 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				}),
 			};
 		}
-		res.status(200).json({ success: true, works });
+		return res.status(200).json({ success: true, works });
 	}
 };
 

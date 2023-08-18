@@ -1,14 +1,7 @@
 import { GapiItem } from '@/pages/work';
 import Image from 'next/image';
 import Input from './input';
-import {
-	Dispatch,
-	MutableRefObject,
-	SetStateAction,
-	SyntheticEvent,
-	useEffect,
-	useState,
-} from 'react';
+import { MutableRefObject, SyntheticEvent } from 'react';
 import { WorkInfos, VimeoVideos, OwnedVideoItems } from '@/pages/work/write';
 import Circles from './circles';
 
@@ -192,7 +185,7 @@ export function VimeoThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div ref={intersectionRef} className='h-32 my-10 order-last'>
+			<div ref={intersectionRef} className='h-32 my-10 order-last bg-pink-300'>
 				{isScrollLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
@@ -244,7 +237,7 @@ export function YoutubeThumbnailFeed({
 										  data.snippet.thumbnails.medium?.url
 										: ''
 								}
-								alt='test'
+								alt='Thumbnail not available'
 								width={1280}
 								height={720}
 								className='w-full object-cover'
@@ -330,7 +323,7 @@ export function YoutubeThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div ref={intersectionRef} className='h-32 my-10 order-last'>
+			<div ref={intersectionRef} className='h-32 my-10 order-last bg-pink-300'>
 				{isScrollLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>

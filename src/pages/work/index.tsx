@@ -1318,14 +1318,14 @@ export default function Work({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-	const worksLength = {
+	const initialLength = {
 		film: await client.works.count({ where: { category: 'film' } }),
 		short: await client.works.count({ where: { category: 'short' } }),
 		outsource: await client.works.count({
 			where: { category: 'outsource' },
 		}),
 	};
-	const works = {
+	const initialWorks = {
 		film: await client.works.findMany({
 			where: { category: 'film' },
 			take: 12,
@@ -1340,15 +1340,15 @@ export const getStaticProps: GetStaticProps = async () => {
 		}),
 	};
 	let initialHasNextPage = { film: false, short: false, outsource: false };
-	for (const count in works) {
-		works[count as VideosCategory].length < 12
+	for (const count in initialWorks) {
+		initialWorks[count as VideosCategory].length < 12
 			? (initialHasNextPage[count as VideosCategory] = false)
 			: (initialHasNextPage[count as VideosCategory] = true);
 	}
 	return {
 		props: {
-			initialLength: worksLength,
-			initialWorks: JSON.parse(JSON.stringify(works)),
+			initialLength,
+			initialWorks: JSON.parse(JSON.stringify(initialWorks)),
 			initialHasNextPage,
 		},
 	};

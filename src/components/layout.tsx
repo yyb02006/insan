@@ -23,6 +23,7 @@ interface LayoutProps {
 	nav?: { exist?: boolean; isShort: boolean };
 	logo?: boolean;
 	menu?: boolean;
+	isMobile?: boolean;
 }
 
 const ListMenu = () => {
@@ -75,9 +76,12 @@ const ListMenu = () => {
 	);
 };
 
-const ExtendedNav = () => {
+const ExtendedNav = ({ isMobile = true }: { isMobile?: boolean }) => {
 	const router = useRouter();
-	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(0);
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
+		limitHeight: 0,
+		isMobile,
+	});
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
 	const menu = [
@@ -260,7 +264,7 @@ const ExtendedNav = () => {
 	);
 };
 
-const HamburgerMenu = () => {
+const HamburgerMenu = ({ isMobile = true }: { isMobile?: boolean }) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [isOpen, setIsOpen] = useState(false);
 	const [navRef, animate] = useAnimate();
@@ -306,7 +310,9 @@ const HamburgerMenu = () => {
 			ref={navRef}
 			className='absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
-			<AnimatePresence>{isOpen ? <ExtendedNav /> : null}</AnimatePresence>
+			<AnimatePresence>
+				{isOpen ? <ExtendedNav isMobile={(isMobile = true)} /> : null}
+			</AnimatePresence>
 			<div
 				onClick={() => {
 					setIsOpen((p) => !p);
@@ -341,6 +347,7 @@ export default function Layout({
 	nav = { exist: true, isShort: false },
 	logo = true,
 	menu = true,
+	isMobile = true,
 }: LayoutProps) {
 	const router = useRouter();
 	return (
@@ -371,7 +378,7 @@ export default function Layout({
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>
 					<AnimatePresence>
-						{nav.isShort ? <HamburgerMenu /> : null}
+						{nav.isShort ? <HamburgerMenu isMobile={isMobile} /> : null}
 					</AnimatePresence>
 				</div>
 			) : null}
