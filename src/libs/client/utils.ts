@@ -6,6 +6,20 @@ export function cls(...className: string[]) {
 }
 
 /**
+ * 기본 fetch 함수
+ */
+interface Init {
+	method?: 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH';
+	headers?: { [key: string]: any };
+	[key: string]: any;
+}
+
+export async function fetchData(url: string, init?: Init) {
+	const response = await (await fetch(url, init)).json();
+	return response;
+}
+
+/**
  * fetch한 값을 콜백함수를 받아 처리해주는 함수
  */
 export function fetchApi<T>(

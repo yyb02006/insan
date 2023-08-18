@@ -1,4 +1,4 @@
-import { fetchYouTubeApi } from '@/libs/client/utils';
+import { fetchData, fetchYouTubeApi } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
@@ -17,6 +17,7 @@ import {
 	SelectedListButton,
 } from './delete';
 import ToTop from '@/components/toTop';
+import { GetStaticProps } from 'next';
 
 export interface WorkInfos {
 	title: string;
@@ -57,37 +58,43 @@ export type ResourceHost = 'vimeo' | 'youtube';
 
 export type FlatformsCategory = 'filmShort' | 'outsource';
 
-export default function Write() {
+interface InitialData {
+	initialVimeoVideos: VimeoVideos[];
+	initialYoutubeVideos: GapiItem[];
+	initialOwnedVideos: OwnedVideos;
+}
+
+export default function Write({
+	initialVimeoVideos,
+	initialYoutubeVideos,
+	initialOwnedVideos,
+}: InitialData) {
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
 		'filmShort'
 	);
-	const lists = [
-		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
-		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
-	];
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapshot, setSearchWordSnapshot] = useState<{
 		searchWord: string;
 		category: FlatformsCategory;
 	}>({ searchWord: '', category: 'filmShort' });
 	const [searchResult, setSearchResult] = useState<SearchResult>({
-		vimeo: [],
-		youtube: [],
+		vimeo: initialVimeoVideos,
+		youtube: initialYoutubeVideos,
 	});
-	const [youtubeVideos, setYoutubeVideos] = useState<GapiItem[]>([]);
-	const [vimeoVideos, setVimeoVideos] = useState<VimeoVideos[]>([]);
+	const [youtubeVideos, setYoutubeVideos] =
+		useState<GapiItem[]>(initialYoutubeVideos);
+	const [vimeoVideos, setVimeoVideos] =
+		useState<VimeoVideos[]>(initialVimeoVideos);
 	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
 		'/api/work/write'
 	);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const [isScrollLoading, setIsScrollLoading] = useState(false);
-	const [ownedVideos, setOwnedVideos] = useState<OwnedVideos>({
-		filmShort: [],
-		outsource: [],
-	});
+	const [ownedVideos, setOwnedVideos] =
+		useState<OwnedVideos>(initialOwnedVideos);
 	const intersectionRef = useInfiniteScrollFromFlatform({
 		setVimeoVideos,
 		setYoutubeVideos,
@@ -95,41 +102,6 @@ export default function Write() {
 		category,
 		isInfiniteScrollEnabled,
 	});
-	useEffect(() => {
-		fetch(
-			`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10`,
-			{
-				method: 'get',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-				},
-			}
-		)
-			.then((res) => res.json())
-			.then((data) => {
-				setVimeoVideos((p) => [...p, ...data.data]);
-				setSearchResult((p) => ({ ...p, vimeo: [...data.data] }));
-				// console.log(data.data);
-			});
-		lists.forEach((list) => {
-			fetchYouTubeApi(
-				'playlistItems',
-				'10',
-				(data: { items: GapiItem[]; nextPageToken: string }) => {
-					setYoutubeVideos((p) => [...p, ...data.items]);
-					setSearchResult((p) => ({ ...p, youtube: [...data.items] }));
-				},
-				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)',
-				list.id
-			);
-		});
-		const getVideoListAPI = async () => {
-			const videos = await (await fetch('/api/work/list?from=write')).json();
-			setOwnedVideos(videos.work);
-		};
-		getVideoListAPI();
-	}, []);
 	useEffect(() => {
 		if (category === 'filmShort' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
@@ -170,7 +142,6 @@ export default function Write() {
 		setWorkInfos(undefined);
 	}, [category, isInfiniteScrollEnabled]);
 	useEffect(() => {
-		console.log(data?.success);
 		if (data?.success) router.reload();
 	}, [data, router]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -320,8 +291,6 @@ export default function Write() {
 			}));
 		}
 	};
-	console.log(workInfos);
-	console.log(loading);
 
 	return (
 		<Layout
@@ -384,3 +353,29 @@ export default function Write() {
 		</Layout>
 	);
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+	const initialVimeoVideos = await fetchData(
+		'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10',
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+			},
+		}
+	);
+	const initialYoutubeVideos = await Promise.all(
+		[
+			'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
+			'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
+		].map((id) =>
+			fetchData(
+				`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${id}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=10&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
+			)
+		)
+	);
+	const initialOwnedVideos = await fetchData('/api/work/list?from=write');
+	return {
+		props: { initialVimeoVideos, initialYoutubeVideos, initialOwnedVideos },
+	};
+};
