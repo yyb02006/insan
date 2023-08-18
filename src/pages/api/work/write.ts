@@ -37,11 +37,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				});
 			});
 			await res.revalidate('/work');
+			await res.revalidate('/work/delete');
 			return res.status(200).json({ success: true });
 		} catch (error) {
-			return res
-				.status(500)
-				.json({ success: false, message: 'Error Revalidating OR Error Query' });
+			return res.status(500).json({
+				success: false,
+				message: 'Error Revalidating OR Error Query',
+				error,
+			});
 		}
 	} else {
 		return res.status(500).json({ success: false });

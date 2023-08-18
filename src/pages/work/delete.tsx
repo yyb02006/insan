@@ -6,9 +6,8 @@ import {
 	useState,
 } from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
-import { ciIncludes, cls, fetchApi } from '@/libs/client/utils';
+import { ciIncludes, cls, fetchData } from '@/libs/client/utils';
 import Image from 'next/image';
-import useMutation from '@/libs/client/useMutation';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout';
 import Link from 'next/link';
@@ -16,6 +15,10 @@ import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import useDeleteRequest from '@/libs/client/useDelete';
 import ToTop from '@/components/toTop';
+import { GetStaticProps } from 'next';
+import client from '@/libs/server/client';
+import { VideosCategory } from '.';
+import { Works } from '@prisma/client';
 
 interface list extends WorkInfos {
 	id: number;
@@ -221,7 +224,7 @@ export const ButtonsController = ({
 
 interface WorkProps {
 	onClick: () => void;
-	searchResult: ListItems;
+	searchResult: VideosMerged<Works[]>;
 	category: FlatformsCategory;
 	selected: boolean;
 	resourceId: string;
@@ -269,86 +272,48 @@ const Work = ({
 	);
 };
 
-interface ListItems {
-	outsource: list[];
-	filmShort: list[];
+interface VideosMerged<T> {
+	filmShort: T;
+	outsource: T;
 }
 
-interface getListsInitProps {
-	kind: FlatformsCategory;
-	showLoading: boolean;
+interface InitialData {
+	initialWorks: VideosMerged<Works[]>;
+	initialHasNextPage: VideosMerged<boolean>;
 }
 
-export default function Delete() {
+export default function Delete({
+	initialWorks,
+	initialHasNextPage,
+}: InitialData) {
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
-	const [searchResult, setSearchResult] = useState<ListItems>({
+	const [searchResult, setSearchResult] =
+		useState<VideosMerged<Works[]>>(initialWorks);
+	const [searchResultSnapShot, setSearchResultSnapShot] = useState<
+		VideosMerged<Works[]>
+	>({
 		filmShort: [],
 		outsource: [],
 	});
-	const [searchResultSnapShot, setSearchResultSnapShot] = useState<ListItems>({
-		filmShort: [],
-		outsource: [],
-	});
-	const [list, setList] = useState<ListItems>({
-		outsource: [],
-		filmShort: [],
-	});
+	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
 	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
-		'/api/work'
+		`/api/work?secret=${process.env.ODR_SECRET_TOKEN}`
 	);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
-	const [page, setPage] = useState(1);
+	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
 		filmShort: number;
 		outsource: number;
-	}>({ filmShort: 1, outsource: 1 });
+	}>({ filmShort: 2, outsource: 2 });
 	const perPage = 12;
 	const [onSelectedList, setOnSelectedList] = useState(false);
 	const [fetchLoading, setFetchLoading] = useState(true);
-	const [hasNextPage, setHasNextPage] = useState<{
-		filmShort: boolean;
-		outsource: boolean;
-	}>({ filmShort: true, outsource: true });
-
-	useEffect(() => {
-		const getListsInit = async ({ kind, showLoading }: getListsInitProps) => {
-			showLoading && setFetchLoading(true);
-			const lists: dataState = await (
-				await fetch(
-					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${kind}`
-				)
-			).json();
-			setList((p) => ({
-				...p,
-				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
-			}));
-			setSearchResult((p) => ({
-				...p,
-				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
-			}));
-			if (
-				lists.works[kind === 'filmShort' ? 'film' : 'outsource'].length <
-				perPage
-			) {
-				setHasNextPage((p) => ({ ...p, [kind]: false }));
-			}
-			setPage(2);
-			setApiPage({ filmShort: 2, outsource: 2 });
-			showLoading && setFetchLoading(false);
-		};
-		getListsInit({
-			kind: 'filmShort',
-			showLoading: true,
-		});
-		getListsInit({
-			kind: 'outsource',
-			showLoading: false,
-		});
-	}, []);
+	const [hasNextPage, setHasNextPage] =
+		useState<VideosMerged<boolean>>(initialHasNextPage);
 
 	useEffect(() => {
 		setOnSelectedList(false);
@@ -539,3 +504,28 @@ export default function Delete() {
 		</Layout>
 	);
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+	const initialWorks = {
+		filmShort: await client.works.findMany({
+			where: { OR: [{ category: 'film' }, { category: 'short' }] },
+			take: 12,
+		}),
+		outsource: await client.works.findMany({
+			where: { category: 'outsource' },
+			take: 12,
+		}),
+	};
+	let initialHasNextPage = { filmShort: false, outsource: false };
+	for (const count in initialWorks) {
+		initialWorks[count as FlatformsCategory].length < 12
+			? (initialHasNextPage[count as FlatformsCategory] = false)
+			: (initialHasNextPage[count as FlatformsCategory] = true);
+	}
+	return {
+		props: {
+			initialWorks: JSON.parse(JSON.stringify(initialWorks)),
+			initialHasNextPage,
+		},
+	};
+};

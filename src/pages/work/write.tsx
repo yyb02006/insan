@@ -1,4 +1,4 @@
-import { fetchData, fetchYouTubeApi } from '@/libs/client/utils';
+import { fetchData } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
@@ -18,6 +18,7 @@ import {
 } from './delete';
 import ToTop from '@/components/toTop';
 import { GetStaticProps } from 'next';
+import client from '@/libs/server/client';
 
 export interface WorkInfos {
 	title: string;
@@ -69,6 +70,8 @@ export default function Write({
 	initialYoutubeVideos,
 	initialOwnedVideos,
 }: InitialData) {
+	console.log(initialYoutubeVideos);
+
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
@@ -88,7 +91,7 @@ export default function Write({
 	const [vimeoVideos, setVimeoVideos] =
 		useState<VimeoVideos[]>(initialVimeoVideos);
 	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
-		'/api/work/write'
+		`/api/work/write?secret=${process.env.ODR_SECRET_TOKEN}`
 	);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
@@ -355,8 +358,9 @@ export default function Write({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-	const initialVimeoVideos = await fetchData(
-		'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10',
+	const perPage = 6;
+	const VimeoVideos = await fetchData(
+		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=${perPage}`,
 		{
 			headers: {
 				'Content-Type': 'application/json',
@@ -364,18 +368,44 @@ export const getStaticProps: GetStaticProps = async () => {
 			},
 		}
 	);
-	const initialYoutubeVideos = await Promise.all(
+
+	const YoutubeVideos = await Promise.all(
 		[
 			'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
 			'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
 		].map((id) =>
 			fetchData(
-				`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${id}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=10&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
+				`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${id}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=${perPage}&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
 			)
 		)
 	);
-	const initialOwnedVideos = await fetchData('/api/work/list?from=write');
+
+	const lists = await client.works.findMany({
+		select: {
+			title: true,
+			category: true,
+			date: true,
+			description: true,
+			resourceId: true,
+		},
+	});
+
+	const initialOwnedVideos = {
+		filmShort: lists.filter(
+			(list) => list.category === 'film' || list.category === 'short'
+		),
+		outsource: lists.filter((list) => list.category === 'outsource'),
+	};
+
 	return {
-		props: { initialVimeoVideos, initialYoutubeVideos, initialOwnedVideos },
+		props: {
+			initialVimeoVideos: VimeoVideos.data,
+			initialYoutubeVideos: [
+				...YoutubeVideos[0].items,
+				...YoutubeVideos[1].items,
+			],
+			initialOwnedVideos,
+		},
+		revalidate: 86400,
 	};
 };

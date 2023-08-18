@@ -3,15 +3,29 @@ import { apiSessionWrapper } from '@/libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-	const { body, session } = req;
+	const {
+		body,
+		session,
+		query: { secret },
+	} = req;
+
+	if (secret !== process.env.ODR_SECRET_TOKEN) {
+		return res.status(401).json({ success: false, message: 'Invalid token' });
+	}
+
 	if (body === process.env.ADMIN_PASSWORD) {
-		session.admin = {
-			password: body,
-		};
-		await req.session.save();
-		res.status(200).json({ success: true, message: 'Autorized' });
+		try {
+			session.admin = {
+				password: body,
+			};
+			await req.session.save();
+			await res.revalidate('/work/write');
+			return res.status(200).json({ success: true, message: 'Autorized' });
+		} catch (error) {
+			return res.status(500).json({ success: false, error });
+		}
 	} else {
-		res.status(200).json({ success: false, message: 'Unautorized' });
+		return res.status(200).json({ success: false, message: 'Unautorized' });
 	}
 };
 

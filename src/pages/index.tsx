@@ -14,6 +14,7 @@ import {
 	usePresence,
 	AnimatePresence,
 	useMotionValueEvent,
+	motionValue,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -1152,14 +1153,26 @@ const OutroSection: NextPage = () => {
 };
 
 const Home: NextPage = () => {
+	useEffect(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		setIsMobile(
+			/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+				userAgent
+			)
+		);
+	}, []);
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
 	const [innerWidth, setInnerWidth] = useState(0);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackground = useInView(background, { margin: '0% 0% 100% 0%' });
+	const [isMobile, setIsMobile] = useState(true);
 	const { scrollYProgress } = useScroll({ target: circle });
-	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
+		limitHeight: 2200,
+		isMobile: isMobile,
+	});
 	const handleResize = () => {
 		setInnerWidth(window.innerWidth);
 	};
@@ -1174,8 +1187,8 @@ const Home: NextPage = () => {
 	return (
 		<div
 			ref={background}
-			onMouseMove={onMove}
-			onMouseLeave={onLeave}
+			onMouseMove={!isMobile ? onMove : undefined}
+			onMouseLeave={!isMobile ? onLeave : undefined}
 			className='w-[100vw] h-[100vh]'
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
@@ -1185,6 +1198,7 @@ const Home: NextPage = () => {
 				nav={{
 					isShort: innerWidth > 640 ? !isInBackground : true,
 				}}
+				isMobile={isMobile}
 			>
 				<CircleSection
 					inheritRef={circle}
