@@ -1,62 +1,154 @@
-import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
-import { SyntheticEvent, useEffect, useState } from 'react';
-import { GapiItem } from '.';
-import Input from '@/components/input';
+import { fetchData, fetchYouTubeApi } from '@/libs/client/utils';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
-import Link from 'next/link';
-import Feed from '@/components/feed';
+import {
+	VimeoThumbnailFeed,
+	YoutubeThumbnailFeed,
+} from '@/components/thumbnailFeed';
+import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
+import { useRouter } from 'next/router';
+import {
+	ButtonsController,
+	CategoryTab,
+	MenuBar,
+	SearchForm,
+	SelectedListButton,
+} from './delete';
+import ToTop from '@/components/toTop';
+import { GetStaticProps } from 'next';
 
 export interface WorkInfos {
 	title: string;
 	description: string;
 	resourceId: string;
 	category: string;
+	date: string;
+	thumbnailLink: string;
 }
 
-export default function Write() {
-	const [category, setCategory] = useState<'film&short' | 'outsource'>(
-		'film&short'
-	);
-	const lists = [
-		{ title: '외주 작업', id: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40' },
-		{ title: '참여 촬영', id: 'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1' },
-	];
-	const [searchWord, setSearchWord] = useState('');
-	const [searchResult, setSearchResult] = useState<GapiItem[]>([]);
-	const [list, setList] = useState<GapiItem[]>([]);
-	const [sendList, { loading }] = useMutation<WorkInfos[]>('/api/work/write');
-	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
-	useEffect(() => {
-		lists.forEach((list) => {
-			fetchYouTubeApi(
-				'playlistItems',
-				'10',
-				(data: { items: GapiItem[] }) => {
-					setList((p) => [...p, ...data.items]);
-					setSearchResult((p) => [...p, ...data.items]);
-				},
-				'(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)))',
-				list.id
-			);
-		});
-		fetch('https://api.vimeo.com/users/136249834/videos', {
-			method: 'get',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: 'Bearer 20914f40ed21172340248f548f8aaade',
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => console.log(data));
-	}, []);
+export interface VimeoVideos {
+	player_embed_url: string;
+	resource_key: string;
+	pictures: { sizes: { link: string }[] };
+	name: string;
+	description: string;
+}
 
+interface SearchResult {
+	vimeo: VimeoVideos[];
+	youtube: GapiItem[];
+}
+
+export interface OwnedVideoItems {
+	title: string;
+	category: VideosCategory;
+	date: string;
+	description: string;
+	resourceId: string;
+}
+
+interface OwnedVideos {
+	filmShort: OwnedVideoItems[];
+	outsource: OwnedVideoItems[];
+}
+
+export type ResourceHost = 'vimeo' | 'youtube';
+
+export type FlatformsCategory = 'filmShort' | 'outsource';
+
+interface InitialData {
+	initialVimeoVideos: VimeoVideos[];
+	initialYoutubeVideos: GapiItem[];
+	initialOwnedVideos: OwnedVideos;
+}
+
+export default function Write({
+	initialVimeoVideos,
+	initialYoutubeVideos,
+	initialOwnedVideos,
+}: InitialData) {
+	const router = useRouter();
+	const topElement = useRef<HTMLDivElement>(null);
+	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
+		'filmShort'
+	);
+	const [searchWord, setSearchWord] = useState('');
+	const [searchWordSnapshot, setSearchWordSnapshot] = useState<{
+		searchWord: string;
+		category: FlatformsCategory;
+	}>({ searchWord: '', category: 'filmShort' });
+	const [searchResult, setSearchResult] = useState<SearchResult>({
+		vimeo: initialVimeoVideos,
+		youtube: initialYoutubeVideos,
+	});
+	const [youtubeVideos, setYoutubeVideos] =
+		useState<GapiItem[]>(initialYoutubeVideos);
+	const [vimeoVideos, setVimeoVideos] =
+		useState<VimeoVideos[]>(initialVimeoVideos);
+	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
+		'/api/work/write'
+	);
+	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
+	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
+	const [isScrollLoading, setIsScrollLoading] = useState(false);
+	const [ownedVideos, setOwnedVideos] =
+		useState<OwnedVideos>(initialOwnedVideos);
+	const intersectionRef = useInfiniteScrollFromFlatform({
+		setVimeoVideos,
+		setYoutubeVideos,
+		setIsScrollLoading,
+		category,
+		isInfiniteScrollEnabled,
+	});
+	useEffect(() => {
+		if (category === 'filmShort' && youtubeVideos.length > 0) {
+			if (searchWordSnapshot.category !== category) {
+				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
+				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
+				setSearchWord('');
+			} else {
+				setSearchResult((p) => ({
+					...p,
+					vimeo: vimeoVideos.filter(
+						(el) =>
+							el.name.includes(searchWord) ||
+							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
+					),
+				}));
+			}
+		} else if (category === 'outsource') {
+			if (searchWordSnapshot.category !== category) {
+				setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
+				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
+				setSearchWord('');
+			} else {
+				setSearchResult((p) => ({
+					...p,
+					youtube: youtubeVideos.filter(
+						(el) =>
+							el.snippet.title.includes(searchWord) ||
+							el.snippet.resourceId?.videoId
+								.toLowerCase()
+								.includes(searchWord.toLowerCase())
+					),
+				}));
+			}
+		}
+	}, [category, youtubeVideos, vimeoVideos]);
+	useEffect(() => {
+		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+		setWorkInfos(undefined);
+	}, [category, isInfiniteScrollEnabled]);
+	useEffect(() => {
+		if (data?.success) router.reload();
+	}, [data, router]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
-		const { value, name, dataset } = e.currentTarget;
+		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
-		console.log(e.currentTarget.value);
 		if (workIdx !== undefined && workIdx >= 0) {
 			if (name === 'title' && value !== '') {
 				setWorkInfos((p) =>
@@ -84,7 +176,17 @@ export default function Write() {
 						  )
 						: undefined
 				);
-			} else if (name === 'category') {
+			} else if (name === 'date') {
+				setWorkInfos((p) =>
+					p
+						? p.map((arr) =>
+								arr.resourceId === dataset.resourceid
+									? { ...arr, date: value }
+									: arr
+						  )
+						: undefined
+				);
+			} else if (type === 'radio') {
 				setWorkInfos((p) =>
 					p
 						? p.map((arr) =>
@@ -96,7 +198,6 @@ export default function Write() {
 				);
 			}
 		} else {
-			console.log('here');
 			if (name === 'title') {
 				setWorkInfos((p) =>
 					p
@@ -106,7 +207,9 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: category === 'film&short' ? '' : 'outsource',
+									category: category === 'filmShort' ? '' : 'outsource',
+									date: '',
+									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
 						: [
@@ -114,7 +217,9 @@ export default function Write() {
 									resourceId: dataset.resourceid ? dataset.resourceid : '',
 									title: value,
 									description: '',
-									category: category === 'film&short' ? '' : 'outsource',
+									category: category === 'filmShort' ? '' : 'outsource',
+									date: '',
+									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 								},
 						  ]
 				);
@@ -130,17 +235,63 @@ export default function Write() {
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!searchWord) return;
-		setSearchResult(
-			list.filter(
-				(el) =>
-					el.snippet.title.includes(searchWord) ||
-					el.snippet.resourceId?.videoId
-						.toLowerCase()
-						.includes(searchWord.toLowerCase())
-			)
-		);
+		setSearchWordSnapshot({ searchWord, category });
+		//임시방편 setResult의 infiniteScroll 생각해야함
+		if (!searchWord) {
+			return router.reload();
+		}
+		const filterResources = (kind: ResourceHost) => {
+			if (kind === 'vimeo') {
+				setSearchResult((p) => ({
+					...p,
+					[kind]: vimeoVideos.filter(
+						(el) =>
+							el.name.includes(searchWord) ||
+							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
+					),
+				}));
+			} else if (kind === 'youtube') {
+				setSearchResult((p) => ({
+					...p,
+					[kind]: youtubeVideos.filter(
+						(el) =>
+							el.snippet.title.includes(searchWord) ||
+							el.snippet.resourceId?.videoId
+								.toLowerCase()
+								.includes(searchWord.toLowerCase())
+					),
+				}));
+			}
+		};
+		if (category === 'filmShort') {
+			filterResources('vimeo');
+		} else if (category === 'outsource') {
+			filterResources('youtube');
+		}
+		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 	};
+	const onUpdatedListClick = () => {
+		setIsInfiniteScrollEnabled(false);
+		if (!workInfos || workInfos?.length < 1) return;
+		if (category === 'filmShort') {
+			setSearchResult((p) => ({
+				...p,
+				vimeo: vimeoVideos.filter((info) =>
+					workInfos?.some((video) => video.resourceId === info.player_embed_url)
+				),
+			}));
+		} else if (category === 'outsource') {
+			setSearchResult((p) => ({
+				...p,
+				youtube: youtubeVideos.filter((info) =>
+					workInfos?.some(
+						(video) => video.resourceId === info.snippet.resourceId?.videoId
+					)
+				),
+			}));
+		}
+	};
+
 	return (
 		<Layout
 			seoTitle='Write'
@@ -148,94 +299,83 @@ export default function Write() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
-			<section className='relative xl:px-40 sm:px-24 px-16'>
-				<div>
-					<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
-						추가하기
-					</div>
-					<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
-						<Link href={'/work/delete'}>삭제하기</Link>
-					</div>
-				</div>
-				<div className='flex py-4'>
-					<button
-						onClick={() => {
-							setCategory('film&short');
-							setWorkInfos(undefined);
-						}}
-						className={cls(
-							category === 'film&short' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Film / Short
-					</button>
-					<button
-						onClick={() => {
-							setCategory('outsource');
-							setWorkInfos(undefined);
-						}}
-						className={cls(
-							category === 'outsource' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Outsource
-					</button>
-				</div>
-				<form
-					onSubmit={onSearch}
-					className='relative mb-8 mt-4 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
-				>
-					<button type='submit'>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							fill='none'
-							viewBox='0 0 24 24'
-							strokeWidth={2}
-							stroke='currentColor'
-							className='w-6 h-6'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
-							/>
-						</svg>
-					</button>
-					<Input
-						name='search'
-						type='text'
-						placeholder='search'
-						css='border-none placeholder:font-bold bg-transparent'
-						onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-							setSearchWord(e.currentTarget.value);
-						}}
-					/>
-				</form>
-				{category === 'film&short' ? <></> : null}
-				{category === 'outsource' ? (
-					<Feed
+			<section ref={topElement} className='relative xl:px-40 sm:px-24 px-16'>
+				<MenuBar currentPage='write' />
+				<CategoryTab
+					category={category}
+					onFilmShortClick={() => {
+						setCategory('filmShort');
+						setWorkInfos(undefined);
+					}}
+					onOutsourceClick={() => {
+						setCategory('outsource');
+						setWorkInfos(undefined);
+					}}
+				/>
+				<SearchForm
+					onSearch={onSearch}
+					searchWord={searchWord}
+					setSearchWord={setSearchWord}
+				/>
+				{category === 'filmShort' && vimeoVideos.length > 0 ? (
+					<VimeoThumbnailFeed
 						inputChange={inputChange}
-						searchResult={searchResult}
+						resource={searchResult.vimeo}
 						workInfos={workInfos}
-					></Feed>
+						intersectionRef={intersectionRef}
+						isScrollLoading={isScrollLoading}
+						OwnedVideos={ownedVideos.filmShort}
+					></VimeoThumbnailFeed>
 				) : null}
-				<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
-					<button
-						onClick={onReset}
-						className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-					>
-						Reset
-					</button>
-					<button
-						onClick={onSubmitWrites}
-						className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-					>
-						Save
-					</button>
-				</div>
+				{category === 'outsource' ? (
+					<YoutubeThumbnailFeed
+						inputChange={inputChange}
+						resource={searchResult.youtube}
+						workInfos={workInfos}
+						intersectionRef={intersectionRef}
+						isScrollLoading={isScrollLoading}
+						OwnedVideos={ownedVideos.outsource}
+					></YoutubeThumbnailFeed>
+				) : null}
+				<SelectedListButton
+					onClick={onUpdatedListClick}
+					count={workInfos ? workInfos?.length : 0}
+					isMobile={true}
+				/>
+				<ButtonsController
+					onReset={onReset}
+					onSave={onSubmitWrites}
+					onSort={onUpdatedListClick}
+					count={workInfos ? workInfos?.length : 0}
+				/>
 			</section>
+			<ToTop toScroll={topElement} />
 		</Layout>
 	);
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+	const initialVimeoVideos = await fetchData(
+		'https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=10',
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+			},
+		}
+	);
+	const initialYoutubeVideos = await Promise.all(
+		[
+			'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
+			'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
+		].map((id) =>
+			fetchData(
+				`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${id}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=10&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
+			)
+		)
+	);
+	const initialOwnedVideos = await fetchData('/api/work/list?from=write');
+	return {
+		props: { initialVimeoVideos, initialYoutubeVideos, initialOwnedVideos },
+	};
+};

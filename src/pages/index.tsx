@@ -25,6 +25,8 @@ import {
 } from 'react';
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import Image from 'next/image';
+import VimeoPlayer from 'react-player/vimeo';
+import { NextPage } from 'next';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -78,6 +80,7 @@ interface WaveProps {
 
 interface VideoProps {
 	videoId: string;
+	thumbnailLink: string;
 }
 
 interface VideoContainerProps {
@@ -88,6 +91,7 @@ interface VideoContainerProps {
 	date: string;
 	videoId: string;
 	innerWidth: number;
+	thumbnailLink: string;
 }
 
 interface VideoSectionProps {
@@ -206,14 +210,14 @@ const snsList: Variants = {
 	},
 };
 
-const SpringTextMotionLi = ({
+const SpringTextMotionLi: NextPage<springTextMotionLiProps> = ({
 	mouseX,
 	mouseY,
 	innerWidth,
 	ratio,
 	css,
 	children,
-}: springTextMotionLiProps) => {
+}) => {
 	const x = useTransform(mouseX, (offset) =>
 		innerWidth > 640 ? offset / 15 : null
 	);
@@ -288,7 +292,7 @@ const SpringText = ({
 	);
 };
 
-const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
+const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 	const scale = useTransform(scrollYProgress, [0.25, 0.45], [1, 0]);
 	const visibility = useTransform(scrollYProgress, (value) => {
 		if (value > 0.3) {
@@ -330,13 +334,13 @@ const SnsLink = ({ scrollYProgress, isInView }: SnsLinkProps) => {
 	);
 };
 
-const CircleSection = ({
+const CircleSection: NextPage<HeaderProps> = ({
 	mouseX,
 	mouseY,
 	innerWidth,
 	scrollYProgress,
 	inheritRef,
-}: HeaderProps) => {
+}) => {
 	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
 		clamp: false,
 	});
@@ -417,20 +421,19 @@ const CircleSection = ({
 	);
 };
 
-const Wave = ({
+const Wave: NextPage<WaveProps> = ({
 	scrollYProgress,
 	letter,
 	startHeight,
 	endHeigth,
 	inViewCondition,
-	stickyCondition,
 	waveSec,
 	waveReverse = false,
 	css = '',
 	letterHeightFix = -65,
 	index,
 	innerWidth,
-}: WaveProps) => {
+}) => {
 	const y = useTransform(
 		scrollYProgress,
 		[startHeight, endHeigth],
@@ -492,11 +495,11 @@ const Wave = ({
 	);
 };
 
-const WavesSection = ({
+const WavesSection: NextPage<WaveSectionProps> = ({
 	scrollYProgress,
 	inheritRef,
 	innerWidth,
-}: WaveSectionProps) => {
+}) => {
 	const waveProps = useRef([
 		{
 			index: 1,
@@ -573,15 +576,14 @@ const WavesSection = ({
 	);
 };
 
-const Video = ({ videoId }: VideoProps) => {
+const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 	const ref = useRef(null);
-	const isInView = useInView(ref);
+	// const isInView = useInView(ref,{once:true,amount:0.8});
 	const [thumnail, setThumnail] = useState(true);
-	const [videoLoad, setVideoLoad] = useState(false);
-	const [isLoad, setIsLoad] = useState(false);
-	const [video, setVideo] = useState<YouTubeEvent>();
-	const [videoState, setVideoState] = useState<number>(-1);
-	const onVideoReady: YouTubeProps['onReady'] = (e) => {
+	const [isLoadable, setIsLoadable] = useState(false);
+	const [play, setPlay] = useState(false);
+	const [start, setStart] = useState(false);
+	/* const onVideoReady: YouTubeProps['onReady'] = (e) => {
 		setVideo(e);
 		setVideoLoad(true);
 	};
@@ -604,68 +606,83 @@ const Video = ({ videoId }: VideoProps) => {
 		}
 		if (video && videoState === 1) {
 		}
-	}, [thumnail, video, videoState]);
-	useEffect(() => {
-		if (!isInView && videoState === 1) {
-			setThumnail((p) => !p);
+	}, [thumnail, video, videoState]); */
+	/* useEffect(() => {
+		if (isInView && !isLoad) {
+			setIsLoad(true);
 		}
-	}, [isInView, videoState]);
+	}, [isInView]); */
 	return (
-		<article ref={ref} className='relative w-[70vw] sm:w-auto'>
-			<div className='Wrapper absolute w-full aspect-square'>
-				<Circles
-					ulMotion={{
-						css: cls(
-							videoState === 1
-								? 'animate-spin-slow'
-								: 'animate-spin-slow pause',
-							'transition-all'
-						),
-					}}
-					liMotion={{
-						css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]',
-					}}
-				/>
+		<article
+			ref={ref}
+			className='relative sm:left-6 lg:left-4 xl:left-0 w-[70vw] sm:w-[calc(20vw+256px)] xl:w-auto'
+		>
+			<div className='Wrapper absolute top-0 w-full aspect-square flex justify-center items-center'>
+				<div className='absolute w-[104%] aspect-square'>
+					<Circles
+						ulMotion={{
+							css: cls(
+								play ? 'animate-spin-slow' : 'animate-spin-slow pause',
+								'transition-all'
+							),
+						}}
+						liMotion={{
+							css: 'w-[calc(28px+100%)] sm:w-[calc(30px+100%)] lg:w-[calc(40px+100%)] xl:w-[calc(50px+100%)]',
+						}}
+					/>
+				</div>
 			</div>
 			<div className='relative bg-[#101010] w-full aspect-square rounded-full flex justify-center items-center overflow-hidden'>
-				<div className='h-full aspect-video'>
-					{isLoad ? (
-						<YouTube
-							videoId={videoId}
-							opts={{
-								width: '100%',
-								height: '100%',
-								playerVars: { rel: 0, modestbranding: 1 },
-								host: 'https://www.youtube-nocookie.com',
-								origin: 'http://localhost:3000',
-							}}
-							loading='lazy'
-							onReady={onVideoReady}
-							onStateChange={(e) => {
-								if (video) {
-									onVideoStateChange(e);
-								}
-							}}
-							className='relative h-full aspect-video pointer-events-none'
-						/>
+				<div className='relative h-full aspect-video'>
+					{isLoadable ? (
+						<>
+							<VimeoPlayer
+								url={`https://player.vimeo.com/video/${videoId}`}
+								controls={false}
+								muted={false}
+								playing={play}
+								width={'100%'}
+								height={'100%'}
+								onStart={() => {
+									setStart(true);
+								}}
+							/>
+							{!start ? (
+								<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+									<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+										<Circles
+											liMotion={{
+												css: 'w-[calc(20px+100%)] border-[#eaeaea] border-1',
+											}}
+										/>
+									</div>
+								</div>
+							) : null}
+						</>
 					) : null}
 				</div>
 				<m.div
 					onClick={() => {
 						setThumnail((p) => !p);
-						setIsLoad(true);
+						isLoadable || setIsLoadable(true);
+						setPlay((p) => !p);
+						if (isLoadable && !start) {
+							setIsLoadable(false);
+						}
 					}}
 					style={{ opacity: thumnail ? 1 : 0 }}
-					className='absolute top-0 h-full bg-pink-400 aspect-video cursor-pointer duration-300'
+					className='absolute top-0 w-auto h-full aspect-video cursor-pointer duration-300'
 				>
-					<Image
-						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-						width={1600}
-						height={900}
-						alt={`${videoId}유튜브영상 썸네일`}
-						className='absolute w-auto h-full aspect-video'
-						priority
-					/>
+					<div className='relative w-full h-0 aspect-video'>
+						<Image
+							src={thumbnailLink}
+							width={1280}
+							height={720}
+							alt={`${videoId}유튜브영상 썸네일`}
+							className='absolute top-0 left-0'
+							priority
+						/>
+					</div>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
 				</m.div>
 			</div>
@@ -673,7 +690,7 @@ const Video = ({ videoId }: VideoProps) => {
 	);
 };
 
-const VideoContainer = ({
+const VideoContainer: NextPage<VideoContainerProps> = ({
 	index,
 	title,
 	role,
@@ -681,7 +698,8 @@ const VideoContainer = ({
 	date,
 	videoId,
 	innerWidth,
-}: VideoContainerProps) => {
+	thumbnailLink,
+}) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
 	const [textScope, textAnimate] = useAnimate();
@@ -741,15 +759,15 @@ const VideoContainer = ({
 	}, [isInView, innerWidth, textAnimate, videoAnimate]);
 	return (
 		<section ref={ref} className='h-[100vh] w-screen'>
-			<div className='relative h-[100vh] w-screen flex justify-start items-center'>
-				<div className='absolute w-full h-full flex items-center'>
+			<div className='relative h-[100vh] flex justify-start items-center'>
+				<div className='absolute w-full h-full px-8 sm:px-0 flex items-center'>
 					<Image
-						src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+						src={thumbnailLink}
 						alt='1'
 						width={1600}
 						height={900}
 						style={{ objectFit: 'cover' }}
-						className='relative h-[80vh] aspect-video bg-pink-300'
+						className='relative h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-90' />
 				</div>
@@ -757,7 +775,7 @@ const VideoContainer = ({
 					ref={videoScope}
 					className='w-[100vw-48px] m-auto sm:w-[600px] sm:ml-[calc(20vw)]'
 				>
-					<Video videoId={videoId} />
+					<Video videoId={videoId} thumbnailLink={thumbnailLink} />
 				</div>
 				<div
 					ref={textScope}
@@ -790,7 +808,7 @@ const VideoContainer = ({
 	);
 };
 
-const VideosSection = ({ innerWidth }: VideoSectionProps) => {
+const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 	const dummyDatas = [
 		{
 			index: 1,
@@ -798,7 +816,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.22',
-			videoId: 'd4I-0Zv1Lv8',
+			videoId: '852566352',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1707755112-18437e1930810b2d8db1a3018ebed3871d824a547ada768ed8f67d7855ef1cf3-d_1280x720?r=pad',
 		},
 		{
 			index: 2,
@@ -806,7 +826,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Camera',
 			description: '엔터테인먼트와 현실의 연결',
 			date: '2023.2.23',
-			videoId: 'CWBy5PyyMyw',
+			videoId: '844725783',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_1280x720?r=pad',
 		},
 		{
 			index: 3,
@@ -814,7 +836,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Art Director',
 			description: '확장과 재창조, 창작의 결과물',
 			date: '2023.2.24',
-			videoId: 'Kzgid8FIjKc',
+			videoId: '844717748',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1696959898-14f7b78bd35137dcd561717429b265947ce7272a735e7b7ed8b4bc56ec229666-d_1280x720?r=pad',
 		},
 		{
 			index: 4,
@@ -822,7 +846,9 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 			role: 'Lead Developer',
 			description: '영감을 주고 받은 기록',
 			date: '2023.2.25',
-			videoId: 'AuXYLGyEajg',
+			videoId: '852566292',
+			thumbnailLink:
+				'https://i.vimeocdn.com/video/1707754967-f097f998c5b730464d3e56cfd8c0c7c9fdc9376ca910ed687f63faa3d7c27db2-d_1280x720?r=pad',
 		},
 	];
 	const [range, setRange] = useState(0);
@@ -858,6 +884,7 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 							description={data.description}
 							date={data.date}
 							videoId={data.videoId}
+							thumbnailLink={data.thumbnailLink}
 							innerWidth={innerWidth}
 						/>
 					))}
@@ -875,10 +902,10 @@ const VideosSection = ({ innerWidth }: VideoSectionProps) => {
 	);
 };
 
-const VideoSectionIndicator = ({
+const VideoSectionIndicator: NextPage<VideoSectionIndicatorProps> = ({
 	scrollYProgress,
 	innerWidth,
-}: VideoSectionIndicatorProps) => {
+}) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [indicator, animate] = useAnimate();
 	const [role, setRole] = useState('');
@@ -940,14 +967,14 @@ const VideoSectionIndicator = ({
 	);
 };
 
-const TextSectionMotionSpan = ({
+const TextSectionMotionSpan: NextPage<TextSectionMotionProps> = ({
 	scrollYProgress,
 	scrollStart,
 	scrollEnd,
 	css,
 	children,
 	isStroke = false,
-}: TextSectionMotionProps) => {
+}) => {
 	const y = useTransform(scrollYProgress, [scrollStart, scrollEnd], [100, 0]);
 	const opacity = useTransform(
 		scrollYProgress,
@@ -968,7 +995,7 @@ const TextSectionMotionSpan = ({
 	);
 };
 
-const TextSection = () => {
+const TextSection: NextPage = () => {
 	const ref = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: ref,
@@ -979,19 +1006,20 @@ const TextSection = () => {
 	return (
 		<section
 			ref={ref}
-			className='relative mt-[50vh] h-[70vh] sm:h-[120vh] flex justify-center overflow-hidden'
+			//문제 있음 각 사이즈 별로
+			className='relative mt-[50vh] h-[auto] sm:h-[auto] pb-[10vw] flex justify-center overflow-hidden'
 		>
 			<m.div
 				style={{ scale, rotate }}
-				className='absolute -right-[30vh] sm:-right-[40vh] top-20 h-[40vh] sm:h-[80vh] aspect-square'
+				className='absolute -right-[45vw] sm:-right-[calc(30vw)] top-20 h-[70vw] sm:h-[calc(54vw-80px)] xl:h-[calc(50vw-50px)] aspect-square'
 			>
 				<Circles
 					liMotion={{
-						css: 'w-[calc(25px+100%)] sm:w-[calc(50px+100%)]',
+						css: 'w-[calc(25px+100%)] sm:w-[calc(35px+100%)] lg:w-[calc(50px+100%)]',
 					}}
 				/>
 			</m.div>
-			<div className='font-GmarketSans font-bold leading-[1.1] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pr-40'>
+			<div className='relative font-GmarketSans font-bold leading-[1.2] sm:leading-[1.4] lg:leading-[1.3] xl:leading-[1.2] text-[#101010] text-[calc(16px+9vw)] pr-0 sm:pl-10 md:pr-20 '>
 				<TextSectionMotionSpan
 					scrollYProgress={scrollYProgress}
 					scrollStart={0.1}
@@ -1033,7 +1061,7 @@ const TextSection = () => {
 						scrollYProgress={scrollYProgress}
 						scrollStart={0.3}
 						scrollEnd={0.4}
-						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16'
+						css='block absolute text-[calc(16px+9vw)] text-[#101010] -left-8 sm:-left-16 flex items-center h-full sm:h-auto'
 						isStroke={true}
 					>
 						&
@@ -1071,7 +1099,7 @@ const TextSection = () => {
 	);
 };
 
-const OutroSection = () => {
+const OutroSection: NextPage = () => {
 	const [scope, animate] = useAnimate();
 	const isInView = useInView(scope, { amount: 0.3 });
 	useEffect(() => {
@@ -1096,7 +1124,7 @@ const OutroSection = () => {
 					ref={scope}
 					onMouseEnter={onCircleEnter}
 					onMouseLeave={onCircleLeave}
-					className='relative w-[55vw] sm:h-[70vh] aspect-square flex justify-center items-center rounded-full'
+					className='relative w-[55vw] sm:h-[55vw] lg:h-[35vw] xl:h-[30vw] max-h-[800px] aspect-square flex justify-center items-center rounded-full'
 				>
 					<div className='Container absolute w-full sm:w-auto sm:h-full aspect-square'>
 						<Circles
@@ -1106,12 +1134,14 @@ const OutroSection = () => {
 									'transition-transform'
 								),
 							}}
-							liMotion={{ css: 'w-[calc(20px+100%)] sm:w-[calc(50px+100%)]' }}
+							liMotion={{
+								css: 'w-[calc(30px+100%)] sm:w-[calc(40px+100%)] lg:w-[calc(50px+100%)]',
+							}}
 						/>
 					</div>
 					<span
 						style={{ WebkitTextStroke: '1px #eaeaea' }}
-						className='Text relative text-[#101010] text-[6rem] sm:text-[10rem] font-GmarketSans font-bold'
+						className='Text relative text-[#101010] text-[6rem] sm:text-[7.375rem] lg:text-[8.625rem] xl:text-[10rem] font-GmarketSans font-bold'
 					>
 						INSAN
 					</span>
@@ -1121,7 +1151,7 @@ const OutroSection = () => {
 	);
 };
 
-export default function Home() {
+const Home: NextPage = () => {
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
@@ -1174,4 +1204,6 @@ export default function Home() {
 			</Layout>
 		</div>
 	);
-}
+};
+
+export default Home;

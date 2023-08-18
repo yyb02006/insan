@@ -1,84 +1,483 @@
-import { SyntheticEvent, useEffect, useState } from 'react';
-import { WorkInfos } from './write';
-import { cls, fetchApi } from '@/libs/client/utils';
+import {
+	SetStateAction,
+	SyntheticEvent,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
+import { FlatformsCategory, WorkInfos } from './write';
+import { ciIncludes, cls, fetchApi } from '@/libs/client/utils';
 import Image from 'next/image';
 import useMutation from '@/libs/client/useMutation';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout';
 import Link from 'next/link';
 import Input from '@/components/input';
+import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
+import useDeleteRequest from '@/libs/client/useDelete';
+import ToTop from '@/components/toTop';
 
 interface list extends WorkInfos {
 	id: number;
 }
 
-interface listState extends list {
-	selected: boolean;
-}
-
 interface dataState {
 	success: boolean;
-	list: list[];
+	works: { film: list[]; short: list[]; outsource: list[] };
+}
+
+interface ThumbnailProps {
+	src: { main: string; sub: string };
+}
+
+const Thumbnail = ({ src }: ThumbnailProps) => {
+	const [error, setError] = useState(false);
+	const handleImageError = () => {
+		setError(true);
+	};
+	return (
+		<Image
+			src={!error ? src.main : src.sub}
+			alt='picturesAlter'
+			width={1280}
+			height={720}
+			priority
+			onError={handleImageError}
+			className='w-full object-cover aspect-video'
+		/>
+	);
+};
+
+interface MenuBarProps {
+	currentPage: 'write' | 'delete';
+}
+
+export const MenuBar = ({ currentPage = 'write' }: MenuBarProps) => {
+	return (
+		<>
+			<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
+				{currentPage === 'write' ? (
+					<span>추가하기</span>
+				) : (
+					<span>삭제하기</span>
+				)}
+			</div>
+			<div className='absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
+				<Link href={`/work/${currentPage === 'write' ? 'delete' : 'write'}`}>
+					{currentPage === 'write' ? (
+						<span>삭제하기</span>
+					) : (
+						<span>추가하기</span>
+					)}
+				</Link>
+			</div>
+		</>
+	);
+};
+
+interface CategoryTabProps {
+	onFilmShortClick: () => void;
+	onOutsourceClick: () => void;
+	category: FlatformsCategory;
+}
+
+export const CategoryTab = ({
+	onFilmShortClick,
+	onOutsourceClick,
+	category,
+}: CategoryTabProps) => {
+	return (
+		<div className='flex py-4'>
+			<button
+				onClick={onFilmShortClick}
+				className={cls(
+					category === 'filmShort' ? 'text-palettered' : '',
+					'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
+				)}
+			>
+				Film / Short
+			</button>
+			<button
+				onClick={onOutsourceClick}
+				className={cls(
+					category === 'outsource' ? 'text-palettered' : '',
+					'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
+				)}
+			>
+				Outsource
+			</button>
+		</div>
+	);
+};
+
+interface SearchFormProps {
+	onSearch: (e: SyntheticEvent<HTMLFormElement>) => void;
+	setSearchWord: (value: SetStateAction<string>) => void;
+	searchWord: string;
+}
+
+export const SearchForm = ({
+	onSearch,
+	setSearchWord,
+	searchWord,
+}: SearchFormProps) => {
+	return (
+		<form
+			onSubmit={onSearch}
+			className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
+		>
+			<button type='submit'>
+				<svg
+					xmlns='http://www.w3.org/2000/svg'
+					fill='none'
+					viewBox='0 0 24 24'
+					strokeWidth={2}
+					stroke='currentColor'
+					className='w-6 h-6'
+				>
+					<path
+						strokeLinecap='round'
+						strokeLinejoin='round'
+						d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+					/>
+				</svg>
+			</button>
+			<Input
+				name='search'
+				type='text'
+				placeholder='search'
+				css='border-none placeholder:font-bold bg-transparent'
+				onChange={(e: SyntheticEvent<HTMLInputElement>) => {
+					setSearchWord(e.currentTarget.value);
+				}}
+				value={searchWord}
+			/>
+		</form>
+	);
+};
+
+interface SelectedListButtonProps {
+	onClick: () => void;
+	count: number;
+	isMobile: boolean;
+}
+
+export const SelectedListButton = ({
+	onClick,
+	count,
+	isMobile,
+}: SelectedListButtonProps) => {
+	return (
+		<button
+			onClick={onClick}
+			className={cls(
+				isMobile
+					? 'fixed sm:hidden bottom-24 right-4 w-16  bg-[#101010] font-bold '
+					: 'hidden sm:inline-block w-full font-light hover:text-palettered hover:font-bold',
+				'ring-1 ring-palettered aspect-square text-sm rounded-full'
+			)}
+		>
+			<div>{count}</div>
+			<div>Lists</div>
+		</button>
+	);
+};
+
+interface ButtonsControllerProps {
+	onReset: () => void;
+	onSave: () => void;
+	onSort: () => void;
+	count: number;
+}
+
+export const ButtonsController = ({
+	onReset,
+	onSave,
+	onSort,
+	count,
+}: ButtonsControllerProps) => {
+	return (
+		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
+			<button
+				onClick={onReset}
+				className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+			>
+				Reset
+			</button>
+			<button
+				onClick={onSave}
+				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+			>
+				Save
+			</button>
+			<SelectedListButton
+				onClick={onSort}
+				count={count}
+				isMobile={false}
+			></SelectedListButton>
+		</div>
+	);
+};
+
+interface WorkProps {
+	onClick: () => void;
+	searchResult: ListItems;
+	category: FlatformsCategory;
+	selected: boolean;
+	resourceId: string;
+	title: string;
+	thumbnailLink: string;
+}
+
+const Work = ({
+	category,
+	selected,
+	resourceId,
+	title,
+	onClick,
+	searchResult,
+	thumbnailLink,
+}: WorkProps) => {
+	return (
+		<div
+			className={cls(selected ? 'ring-2' : 'ring-0', 'ring-palettered')}
+			onClick={onClick}
+		>
+			<Thumbnail
+				src={
+					searchResult[category].length !== 0
+						? category === 'outsource'
+							? {
+									main: `https://i.ytimg.com/vi/${resourceId}/maxresdefault.jpg`,
+									sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+							  }
+							: {
+									main: thumbnailLink,
+									sub: thumbnailLink,
+							  }
+						: { main: '', sub: '' }
+				}
+			/>
+			<div className='mt-2'>
+				<div className='text-sm'>Title : {title}</div>
+				<div className='text-xs font-light break-words'>
+					<span className='whitespace-nowrap'>Id : </span>
+					{resourceId}
+				</div>
+			</div>
+		</div>
+	);
+};
+
+interface ListItems {
+	outsource: list[];
+	filmShort: list[];
+}
+
+interface getListsInitProps {
+	kind: FlatformsCategory;
+	showLoading: boolean;
 }
 
 export default function Delete() {
-	const [category, setCategory] = useState<'film&short' | 'outsource'>(
-		'film&short'
-	);
+	const router = useRouter();
+	const topElement = useRef<HTMLDivElement>(null);
+	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
-	const [searchResult, setSearchResult] = useState<listState[]>();
-	const [list, setList] = useState<listState[]>();
-	const [send, { loading, data }] = useMutation<{ success: boolean }>(
+	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
+	const [searchResult, setSearchResult] = useState<ListItems>({
+		filmShort: [],
+		outsource: [],
+	});
+	const [searchResultSnapShot, setSearchResultSnapShot] = useState<ListItems>({
+		filmShort: [],
+		outsource: [],
+	});
+	const [list, setList] = useState<ListItems>({
+		outsource: [],
+		filmShort: [],
+	});
+	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
 		'/api/work'
 	);
-	const router = useRouter();
+	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
+	const [page, setPage] = useState(1);
+	const [apiPage, setApiPage] = useState<{
+		filmShort: number;
+		outsource: number;
+	}>({ filmShort: 1, outsource: 1 });
+	const perPage = 12;
+	const [onSelectedList, setOnSelectedList] = useState(false);
+	const [fetchLoading, setFetchLoading] = useState(true);
+	const [hasNextPage, setHasNextPage] = useState<{
+		filmShort: boolean;
+		outsource: boolean;
+	}>({ filmShort: true, outsource: true });
+
 	useEffect(() => {
-		fetchApi(
-			'/api/work',
-			(data: dataState) =>
-				setList(data.list.map((list) => ({ ...list, selected: false }))),
-			{ method: 'GET' }
-		);
+		const getListsInit = async ({ kind, showLoading }: getListsInitProps) => {
+			showLoading && setFetchLoading(true);
+			const lists: dataState = await (
+				await fetch(
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${kind}`
+				)
+			).json();
+			setList((p) => ({
+				...p,
+				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
+			}));
+			setSearchResult((p) => ({
+				...p,
+				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
+			}));
+			if (
+				lists.works[kind === 'filmShort' ? 'film' : 'outsource'].length <
+				perPage
+			) {
+				setHasNextPage((p) => ({ ...p, [kind]: false }));
+			}
+			setPage(2);
+			setApiPage({ filmShort: 2, outsource: 2 });
+			showLoading && setFetchLoading(false);
+		};
+		getListsInit({
+			kind: 'filmShort',
+			showLoading: true,
+		});
+		getListsInit({
+			kind: 'outsource',
+			showLoading: false,
+		});
 	}, []);
-	const onSubmitDelete = () => {
-		if (loading) return;
-		console.log(
-			searchResult
-				?.filter((list) => list.selected === true)
-				.map((list) => list.id)
-		);
-		send(
-			searchResult
-				?.filter((list) => list.selected === true)
-				.map((list) => list.id)
-		);
-	};
+
+	useEffect(() => {
+		setOnSelectedList(false);
+		setDeleteIdList([]);
+		setPage(2);
+		setSearchResult((p) => ({
+			...p,
+			[category === 'filmShort' ? 'outsource' : 'filmShort']:
+				list[category === 'filmShort' ? 'outsource' : 'filmShort'],
+		}));
+	}, [category]);
+
 	useEffect(() => {
 		if (data?.success) {
 			router.push('/work/write');
 		}
 	}, [router, data]);
-	useEffect(() => {
-		if (list) {
-			setSearchResult(list);
-		}
-	}, [list]);
-	const onReset = () => {
-		setList((p) => p?.map((arr) => ({ ...arr, selected: false })));
+
+	const onSubmitDelete = () => {
+		if (loading) return;
+		send(deleteIdList);
 	};
+
+	const onReset = () => {
+		setOnSelectedList(false);
+		setPage(1);
+		setDeleteIdList([]);
+		setSearchResult((p) => ({ ...p, [category]: list[category] }));
+		setSearchWordSnapShot('');
+	};
+
+	const onSelectedListClick = () => {
+		setOnSelectedList(true);
+		setPage(1);
+		if (!deleteIdList || deleteIdList?.length < 1) return;
+		setSearchResultSnapShot((p) => ({
+			...p,
+			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+		}));
+		setSearchResult((p) => ({
+			...p,
+			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+		}));
+	};
+
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!searchWord) return;
-		setSearchResult(
-			list?.filter(
-				(el) =>
-					el.title.includes(searchWord) ||
-					el.resourceId.toLowerCase().includes(searchWord.toLowerCase())
-			)
+		setPage(1);
+		if (typeof searchWord === undefined) return;
+		setSearchWordSnapShot(searchWord);
+		if (onSelectedList) {
+			setSearchResult((p) => ({
+				...p,
+				[category]: searchResultSnapShot[category].filter(
+					(result) =>
+						ciIncludes(result.title, searchWord) ||
+						ciIncludes(result.resourceId, searchWord)
+				),
+			}));
+		} else {
+			setSearchResult((p) => ({
+				...p,
+				[category]: list[category].filter(
+					(li) =>
+						ciIncludes(li.title, searchWord) ||
+						ciIncludes(li.resourceId, searchWord)
+				),
+			}));
+		}
+	};
+
+	const onClick = (id: number) => {
+		setDeleteIdList((p) =>
+			p.includes(id) ? p.filter((item) => item !== id) : [...p, id]
 		);
 	};
-	console.log(list);
 
+	const processIntersection = () => {
+		const getList = async () => {
+			setFetchLoading(true);
+			const lists: dataState = await (
+				await fetch(
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
+				)
+			).json();
+			if (
+				lists.works[category === 'filmShort' ? 'film' : 'outsource'].length <
+				perPage
+			) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
+			}
+			setList((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[category === 'filmShort' ? 'film' : 'outsource'],
+				],
+			}));
+			setSearchResult((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[
+						category === 'filmShort' ? 'film' : 'outsource'
+					].filter(
+						(li) =>
+							ciIncludes(li.title, searchWordSnapShot) ||
+							ciIncludes(li.resourceId, searchWordSnapShot)
+					),
+				],
+			}));
+			setFetchLoading(false);
+			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+		};
+		if (fetchLoading) return;
+		if (!onSelectedList && hasNextPage[category]) {
+			getList();
+		}
+		if (page <= searchResult[category].length / perPage + 1) {
+			setPage((p) => p + 1);
+		}
+	};
+
+	const intersectionRef = useInfiniteScroll({
+		processIntersection,
+		dependencyArray: [page, fetchLoading],
+	});
+
+	console.log('page=' + page, 'api=' + apiPage[category], fetchLoading);
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -86,129 +485,56 @@ export default function Delete() {
 			nav={{ isShort: true }}
 			menu={false}
 		>
-			<section className='relative xl:px-40 sm:px-24 px-16'>
-				<div className='h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl'>
-					삭제하기
-				</div>
-				<div className='fixed right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm'>
-					<Link href={'/work/write'}>추가하기</Link>
-				</div>
-				<div className='flex py-4'>
-					<button
-						onClick={() => {
-							setCategory('film&short');
-						}}
-						className={cls(
-							category === 'film&short' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Film / Short
-					</button>
-					<button
-						onClick={() => {
-							setCategory('outsource');
-						}}
-						className={cls(
-							category === 'outsource' ? 'text-palettered' : '',
-							'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-						)}
-					>
-						Outsource
-					</button>
-				</div>
-				<form
-					onSubmit={onSearch}
-					className='relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
-				>
-					<button type='submit'>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							fill='none'
-							viewBox='0 0 24 24'
-							strokeWidth={2}
-							stroke='currentColor'
-							className='w-6 h-6'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+			<section ref={topElement} className='relative xl:px-40 sm:px-24 px-16'>
+				<MenuBar currentPage='delete' />
+				<CategoryTab
+					category={category}
+					onFilmShortClick={() => {
+						setCategory('filmShort');
+					}}
+					onOutsourceClick={() => {
+						setCategory('outsource');
+					}}
+				/>
+				<SearchForm
+					onSearch={onSearch}
+					setSearchWord={setSearchWord}
+					searchWord={searchWord}
+				/>
+				<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
+					{searchResult[category].map((li, index) =>
+						index < 12 * (page - 1) ? (
+							<Work
+								key={li.id}
+								category={category}
+								selected={deleteIdList.includes(li.id)}
+								resourceId={li.resourceId}
+								title={li.title}
+								thumbnailLink={li.thumbnailLink}
+								onClick={() => {
+									onClick(li.id);
+								}}
+								searchResult={searchResult}
 							/>
-						</svg>
-					</button>
-					<Input
-						name='search'
-						type='text'
-						placeholder='search'
-						css='border-none placeholder:font-bold bg-transparent'
-						onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-							setSearchWord(e.currentTarget.value);
-						}}
-					/>
-				</form>
-				{category === 'film&short' ? <></> : ''}
-				{category === 'outsource' ? (
-					<>
-						<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-							{searchResult?.map((li) => (
-								<div
-									key={li.id}
-									className={cls(
-										li.selected ? 'ring-2' : 'ring-0',
-										'ring-palettered'
-									)}
-									onClick={() => {
-										setSearchResult((p) =>
-											p?.map((list) =>
-												list.id === li.id
-													? { ...list, selected: !list.selected }
-													: list
-											)
-										);
-									}}
-								>
-									<Image
-										src={
-											searchResult.length !== 0
-												? `https://i.ytimg.com/vi/${li.resourceId}/maxresdefault.jpg` ||
-												  `https://i.ytimg.com/vi/${li.resourceId}/sddefault.jpg` ||
-												  `https://i.ytimg.com/vi/${li.resourceId}/mqdefault.jpg`
-												: ''
-										}
-										alt='test'
-										width={1280}
-										height={720}
-										className='w-full object-cover'
-										priority
-									/>
-									<div className='mt-2'>
-										<div className='text-sm'>Title : {li.title}</div>
-										<div className='text-xs font-light'>
-											Id : {li.resourceId}
-										</div>
-									</div>
-								</div>
-							))}
-							<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
-								<button
-									onClick={onReset}
-									className='w-full ring-1 ring-palettered aspect-square sm:rounded-full bg-[#101010] sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Reset
-								</button>
-								<button
-									onClick={onSubmitDelete}
-									className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
-								>
-									Delete
-								</button>
-							</div>
-						</div>
-					</>
-				) : (
-					''
-				)}
+						) : null
+					)}
+				</div>
+				<div
+					ref={intersectionRef}
+					className='w-full h-1 my-40 bg-pink-600'
+				></div>
+				<SelectedListButton
+					onClick={onSelectedListClick}
+					count={deleteIdList.length}
+					isMobile={true}
+				/>
+				<ButtonsController
+					onReset={onReset}
+					onSave={onSubmitDelete}
+					onSort={onSelectedListClick}
+					count={deleteIdList.length}
+				/>
+				<ToTop toScroll={topElement} />
 			</section>
 		</Layout>
 	);

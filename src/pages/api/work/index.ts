@@ -1,31 +1,66 @@
 import client from '@/libs/server/client';
 import withHandler from '@/libs/server/withHandler';
+import { apiSessionWrapper } from '@/libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+	const {
+		query: { purpose, secret },
+	} = req;
+
 	if (req.method === 'GET') {
-		const list = await client.works.findMany({
-			select: {
-				id: true,
-				resourceId: true,
-				title: true,
-				description: true,
-				category: true,
-			},
-		});
-		return res.json({ success: true, list });
+		if (purpose === 'length') {
+			const works = {
+				film: await client.works.count({ where: { category: 'film' } }),
+				short: await client.works.count({ where: { category: 'short' } }),
+				outsource: await client.works.count({
+					where: { category: 'outsource' },
+				}),
+			};
+			return res.status(200).json({ success: true, works });
+		} else {
+			return res.status(400).json({
+				success: false,
+				message: 'Wrong Parameter Or Not Resource To Response',
+			});
+		}
 	}
-	if (req.method === 'POST') {
-		const { body } = req;
-		console.log('this is body' + body);
-		body.forEach(async (el: number) => {
-			await client.works.delete({ where: { id: el } });
-		});
-		return res.json({ success: true });
+
+	if (req.method === 'DELETE') {
+		try {
+			if (secret !== process.env.ODR_SECRET_TOKEN) {
+				return res
+					.status(401)
+					.json({ success: false, message: 'Invalid token' });
+			}
+
+			const ids = req.headers['ids-to-delete'];
+
+			if (!ids || Array.isArray(ids))
+				return res.status(500).json({ success: false });
+			const parsedIds = JSON.parse(ids);
+
+			/* iterable한 변수인지 구분법
+			typeof ids[Symbol.iterator] === 'function' */
+
+			await Promise.all(
+				parsedIds.map(async (el: string) => {
+					await client.works.delete({ where: { id: +el } });
+				})
+			);
+
+			await res.revalidate('/work');
+			return res.status(200).json({ success: true });
+		} catch (error) {
+			return res.status(500).json({ success: false });
+		}
 	}
 };
 
-export default withHandler({
-	methods: ['GET', 'POST', 'DELETE'],
-	handlerFunc: handler,
-});
+export default apiSessionWrapper(
+	withHandler({
+		methods: ['GET', 'DELETE'],
+		handlerFunc: handler,
+		inspection: { targetMethods: ['DELETE'], onInspection: true },
+	})
+);

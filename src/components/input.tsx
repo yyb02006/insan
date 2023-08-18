@@ -15,6 +15,7 @@ interface InputProps {
 	css?: string;
 	labelCss?: string;
 	labelName?: string;
+	radioDisabled?: boolean;
 	[key: string]: any;
 }
 
@@ -29,6 +30,7 @@ export default function Input({
 	css,
 	labelCss,
 	labelName,
+	radioDisabled,
 	...rest
 }: InputProps) {
 	return (
@@ -42,8 +44,9 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
@@ -56,8 +59,9 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
@@ -70,31 +74,32 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
 					)}
+					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
 			{type === 'radio' ? (
-				<div>
+				<label>
 					<input
 						type='radio'
 						id={radioId}
 						name={name}
 						value={value}
+						disabled={radioDisabled}
 						className={cls(css ? css : '', 'hidden peer')}
 						{...rest}
 					/>
-					<label
-						htmlFor={radioId}
+					<div
 						className={cls(
 							labelCss ? labelCss : '',
-							'peer-checked:text-palettered'
+							'peer-checked:text-palettered text-[#bababa]'
 						)}
 					>
 						{labelName}
-					</label>
-				</div>
+					</div>
+				</label>
 			) : null}
 			{type === 'textarea' ? (
 				<textarea
@@ -109,7 +114,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#eaeaea] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
 					)}
 					{...rest}
 				/>

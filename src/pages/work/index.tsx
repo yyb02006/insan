@@ -1,6 +1,11 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { cls, fetchApi, fetchYouTubeApi } from '@/libs/client/utils';
+import {
+	ciIncludes,
+	cls,
+	fetchApi,
+	fetchYouTubeApi,
+} from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -17,6 +22,8 @@ import {
 	Dispatch,
 	MutableRefObject,
 	SetStateAction,
+	SyntheticEvent,
+	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -26,6 +33,16 @@ import Input from '@/components/input';
 import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
+import VimeoPlayer from 'react-player/vimeo';
+import ReactPlayer from 'react-player/lazy';
+import YouTubePlayer from 'react-player/youtube';
+import { FixedSizeList } from 'react-window';
+import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
+import { VideoResponseItem } from '../api/work/list';
+import client from '@/libs/server/client';
+import { GetStaticProps } from 'next';
+
+export type VideosCategory = 'film' | 'short' | 'outsource';
 
 interface TagButtonProps {
 	tag: { name: string };
@@ -38,7 +55,8 @@ interface TitleSvgPresenseProps {
 }
 
 interface TitleSectionProps {
-	setCategory: Dispatch<SetStateAction<'film' | 'short' | 'outsource'>>;
+	setCategory: Dispatch<SetStateAction<VideosCategory>>;
+	initialLength: initialLength;
 }
 
 interface TagButtonSectionProps {
@@ -46,25 +64,33 @@ interface TagButtonSectionProps {
 }
 
 interface SearchSectionProp {
-	setKeyWords: Dispatch<SetStateAction<keyWordsState>>;
-}
-
-interface VideoSectionProps {
-	category: 'film' | 'short' | 'outsource';
-	keywords: keyWordsState;
+	setSearchWords: Dispatch<SetStateAction<string>>;
+	setTags: Dispatch<SetStateAction<string[]>>;
+	onSearch: () => void;
+	searchWords: string;
 }
 
 interface VideoProps {
 	index: string;
 	waiting: number;
-	thumbnail: { url: string; width: number; height: number };
+	thumbnail: { url: string; width: number; height: number; alt: string };
 	title: string;
 	description: string;
+	category: VideosCategory;
+	resource: string;
+	date: string;
+	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
+	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
 }
 
-interface keyWordsState {
-	searchWord: string;
-	selectedTags: string[];
+interface OnDetail {
+	isOpen: boolean;
+	title: string;
+	description: string;
+	date: string;
+	resource: string;
+	category: VideosCategory;
+	imageUrl: string;
 }
 
 const titleContainer: Variants = {
@@ -105,6 +131,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	const [chevron, chevronAnimate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
+		console.log(chevron);
 		if (isPresent) {
 			const enterAnimation = async () => {
 				await chevronAnimate(
@@ -127,7 +154,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent, chevron, chevronAnimate]);
+	}, [isPresent, chevron, chevronAnimate, safeToRemove]);
 	return (
 		<div ref={chevron} className='relative opacity-0 flex items-center'>
 			<svg
@@ -151,46 +178,47 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 
 type categories = {
 	title: string;
-	kind: 'film' | 'short' | 'outsource';
+	kind: VideosCategory;
 	count: number;
 	idx: number;
 	explanation: string;
 };
 
-const TitleSection = ({ setCategory }: TitleSectionProps) => {
-	const [categoryState, setCategoryState] = useState<
-		'film' | 'short' | 'outsource'
-	>('film');
-	const dataLength = useRef(389);
-	const rotate = useRef(0);
-	const categories: categories[] = [
+const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
+	const [categoryState, setCategoryState] = useState<VideosCategory>('film');
+	const categoriesInfo: categories[] = [
 		{
 			title: 'Film & AD',
 			kind: 'film',
-			count: 225,
+			count: initialLength.film,
 			idx: 1,
 			explanation: '16 : 9',
 		},
 		{
 			title: 'Short-form',
 			kind: 'short',
-			count: 22,
+			count: initialLength.short,
 			idx: 2,
 			explanation: '9 : 16',
 		},
 		{
 			title: 'Outsource',
 			kind: 'outsource',
-			count: 13,
+			count: initialLength.outsource,
 			idx: 3,
 			explanation: 'partial',
 		},
 	];
+	const totalDatasLength =
+		initialLength.film + initialLength.outsource + initialLength.short;
+	const rotate = useRef(0);
 	const count = useMotionValue(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const rounded = useTransform(count, Math.round);
+	console.log(categoriesInfo);
+
 	useEffect(() => {
-		const animation = animate(count, dataLength.current, {
+		const animation = animate(count, totalDatasLength, {
 			duration: 1,
 			ease: [0.8, 0, 0.2, 1],
 			onUpdate(value) {
@@ -200,7 +228,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 			},
 		});
 		return animation.stop;
-	}, [rounded, count]);
+	}, [rounded, count, totalDatasLength]);
 	useEffect(() => {
 		setCategory(categoryState);
 		switch (categoryState) {
@@ -232,7 +260,7 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
 					<span className='font-light'>
 						<span ref={ref} className='absolute'></span>
-						<span className='invisible'>{dataLength.current}&nbsp;</span>
+						<span className='invisible'>{totalDatasLength}&nbsp;</span>
 					</span>
 					<motion.span
 						initial={'initial'}
@@ -256,15 +284,15 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 					animate={'visible'}
 					variants={categoryContainer}
 				>
-					{categories.map((category) => (
+					{categoriesInfo.map((info) => (
 						<motion.div
-							key={category.idx}
+							key={info.idx}
 							variants={categoryChild}
 							onClick={() => {
-								setCategoryState(category.kind);
+								setCategoryState(info.kind);
 							}}
 							className={cls(
-								categoryState === category.kind
+								categoryState === info.kind
 									? 'text-palettered'
 									: 'text-[#bababa]',
 								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
@@ -274,13 +302,15 @@ const TitleSection = ({ setCategory }: TitleSectionProps) => {
 								<div className='absolute bg-[#151515] w-full h-[40%]' />
 							) : null} */}
 							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
-								<div className='inline-block pr-3'>{category.count} </div>
-								{category.title}
+								<div className='inline-block pr-3'>{info.count} </div>
+								{info.title}
 							</div>
 							<AnimatePresence>
-								{categoryState === category.kind ? (
-									<TitleSvgPresense explanation={category.explanation} />
-								) : null}
+								{categoryState === info.kind ? (
+									<TitleSvgPresense explanation={info.explanation} />
+								) : (
+									<div />
+								)}
 							</AnimatePresence>
 						</motion.div>
 					))}
@@ -363,9 +393,17 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 				})
 		);
 	};
+
+	const setSelectedTagsCallback = useCallback(
+		(selected: string[]) => {
+			setSelectedTags(selected);
+		},
+		[setSelectedTags]
+	);
+
 	useEffect(() => {
 		setSelectedTags(tags.selected);
-	}, [tags]);
+	}, [tags, setSelectedTagsCallback]);
 	return (
 		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
@@ -398,23 +436,23 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	);
 };
 
-const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
-	const [selectedTags, setSelectedTags] = useState(['']);
-	const [searchWord, setSearchWord] = useState('');
-	const onChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
-		setSearchWord(e.currentTarget.value);
+const SearchSection = ({
+	setSearchWords,
+	setTags,
+	onSearch,
+	searchWords,
+}: SearchSectionProp) => {
+	const onChange = (e: SyntheticEvent<HTMLInputElement>) => {
+		setSearchWords(e.currentTarget.value);
 	};
-	const onsubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+	const onSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setKeyWords((p) => ({ ...p, searchWord }));
+		onSearch();
 	};
-	useEffect(() => {
-		setKeyWords((p) => ({ ...p, selectedTags }));
-	}, [selectedTags]);
 	return (
 		<section>
 			<form
-				onSubmit={onsubmit}
+				onSubmit={onSubmit}
 				className='relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
 			>
 				<button>
@@ -439,9 +477,10 @@ const SearchSection = ({ setKeyWords }: SearchSectionProp) => {
 					placeholder='search'
 					css='border-none placeholder:font-bold bg-transparent'
 					onChange={onChange}
+					value={searchWords}
 				/>
 			</form>
-			<TagButtonSection setSelectedTags={setSelectedTags} />
+			<TagButtonSection setSelectedTags={setTags} />
 		</section>
 	);
 };
@@ -495,9 +534,193 @@ const VideoTitlePresense = ({
 			ref={intro}
 			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
 		>
-			<div className='Title'>{title}</div>
-			<div className='Desc font-medium text-xl'>description</div>
+			<div className='absolute top-0 left-0 w-full h-full bg-[#101010] opacity-30'></div>
+			<div className='relative Title'>{title}</div>
+			<div className='relative Desc font-medium text-xl'>{description}</div>
 		</div>
+	);
+};
+
+interface VideoDetailProps {
+	title: string;
+	date: string;
+	resource: string;
+	category: VideosCategory;
+	thumbnail: string;
+	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
+}
+
+interface youtubeDesc {
+	items: { snippet: description }[];
+}
+
+interface description {
+	description: string;
+}
+
+const VideoDetail = ({
+	title,
+	date,
+	resource,
+	category,
+	thumbnail,
+	setOnDetail,
+}: VideoDetailProps) => {
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [description, setDescription] = useState<string>();
+	const pattern = /\/([^/]+)\?/;
+	useEffect(() => {
+		if (category === 'film' || category === 'short') {
+			fetch(
+				`https://api.vimeo.com/videos/${
+					resource.match(pattern)?.[1]
+				}?fields=description`,
+				{
+					method: 'get',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+					},
+				}
+			)
+				.then((res) => res.json())
+				.then((data) => {
+					setDescription(data.description);
+					console.log(data);
+				});
+		} else if (category === 'outsource') {
+			fetchYouTubeApi(
+				'videos',
+				'10',
+				(data: youtubeDesc) => {
+					setDescription(data.items[0].snippet.description);
+				},
+				'items(snippet(description))',
+				undefined,
+				resource
+			);
+		}
+	}, [pattern]);
+	return (
+		<>
+			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80' />
+			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
+				<div className='w-full h-auto py-16 bg-[#101010]'>
+					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
+						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
+							{category === 'film' || category === 'short' ? (
+								<>
+									<VimeoPlayer
+										url={`${resource}`}
+										controls={true}
+										width={'100%'}
+										height={'auto'}
+										style={{ aspectRatio: 16 / 9 }}
+										onReady={() => {
+											setInterval(() => {
+												setIsLoaded(true);
+											}, 80);
+										}}
+									/>
+									{!isLoaded ? (
+										<div className='absolute top-0 left-0 w-full aspect-video'>
+											<Image
+												src={thumbnail}
+												alt={'will fixed'}
+												width={960}
+												height={540}
+												priority
+												className='absolute top-0 left-0 w-full aspect-video object-cover'
+											/>
+											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
+											<div className='absolute w-full h-full flex justify-center items-center'>
+												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+													<Circles
+														liMotion={{
+															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+														}}
+													/>
+												</div>
+											</div>
+										</div>
+									) : null}
+								</>
+							) : null}
+							{category === 'outsource' ? (
+								<>
+									<div className='w-full h-full bg-green-500'>
+										<YouTubePlayer
+											url={`https://www.youtube.com/watch?v=${resource}`}
+											controls={true}
+											width={'auto'}
+											height={'full'}
+											style={{ aspectRatio: 16 / 9 }}
+											onReady={() => {
+												setInterval(() => {
+													setIsLoaded(true);
+												}, 80);
+											}}
+										/>
+									</div>
+									{!isLoaded ? (
+										<div className='absolute top-0 left-0 w-full aspect-video'>
+											<Image
+												src={thumbnail}
+												alt={'will fixed'}
+												width={960}
+												height={540}
+												priority
+												className='absolute top-0 left-0 w-full aspect-video object-cover'
+											/>
+											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
+											<div className='absolute w-full h-full flex justify-center items-center'>
+												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+													<Circles
+														liMotion={{
+															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
+														}}
+													/>
+												</div>
+											</div>
+										</div>
+									) : null}
+								</>
+							) : null}
+						</div>
+						<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
+							<div className='font-semibold text-xl self-start'>{title}</div>
+							<div className='font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]'>
+								{description ? description : null}
+							</div>
+							<div className='font-light text-sm self-end text-[#aaaaaa]'>
+								{date}
+							</div>
+						</div>
+					</div>
+				</div>
+				<button
+					className='absolute m-2 top-4 right-4'
+					onClick={() => {
+						setOnDetail((p) => (p ? { ...p, isOpen: false } : undefined));
+					}}
+				>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						fill='none'
+						viewBox='0 0 24 24'
+						strokeWidth={1}
+						stroke='currentColor'
+						className='w-10 h-10 stroke-[#707070]'
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M6 18L18 6M6 6l12 12'
+						/>
+					</svg>
+				</button>
+			</div>
+		</>
 	);
 };
 
@@ -507,9 +730,43 @@ const Video = ({
 	thumbnail,
 	title,
 	description,
+	category,
+	resource,
+	date,
+	setOnDetail,
+	setAnimationEnd,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
+	const [error, setError] = useState(false);
+	const [start, setStart] = useState(false);
+	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
+	const [isIntersecting, setIsIntersecting] = useState(false);
+	const videoRef = useRef<HTMLDivElement>(null);
+	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+	const [isHovering, setIsHovering] = useState(false);
+	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+		const [entry] = entries;
+		if (entry.isIntersecting) {
+			setIsIntersecting(true);
+		}
+	};
+	useEffect(() => {
+		const observer = new IntersectionObserver(handleIntersection, {
+			root: null,
+			rootMargin: '0px',
+			threshold: 0.5,
+		});
+		const currentIntersectionRef = videoRef.current;
+		if (currentIntersectionRef) {
+			observer.observe(currentIntersectionRef);
+		}
+		return () => {
+			if (currentIntersectionRef) {
+				observer.unobserve(currentIntersectionRef);
+			}
+		};
+	}, []);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -520,59 +777,157 @@ const Video = ({
 			const exitAnimation = async () => {
 				await coverAnimate(
 					cover.current,
-					{ opacity: 0.4 },
+					{ opacity: 1 },
 					{ duration: 0.4, delay: 0.4 }
 				);
 			};
 			exitAnimation();
 		}
 	}, [titleScreen, cover, coverAnimate]);
+	const onAnimationComplete = () => {
+		if (setAnimationEnd) {
+			setAnimationEnd(true);
+		}
+	};
+	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
+	const handleMouseEnter = () => {
+		setTitleScreen(true);
+		setIsVideoLoadable(true);
+		setTimer(
+			setTimeout(() => {
+				setIsHovering(true);
+			}, 1000)
+		);
+	};
+	const handleMouseLeave = () => {
+		setTitleScreen(false);
+		if (timer) {
+			clearTimeout(timer);
+			setTimer(null);
+		}
+	};
 	return (
-		<motion.article
-			initial={{ opacity: 1 }}
-			animate={{
-				opacity: [0, 1],
-				y: [80, 0],
-				transition: { delay: 0.2 + 0.08 * waiting },
-			}}
-			exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
-			onMouseEnter={() => {
-				setTitleScreen((p) => (p = true));
-			}}
-			onMouseLeave={() => {
-				setTitleScreen((p) => (p = false));
-			}}
-			key={index}
-			className='relative w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem]  border'
-		>
-			<Image
-				src={thumbnail.url}
-				alt='thumbnail(will fixed)'
-				width={thumbnail.width}
-				height={thumbnail.height}
-				priority
-				className='relative w-full'
-			/>
-			<AnimatePresence>
-				{titleScreen ? (
-					<VideoTitlePresense title={title} description={description} />
+		<>
+			<motion.article
+				initial={{ opacity: 0 }}
+				animate={{
+					opacity: [0, 1],
+					y: [80, 0],
+					transition: { delay: 0.2 + 0.08 * waiting },
+				}}
+				// exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
+				onAnimationComplete={onAnimationComplete}
+				onMouseEnter={() => {
+					handleMouseEnter();
+				}}
+				onMouseLeave={() => {
+					handleMouseLeave();
+				}}
+				onClick={() => {
+					setOnDetail((p) => ({
+						...p,
+						isOpen: true,
+						category,
+						date,
+						description,
+						resource,
+						title,
+						imageUrl: thumbnail.url,
+					}));
+				}}
+				key={index}
+				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
+			>
+				{category === 'film' || category === 'short' ? (
+					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
+						{isIntersecting && isVideoLoadable ? (
+							<>
+								{isHovering ? (
+									<VimeoPlayer
+										url={`${resource}&quality=540p`}
+										controls={false}
+										muted={true}
+										playing={titleScreen}
+										width={'100%'}
+										height={'100%'}
+										loop={true}
+										onStart={() => {
+											setStart(true);
+										}}
+									/>
+								) : null}
+								{!start ? (
+									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+											<Circles
+												liMotion={{
+													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+												}}
+											/>
+										</div>
+									</div>
+								) : null}
+							</>
+						) : null}
+					</div>
 				) : null}
-			</AnimatePresence>
-			<div
-				ref={cover}
-				className='absolute w-full h-full bg-[#101010] opacity-40 text-5xl font-bold flex justify-center items-center pointer-events-none'
-			></div>
-		</motion.article>
+				{category === 'outsource' ? (
+					<div ref={videoRef} className='absolute w-full aspect-video'>
+						{isIntersecting && isVideoLoadable ? (
+							<>
+								<YouTubePlayer
+									url={`https://www.youtube.com/watch?v=${resource}`}
+									controls={false}
+									muted={true}
+									playing={titleScreen}
+									width={'100%'}
+									height={'100%'}
+									config={{
+										embedOptions: { host: 'https://www.youtube-nocookie.com' },
+									}}
+									loop={true}
+									onStart={() => {
+										setStart(true);
+									}}
+								/>
+								{!start ? (
+									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+											<Circles
+												liMotion={{
+													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+												}}
+											/>
+										</div>
+									</div>
+								) : null}
+							</>
+						) : null}
+					</div>
+				) : null}
+				<div ref={cover} className='absolute w-full h-full '>
+					<Image
+						src={error ? thumbnail.alt : thumbnail.url}
+						onError={() => {
+							setError(true);
+						}}
+						alt={'will fixed'}
+						width={thumbnail.width}
+						height={thumbnail.height}
+						priority
+						className='relative w-full aspect-video object-cover'
+					/>
+					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
+				</div>
+				<AnimatePresence>
+					{titleScreen ? (
+						<VideoTitlePresense title={title} description={description} />
+					) : null}
+				</AnimatePresence>
+			</motion.article>
+		</>
 	);
 };
-
-interface videoGenreState {
-	category: 'film' | 'short' | 'outsource';
-	id: string;
-	thumbnails: { url: string; width: number; height: number };
-	title: string;
-	description: string;
-}
 
 export interface GapiItem {
 	id: string;
@@ -586,145 +941,16 @@ export interface GapiItem {
 	};
 }
 
-interface GapiLists {
-	items: {
-		id: string;
-		snippet: {
-			title: string;
-		};
-	}[];
+interface VideoResponse {
+	success: boolean;
+	works: VideoResponseItem;
 }
 
-const VideoSection = ({ category, keywords }: VideoSectionProps) => {
-	const videoDatas = [
-		{ category: 'film', direction: 'horizental', index: 1 },
-		{ category: 'short', direction: 'vertical', index: 2 },
-		{ category: 'film', direction: 'horizental', index: 3 },
-		{ category: 'short', direction: 'vertical', index: 4 },
-		{ category: 'short', direction: 'vertical', index: 5 },
-		{ category: 'film', direction: 'horizental', index: 6 },
-		{ category: 'film', direction: 'horizental', index: 7 },
-		{ category: 'short', direction: 'vertical', index: 8 },
-		{ category: 'film', direction: 'horizental', index: 9 },
-		{ category: 'short', direction: 'vertical', index: 10 },
-		{ category: 'film', direction: 'horizental', index: 11 },
-		{ category: 'short', direction: 'vertical', index: 12 },
-		{ category: 'outsource', direction: 'horizental', index: 13 },
-		{ category: 'film', direction: 'horizental', index: 14 },
-		{ category: 'film', direction: 'horizental', index: 15 },
-		{ category: 'short', direction: 'vertical', index: 16 },
-		{ category: 'outsource', direction: 'horizental', index: 17 },
-		{ category: 'outsource', direction: 'horizental', index: 18 },
-		{ category: 'film', direction: 'horizental', index: 19 },
-		{ category: 'short', direction: 'vertical', index: 20 },
-	];
-	const newVideoDatas = {
-		film: videoDatas.filter((data) => data.category === 'film'),
-		short: videoDatas.filter((data) => data.category === 'short'),
-		outsource: videoDatas.filter((data) => data.category === 'outsource'),
-	};
-	// const youtube = (category: 'film' | 'short' | 'outsource') => {
-	// 	fetch(
-	// 		`https://www.googleapis.com/youtube/v3/search?key=${process.env.YOUTUBE_API_KEY}&part=snippet&channelId=UCwy8JhA4eDumalKwKrvrxQA&type=video&fields=(nextPageToken,items(id,snippet(title,channelTitle,description,thumbnails)))`
-	// 	)
-	// 		.then((response) => response.json())
-	// 		.then((data) => {
-	// 			const { items } = data;
-	// 			const newItems: videoGenreState[] = items.map((element: GapiItems) => {
-	// 				const newItem: videoGenreState = {
-	// 					category,
-	// 					id: element.id.videoId,
-	// 					thumbnails: element.snippet.thumbnails.default,
-	// 					description: element.snippet.description,
-	// 					title: element.snippet.title,
-	// 				};
-	// 				return newItem;
-	// 			});
-	// 			setVideos((p) => ({ ...p, [category]: newItems }));
-	// 		});
-	// };
-	const [items, setItems] = useState<GapiItem[]>([]);
-	const [videos, setVideos] = useState<{ success: boolean; work: Works[] }>();
-	const [playlistIds, setPlaylistIds] = useState<GapiLists>();
-	useEffect(() => {
-		fetchYouTubeApi(
-			'playlists',
-			'10',
-			setPlaylistIds,
-			'(items(id,snippet(title)))'
-		);
-	}, []);
-	useEffect(() => {
-		if (!playlistIds) return;
-		if (category === 'film') {
-			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (
-					item.snippet.title !== 'shorts' &&
-					item.snippet.title !== '참여 촬영'
-				)
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
-		} else if (category === 'short') {
-			setItems((p) => (p = []));
-			playlistIds.items.forEach((item) => {
-				if (item.snippet.title === 'shorts')
-					fetchYouTubeApi(
-						'playlistItems',
-						'9',
-						(data: { items: GapiItem[] }) => {
-							setItems((p) => [...p, ...data.items]);
-						},
-						'(items(id,snippet(title,description,thumbnails)))',
-						item.id
-					);
-			});
-		} else if (category === 'outsource') {
-			setItems((p) => (p = []));
-			fetchApi('/api/work/list?kind=outsource', setVideos);
-		}
-	}, [playlistIds, category]);
-	console.log(items);
-	return (
-		<section className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 bg-[#101010] px-9'>
-			<AnimatePresence>
-				{category === 'outsource'
-					? videos?.work?.map((data, idx) => (
-							<Video
-								key={idx}
-								index={data.id.toString()}
-								waiting={idx}
-								thumbnail={{
-									url: `https://i.ytimg.com/vi/${data.resourceId}/maxresdefault.jpg`,
-									width: 1280,
-									height: 720,
-								}}
-								title={data.title}
-								description={data.description}
-							/>
-					  ))
-					: items.map((data, idx) => (
-							<Video
-								key={idx}
-								index={data.id}
-								waiting={idx}
-								thumbnail={data.snippet.thumbnails.high}
-								title={data.snippet.title}
-								description={data.snippet.description}
-							/>
-					  ))}
-			</AnimatePresence>
-		</section>
-	);
-};
+interface Videos<T> {
+	film: T;
+	short: T;
+	outsource: T;
+}
 
 const OutroSection = () => {
 	const letterRef = useRef(null);
@@ -870,31 +1096,260 @@ const OutroSection = () => {
 	);
 };
 
-export default function Work() {
-	const [category, setCategory] = useState<'film' | 'short' | 'outsource'>(
-		'film'
-	);
+type initialLength = Videos<number>;
+
+type initialWorks = Videos<Works[]>;
+
+type initialHasNextPage = Videos<boolean>;
+
+interface initialData {
+	initialLength: initialLength;
+	initialWorks: initialWorks;
+	initialHasNextPage: initialHasNextPage;
+}
+
+export default function Work({
+	initialLength,
+	initialWorks,
+	initialHasNextPage,
+}: initialData) {
+	const [onDetail, setOnDetail] = useState<OnDetail>();
+	const [category, setCategory] = useState<VideosCategory>('film');
 	const section = useRef<HTMLDivElement>(null);
-	console.log(section);
-	const [keyWords, setKeyWords] = useState<keyWordsState>({
-		searchWord: '',
-		selectedTags: [''],
+	const [fetchLoading, setFetchLoading] = useState(false);
+	const [videos, setVideos] = useState<Videos<Works[]>>(initialWorks);
+	const [searchResults, setSearchResults] =
+		useState<Videos<Works[]>>(initialWorks);
+	const [hasNextPage, setHasNextPage] =
+		useState<Videos<boolean>>(initialHasNextPage);
+	const [page, setPage] = useState(2);
+	const [apipage, setApiPage] = useState<Videos<number>>({
+		film: 2,
+		short: 2,
+		outsource: 2,
 	});
+	//isAnimationEnd를 상시 true로 해놓으면 앞의 컴포넌트가 애니메이션이 끝날 때까지 기다리지 않고 새로 나타난 컴포넌트들이 애니메이션된다
+	const [isAnimationEnd, setIsAnimationEnd] = useState(false);
+	const [searchWordsSnapShot, setSearchWordsSnapShot] = useState('');
+	const [searchWords, setSearchWords] = useState('');
+	const [tags, setTags] = useState<string[]>([]);
+	const perPage = 12;
+
+	console.log(initialLength, initialWorks, initialHasNextPage);
+
 	useEffect(() => {
-		console.log(keyWords);
-	}, [keyWords]);
+		if (onDetail?.isOpen === true) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'auto';
+		}
+		const currentScrollY = window.scrollY;
+		console.log(currentScrollY);
+	}, [onDetail]);
+
+	useEffect(() => {
+		setIsAnimationEnd(false);
+		setPage(2);
+		setSearchResults((p) => ({
+			...p,
+			[category]: videos[category],
+		}));
+	}, [category]);
+
+	const onSearch = () => {
+		//렌더링을 처음부터 다시 시작해야 하기 떄문에 page가 1부터 시작해야 하는데 이때문에 updatePage에 예외가 필요
+		setPage(1);
+		setIsAnimationEnd(false);
+		setSearchWordsSnapShot(searchWords);
+		setSearchResults((p) => ({
+			...p,
+			[category]: videos[category].filter(
+				(video) =>
+					ciIncludes(video.title, searchWords) ||
+					ciIncludes(video.description, searchWords)
+			),
+		}));
+	};
+
+	const updatePage = () => {
+		const getVideos = async () => {
+			setFetchLoading(true);
+			const lists: VideoResponse = await (
+				await fetch(
+					`/api/work/list?page=${apipage[category]}&per_page=${perPage}&category=${category}`
+				)
+			).json();
+			if (lists.works[category].length < perPage) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
+			}
+			setVideos((p) => ({
+				...p,
+				[category]: [...p[category], ...lists.works[category]],
+			}));
+			setSearchResults((p) => ({
+				...p,
+				[category]: [
+					...p[category],
+					...lists.works[category].filter(
+						(li) =>
+							ciIncludes(li.title, searchWordsSnapShot) ||
+							ciIncludes(li.description, searchWordsSnapShot)
+					),
+				],
+			}));
+			if (lists.works[category].length < perPage) {
+				setHasNextPage((p) => ({ ...p, [category]: false }));
+			}
+			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+			setFetchLoading(false);
+		};
+		if (page > 1 && (!isAnimationEnd || fetchLoading)) return;
+		if (hasNextPage[category]) {
+			getVideos();
+		}
+		if (page <= searchResults[category].length / perPage + 1) {
+			setPage((p) => p + 1);
+		}
+	};
+
+	const intersectionRef = useInfiniteScroll({
+		processIntersection: updatePage,
+		dependencyArray: [
+			category,
+			page,
+			hasNextPage[category],
+			isAnimationEnd,
+			fetchLoading,
+		],
+	});
+
 	return (
-		<Layout seoTitle='Work' nav={{ isShort: true }}>
-			<main
-				ref={section}
-				className='pt-[100px] font-GmarketSans overflow-x-hidden'
+		<>
+			<Layout
+				seoTitle='Work'
+				nav={{ isShort: true }}
+				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
 			>
-				<TitleSection setCategory={setCategory} />
-				<SearchSection setKeyWords={setKeyWords} />
-				<VideoSection category={category} keywords={keyWords} />
-				<OutroSection />
-				<ToTop toScroll={section} />
-			</main>
-		</Layout>
+				<main
+					ref={section}
+					className='pt-[100px] font-GmarketSans overflow-x-hidden'
+				>
+					<TitleSection
+						setCategory={setCategory}
+						initialLength={initialLength}
+					/>
+					<SearchSection
+						setSearchWords={setSearchWords}
+						setTags={setTags}
+						onSearch={onSearch}
+						searchWords={searchWords}
+					/>
+					<section className='relative bg-[#101010]'>
+						<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9 '>
+							<AnimatePresence>
+								{searchResults[category].map((data, idx) =>
+									idx < perPage * (page - 1) ? (
+										<div key={data.id}>
+											<Video
+												index={data.id.toString()}
+												waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
+												thumbnail={{
+													url:
+														category === 'film' || category === 'short'
+															? data.thumbnailLink
+															: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+													alt:
+														category === 'film' || category === 'short'
+															? data.thumbnailLink
+															: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
+													width: 960,
+													height: 540,
+												}}
+												title={data.title}
+												description={data.description}
+												category={category}
+												resource={data.resourceId}
+												date={data.date}
+												setOnDetail={setOnDetail}
+												setAnimationEnd={
+													//serachResults가 페이지 제한 때문에 보이는 것보다 많은 상황이면 먹히지 않기때문에 수정됨.
+													idx ===
+													(searchResults[category].length < (page - 1) * perPage
+														? searchResults[category].length - 1
+														: (page - 1) * perPage - 1)
+														? setIsAnimationEnd
+														: undefined
+												}
+											/>
+										</div>
+									) : null
+								)}
+							</AnimatePresence>
+						</div>
+						<div ref={intersectionRef} className='h-1' />
+						{fetchLoading ? (
+							<div className='relative w-full h-60 flex justify-center items-center'>
+								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+									<Circles
+										liMotion={{
+											css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+										}}
+									/>
+								</div>
+							</div>
+						) : null}
+					</section>
+					<OutroSection />
+					<ToTop toScroll={section} />
+				</main>
+			</Layout>
+			{onDetail && onDetail.isOpen === true ? (
+				<VideoDetail
+					resource={onDetail.resource}
+					category={category}
+					date={onDetail.date}
+					title={onDetail.title}
+					setOnDetail={setOnDetail}
+					thumbnail={onDetail.imageUrl}
+				></VideoDetail>
+			) : null}
+		</>
 	);
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+	const worksLength = {
+		film: await client.works.count({ where: { category: 'film' } }),
+		short: await client.works.count({ where: { category: 'short' } }),
+		outsource: await client.works.count({
+			where: { category: 'outsource' },
+		}),
+	};
+	const works = {
+		film: await client.works.findMany({
+			where: { category: 'film' },
+			take: 12,
+		}),
+		short: await client.works.findMany({
+			where: { category: 'short' },
+			take: 12,
+		}),
+		outsource: await client.works.findMany({
+			where: { category: 'outsource' },
+			take: 12,
+		}),
+	};
+	let initialHasNextPage = { film: false, short: false, outsource: false };
+	for (const count in works) {
+		works[count as VideosCategory].length < 12
+			? (initialHasNextPage[count as VideosCategory] = false)
+			: (initialHasNextPage[count as VideosCategory] = true);
+	}
+	return {
+		props: {
+			initialLength: worksLength,
+			initialWorks: JSON.parse(JSON.stringify(works)),
+			initialHasNextPage,
+		},
+	};
+};
