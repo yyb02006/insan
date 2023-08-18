@@ -4,33 +4,47 @@ import { WorkInfos } from '@/pages/work/write';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-	const { body } = req;
-	console.log(body);
+	const {
+		body,
+		query: { secret },
+	} = req;
+
+	if (secret !== process.env.ODR_SECRET_TOKEN) {
+		return res.status(401).json({ success: false, message: 'Invalid token' });
+	}
+
 	if (body.length > 0) {
-		body.forEach(async (el: WorkInfos) => {
-			await client.works.upsert({
-				where: { resourceId: el.resourceId },
-				create: {
-					title: el.title,
-					resourceId: el.resourceId,
-					description: el.description,
-					category: el.category ? el.category : 'film',
-					date: el.date ? el.date : 'no-date',
-					thumbnailLink: el.thumbnailLink,
-				},
-				update: {
-					title: el.title,
-					resourceId: el.resourceId,
-					description: el.description,
-					category: el.category ? el.category : 'film',
-					date: el.date ? el.date : 'no-date',
-					thumbnailLink: el.thumbnailLink,
-				},
+		try {
+			body.forEach(async (el: WorkInfos) => {
+				await client.works.upsert({
+					where: { resourceId: el.resourceId },
+					create: {
+						title: el.title,
+						resourceId: el.resourceId,
+						description: el.description,
+						category: el.category ? el.category : 'film',
+						date: el.date ? el.date : 'no-date',
+						thumbnailLink: el.thumbnailLink,
+					},
+					update: {
+						title: el.title,
+						resourceId: el.resourceId,
+						description: el.description,
+						category: el.category ? el.category : 'film',
+						date: el.date ? el.date : 'no-date',
+						thumbnailLink: el.thumbnailLink,
+					},
+				});
 			});
-		});
-		res.status(200).json({ success: true });
+			await res.revalidate('/work');
+			return res.status(200).json({ success: true });
+		} catch (error) {
+			return res
+				.status(500)
+				.json({ success: false, message: 'Error Revalidating OR Error Query' });
+		}
 	} else {
-		res.status(500).json({ success: false });
+		return res.status(500).json({ success: false });
 	}
 };
 

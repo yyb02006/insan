@@ -5,9 +5,6 @@ interface ToTopProps {
 }
 
 export default function ToTop({ toScroll }: ToTopProps) {
-	useEffect(() => {
-		console.log('dddddddd' + toScroll);
-	}, []);
 	const onMoveClick = () => {
 		toScroll.current?.scrollIntoView();
 	};

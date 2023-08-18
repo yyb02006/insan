@@ -1,16 +1,13 @@
-import { cls, fetchYouTubeApi } from '@/libs/client/utils';
+import { fetchYouTubeApi } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
-import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
-import Link from 'next/link';
 import {
 	VimeoThumbnailFeed,
 	YoutubeThumbnailFeed,
 } from '@/components/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
-import Circles from '@/components/circles';
 import { useRouter } from 'next/router';
 import {
 	ButtonsController,
@@ -171,11 +168,11 @@ export default function Write() {
 	useEffect(() => {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos(undefined);
-	}, [category]);
+	}, [category, isInfiniteScrollEnabled]);
 	useEffect(() => {
 		console.log(data?.success);
 		if (data?.success) router.reload();
-	}, [data]);
+	}, [data, router]);
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
