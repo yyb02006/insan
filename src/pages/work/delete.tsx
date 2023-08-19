@@ -18,6 +18,7 @@ import ToTop from '@/components/toTop';
 import { GetStaticProps } from 'next';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
+import Circles from '@/components/circles';
 
 interface list extends WorkInfos {
 	id: number;
@@ -211,7 +212,7 @@ export const ButtonsController = ({
 				onClick={onSave}
 				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 			>
-				Save
+				Delete
 			</button>
 			<SelectedListButton
 				onClick={onSort}
@@ -304,7 +305,7 @@ export default function Delete({
 	});
 	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
 	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
-		`/api/work?secret=${process.env.ODR_SECRET_TOKEN}`
+		`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
 	);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
 	const [page, setPage] = useState(2);
@@ -342,7 +343,7 @@ export default function Delete({
 
 	const onReset = () => {
 		setOnSelectedList(false);
-		setPage(1);
+		setPage(2);
 		setDeleteIdList([]);
 		setSearchResult((p) => ({ ...p, [category]: list[category] }));
 		setSearchWordSnapShot('');
@@ -350,7 +351,7 @@ export default function Delete({
 
 	const onSelectedListClick = () => {
 		setOnSelectedList(true);
-		setPage(1);
+		setPage(2);
 		if (!deleteIdList || deleteIdList?.length < 1) return;
 		setSearchResultSnapShot((p) => ({
 			...p,
@@ -364,7 +365,7 @@ export default function Delete({
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setPage(1);
+		setPage(2);
 		if (typeof searchWord === undefined) return;
 		setSearchWordSnapShot(searchWord);
 		if (onSelectedList) {
@@ -388,7 +389,7 @@ export default function Delete({
 		}
 	};
 
-	const onClick = (id: number) => {
+	const onWorkClick = (id: number) => {
 		setDeleteIdList((p) =>
 			p.includes(id) ? p.filter((item) => item !== id) : [...p, id]
 		);
@@ -479,7 +480,7 @@ export default function Delete({
 								title={li.title}
 								thumbnailLink={li.thumbnailLink}
 								onClick={() => {
-									onClick(li.id);
+									onWorkClick(li.id);
 								}}
 								searchResult={searchResult}
 								setPriority={index < 6 ? true : false}
@@ -501,6 +502,19 @@ export default function Delete({
 				/>
 				<ToTop toScroll={topElement} />
 			</section>
+			{loading ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] bg-black'>
+					<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				</div>
+			) : null}
 		</Layout>
 	);
 }
