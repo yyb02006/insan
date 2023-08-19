@@ -73,6 +73,7 @@ interface VideoProps {
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
+	isMobile: boolean;
 }
 
 interface OnDetail {
@@ -727,6 +728,7 @@ const Video = ({
 	date,
 	setOnDetail,
 	setAnimationEnd,
+	isMobile,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
@@ -832,7 +834,7 @@ const Video = ({
 			>
 				{category === 'film' || category === 'short' ? (
 					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
-						{isIntersecting && isVideoLoadable ? (
+						{isIntersecting && isVideoLoadable && !isMobile ? (
 							<>
 								{isHovering ? (
 									<VimeoPlayer
@@ -1105,6 +1107,7 @@ export default function Work({
 	initialWorks,
 	initialHasNextPage,
 }: initialData) {
+	const [isMobile, setIsMobile] = useState<boolean>(true);
 	const [onDetail, setOnDetail] = useState<OnDetail>();
 	const [category, setCategory] = useState<VideosCategory>('film');
 	const section = useRef<HTMLDivElement>(null);
@@ -1127,7 +1130,14 @@ export default function Work({
 	const [tags, setTags] = useState<string[]>([]);
 	const perPage = 12;
 
-	console.log(initialLength, initialWorks, initialHasNextPage);
+	useEffect(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		setIsMobile(
+			/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+				userAgent
+			)
+		);
+	}, []);
 
 	useEffect(() => {
 		if (onDetail?.isOpen === true) {
@@ -1237,7 +1247,7 @@ export default function Work({
 						searchWords={searchWords}
 					/>
 					<section className='relative bg-[#101010]'>
-						<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9 '>
+						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
 									idx < perPage * (page - 1) ? (
@@ -1272,7 +1282,14 @@ export default function Work({
 														? setIsAnimationEnd
 														: undefined
 												}
+												isMobile={isMobile}
 											/>
+											<div className='block sm:hidden'>
+												<div className='mt-1 font-semibold'>{data.title}</div>
+												<div className='font-light text-xs'>
+													{data.description}
+												</div>
+											</div>
 										</div>
 									) : null
 								)}
