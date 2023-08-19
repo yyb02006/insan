@@ -80,7 +80,6 @@ const ExtendedNav = ({ isMobile = true }: { isMobile?: boolean }) => {
 	const router = useRouter();
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
 		limitHeight: 0,
-		isMobile,
 	});
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();

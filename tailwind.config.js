@@ -12,7 +12,7 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				Pretendard: ['var(--font-Pretendard)', ...defaultTheme.fontFamily.sans],
+				Pretendard: ['Pretendard', ...defaultTheme.fontFamily.sans],
 				GmarketSans: [
 					'var(--font-GMarKetSans)',
 					...defaultTheme.fontFamily.sans,

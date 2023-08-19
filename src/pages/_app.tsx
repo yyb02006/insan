@@ -34,7 +34,7 @@ const gMarKetSans = localFont({
 	variable: '--font-GMarKetSans',
 });
 
-const pretendard = localFont({
+/* const pretendard = localFont({
 	src: [
 		{
 			path: '../fonts/Pretendard-Thin.woff2',
@@ -71,19 +71,9 @@ const pretendard = localFont({
 			weight: '700',
 			style: 'normal',
 		},
-		{
-			path: '../fonts/Pretendard-ExtraBold.woff2',
-			weight: '800',
-			style: 'normal',
-		},
-		{
-			path: '../fonts/Pretendard-Black.woff2',
-			weight: '900',
-			style: 'normal',
-		},
 	],
 	variable: '--font-Pretendard',
-});
+}); */
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
@@ -91,13 +81,7 @@ export default function App({ Component, pageProps }: AppProps) {
 			value={{ fetcher: (url: string) => fetch(url).then((res) => res.json()) }}
 		>
 			<LazyMotion features={domAnimation}>
-				<main
-					className={cls(
-						roboto.variable,
-						gMarKetSans.variable,
-						pretendard.variable
-					)}
-				>
+				<main className={cls(roboto.variable, gMarKetSans.variable)}>
 					<Component {...pageProps} />
 				</main>
 			</LazyMotion>
