@@ -76,7 +76,7 @@ const HeaderSection = () => {
 		enterAnimation();
 	}, [headerAnimate]);
 	useEffect(() => {
-		window.addEventListener('scroll', () => console.log(scrollYProgress.get()));
+		window.addEventListener('scroll', () => {});
 		window.removeEventListener('scroll', () => {});
 	}, [scrollYProgress]);
 	return (
