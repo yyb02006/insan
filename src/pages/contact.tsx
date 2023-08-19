@@ -113,7 +113,7 @@ export default function Contact() {
 								))}
 							</div>
 						</motion.div>
-						<div className='Letters opacity-0 font-SCoreDream font-extralight text-[calc(10px+1.3vw)] leading-tight'>
+						<div className='Letters opacity-0 font-Pretendard font-extralight text-[calc(10px+1.3vw)] leading-tight'>
 							<div className='lg:block hidden'>
 								당신의{' '}
 								<span className='font-bold'>
@@ -162,6 +162,7 @@ export default function Contact() {
 							placeholder='Title'
 							onChange={onChange}
 							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+							value={inputDatas.title}
 						/>
 						<Input
 							type='text'
@@ -169,6 +170,7 @@ export default function Contact() {
 							placeholder='Your E-mail address'
 							onChange={onChange}
 							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+							value={inputDatas.email}
 						/>
 						<Input
 							type='textarea'
@@ -177,9 +179,10 @@ export default function Contact() {
 							rows={9}
 							onChange={onChange}
 							css='Input opacity-0 border-[#cacaca] border-b border-t-0 border-r-0 border-l-0'
+							value={inputDatas.message}
 						/>
 						<div className='space-x-4'>
-							<span className='font-SCoreDream font-medium text-sm text-palettered'>
+							<span className='font-Pretendard font-medium text-sm text-palettered'>
 								{errors.message}
 							</span>
 							<button className='Input placeholder:text-[#eaeaea] opacity-0 w-[100px] h-8 bg-[#eaeaea] text-[#101010] font-bold'>
