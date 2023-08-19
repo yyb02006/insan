@@ -63,7 +63,7 @@ export default function useInfiniteScrollFromFlatform({
 					).json();
 					setVimeoVideos((p) => [...p, ...data.data]);
 					if (data.data.length === 12) {
-						setPage((p) => (p = p + 1));
+						setPage((p) => p + 1);
 					} else {
 						setHasNextPage(false);
 					}

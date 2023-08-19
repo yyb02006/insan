@@ -734,32 +734,9 @@ const Video = ({
 	const [error, setError] = useState(false);
 	const [start, setStart] = useState(false);
 	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
-	const [isIntersecting, setIsIntersecting] = useState(false);
 	const videoRef = useRef<HTMLDivElement>(null);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [isHovering, setIsHovering] = useState(false);
-	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-		const [entry] = entries;
-		if (entry.isIntersecting) {
-			setIsIntersecting(true);
-		}
-	};
-	useEffect(() => {
-		const observer = new IntersectionObserver(handleIntersection, {
-			root: null,
-			rootMargin: '0px',
-			threshold: 0.5,
-		});
-		const currentIntersectionRef = videoRef.current;
-		if (currentIntersectionRef) {
-			observer.observe(currentIntersectionRef);
-		}
-		return () => {
-			if (currentIntersectionRef) {
-				observer.unobserve(currentIntersectionRef);
-			}
-		};
-	}, []);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -798,6 +775,7 @@ const Video = ({
 			setTimer(null);
 		}
 	};
+	console.log('start = ' + start, 'hover = ' + isHovering);
 	return (
 		<>
 			<motion.article
@@ -830,9 +808,15 @@ const Video = ({
 				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 			>
 				{category === 'film' || category === 'short' ? (
-					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
-						{isIntersecting && isVideoLoadable && !isMobile ? (
-							<>
+					<div
+						ref={videoRef}
+						className='absolute w-full aspect-video bg-[#050505]'
+					>
+						{/* 이전에 intersecting에 대한 조건이 있었는데,
+						맨 앞의 6개는 처음부터 보이는 상태라 인터섹팅에 포함이 안될 때도 있어서
+						앞의 6개만 비디오 로딩이 안되는 경우가 있었다  */}
+						{isVideoLoadable && !isMobile ? (
+							<div>
 								{isHovering ? (
 									<VimeoPlayer
 										url={`${resource}&quality=540p`}
@@ -858,13 +842,16 @@ const Video = ({
 										</div>
 									</div>
 								) : null}
-							</>
+							</div>
 						) : null}
 					</div>
 				) : null}
 				{category === 'outsource' ? (
-					<div ref={videoRef} className='absolute w-full aspect-video'>
-						{isIntersecting && isVideoLoadable && !isMobile ? (
+					<div
+						ref={videoRef}
+						className='absolute w-full aspect-video bg-[#050505]'
+					>
+						{isVideoLoadable && !isMobile ? (
 							<>
 								{isHovering ? (
 									<YouTubePlayer
