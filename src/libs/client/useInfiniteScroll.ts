@@ -152,9 +152,8 @@ export default function useInfiniteScrollFromFlatform({
 		const currentIntersectionRef = intersectionRef.current;
 		if (currentIntersectionRef) {
 			observer.observe(currentIntersectionRef);
-			console.log('observe');
 		} else {
-			console.log('failed');
+			console.log('Observe Failed');
 		}
 		return () => {
 			if (currentIntersectionRef) {

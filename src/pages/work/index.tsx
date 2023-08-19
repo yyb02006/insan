@@ -125,7 +125,6 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	const [chevron, chevronAnimate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
-		console.log(chevron);
 		if (isPresent) {
 			const enterAnimation = async () => {
 				await chevronAnimate(
@@ -209,7 +208,6 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 	const count = useMotionValue(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const rounded = useTransform(count, Math.round);
-	console.log(categoriesInfo);
 
 	useEffect(() => {
 		const animation = animate(count, totalDatasLength, {
@@ -580,7 +578,6 @@ const VideoDetail = ({
 				.then((res) => res.json())
 				.then((data) => {
 					setDescription(data.description);
-					console.log(data);
 				});
 		} else if (category === 'outsource') {
 			fetchYouTubeApi(
@@ -785,7 +782,6 @@ const Video = ({
 			setAnimationEnd(true);
 		}
 	};
-	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
 	const handleMouseEnter = () => {
 		setTitleScreen(true);
 		setIsVideoLoadable(true);
@@ -811,7 +807,6 @@ const Video = ({
 					y: [80, 0],
 					transition: { delay: 0.2 + 0.08 * waiting },
 				}}
-				// exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
 					handleMouseEnter();
@@ -869,23 +864,27 @@ const Video = ({
 				) : null}
 				{category === 'outsource' ? (
 					<div ref={videoRef} className='absolute w-full aspect-video'>
-						{isIntersecting && isVideoLoadable ? (
+						{isIntersecting && isVideoLoadable && !isMobile ? (
 							<>
-								<YouTubePlayer
-									url={`https://www.youtube.com/watch?v=${resource}`}
-									controls={false}
-									muted={true}
-									playing={titleScreen}
-									width={'100%'}
-									height={'100%'}
-									config={{
-										embedOptions: { host: 'https://www.youtube-nocookie.com' },
-									}}
-									loop={true}
-									onStart={() => {
-										setStart(true);
-									}}
-								/>
+								{isHovering ? (
+									<YouTubePlayer
+										url={`https://www.youtube.com/watch?v=${resource}`}
+										controls={false}
+										muted={true}
+										playing={titleScreen}
+										width={'100%'}
+										height={'100%'}
+										config={{
+											embedOptions: {
+												host: 'https://www.youtube-nocookie.com',
+											},
+										}}
+										loop={true}
+										onReady={() => {
+											setStart(true);
+										}}
+									/>
+								) : null}
 								{!start ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
@@ -1148,7 +1147,6 @@ export default function Work({
 			document.body.style.overflow = 'auto';
 		}
 		const currentScrollY = window.scrollY;
-		console.log(currentScrollY);
 	}, [onDetail]);
 
 	useEffect(() => {

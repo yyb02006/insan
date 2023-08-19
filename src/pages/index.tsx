@@ -1145,7 +1145,6 @@ const Home: NextPage = () => {
 		limitHeight: 2200,
 		isMobile: isMobile,
 	});
-	console.log(isMobile);
 
 	const handleResize = () => {
 		setInnerWidth(window.innerWidth);
