@@ -1,11 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import {
-	ciIncludes,
-	cls,
-	fetchApi,
-	fetchYouTubeApi,
-} from '@/libs/client/utils';
+import { ciIncludes, cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -20,7 +15,6 @@ import {
 import Link from 'next/link';
 import {
 	Dispatch,
-	MutableRefObject,
 	SetStateAction,
 	SyntheticEvent,
 	useCallback,
@@ -34,9 +28,7 @@ import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
 import VimeoPlayer from 'react-player/vimeo';
-import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
-import { FixedSizeList } from 'react-window';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import { VideoResponseItem } from '../api/work/list';
 import client from '@/libs/server/client';
