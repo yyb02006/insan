@@ -23,10 +23,9 @@ import {
 	useRef,
 	useState,
 } from 'react';
-import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
-import { NextPage } from 'next';
+import { GetStaticProps, NextPage } from 'next';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -37,6 +36,7 @@ interface MouseEventProps {
 interface HeaderProps extends MouseEventProps {
 	inheritRef: MutableRefObject<null>;
 	innerWidth: number;
+	isMobile: boolean;
 }
 
 interface SpringTextProps extends MouseEventProps {
@@ -92,10 +92,12 @@ interface VideoContainerProps {
 	videoId: string;
 	innerWidth: number;
 	thumbnailLink: string;
+	isMobile: boolean;
 }
 
 interface VideoSectionProps {
 	innerWidth: number;
+	isMobile: boolean;
 }
 
 interface VideoSectionIndicatorProps {
@@ -138,7 +140,6 @@ export const wave = (sec: number, reverse: boolean = false): Variants => {
 	}
 };
 
-/**flex속성 필수 */
 export const waveContainer: Variants = {
 	hidden: {
 		opacity: 0,
@@ -259,14 +260,6 @@ const SpringText = ({
 		{ title: 'Trendy', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 	]);
 	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
-	/* useEffect(() => {
-		window.addEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-		window.removeEventListener('scroll', () =>
-			console.log({ scrollYProgress: scrollYProgress.get(), scrollY })
-		);
-	}, []); */
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
@@ -340,6 +333,7 @@ const CircleSection: NextPage<HeaderProps> = ({
 	innerWidth,
 	scrollYProgress,
 	inheritRef,
+	isMobile,
 }) => {
 	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
 		clamp: false,
@@ -362,24 +356,27 @@ const CircleSection: NextPage<HeaderProps> = ({
 	return (
 		<section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
 			<div className='absolute top-0 h-[80%]'>
-				<m.div style={{ scale: logoCircle }} className='sticky top-0'>
-					{logoCircles.current.map((arr, idx) => (
-						<m.div
-							key={idx}
-							initial='hidden'
-							animate='visible'
-							variants={sideCircle}
-							className={cls(
-								arr,
-								'absolute border rounded-full border-[#bababa] aspect-square'
-							)}
-						/>
-					))}
-				</m.div>
+				{!isMobile ? (
+					<m.div style={{ scale: logoCircle }} className='sticky top-0'>
+						{logoCircles.current.map((arr, idx) => (
+							<m.div
+								key={idx}
+								initial='hidden'
+								animate='visible'
+								variants={sideCircle}
+								className={cls(
+									arr,
+									'absolute border rounded-full border-[#bababa] aspect-square'
+								)}
+							/>
+						))}
+					</m.div>
+				) : null}
 			</div>
 			<div className='h-full flex justify-center items-start'>
 				<m.div
-					style={{ scale, y }}
+					//scale 속성이 모바일 렌더링에 많은 부하를 일으킨다
+					style={{ scale: !isMobile ? scale : undefined, y }}
 					className='sticky top-0 h-[100vh] w-full flex items-center justify-center'
 				>
 					<div className='overflow-hidden absolute w-[100vw] aspect-square flex justify-center items-center'>
@@ -578,52 +575,22 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 
 const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 	const ref = useRef(null);
-	// const isInView = useInView(ref,{once:true,amount:0.8});
 	const [thumnail, setThumnail] = useState(true);
 	const [isLoadable, setIsLoadable] = useState(false);
 	const [play, setPlay] = useState(false);
 	const [start, setStart] = useState(false);
-	/* const onVideoReady: YouTubeProps['onReady'] = (e) => {
-		setVideo(e);
-		setVideoLoad(true);
-	};
-	const onVideoStateChange: YouTubeProps['onStateChange'] = (e) => {
-		setVideoState(e.data);
-		console.log(e.data);
-	};
-	useEffect(() => {
-		if (
-			!thumnail &&
-			video &&
-			videoLoad &&
-			(videoState < 1 || videoState === 2)
-		) {
-			video.target.playVideo();
-		} else if (thumnail && video && videoState === 1) {
-			video.target.pauseVideo();
-		} else if (video && videoState === 0) {
-			video.target.stopVideo();
-		}
-		if (video && videoState === 1) {
-		}
-	}, [thumnail, video, videoState]); */
-	/* useEffect(() => {
-		if (isInView && !isLoad) {
-			setIsLoad(true);
-		}
-	}, [isInView]); */
 	return (
 		<article
 			ref={ref}
 			className='relative sm:left-6 lg:left-4 xl:left-0 w-[70vw] sm:w-[calc(20vw+256px)] xl:w-auto'
 		>
-			<div className='Wrapper absolute top-0 w-full aspect-square flex justify-center items-center'>
+			<div className='absolute top-0 w-full aspect-square flex justify-center items-center'>
 				<div className='absolute w-[104%] aspect-square'>
 					<Circles
 						ulMotion={{
 							css: cls(
 								play ? 'animate-spin-slow' : 'animate-spin-slow pause',
-								'transition-all'
+								'Wrapper transition-all'
 							),
 						}}
 						liMotion={{
@@ -680,7 +647,8 @@ const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 							height={720}
 							alt={`${videoId}유튜브영상 썸네일`}
 							className='absolute top-0 left-0'
-							priority
+							style={{ objectFit: 'cover' }}
+							loading='lazy'
 						/>
 					</div>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
@@ -699,6 +667,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 	videoId,
 	innerWidth,
 	thumbnailLink,
+	isMobile,
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
@@ -764,10 +733,11 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 					<Image
 						src={thumbnailLink}
 						alt='1'
-						width={1600}
-						height={900}
+						width={640}
+						height={360}
 						style={{ objectFit: 'cover' }}
-						className='relative h-[80vh] aspect-video'
+						loading='lazy'
+						className='relative w-auto h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-90' />
 				</div>
@@ -808,7 +778,10 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 	);
 };
 
-const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
+const VideosSection: NextPage<VideoSectionProps> = ({
+	innerWidth,
+	isMobile,
+}) => {
 	const dummyDatas = [
 		{
 			index: 1,
@@ -818,7 +791,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 			date: '2023.2.22',
 			videoId: '852566352',
 			thumbnailLink:
-				'https://i.vimeocdn.com/video/1707755112-18437e1930810b2d8db1a3018ebed3871d824a547ada768ed8f67d7855ef1cf3-d_1280x720?r=pad',
+				'https://i.vimeocdn.com/video/1707755112-18437e1930810b2d8db1a3018ebed3871d824a547ada768ed8f67d7855ef1cf3-d_960x540?r=pad',
 		},
 		{
 			index: 2,
@@ -828,7 +801,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 			date: '2023.2.23',
 			videoId: '844725783',
 			thumbnailLink:
-				'https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_1280x720?r=pad',
+				'https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad',
 		},
 		{
 			index: 3,
@@ -838,7 +811,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 			date: '2023.2.24',
 			videoId: '844717748',
 			thumbnailLink:
-				'https://i.vimeocdn.com/video/1696959898-14f7b78bd35137dcd561717429b265947ce7272a735e7b7ed8b4bc56ec229666-d_1280x720?r=pad',
+				'https://i.vimeocdn.com/video/1696959898-14f7b78bd35137dcd561717429b265947ce7272a735e7b7ed8b4bc56ec229666-d_960x540?r=pad',
 		},
 		{
 			index: 4,
@@ -848,7 +821,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 			date: '2023.2.25',
 			videoId: '852566292',
 			thumbnailLink:
-				'https://i.vimeocdn.com/video/1707754967-f097f998c5b730464d3e56cfd8c0c7c9fdc9376ca910ed687f63faa3d7c27db2-d_1280x720?r=pad',
+				'https://i.vimeocdn.com/video/1707754967-f097f998c5b730464d3e56cfd8c0c7c9fdc9376ca910ed687f63faa3d7c27db2-d_640x360?r=pad',
 		},
 	];
 	const [range, setRange] = useState(0);
@@ -886,6 +859,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 							videoId={data.videoId}
 							thumbnailLink={data.thumbnailLink}
 							innerWidth={innerWidth}
+							isMobile={isMobile}
 						/>
 					))}
 				</m.div>
@@ -1006,7 +980,6 @@ const TextSection: NextPage = () => {
 	return (
 		<section
 			ref={ref}
-			//문제 있음 각 사이즈 별로
 			className='relative mt-[50vh] h-[auto] sm:h-[auto] pb-[10vw] flex justify-center overflow-hidden'
 		>
 			<m.div
@@ -1152,14 +1125,27 @@ const OutroSection: NextPage = () => {
 };
 
 const Home: NextPage = () => {
+	useEffect(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		setIsMobile(
+			/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+				userAgent
+			)
+		);
+	}, []);
 	const wave = useRef(null);
 	const background = useRef(null);
 	const circle = useRef(null);
 	const [innerWidth, setInnerWidth] = useState(0);
 	const isInView = useInView(wave, { margin: '0px 0px 150px 0px' });
 	const isInBackground = useInView(background, { margin: '0% 0% 100% 0%' });
+	const [isMobile, setIsMobile] = useState(true);
 	const { scrollYProgress } = useScroll({ target: circle });
-	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(2200);
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
+		limitHeight: 2200,
+		isMobile: isMobile,
+	});
+
 	const handleResize = () => {
 		setInnerWidth(window.innerWidth);
 	};
@@ -1174,8 +1160,8 @@ const Home: NextPage = () => {
 	return (
 		<div
 			ref={background}
-			onMouseMove={onMove}
-			onMouseLeave={onLeave}
+			onMouseMove={!isMobile ? onMove : undefined}
+			onMouseLeave={!isMobile ? onLeave : undefined}
 			className='w-[100vw] h-[100vh]'
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
@@ -1192,13 +1178,14 @@ const Home: NextPage = () => {
 					mouseX={mouseX}
 					mouseY={mouseY}
 					scrollYProgress={scrollYProgress}
+					isMobile={isMobile}
 				/>
 				<WavesSection
 					inheritRef={wave}
 					scrollYProgress={scrollYProgress}
 					innerWidth={innerWidth}
 				/>
-				<VideosSection innerWidth={innerWidth} />
+				<VideosSection isMobile={isMobile} innerWidth={innerWidth} />
 				<TextSection />
 				<OutroSection />
 			</Layout>
@@ -1207,3 +1194,7 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getStaticProps: GetStaticProps = async () => {
+	return { props: {} };
+};

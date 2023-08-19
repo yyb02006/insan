@@ -31,7 +31,7 @@ export default function useUser({
 		} else if (user && user.success === true) {
 			approvedRedirectUrl && router.push(approvedRedirectUrl);
 		}
-	}, [user]);
+	}, [user, DeniedRedirectUrl, approvedRedirectUrl, router]);
 
 	return [user?.success, loading];
 }

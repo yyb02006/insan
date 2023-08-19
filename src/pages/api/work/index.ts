@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	if (req.method === 'DELETE') {
 		try {
-			if (secret !== process.env.ODR_SECRET_TOKEN) {
+			if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 				return res
 					.status(401)
 					.json({ success: false, message: 'Invalid token' });
@@ -50,9 +50,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			);
 
 			await res.revalidate('/work');
+			await res.revalidate('/work/write');
+			await res.revalidate('/work/delete');
 			return res.status(200).json({ success: true });
 		} catch (error) {
-			return res.status(500).json({ success: false });
+			return res.status(500).json({ success: false, error });
 		}
 	}
 };

@@ -6,9 +6,8 @@ import {
 	useState,
 } from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
-import { ciIncludes, cls, fetchApi } from '@/libs/client/utils';
+import { ciIncludes, cls } from '@/libs/client/utils';
 import Image from 'next/image';
-import useMutation from '@/libs/client/useMutation';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout';
 import Link from 'next/link';
@@ -16,6 +15,10 @@ import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import useDeleteRequest from '@/libs/client/useDelete';
 import ToTop from '@/components/toTop';
+import { GetStaticProps } from 'next';
+import client from '@/libs/server/client';
+import { Works } from '@prisma/client';
+import Circles from '@/components/circles';
 
 interface list extends WorkInfos {
 	id: number;
@@ -28,9 +31,10 @@ interface dataState {
 
 interface ThumbnailProps {
 	src: { main: string; sub: string };
+	setPriority: boolean;
 }
 
-const Thumbnail = ({ src }: ThumbnailProps) => {
+const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
 	const [error, setError] = useState(false);
 	const handleImageError = () => {
 		setError(true);
@@ -41,9 +45,9 @@ const Thumbnail = ({ src }: ThumbnailProps) => {
 			alt='picturesAlter'
 			width={1280}
 			height={720}
-			priority
 			onError={handleImageError}
 			className='w-full object-cover aspect-video'
+			priority={setPriority}
 		/>
 	);
 };
@@ -208,7 +212,7 @@ export const ButtonsController = ({
 				onClick={onSave}
 				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 			>
-				Save
+				Delete
 			</button>
 			<SelectedListButton
 				onClick={onSort}
@@ -221,12 +225,13 @@ export const ButtonsController = ({
 
 interface WorkProps {
 	onClick: () => void;
-	searchResult: ListItems;
+	searchResult: VideosMerged<Works[]>;
 	category: FlatformsCategory;
 	selected: boolean;
 	resourceId: string;
 	title: string;
 	thumbnailLink: string;
+	setPriority: boolean;
 }
 
 const Work = ({
@@ -237,6 +242,7 @@ const Work = ({
 	onClick,
 	searchResult,
 	thumbnailLink,
+	setPriority,
 }: WorkProps) => {
 	return (
 		<div
@@ -257,6 +263,7 @@ const Work = ({
 							  }
 						: { main: '', sub: '' }
 				}
+				setPriority={setPriority}
 			/>
 			<div className='mt-2'>
 				<div className='text-sm'>Title : {title}</div>
@@ -269,86 +276,48 @@ const Work = ({
 	);
 };
 
-interface ListItems {
-	outsource: list[];
-	filmShort: list[];
+interface VideosMerged<T> {
+	filmShort: T;
+	outsource: T;
 }
 
-interface getListsInitProps {
-	kind: FlatformsCategory;
-	showLoading: boolean;
+interface InitialData {
+	initialWorks: VideosMerged<Works[]>;
+	initialHasNextPage: VideosMerged<boolean>;
 }
 
-export default function Delete() {
+export default function Delete({
+	initialWorks,
+	initialHasNextPage,
+}: InitialData) {
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
-	const [searchResult, setSearchResult] = useState<ListItems>({
+	const [searchResult, setSearchResult] =
+		useState<VideosMerged<Works[]>>(initialWorks);
+	const [searchResultSnapShot, setSearchResultSnapShot] = useState<
+		VideosMerged<Works[]>
+	>({
 		filmShort: [],
 		outsource: [],
 	});
-	const [searchResultSnapShot, setSearchResultSnapShot] = useState<ListItems>({
-		filmShort: [],
-		outsource: [],
-	});
-	const [list, setList] = useState<ListItems>({
-		outsource: [],
-		filmShort: [],
-	});
+	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
 	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
-		'/api/work'
+		`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
 	);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
-	const [page, setPage] = useState(1);
+	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
 		filmShort: number;
 		outsource: number;
-	}>({ filmShort: 1, outsource: 1 });
+	}>({ filmShort: 2, outsource: 2 });
 	const perPage = 12;
 	const [onSelectedList, setOnSelectedList] = useState(false);
 	const [fetchLoading, setFetchLoading] = useState(true);
-	const [hasNextPage, setHasNextPage] = useState<{
-		filmShort: boolean;
-		outsource: boolean;
-	}>({ filmShort: true, outsource: true });
-
-	useEffect(() => {
-		const getListsInit = async ({ kind, showLoading }: getListsInitProps) => {
-			showLoading && setFetchLoading(true);
-			const lists: dataState = await (
-				await fetch(
-					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${kind}`
-				)
-			).json();
-			setList((p) => ({
-				...p,
-				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
-			}));
-			setSearchResult((p) => ({
-				...p,
-				[kind]: lists.works[kind === 'filmShort' ? 'film' : 'outsource'],
-			}));
-			if (
-				lists.works[kind === 'filmShort' ? 'film' : 'outsource'].length <
-				perPage
-			) {
-				setHasNextPage((p) => ({ ...p, [kind]: false }));
-			}
-			setPage(2);
-			setApiPage({ filmShort: 2, outsource: 2 });
-			showLoading && setFetchLoading(false);
-		};
-		getListsInit({
-			kind: 'filmShort',
-			showLoading: true,
-		});
-		getListsInit({
-			kind: 'outsource',
-			showLoading: false,
-		});
-	}, []);
+	const [hasNextPage, setHasNextPage] =
+		useState<VideosMerged<boolean>>(initialHasNextPage);
 
 	useEffect(() => {
 		setOnSelectedList(false);
@@ -374,7 +343,7 @@ export default function Delete() {
 
 	const onReset = () => {
 		setOnSelectedList(false);
-		setPage(1);
+		setPage(2);
 		setDeleteIdList([]);
 		setSearchResult((p) => ({ ...p, [category]: list[category] }));
 		setSearchWordSnapShot('');
@@ -382,7 +351,7 @@ export default function Delete() {
 
 	const onSelectedListClick = () => {
 		setOnSelectedList(true);
-		setPage(1);
+		setPage(2);
 		if (!deleteIdList || deleteIdList?.length < 1) return;
 		setSearchResultSnapShot((p) => ({
 			...p,
@@ -396,7 +365,7 @@ export default function Delete() {
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setPage(1);
+		setPage(2);
 		if (typeof searchWord === undefined) return;
 		setSearchWordSnapShot(searchWord);
 		if (onSelectedList) {
@@ -420,7 +389,7 @@ export default function Delete() {
 		}
 	};
 
-	const onClick = (id: number) => {
+	const onWorkClick = (id: number) => {
 		setDeleteIdList((p) =>
 			p.includes(id) ? p.filter((item) => item !== id) : [...p, id]
 		);
@@ -477,7 +446,6 @@ export default function Delete() {
 		dependencyArray: [page, fetchLoading],
 	});
 
-	console.log('page=' + page, 'api=' + apiPage[category], fetchLoading);
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -512,17 +480,15 @@ export default function Delete() {
 								title={li.title}
 								thumbnailLink={li.thumbnailLink}
 								onClick={() => {
-									onClick(li.id);
+									onWorkClick(li.id);
 								}}
 								searchResult={searchResult}
+								setPriority={index < 6 ? true : false}
 							/>
 						) : null
 					)}
 				</div>
-				<div
-					ref={intersectionRef}
-					className='w-full h-1 my-40 bg-pink-600'
-				></div>
+				<div ref={intersectionRef} className='w-full h-1 my-40'></div>
 				<SelectedListButton
 					onClick={onSelectedListClick}
 					count={deleteIdList.length}
@@ -536,6 +502,44 @@ export default function Delete() {
 				/>
 				<ToTop toScroll={topElement} />
 			</section>
+			{loading ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] bg-black'>
+					<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				</div>
+			) : null}
 		</Layout>
 	);
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+	const initialWorks = {
+		filmShort: await client.works.findMany({
+			where: { OR: [{ category: 'film' }, { category: 'short' }] },
+			take: 12,
+		}),
+		outsource: await client.works.findMany({
+			where: { category: 'outsource' },
+			take: 12,
+		}),
+	};
+	let initialHasNextPage = { filmShort: false, outsource: false };
+	for (const count in initialWorks) {
+		initialWorks[count as FlatformsCategory].length < 12
+			? (initialHasNextPage[count as FlatformsCategory] = false)
+			: (initialHasNextPage[count as FlatformsCategory] = true);
+	}
+	return {
+		props: {
+			initialWorks: JSON.parse(JSON.stringify(initialWorks)),
+			initialHasNextPage,
+		},
+	};
+};

@@ -77,7 +77,9 @@ const ListMenu = () => {
 
 const ExtendedNav = () => {
 	const router = useRouter();
-	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring(0);
+	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
+		limitHeight: 0,
+	});
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
 	const menu = [

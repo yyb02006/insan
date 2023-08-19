@@ -12,8 +12,9 @@ export interface AuthResponse {
 export default function Admin() {
 	const router = useRouter();
 	const [password, setPassword] = useState<string>('');
-	const [sendPassword, { loading, data }] =
-		useMutation<AuthResponse>('api/enter');
+	const [sendPassword, { loading, data }] = useMutation<AuthResponse>(
+		`api/enter?secret=${process.env.ODR_SECRET_TOKEN}`
+	);
 	const [user, authLoading] = useUser({ approvedRedirectUrl: 'work/write' });
 
 	const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -29,8 +30,7 @@ export default function Admin() {
 		if (data?.success === true) {
 			router.push('work/write');
 		}
-	}, [data?.success]);
-	console.log(authLoading);
+	}, [data?.success, router]);
 
 	return (
 		<div className='w-screen h-screen flex justify-center items-center bg-pink-500'>

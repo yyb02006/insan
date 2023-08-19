@@ -1,14 +1,7 @@
 import { GapiItem } from '@/pages/work';
 import Image from 'next/image';
 import Input from './input';
-import {
-	Dispatch,
-	MutableRefObject,
-	SetStateAction,
-	SyntheticEvent,
-	useEffect,
-	useState,
-} from 'react';
+import { MutableRefObject, SyntheticEvent } from 'react';
 import { WorkInfos, VimeoVideos, OwnedVideoItems } from '@/pages/work/write';
 import Circles from './circles';
 
@@ -57,11 +50,11 @@ export function VimeoThumbnailFeed({
 					>
 						<div>
 							<Image
-								src={video.pictures.sizes[4].link}
+								src={video.pictures.sizes[3].link}
 								alt='picturesAlter'
 								width={960}
 								height={540}
-								priority
+								priority={arr < 6 ? true : false}
 							/>
 							<div className='mt-2'>
 								<div className='text-sm text-[#bababa] '>
@@ -244,9 +237,10 @@ export function YoutubeThumbnailFeed({
 										  data.snippet.thumbnails.medium?.url
 										: ''
 								}
-								alt='test'
+								alt='Thumbnail not available'
 								width={1280}
 								height={720}
+								priority={arr < 6 ? true : false}
 								className='w-full object-cover'
 							/>
 							<div className='mt-2'>

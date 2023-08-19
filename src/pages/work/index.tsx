@@ -1,11 +1,6 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import {
-	ciIncludes,
-	cls,
-	fetchApi,
-	fetchYouTubeApi,
-} from '@/libs/client/utils';
+import { ciIncludes, cls, fetchYouTubeApi } from '@/libs/client/utils';
 import {
 	motion,
 	AnimatePresence,
@@ -20,7 +15,6 @@ import {
 import Link from 'next/link';
 import {
 	Dispatch,
-	MutableRefObject,
 	SetStateAction,
 	SyntheticEvent,
 	useCallback,
@@ -34,9 +28,7 @@ import Image from 'next/image';
 import { Works } from '@prisma/client';
 import ToTop from '@/components/toTop';
 import VimeoPlayer from 'react-player/vimeo';
-import ReactPlayer from 'react-player/lazy';
 import YouTubePlayer from 'react-player/youtube';
-import { FixedSizeList } from 'react-window';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import { VideoResponseItem } from '../api/work/list';
 import client from '@/libs/server/client';
@@ -81,6 +73,8 @@ interface VideoProps {
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
+	isMobile: boolean;
+	setpriority: boolean;
 }
 
 interface OnDetail {
@@ -131,7 +125,6 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	const [chevron, chevronAnimate] = useAnimate();
 	const [isPresent, safeToRemove] = usePresence();
 	useEffect(() => {
-		console.log(chevron);
 		if (isPresent) {
 			const enterAnimation = async () => {
 				await chevronAnimate(
@@ -215,7 +208,6 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 	const count = useMotionValue(0);
 	const ref = useRef<HTMLDivElement>(null);
 	const rounded = useTransform(count, Math.round);
-	console.log(categoriesInfo);
 
 	useEffect(() => {
 		const animation = animate(count, totalDatasLength, {
@@ -586,7 +578,6 @@ const VideoDetail = ({
 				.then((res) => res.json())
 				.then((data) => {
 					setDescription(data.description);
-					console.log(data);
 				});
 		} else if (category === 'outsource') {
 			fetchYouTubeApi(
@@ -735,38 +726,17 @@ const Video = ({
 	date,
 	setOnDetail,
 	setAnimationEnd,
+	isMobile,
+	setpriority,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
 	const [error, setError] = useState(false);
 	const [start, setStart] = useState(false);
 	const [isVideoLoadable, setIsVideoLoadable] = useState(false);
-	const [isIntersecting, setIsIntersecting] = useState(false);
 	const videoRef = useRef<HTMLDivElement>(null);
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [isHovering, setIsHovering] = useState(false);
-	const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-		const [entry] = entries;
-		if (entry.isIntersecting) {
-			setIsIntersecting(true);
-		}
-	};
-	useEffect(() => {
-		const observer = new IntersectionObserver(handleIntersection, {
-			root: null,
-			rootMargin: '0px',
-			threshold: 0.5,
-		});
-		const currentIntersectionRef = videoRef.current;
-		if (currentIntersectionRef) {
-			observer.observe(currentIntersectionRef);
-		}
-		return () => {
-			if (currentIntersectionRef) {
-				observer.unobserve(currentIntersectionRef);
-			}
-		};
-	}, []);
 	useEffect(() => {
 		if (titleScreen) {
 			const enterAnimaition = async () => {
@@ -789,7 +759,6 @@ const Video = ({
 			setAnimationEnd(true);
 		}
 	};
-	// console.log(waiting, setAnimationEnd ? 'yes' : 'nope');
 	const handleMouseEnter = () => {
 		setTitleScreen(true);
 		setIsVideoLoadable(true);
@@ -806,6 +775,7 @@ const Video = ({
 			setTimer(null);
 		}
 	};
+	console.log('start = ' + start, 'hover = ' + isHovering);
 	return (
 		<>
 			<motion.article
@@ -815,7 +785,6 @@ const Video = ({
 					y: [80, 0],
 					transition: { delay: 0.2 + 0.08 * waiting },
 				}}
-				// exit={{ opacity: 0, y: [0, 40], transition: { duration: 0.2 } }}
 				onAnimationComplete={onAnimationComplete}
 				onMouseEnter={() => {
 					handleMouseEnter();
@@ -839,9 +808,15 @@ const Video = ({
 				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
 			>
 				{category === 'film' || category === 'short' ? (
-					<div ref={videoRef} className='absolute w-full aspect-video bg-black'>
-						{isIntersecting && isVideoLoadable ? (
-							<>
+					<div
+						ref={videoRef}
+						className='absolute w-full aspect-video bg-[#050505]'
+					>
+						{/* 이전에 intersecting에 대한 조건이 있었는데,
+						맨 앞의 6개는 처음부터 보이는 상태라 인터섹팅에 포함이 안될 때도 있어서
+						앞의 6개만 비디오 로딩이 안되는 경우가 있었다  */}
+						{isVideoLoadable && !isMobile ? (
+							<div>
 								{isHovering ? (
 									<VimeoPlayer
 										url={`${resource}&quality=540p`}
@@ -867,29 +842,36 @@ const Video = ({
 										</div>
 									</div>
 								) : null}
-							</>
+							</div>
 						) : null}
 					</div>
 				) : null}
 				{category === 'outsource' ? (
-					<div ref={videoRef} className='absolute w-full aspect-video'>
-						{isIntersecting && isVideoLoadable ? (
+					<div
+						ref={videoRef}
+						className='absolute w-full aspect-video bg-[#050505]'
+					>
+						{isVideoLoadable && !isMobile ? (
 							<>
-								<YouTubePlayer
-									url={`https://www.youtube.com/watch?v=${resource}`}
-									controls={false}
-									muted={true}
-									playing={titleScreen}
-									width={'100%'}
-									height={'100%'}
-									config={{
-										embedOptions: { host: 'https://www.youtube-nocookie.com' },
-									}}
-									loop={true}
-									onStart={() => {
-										setStart(true);
-									}}
-								/>
+								{isHovering ? (
+									<YouTubePlayer
+										url={`https://www.youtube.com/watch?v=${resource}`}
+										controls={false}
+										muted={true}
+										playing={titleScreen}
+										width={'100%'}
+										height={'100%'}
+										config={{
+											embedOptions: {
+												host: 'https://www.youtube-nocookie.com',
+											},
+										}}
+										loop={true}
+										onReady={() => {
+											setStart(true);
+										}}
+									/>
+								) : null}
 								{!start ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
@@ -914,7 +896,7 @@ const Video = ({
 						alt={'will fixed'}
 						width={thumbnail.width}
 						height={thumbnail.height}
-						priority
+						priority={setpriority}
 						className='relative w-full aspect-video object-cover'
 					/>
 					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
@@ -1113,6 +1095,7 @@ export default function Work({
 	initialWorks,
 	initialHasNextPage,
 }: initialData) {
+	const [isMobile, setIsMobile] = useState<boolean>(true);
 	const [onDetail, setOnDetail] = useState<OnDetail>();
 	const [category, setCategory] = useState<VideosCategory>('film');
 	const section = useRef<HTMLDivElement>(null);
@@ -1135,7 +1118,14 @@ export default function Work({
 	const [tags, setTags] = useState<string[]>([]);
 	const perPage = 12;
 
-	console.log(initialLength, initialWorks, initialHasNextPage);
+	useEffect(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		setIsMobile(
+			/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+				userAgent
+			)
+		);
+	}, []);
 
 	useEffect(() => {
 		if (onDetail?.isOpen === true) {
@@ -1144,7 +1134,6 @@ export default function Work({
 			document.body.style.overflow = 'auto';
 		}
 		const currentScrollY = window.scrollY;
-		console.log(currentScrollY);
 	}, [onDetail]);
 
 	useEffect(() => {
@@ -1245,7 +1234,7 @@ export default function Work({
 						searchWords={searchWords}
 					/>
 					<section className='relative bg-[#101010]'>
-						<div className='relative grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 px-9 '>
+						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
 									idx < perPage * (page - 1) ? (
@@ -1262,8 +1251,8 @@ export default function Work({
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
 															: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-													width: 960,
-													height: 540,
+													width: 480,
+													height: 270,
 												}}
 												title={data.title}
 												description={data.description}
@@ -1280,7 +1269,15 @@ export default function Work({
 														? setIsAnimationEnd
 														: undefined
 												}
+												isMobile={isMobile}
+												setpriority={idx < 6 ? true : false}
 											/>
+											<div className='block sm:hidden'>
+												<div className='mt-1 font-semibold'>{data.title}</div>
+												<div className='font-light text-xs'>
+													{data.description}
+												</div>
+											</div>
 										</div>
 									) : null
 								)}
@@ -1318,14 +1315,14 @@ export default function Work({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-	const worksLength = {
+	const initialLength = {
 		film: await client.works.count({ where: { category: 'film' } }),
 		short: await client.works.count({ where: { category: 'short' } }),
 		outsource: await client.works.count({
 			where: { category: 'outsource' },
 		}),
 	};
-	const works = {
+	const initialWorks = {
 		film: await client.works.findMany({
 			where: { category: 'film' },
 			take: 12,
@@ -1340,15 +1337,15 @@ export const getStaticProps: GetStaticProps = async () => {
 		}),
 	};
 	let initialHasNextPage = { film: false, short: false, outsource: false };
-	for (const count in works) {
-		works[count as VideosCategory].length < 12
+	for (const count in initialWorks) {
+		initialWorks[count as VideosCategory].length < 12
 			? (initialHasNextPage[count as VideosCategory] = false)
 			: (initialHasNextPage[count as VideosCategory] = true);
 	}
 	return {
 		props: {
-			initialLength: worksLength,
-			initialWorks: JSON.parse(JSON.stringify(works)),
+			initialLength,
+			initialWorks: JSON.parse(JSON.stringify(initialWorks)),
 			initialHasNextPage,
 		},
 	};
