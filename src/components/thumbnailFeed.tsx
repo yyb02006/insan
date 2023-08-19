@@ -50,11 +50,11 @@ export function VimeoThumbnailFeed({
 					>
 						<div>
 							<Image
-								src={video.pictures.sizes[4].link}
+								src={video.pictures.sizes[3].link}
 								alt='picturesAlter'
 								width={960}
 								height={540}
-								priority
+								priority={arr < 6 ? true : false}
 							/>
 							<div className='mt-2'>
 								<div className='text-sm text-[#bababa] '>
@@ -185,7 +185,7 @@ export function VimeoThumbnailFeed({
 					</div>
 				))}
 			</div>
-			<div ref={intersectionRef} className='h-32 my-10 order-last bg-pink-300'>
+			<div ref={intersectionRef} className='h-32 my-10 order-last'>
 				{isScrollLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
@@ -240,6 +240,7 @@ export function YoutubeThumbnailFeed({
 								alt='Thumbnail not available'
 								width={1280}
 								height={720}
+								priority={arr < 6 ? true : false}
 								className='w-full object-cover'
 							/>
 							<div className='mt-2'>

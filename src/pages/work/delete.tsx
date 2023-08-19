@@ -6,7 +6,7 @@ import {
 	useState,
 } from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
-import { ciIncludes, cls, fetchData } from '@/libs/client/utils';
+import { ciIncludes, cls } from '@/libs/client/utils';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout';
@@ -17,7 +17,6 @@ import useDeleteRequest from '@/libs/client/useDelete';
 import ToTop from '@/components/toTop';
 import { GetStaticProps } from 'next';
 import client from '@/libs/server/client';
-import { VideosCategory } from '.';
 import { Works } from '@prisma/client';
 
 interface list extends WorkInfos {
@@ -31,9 +30,10 @@ interface dataState {
 
 interface ThumbnailProps {
 	src: { main: string; sub: string };
+	setPriority: boolean;
 }
 
-const Thumbnail = ({ src }: ThumbnailProps) => {
+const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
 	const [error, setError] = useState(false);
 	const handleImageError = () => {
 		setError(true);
@@ -44,9 +44,9 @@ const Thumbnail = ({ src }: ThumbnailProps) => {
 			alt='picturesAlter'
 			width={1280}
 			height={720}
-			priority
 			onError={handleImageError}
 			className='w-full object-cover aspect-video'
+			priority={setPriority}
 		/>
 	);
 };
@@ -230,6 +230,7 @@ interface WorkProps {
 	resourceId: string;
 	title: string;
 	thumbnailLink: string;
+	setPriority: boolean;
 }
 
 const Work = ({
@@ -240,6 +241,7 @@ const Work = ({
 	onClick,
 	searchResult,
 	thumbnailLink,
+	setPriority,
 }: WorkProps) => {
 	return (
 		<div
@@ -260,6 +262,7 @@ const Work = ({
 							  }
 						: { main: '', sub: '' }
 				}
+				setPriority={setPriority}
 			/>
 			<div className='mt-2'>
 				<div className='text-sm'>Title : {title}</div>
@@ -479,6 +482,7 @@ export default function Delete({
 									onClick(li.id);
 								}}
 								searchResult={searchResult}
+								setPriority={index < 6 ? true : false}
 							/>
 						) : null
 					)}
