@@ -335,9 +335,14 @@ const CircleSection: NextPage<HeaderProps> = ({
 	inheritRef,
 	isMobile,
 }) => {
-	const rotate = useTransform(scrollYProgress, [0, 1], [0, 360], {
-		clamp: false,
-	});
+	const rotate = useTransform(
+		scrollYProgress,
+		[0, 1],
+		[0, isMobile ? 270 : 360],
+		{
+			clamp: false,
+		}
+	);
 	const y = useTransform(scrollYProgress, [0.1, 0.4], [0, -200]);
 	const scale = useTransform(
 		scrollYProgress,
@@ -354,7 +359,10 @@ const CircleSection: NextPage<HeaderProps> = ({
 		'top-[-120px] left-[-80px] w-[240px] lg:w-[340px]',
 	]);
 	return (
-		<section className='relative h-[500vh] mb-[100vh]' ref={inheritRef}>
+		<section
+			className='relative h-[700vh] sm:h-[500vh] mb-[100vh]'
+			ref={inheritRef}
+		>
 			<div className='absolute top-0 h-[80%]'>
 				{!isMobile ? (
 					<m.div style={{ scale: logoCircle }} className='sticky top-0'>
@@ -535,7 +543,7 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 		<m.div
 			ref={inheritRef}
 			animate='wave'
-			className='absolute top-[200vh] w-full h-[400vh] pb-[50vh]'
+			className='absolute top-[200vh] w-full h-[600vh] sm:h-[400vh] pb-[50vh]'
 		>
 			{waveProps.current.map((prop) =>
 				prop.index % 2 === 0 ? (
@@ -709,7 +717,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 		if (isInView) {
 			videoAnimate(
 				'.Wrapper',
-				{ scale: [0.8, 1] },
+				{ opacity: [0, 1] },
 				{ duration: 0.4, ease: 'easeOut' }
 			);
 			if (innerWidth > 640) {
@@ -718,7 +726,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 		} else {
 			videoAnimate(
 				'.Wrapper',
-				{ scale: [1, 0.8] },
+				{ opacity: [1, 0] },
 				{ duration: 0.4, ease: 'easeIn' }
 			);
 			if (innerWidth > 640) {
@@ -837,7 +845,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 	const inner = useRef(null);
 	const isInView = useInView(inner, { margin: '0% 0% -100% 0%' });
 	return (
-		<section ref={vertical} className='relative h-[400vh] sm:h-[600vh]'>
+		<section ref={vertical} className='relative h-[600vh] sm:h-[600vh]'>
 			<div
 				ref={inner}
 				className='top-0 absolute h-[calc(100%-100vh)] w-full'
