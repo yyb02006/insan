@@ -816,7 +816,7 @@ const Video = ({
 						맨 앞의 6개는 처음부터 보이는 상태라 인터섹팅에 포함이 안될 때도 있어서
 						앞의 6개만 비디오 로딩이 안되는 경우가 있었다  */}
 						{isVideoLoadable && !isMobile ? (
-							<div>
+							<>
 								{isHovering ? (
 									<VimeoPlayer
 										url={`${resource}&quality=540p`}
@@ -842,7 +842,7 @@ const Video = ({
 										</div>
 									</div>
 								) : null}
-							</div>
+							</>
 						) : null}
 					</div>
 				) : null}
