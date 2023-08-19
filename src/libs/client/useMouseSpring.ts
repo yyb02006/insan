@@ -5,7 +5,7 @@ interface useMouseSpringProps {
 	limitHeight: number;
 	xSpringConfig?: SpringOptions;
 	ySpringConfig?: SpringOptions;
-	isMobile: boolean;
+	isMobile?: boolean;
 }
 
 export default function useMouseSpring({
@@ -16,7 +16,7 @@ export default function useMouseSpring({
 }: useMouseSpringProps) {
 	const mouseX = useSpring(0, xSpringConfig);
 	const mouseY = useSpring(0, ySpringConfig);
-	if (!isMobile) {
+	if (typeof isMobile !== undefined && !isMobile) {
 		const mouseCoord = (opX = 0, opY = 0) => {
 			mouseX.set(opX);
 			mouseY.set(opY);

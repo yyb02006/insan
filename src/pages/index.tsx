@@ -14,7 +14,6 @@ import {
 	usePresence,
 	AnimatePresence,
 	useMotionValueEvent,
-	motionValue,
 } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -24,10 +23,9 @@ import {
 	useRef,
 	useState,
 } from 'react';
-import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import Image from 'next/image';
 import VimeoPlayer from 'react-player/vimeo';
-import { NextPage } from 'next';
+import { GetStaticProps, NextPage } from 'next';
 
 interface MouseEventProps {
 	mouseX: MotionValue;
@@ -1174,6 +1172,8 @@ const Home: NextPage = () => {
 		limitHeight: 2200,
 		isMobile: isMobile,
 	});
+	console.log(isMobile);
+
 	const handleResize = () => {
 		setInnerWidth(window.innerWidth);
 	};
@@ -1222,3 +1222,7 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getStaticProps: GetStaticProps = async () => {
+	return { props: {} };
+};

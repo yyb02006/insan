@@ -7,7 +7,7 @@ export default function Error403() {
 	};
 	return (
 		<div className='w-screen h-screen flex flex-col justify-center items-center gap-5'>
-			<div className='text-6xl text-palettered font-semibold'>
+			<div className='text-6xl text-palettered font-bold'>
 				워<span className='text-[#fafafa]'>닝</span>! 워
 				<span className='text-[#fafafa]'>닝</span>!
 			</div>
