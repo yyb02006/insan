@@ -92,10 +92,12 @@ interface VideoContainerProps {
 	videoId: string;
 	innerWidth: number;
 	thumbnailLink: string;
+	isMobile: boolean;
 }
 
 interface VideoSectionProps {
 	innerWidth: number;
+	isMobile: boolean;
 }
 
 interface VideoSectionIndicatorProps {
@@ -582,13 +584,13 @@ const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 			ref={ref}
 			className='relative sm:left-6 lg:left-4 xl:left-0 w-[70vw] sm:w-[calc(20vw+256px)] xl:w-auto'
 		>
-			<div className='Wrapper absolute top-0 w-full aspect-square flex justify-center items-center'>
+			<div className='absolute top-0 w-full aspect-square flex justify-center items-center'>
 				<div className='absolute w-[104%] aspect-square'>
 					<Circles
 						ulMotion={{
 							css: cls(
 								play ? 'animate-spin-slow' : 'animate-spin-slow pause',
-								'transition-all'
+								'Wrapper transition-all'
 							),
 						}}
 						liMotion={{
@@ -665,6 +667,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 	videoId,
 	innerWidth,
 	thumbnailLink,
+	isMobile,
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const isInView = useInView(ref, { amount: 0.5 });
@@ -775,7 +778,10 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 	);
 };
 
-const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
+const VideosSection: NextPage<VideoSectionProps> = ({
+	innerWidth,
+	isMobile,
+}) => {
 	const dummyDatas = [
 		{
 			index: 1,
@@ -853,6 +859,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({ innerWidth }) => {
 							videoId={data.videoId}
 							thumbnailLink={data.thumbnailLink}
 							innerWidth={innerWidth}
+							isMobile={isMobile}
 						/>
 					))}
 				</m.div>
@@ -1179,7 +1186,7 @@ const Home: NextPage = () => {
 					scrollYProgress={scrollYProgress}
 					innerWidth={innerWidth}
 				/>
-				<VideosSection innerWidth={innerWidth} />
+				<VideosSection isMobile={isMobile} innerWidth={innerWidth} />
 				<TextSection />
 				<OutroSection />
 			</Layout>
