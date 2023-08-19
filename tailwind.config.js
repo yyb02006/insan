@@ -12,9 +12,11 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				SCoreDream: ['SCoreDream', ...defaultTheme.fontFamily.sans],
-				Pretendard: ['Pretendard', ...defaultTheme.fontFamily.sans],
-				GmarketSans: ['GmarketSans', ...defaultTheme.fontFamily.sans],
+				Pretendard: ['var(--font-Pretendard)', ...defaultTheme.fontFamily.sans],
+				GmarketSans: [
+					'var(--font-GMarKetSans)',
+					...defaultTheme.fontFamily.sans,
+				],
 				Roboto: ['var(--font-roboto)', ...defaultTheme.fontFamily.sans],
 			},
 			backgroundImage: {

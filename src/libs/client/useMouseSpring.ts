@@ -36,8 +36,8 @@ export default function useMouseSpring({
 
 		return { onMove, onLeave, mouseX, mouseY };
 	} else {
-		const onMove = () => {};
-		const onLeave = () => {};
+		const onMove = undefined;
+		const onLeave = undefined;
 		const mouseX = motionValue(0);
 		const mouseY = motionValue(0);
 		return { onMove, onLeave, mouseX, mouseY };

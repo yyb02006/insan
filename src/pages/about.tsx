@@ -250,7 +250,7 @@ const WorkIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight font-SCoreDream font-bold'
+				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight font-Pretendard font-bold'
 			>
 				{descDatas.map((data, idx) => (
 					<WorkIntroSectionMotionLi

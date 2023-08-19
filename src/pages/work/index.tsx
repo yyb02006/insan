@@ -1262,8 +1262,8 @@ export default function Work({
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
 															: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-													width: 960,
-													height: 540,
+													width: 480,
+													height: 270,
 												}}
 												title={data.title}
 												description={data.description}

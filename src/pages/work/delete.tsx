@@ -442,7 +442,6 @@ export default function Delete({
 		dependencyArray: [page, fetchLoading],
 	});
 
-	console.log('page=' + page, 'api=' + apiPage[category], fetchLoading);
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -484,10 +483,7 @@ export default function Delete({
 						) : null
 					)}
 				</div>
-				<div
-					ref={intersectionRef}
-					className='w-full h-1 my-40 bg-pink-600'
-				></div>
+				<div ref={intersectionRef} className='w-full h-1 my-40'></div>
 				<SelectedListButton
 					onClick={onSelectedListClick}
 					count={deleteIdList.length}

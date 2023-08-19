@@ -681,7 +681,7 @@ const Video: NextPage<VideoProps> = ({ videoId, thumbnailLink }) => {
 							height={720}
 							alt={`${videoId}유튜브영상 썸네일`}
 							className='absolute top-0 left-0'
-							priority
+							loading='lazy'
 						/>
 					</div>
 					<div className='absolute top-0 h-full aspect-video bg-[#202020] opacity-[35%]' />
@@ -765,10 +765,11 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 					<Image
 						src={thumbnailLink}
 						alt='1'
-						width={1600}
-						height={900}
+						width={960}
+						height={540}
 						style={{ objectFit: 'cover' }}
-						className='relative h-[80vh] aspect-video'
+						loading='lazy'
+						className='relative w-auto h-[80vh] aspect-video'
 					/>
 					<div className='absolute top-0 w-full h-full bg-[#101010] opacity-90' />
 				</div>
