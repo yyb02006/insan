@@ -36,9 +36,6 @@ export default function useInfiniteScrollFromFlatform({
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const [firstIdPerPage, setFirstIdPerPage] = useState(6);
 	const [secondIdPerPage, setSecondIdPerPage] = useState(6);
-
-	console.log(nextpageToken);
-
 	useEffect(() => {
 		setIsScrollLoading(isLoading);
 	}, [isLoading, setIsScrollLoading]);
@@ -145,8 +142,6 @@ export default function useInfiniteScrollFromFlatform({
 	};
 
 	useEffect(() => {
-		console.log('#$@%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-
 		if (!isInfiniteScrollEnabled) return;
 		const options: IntersectionObserverInit = {
 			root: null,

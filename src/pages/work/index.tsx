@@ -74,6 +74,7 @@ interface VideoProps {
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
 	isMobile: boolean;
+	setpriority: boolean;
 }
 
 interface OnDetail {
@@ -729,6 +730,7 @@ const Video = ({
 	setOnDetail,
 	setAnimationEnd,
 	isMobile,
+	setpriority,
 }: VideoProps) => {
 	const [titleScreen, setTitleScreen] = useState(false);
 	const [cover, coverAnimate] = useAnimate();
@@ -908,7 +910,7 @@ const Video = ({
 						alt={'will fixed'}
 						width={thumbnail.width}
 						height={thumbnail.height}
-						priority
+						priority={setpriority}
 						className='relative w-full aspect-video object-cover'
 					/>
 					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
@@ -1283,6 +1285,7 @@ export default function Work({
 														: undefined
 												}
 												isMobile={isMobile}
+												setpriority={idx < 6 ? true : false}
 											/>
 											<div className='block sm:hidden'>
 												<div className='mt-1 font-semibold'>{data.title}</div>

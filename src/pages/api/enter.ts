@@ -9,7 +9,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		query: { secret },
 	} = req;
 
-	if (secret !== process.env.ODR_SECRET_TOKEN) {
+	if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 		return res.status(401).json({ success: false, message: 'Invalid token' });
 	}
 

@@ -19,6 +19,7 @@ import {
 import ToTop from '@/components/toTop';
 import { GetStaticProps } from 'next';
 import client from '@/libs/server/client';
+import Circles from '@/components/circles';
 
 export interface WorkInfos {
 	title: string;
@@ -70,8 +71,6 @@ export default function Write({
 	initialYoutubeVideos,
 	initialOwnedVideos,
 }: InitialData) {
-	console.log(initialYoutubeVideos);
-
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
 	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
@@ -91,13 +90,12 @@ export default function Write({
 	const [vimeoVideos, setVimeoVideos] =
 		useState<VimeoVideos[]>(initialVimeoVideos);
 	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
-		`/api/work/write?secret=${process.env.ODR_SECRET_TOKEN}`
+		`/api/work/write?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
 	);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const [isScrollLoading, setIsScrollLoading] = useState(false);
-	const [ownedVideos, setOwnedVideos] =
-		useState<OwnedVideos>(initialOwnedVideos);
+	const ownedVideos: OwnedVideos = initialOwnedVideos;
 	const intersectionRef = useInfiniteScrollFromFlatform({
 		setVimeoVideos,
 		setYoutubeVideos,
@@ -105,6 +103,7 @@ export default function Write({
 		category,
 		isInfiniteScrollEnabled,
 	});
+
 	useEffect(() => {
 		if (category === 'filmShort' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
@@ -142,8 +141,8 @@ export default function Write({
 	}, [category, youtubeVideos, vimeoVideos]);
 	useEffect(() => {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
-		setWorkInfos(undefined);
-	}, [category, isInfiniteScrollEnabled]);
+		setWorkInfos([]);
+	}, [category]);
 	useEffect(() => {
 		if (data?.success) router.reload();
 	}, [data, router]);
@@ -229,12 +228,19 @@ export default function Write({
 			}
 		}
 	};
+
 	const onSubmitWrites = () => {
 		if (loading) return;
 		sendList(workInfos);
 	};
+
 	const onReset = () => {
+		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos([]);
+		setSearchResult((p) => ({
+			...p,
+			[category]: category === 'filmShort' ? vimeoVideos : youtubeVideos,
+		}));
 	};
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -353,6 +359,19 @@ export default function Write({
 				/>
 			</section>
 			<ToTop toScroll={topElement} />
+			{loading ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] bg-black'>
+					<div className='absolute top-0 w-full h-full flex justify-center items-center'>
+						<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				</div>
+			) : null}
 		</Layout>
 	);
 }
@@ -360,7 +379,7 @@ export default function Write({
 export const getStaticProps: GetStaticProps = async () => {
 	const perPage = 6;
 	const VimeoVideos = await fetchData(
-		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=${perPage}`,
+		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=12`,
 		{
 			headers: {
 				'Content-Type': 'application/json',
