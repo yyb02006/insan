@@ -15,7 +15,5 @@ const cookieOptions = {
 };
 
 export function apiSessionWrapper(fn: NextApiHandler) {
-	console.log(process.env.ADMIN_PASSWORD);
-
 	return withIronSessionApiRoute(fn, cookieOptions);
 }

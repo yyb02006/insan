@@ -450,7 +450,6 @@ const Wave: NextPage<WaveProps> = ({
 	const visibility = useTransform(scrollYProgress, (value) =>
 		value > startHeight ? 'visible' : 'hidden'
 	);
-	console.log(index + ' = ' + isInView);
 
 	return (
 		<div

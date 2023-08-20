@@ -775,7 +775,6 @@ const Video = ({
 			setTimer(null);
 		}
 	};
-	console.log('start = ' + start, 'hover = ' + isHovering);
 	return (
 		<>
 			<motion.article
