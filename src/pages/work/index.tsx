@@ -1025,7 +1025,7 @@ const OutroSection = () => {
 		}
 	}, [isLinksInview, snsLinksAnimate]);
 	return (
-		<section className='relative bg-[#101010] h-auto flex flex-col items-center font-bold'>
+		<section className='hidden sm:flex relative bg-[#101010] h-auto flex-col items-center font-bold'>
 			<motion.div
 				initial={'hidden'}
 				animate={isLetterInview ? 'visible' : 'hidden'}
