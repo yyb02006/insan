@@ -259,12 +259,13 @@ const SpringText = ({
 		},
 		{ title: 'Trendy', yRatio: 2.5, text: 'text-[2.5rem] md:text-[4.5rem]' },
 	]);
-	const y = useTransform(scrollYProgress, [0.4, 0.5, 0.8], [0, 600, 1000]);
+	const y = useTransform(scrollYProgress, [0.4, 0.7, 1], [0, 600, 1000]);
+	const yOnMobile = useTransform(scrollYProgress, [0.2, 0.4], [0, 400]);
 	return (
 		<>
 			<div className='flex border border-[#bababa] justify-center items-center overflow-hidden w-full aspect-square rounded-full'>
 				<m.ul
-					style={{ y }}
+					style={{ y: innerWidth > 640 ? y : yOnMobile }}
 					className='font-Roboto text-[#efefef] font-extrabold leading-snug text-center '
 				>
 					{elements.current.map((element, idx) => (
@@ -360,7 +361,7 @@ const CircleSection: NextPage<HeaderProps> = ({
 	]);
 	return (
 		<section
-			className='relative h-[700vh] sm:h-[500vh] mb-[100vh]'
+			className='relative h-[900vh] sm:h-[500vh] mb-[100vh]'
 			ref={inheritRef}
 		>
 			<div className='absolute top-0 h-[80%]'>
@@ -449,17 +450,22 @@ const Wave: NextPage<WaveProps> = ({
 	const visibility = useTransform(scrollYProgress, (value) =>
 		value > startHeight ? 'visible' : 'hidden'
 	);
+	console.log(index + ' = ' + isInView);
+
 	return (
 		<div
 			ref={parent}
 			//cls에 stickyCondition 프로퍼티를 올리고 globalcss 갔다가 오면 이부분만 css 적용이 풀린다 ㅈ버그 ㅅㅂ
 			className={cls(
 				'sticky',
-				index === 1 ? 'top-[35vh] h-[100vh]' : '',
-				index === 2 ? 'top-[50vh] h-[55vh]' : '',
-				index === 3 ? 'top-[65vh] h-[10vh]' : ''
+				index === 1 ? ' top-[35vh] h-[180vh] sm:h-[100vh]' : '',
+				index === 2 ? ' top-[50vh] h-[135vh] sm:h-[55vh]' : '',
+				index === 3 ? ' top-[65vh] h-[90vh] sm:h-[10vh]' : ''
 			)}
 		>
+			{/* {index === 1 ? (
+				<div className='absolute bottom-0 h-[calc(100%-10vw)] w-full bg-[#161616]'></div>
+			) : null} */}
 			<div className='absolute w-full flex justify-center h-auto'>
 				<m.div
 					style={{ y, visibility }}
@@ -485,17 +491,39 @@ const Wave: NextPage<WaveProps> = ({
 						  ))}
 				</m.div>
 			</div>
-			<div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' />
-			<div className='w-[100vw] overflow-hidden'>
+
+			{/* <div className='absolute mt-8 md:mt-20 bg-[#101010] w-full h-[200px]' /> */}
+			<div className='w-[100vw] h-[10vw] overflow-hidden'>
 				<m.div
 					initial={{ x: waveReverse ? 0 : '-100vw' }}
 					variants={wave(waveSec, waveReverse)}
 					className={cls(
-						waveReverse ? 'bg-wave-pattern-reverse' : 'bg-wave-pattern',
+						index === 1
+							? 'bg-wave-pattern-gradation1-4 sm:bg-wave-pattern-gradation1-2'
+							: '',
+						index === 2
+							? 'bg-wave-pattern-gradation2-4 sm:bg-wave-pattern-gradation2-2'
+							: '',
+						index === 3
+							? 'bg-wave-pattern-gradation3-4 sm:bg-wave-pattern-gradation3-2'
+							: '',
+						/* waveReverse
+							? 'bg-wave-pattern-reverse-4 sm:bg-wave-pattern-reverse-2'
+							: 'bg-wave-pattern-forward-4 sm:bg-wave-pattern-forward-2', */
 						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw] bg-repeat-x'
 					)}
 				></m.div>
 			</div>
+			<div
+				className={cls(
+					index === 1 ? 'bg-[#161616]' : '',
+					index === 2 ? 'bg-[#1c1c1c]' : '',
+					index === 3
+						? 'bg-gradient-to-b from-[#222222] to-[#101010] sm:-bottom-[50vh] sm:h-[calc(100%-10vw+50vh)]'
+						: '',
+					'absolute bottom-0 h-[calc(100%-10vw)] w-full'
+				)}
+			></div>
 		</div>
 	);
 };
@@ -509,8 +537,8 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 		{
 			index: 1,
 			letter: Array.from('Future & Hornesty'),
-			startHeight: 0.5,
-			endHeigth: 0.6,
+			startHeight: innerWidth > 640 ? 0.5 : 0.3,
+			endHeigth: innerWidth > 640 ? 0.6 : 0.4,
 			inViewCondition: 0.5,
 			stickyCondition: { top: 35, height: '100' },
 			waveSec: 12,
@@ -519,8 +547,8 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 		{
 			index: 2,
 			letter: Array.from('Intuitive & Trendy'),
-			startHeight: 0.6,
-			endHeigth: 0.7,
+			startHeight: innerWidth > 640 ? 0.6 : 0.4,
+			endHeigth: innerWidth > 640 ? 0.7 : 0.5,
 			inViewCondition: 0.5,
 			stickyCondition: { top: 50, height: '55' },
 			waveSec: 10,
@@ -531,8 +559,8 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 		{
 			index: 3,
 			letter: Array.from('Creative & Emotional'),
-			startHeight: 0.7,
-			endHeigth: 0.8,
+			startHeight: innerWidth > 640 ? 0.7 : 0.5,
+			endHeigth: innerWidth > 640 ? 0.8 : 0.6,
 			inViewCondition: 0.5,
 			stickyCondition: { top: 65, height: '10' },
 			waveSec: 8,
@@ -543,7 +571,7 @@ const WavesSection: NextPage<WaveSectionProps> = ({
 		<m.div
 			ref={inheritRef}
 			animate='wave'
-			className='absolute top-[200vh] w-full h-[600vh] sm:h-[400vh] pb-[50vh]'
+			className='absolute top-[200vh] w-full h-[800vh] sm:h-[400vh] pb-[50vh]'
 		>
 			{waveProps.current.map((prop) =>
 				prop.index % 2 === 0 ? (
