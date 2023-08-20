@@ -75,10 +75,11 @@ const ListMenu = () => {
 	);
 };
 
-const ExtendedNav = () => {
+const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
 	const router = useRouter();
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
 		limitHeight: 0,
+		isMobile: isMobile,
 	});
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
@@ -262,7 +263,7 @@ const ExtendedNav = () => {
 	);
 };
 
-const HamburgerMenu = () => {
+const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [isOpen, setIsOpen] = useState(false);
 	const [navRef, animate] = useAnimate();
@@ -308,7 +309,9 @@ const HamburgerMenu = () => {
 			ref={navRef}
 			className='absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
-			<AnimatePresence>{isOpen ? <ExtendedNav /> : null}</AnimatePresence>
+			<AnimatePresence>
+				{isOpen ? <ExtendedNav isMobile={isMobile} /> : null}
+			</AnimatePresence>
 			<div
 				onClick={() => {
 					setIsOpen((p) => !p);
@@ -345,6 +348,15 @@ export default function Layout({
 	menu = true,
 }: LayoutProps) {
 	const router = useRouter();
+	const [isMobile, setIsMobile] = useState(true);
+	useEffect(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		setIsMobile(
+			/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+				userAgent
+			)
+		);
+	}, []);
 	return (
 		<section className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
 			<Head>
@@ -373,7 +385,7 @@ export default function Layout({
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>
 					<AnimatePresence>
-						{nav.isShort ? <HamburgerMenu /> : null}
+						{nav.isShort ? <HamburgerMenu isMobile={isMobile} /> : null}
 					</AnimatePresence>
 				</div>
 			) : null}

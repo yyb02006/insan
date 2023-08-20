@@ -1217,6 +1217,7 @@ export default function Work({
 				seoTitle='Work'
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
+				footerPosition='mt-20 sm:mt-0'
 			>
 				<main
 					ref={section}

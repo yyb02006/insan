@@ -250,7 +250,7 @@ const WorkIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight font-Pretendard font-bold'
+				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight tracking-tighter font-Pretendard font-bold'
 			>
 				{descDatas.map((data, idx) => (
 					<WorkIntroSectionMotionLi
@@ -366,19 +366,19 @@ const JobIntroSection = () => {
 	const descDatas = [
 		{
 			title: '트렌디한 감각',
-			desc: '사람들의 마음을 살 수 있는 감성을 잃지 않으려 노력합니다. 저의 감각은 디자인적 트렌드뿐만 아니라, 드론과 3D촬영같은 기술적 트렌드를 반영하는 것에도 특화되어 있습니다. ',
+			desc: '사람들의 마음을 살 수 있는 감성을 잃지 않으려 노력합니다. 저의 감각은 디자인적 트렌드뿐만 아니라, 조명운용, 드론촬영 등 기술적 트렌드를 반영하는 것에도 특화되어 있습니다.',
 		},
 		{
 			title: '융통성 있는 작업과정',
-			desc: '여러 사람이 모여 영상컨텐츠를 만들어내는 과정은 곧 예상치 못한 문제를 해결해내는 과정입니다. 컨텐츠가 완성될 때까지 겪게 되는 모든 어려움에 유연하게 대처하고 팀을 이끌어나갈 수 있습니다. ',
+			desc: '여러 사람이 모여 영상컨텐츠를 만들어내는 과정은 곧 예상치 못한 문제를 해결해내는 과정입니다. 컨텐츠의 완성까지 겪는 모든 어려움에 유연하게 대처하고 팀을 이끌어나갈 수 있습니다.',
 		},
 		{
 			title: '결과에 대한 집착',
-			desc: '클라이언트의 요구를 만족시키는 일은 결코 운 좋게 눈속임한 퀄리티로 해낼 수 없습니다. 때문에 영상디자이너는 항상 결과물로 말해야한다는 생각으로 작업에 임합니다. ',
+			desc: '클라이언트의 요구를 만족시키는 일은 결코 운 좋게 눈속임한 퀄리티로 해낼 수 없습니다. 때문에 영상디자이너는 항상 결과물로 말해야한다는 생각으로 작업에 임합니다.',
 		},
 		{
 			title: '연구를 즐기는 스타일',
-			desc: '영상으로 무언가를 표현한다는 것은 저에게 직업이고 기술이기 이전에, 꿈이자 취미입니다. 메시지를 어떻게 사람들에게 전달할 수 있을지에 대한 고민과 연구를 지금 이 순간에도 하고 있습니다. ',
+			desc: '영상으로 무언가를 표현하는 것은 저에게 직업이고 기술이기 이전에, 꿈이자 취미입니다. 메시지를 사람들에게 어떻게 전달할지에 대한 고민과 연구는 지금 이 순간에도 진행 중 입니다.',
 		},
 	];
 	const title = useRef(null);
@@ -431,12 +431,12 @@ const JobIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative w-full sm:w-[75%] gap-y-[20vh] sm:gap-0 m-auto grid lg:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
+				className='relative w-full sm:w-[75%] gap-y-[20vh] sm:gap-x-4 m-auto grid sm:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
 			>
 				{descDatas.map((data, idx) => (
 					<li
 						key={idx}
-						className='relative xl:w-[340px] md:w-[280px] sm:w-[220px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between'
+						className='relative xl:w-[340px] md:w-[260px] sm:w-[200px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between'
 					>
 						<div className='absolute w-full h-full flex justify-center items-center'>
 							<JobIntroSectionMotionDiv
@@ -450,7 +450,7 @@ const JobIntroSection = () => {
 							scrollYProgress={scrollYProgress}
 							idx={idx}
 							startValue={-100}
-							css='relative w-full text-[2rem] font-bold'
+							css='relative w-full text-[2rem] font-bold font-GmarketSans'
 						>
 							{data.title}
 						</JobIntroSectionMotionDiv>
@@ -458,9 +458,9 @@ const JobIntroSection = () => {
 							scrollYProgress={scrollYProgress}
 							idx={idx}
 							startValue={200}
-							css='relative font-extralight'
+							css='relative font-extralight text-sm sm:text-[0.9375rem] sm:text-[#cacaca] mb-10 sm:mb-6 sm:leading-7 tracking-tighter'
 						>
-							{data.desc}
+							<span className='leading-relaxed'>{data.desc}</span>
 						</JobIntroSectionMotionDiv>
 					</li>
 				))}
