@@ -1297,7 +1297,7 @@ export default function Work({
 						) : null}
 					</section>
 					<OutroSection />
-					<ToTop toScroll={section} />
+					<ToTop toScroll={section} position='right' />
 				</main>
 			</Layout>
 			{onDetail && onDetail.isOpen === true ? (

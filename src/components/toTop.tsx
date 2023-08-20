@@ -1,17 +1,24 @@
-import { RefObject, useEffect } from 'react';
+import { cls } from '@/libs/client/utils';
+import { RefObject } from 'react';
 
 interface ToTopProps {
 	toScroll: RefObject<HTMLDivElement>;
+	position?: 'left' | 'right';
 }
 
-export default function ToTop({ toScroll }: ToTopProps) {
+export default function ToTop({ toScroll, position = 'left' }: ToTopProps) {
 	const onMoveClick = () => {
 		toScroll.current?.scrollIntoView();
 	};
 	return (
 		<button
 			onClick={onMoveClick}
-			className='fixed rounded-full bg-green-500 xl:right-[88px] sm:right-6 right-auto sm:left-auto left-6 sm:bottom-6 bottom-[104px] w-12 aspect-square flex justify-center items-center'
+			className={cls(
+				position === 'left'
+					? 'right-auto left-6 bottom-[104px]'
+					: 'right-6 left-auto bottom-6',
+				'fixed rounded-full bg-green-500 xl:right-[88px] sm:right-6 sm:left-auto sm:bottom-6 w-12 aspect-square flex justify-center items-center'
+			)}
 		>
 			<svg
 				xmlns='http://www.w3.org/2000/svg'
