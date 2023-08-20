@@ -7,7 +7,6 @@ import {
 import { getIronSession } from 'iron-session/edge';
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
-	console.log('dddddddddd' + process.env.COOKIE_PASSWORD);
 	const res = NextResponse.next();
 	const { isBot } = userAgent(req);
 	if (isBot) {
@@ -29,8 +28,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			: 'http://localhost:3000'
 	); */
 	const deniedPathname = ['/work/write', '/work/delete'];
-	console.log(deniedPathname.includes(req.nextUrl.pathname));
-	console.log('refererererererererer', req.headers.get('referer'));
 
 	if (session.admin?.password !== process.env.ADMIN_PASSWORD) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {

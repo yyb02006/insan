@@ -88,7 +88,7 @@ export function VimeoThumbnailFeed({
 							<Input
 								name='description'
 								type='text'
-								placeholder='설명'
+								placeholder='직무'
 								data-resourceid={video.player_embed_url}
 								onChange={inputChange}
 								value={
@@ -279,7 +279,7 @@ export function YoutubeThumbnailFeed({
 							<Input
 								name='description'
 								type='text'
-								placeholder='설명'
+								placeholder='직무'
 								data-resourceid={
 									data.snippet.resourceId
 										? data.snippet.resourceId?.videoId
