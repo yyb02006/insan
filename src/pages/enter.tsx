@@ -12,9 +12,8 @@ export interface AuthResponse {
 export default function Admin() {
 	const router = useRouter();
 	const [password, setPassword] = useState<string>('');
-	const [sendPassword, { loading, data }] = useMutation<AuthResponse>(
-		`/api/enter?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
-	);
+	const [sendPassword, { loading, data }] =
+		useMutation<AuthResponse>(`/api/enter`);
 	const [user, authLoading] = useUser({ approvedRedirectUrl: 'work/write' });
 
 	const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -23,7 +22,10 @@ export default function Admin() {
 
 	const onPasswordSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		sendPassword(password);
+		sendPassword({
+			password,
+			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
+		});
 	};
 
 	useEffect(() => {
