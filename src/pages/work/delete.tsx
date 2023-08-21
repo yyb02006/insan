@@ -192,6 +192,7 @@ interface ButtonsControllerProps {
 	onSave: () => void;
 	onSort: () => void;
 	count: number;
+	action?: 'save' | 'delete';
 }
 
 export const ButtonsController = ({
@@ -199,6 +200,7 @@ export const ButtonsController = ({
 	onSave,
 	onSort,
 	count,
+	action = 'save',
 }: ButtonsControllerProps) => {
 	return (
 		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
@@ -212,7 +214,7 @@ export const ButtonsController = ({
 				onClick={onSave}
 				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
 			>
-				Delete
+				{action === 'save' ? <span>save</span> : <span>delete</span>}
 			</button>
 			<SelectedListButton
 				onClick={onSort}
@@ -499,6 +501,7 @@ export default function Delete({
 					onSave={onSubmitDelete}
 					onSort={onSelectedListClick}
 					count={deleteIdList.length}
+					action='delete'
 				/>
 				<ToTop toScroll={topElement} />
 			</section>
