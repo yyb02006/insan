@@ -4,19 +4,18 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
-		body,
+		body: { password, secret },
 		session,
-		query: { secret },
 	} = req;
 
 	if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 		return res.status(401).json({ success: false, message: 'Invalid token' });
 	}
 
-	if (body === process.env.ADMIN_PASSWORD) {
+	if (password === process.env.ADMIN_PASSWORD) {
 		try {
 			session.admin = {
-				password: body,
+				password,
 			};
 			await req.session.save();
 			await res.revalidate('/work/write');
@@ -25,7 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			return res.status(500).json({ success: false, error });
 		}
 	} else {
-		return res.status(200).json({ success: false, message: 'Unautorized' });
+		return res.status(401).json({ success: false, message: 'Unautorized' });
 	}
 };
 
