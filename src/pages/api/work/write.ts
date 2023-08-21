@@ -5,19 +5,18 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
-		body,
-		query: { secret },
+		body: { data, secret },
 	} = req;
 
 	if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 		return res.status(401).json({ success: false, message: 'Invalid token' });
 	}
 
-	if (body.length > 0) {
+	if (data.length > 0) {
 		try {
 			//forEach 쓰니까 pending돼서 재대로 초기화가 안됨
 			await Promise.all(
-				body.map(async (el: WorkInfos) => {
+				data.map(async (el: WorkInfos) => {
 					await client.works.upsert({
 						where: { resourceId: el.resourceId },
 						create: {
