@@ -359,6 +359,7 @@ export default function Write({
 					onSave={onSubmitWrites}
 					onSort={onUpdatedListClick}
 					count={workInfos ? workInfos?.length : 0}
+					action='save'
 				/>
 			</section>
 			<ToTop toScroll={topElement} />
