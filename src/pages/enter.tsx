@@ -14,7 +14,7 @@ export default function Admin() {
 	const [password, setPassword] = useState<string>('');
 	const [sendPassword, { loading, data }] =
 		useMutation<AuthResponse>(`/api/enter`);
-	const [user, authLoading] = useUser({ approvedRedirectUrl: 'work/write' });
+	const [user, authLoading] = useUser({ approvedRedirectUrl: '/work/write' });
 
 	const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		setPassword(e.currentTarget.value);

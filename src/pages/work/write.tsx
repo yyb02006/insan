@@ -90,7 +90,7 @@ export default function Write({
 	const [vimeoVideos, setVimeoVideos] =
 		useState<VimeoVideos[]>(initialVimeoVideos);
 	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
-		`/api/work/write?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
+		`/api/work/write`
 	);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
@@ -231,7 +231,10 @@ export default function Write({
 
 	const onSubmitWrites = () => {
 		if (loading) return;
-		sendList(workInfos);
+		sendList({
+			data: workInfos,
+			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
+		});
 	};
 
 	const onReset = () => {
