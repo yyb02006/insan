@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	});
 
 	//헤더의 referer라는 속성을 get해서 저장 referer는 사용자가 어디에서 왔는지에 대한 정보가 담겨있음
-	/* const prevUrl = new URL(
+	/* 	const prevUrl = new URL(
 		req.headers.get('referer') || '/',
 		process.env.NODE_ENV === 'production'
 			? 'https://insan.vercel.app'

@@ -13,7 +13,7 @@ export default function Admin() {
 	const router = useRouter();
 	const [password, setPassword] = useState<string>('');
 	const [sendPassword, { loading, data }] = useMutation<AuthResponse>(
-		`api/enter?secret=${process.env.ODR_SECRET_TOKEN}`
+		`api/enter?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
 	);
 	const [user, authLoading] = useUser({ approvedRedirectUrl: 'work/write' });
 
