@@ -41,8 +41,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		if (req.nextUrl.pathname === '/enter') {
 			return NextResponse.redirect(
 				process.env.NODE_ENV === 'production'
-					? 'https://insan.vercel.app'
-					: 'http://localhost:3000'
+					? 'https://insan.vercel.app/work/write'
+					: 'http://localhost:3000/work/write'
 			);
 		}
 	}

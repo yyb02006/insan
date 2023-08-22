@@ -317,7 +317,7 @@ export default function Delete({
 	}>({ filmShort: 2, outsource: 2 });
 	const perPage = 12;
 	const [onSelectedList, setOnSelectedList] = useState(false);
-	const [fetchLoading, setFetchLoading] = useState(true);
+	const [fetchLoading, setFetchLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] =
 		useState<VideosMerged<boolean>>(initialHasNextPage);
 
@@ -448,6 +448,8 @@ export default function Delete({
 		dependencyArray: [page, fetchLoading],
 	});
 
+	console.log(fetchLoading, onSelectedList, hasNextPage[category]);
+
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -490,7 +492,18 @@ export default function Delete({
 						) : null
 					)}
 				</div>
-				<div ref={intersectionRef} className='w-full h-1 my-40'></div>
+				<div ref={intersectionRef} className='w-full h-1 mt-20' />
+				{fetchLoading ? (
+					<div className='relative w-full h-20 flex justify-center items-center mb-20'>
+						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				) : null}
 				<SelectedListButton
 					onClick={onSelectedListClick}
 					count={deleteIdList.length}

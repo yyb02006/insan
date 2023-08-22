@@ -135,7 +135,7 @@ export default function Contact() {
 									</Link>
 								</li>
 								<li className='opacity-0 hover:text-palettered transition-colors'>
-									<Link href='' target='_blank'>
+									<Link href='https://vimeo.com/user136249834' target='_blank'>
 										VIMEO
 									</Link>
 								</li>
