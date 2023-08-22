@@ -89,10 +89,10 @@ export default function Write({
 		useState<GapiItem[]>(initialYoutubeVideos);
 	const [vimeoVideos, setVimeoVideos] =
 		useState<VimeoVideos[]>(initialVimeoVideos);
-	const [sendList, { loading, data }] = useMutation<{ success: boolean }>(
-		`/api/work/write`
-	);
-	const [workInfos, setWorkInfos] = useState<WorkInfos[]>();
+	const [sendList, { loading, data, error }] = useMutation<{
+		success: boolean;
+	}>(`/api/work/write`);
+	const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const [isScrollLoading, setIsScrollLoading] = useState(false);
 	const ownedVideos: OwnedVideos = initialOwnedVideos;
@@ -104,6 +104,11 @@ export default function Write({
 		isInfiniteScrollEnabled,
 	});
 
+	useEffect(() => {
+		if (error) {
+			console.log(error);
+		}
+	}, [error]);
 	useEffect(() => {
 		if (category === 'filmShort' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
@@ -154,80 +159,59 @@ export default function Write({
 		if (workIdx !== undefined && workIdx >= 0) {
 			if (name === 'title' && value !== '') {
 				setWorkInfos((p) =>
-					p
-						? p.map((arr) =>
-								arr.resourceId === dataset.resourceid
-									? { ...arr, title: value }
-									: arr
-						  )
-						: undefined
+					p.map((arr) =>
+						arr.resourceId === dataset.resourceid
+							? { ...arr, title: value }
+							: arr
+					)
 				);
 			} else if (name === 'title' && value === '') {
 				setWorkInfos((p) =>
-					p
-						? p.filter((arr) => arr.resourceId !== dataset.resourceid)
-						: undefined
+					p.filter((arr) => arr.resourceId !== dataset.resourceid)
 				);
 			} else if (name === 'description') {
 				setWorkInfos((p) =>
-					p
-						? p.map((arr) =>
-								arr.resourceId === dataset.resourceid
-									? { ...arr, description: value }
-									: arr
-						  )
-						: undefined
+					p.map((arr) =>
+						arr.resourceId === dataset.resourceid
+							? { ...arr, description: value }
+							: arr
+					)
 				);
 			} else if (name === 'date') {
 				setWorkInfos((p) =>
-					p
-						? p.map((arr) =>
-								arr.resourceId === dataset.resourceid
-									? { ...arr, date: value }
-									: arr
-						  )
-						: undefined
+					p.map((arr) =>
+						arr.resourceId === dataset.resourceid
+							? { ...arr, date: value }
+							: arr
+					)
 				);
 			} else if (type === 'radio') {
 				setWorkInfos((p) =>
-					p
-						? p.map((arr) =>
-								arr.resourceId === dataset.resourceid
-									? { ...arr, category: value }
-									: arr
-						  )
-						: undefined
+					p.map((arr) =>
+						arr.resourceId === dataset.resourceid
+							? { ...arr, category: value }
+							: arr
+					)
 				);
 			}
 		} else {
 			if (name === 'title') {
-				setWorkInfos((p) =>
-					p
-						? [
-								...p,
-								{
-									resourceId: dataset.resourceid ? dataset.resourceid : '',
-									title: value,
-									description: '',
-									category: category === 'filmShort' ? '' : 'outsource',
-									date: '',
-									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
-								},
-						  ]
-						: [
-								{
-									resourceId: dataset.resourceid ? dataset.resourceid : '',
-									title: value,
-									description: '',
-									category: category === 'filmShort' ? '' : 'outsource',
-									date: '',
-									thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
-								},
-						  ]
-				);
+				setWorkInfos((p) => [
+					...p,
+					{
+						resourceId: dataset.resourceid ? dataset.resourceid : '',
+						title: value,
+						description: dataset.description ? dataset.description : '',
+						category: category === 'filmShort' ? '' : 'outsource',
+						date: dataset.date ? dataset.date : '',
+						thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
+					},
+				]);
 			}
 		}
 	};
+
+	console.log(workInfos);
 
 	const onSubmitWrites = () => {
 		if (loading) return;
@@ -317,11 +301,11 @@ export default function Write({
 					category={category}
 					onFilmShortClick={() => {
 						setCategory('filmShort');
-						setWorkInfos(undefined);
+						setWorkInfos([]);
 					}}
 					onOutsourceClick={() => {
 						setCategory('outsource');
-						setWorkInfos(undefined);
+						setWorkInfos([]);
 					}}
 				/>
 				<SearchForm
@@ -336,7 +320,7 @@ export default function Write({
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
-						OwnedVideos={ownedVideos.filmShort}
+						ownedVideos={ownedVideos.filmShort}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
@@ -346,7 +330,7 @@ export default function Write({
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
-						OwnedVideos={ownedVideos.outsource}
+						ownedVideos={ownedVideos.outsource}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<SelectedListButton
