@@ -179,125 +179,111 @@ export function VimeoThumbnailFeed({
 
 export function YoutubeThumbnailFeed({
 	resource,
-	inputChange,
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
 	ownedVideos,
+	inputChange,
+	inputBlur,
 }: YoutubefeedProps) {
 	return (
 		<>
 			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-				{resource.map((data, arr) => (
-					<div
-						key={arr}
-						className={`w-full flex flex-col justify-between ${
-							workInfos?.find(
-								(info) => info.resourceId === data.snippet.resourceId?.videoId
-							)?.title
-								? 'ring-2 ring-palettered'
-								: ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === data.snippet.resourceId?.videoId
-								  )
-								? 'ring-2 ring-green-500'
-								: ''
-						}`}
-					>
-						<div>
-							<Image
-								src={
-									resource.length !== 0
-										? data.snippet.thumbnails.maxres?.url ||
-										  data.snippet.thumbnails.medium?.url
-										: ''
-								}
-								alt='Thumbnail not available'
-								width={1280}
-								height={720}
-								priority={arr < 6 ? true : false}
-								className='w-full object-cover'
-							/>
-							<div className='mt-2'>
-								<div className='text-sm text-[#bababa]'>
-									Title : {data.snippet.title}
-								</div>
-								<div className='text-xs font-light text-[#bababa]'>
-									Id : {data.snippet.resourceId?.videoId}
+				{resource.map((video, arr) => {
+					const matchedWorkInfos = workInfos?.find(
+						(workInfo) =>
+							workInfo.resourceId === video.snippet.resourceId?.videoId
+					);
+					const matchedOwnedVideos = ownedVideos.find(
+						(ownedVideo) =>
+							ownedVideo.resourceId === video.snippet.resourceId?.videoId
+					);
+					return (
+						<div
+							key={arr}
+							className={`w-full flex flex-col justify-between ${
+								matchedWorkInfos
+									? 'ring-2 ring-palettered'
+									: matchedOwnedVideos
+									? 'ring-2 ring-green-500'
+									: ''
+							}`}
+						>
+							<div>
+								<Image
+									src={
+										resource.length !== 0
+											? video.snippet.thumbnails.maxres?.url ||
+											  video.snippet.thumbnails.medium?.url
+											: ''
+									}
+									alt='Thumbnail not available'
+									width={1280}
+									height={720}
+									priority={arr < 6 ? true : false}
+									className='w-full object-cover'
+								/>
+								<div className='mt-2'>
+									<div className='text-sm text-[#bababa]'>
+										Title : {video.snippet.title}
+									</div>
+									<div className='text-xs font-light text-[#bababa]'>
+										Id : {video.snippet.resourceId?.videoId}
+									</div>
 								</div>
 							</div>
+							<div className='mt-2'>
+								<Input
+									name='title'
+									type='text'
+									placeholder='타이틀'
+									data-resourceid={video.snippet.resourceId?.videoId}
+									data-thumbnail={video.snippet.resourceId?.videoId}
+									data-description={matchedOwnedVideos?.description}
+									data-date={matchedOwnedVideos?.date}
+									data-category={matchedOwnedVideos?.category}
+									onChange={inputChange}
+									onBlur={inputBlur}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.title
+											: matchedOwnedVideos
+											? matchedOwnedVideos.title
+											: ''
+									}
+								/>
+								<Input
+									name='description'
+									type='text'
+									placeholder='직무'
+									data-resourceid={video.snippet.resourceId?.videoId}
+									onChange={inputChange}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.description
+											: matchedOwnedVideos
+											? matchedOwnedVideos.description
+											: ''
+									}
+								/>
+								<Input
+									name='date'
+									type='text'
+									placeholder='날짜'
+									data-resourceid={video.snippet.resourceId?.videoId}
+									onChange={inputChange}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.date
+											: matchedOwnedVideos
+											? matchedOwnedVideos.date
+											: ''
+									}
+								/>
+							</div>
 						</div>
-						<div className='mt-2'>
-							<Input
-								name='title'
-								type='text'
-								placeholder='타이틀'
-								data-resourceid={
-									data.snippet.resourceId
-										? data.snippet.resourceId?.videoId
-										: ''
-								}
-								data-thumbnail={'no-link'}
-								onChange={inputChange}
-								value={
-									workInfos?.find(
-										(workInfo) =>
-											workInfo.resourceId === data.snippet.resourceId?.videoId
-									)?.title ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === data.snippet.resourceId?.videoId
-									)?.title ||
-									''
-								}
-							/>
-							<Input
-								name='description'
-								type='text'
-								placeholder='직무'
-								data-resourceid={
-									data.snippet.resourceId
-										? data.snippet.resourceId?.videoId
-										: ''
-								}
-								onChange={inputChange}
-								value={
-									workInfos?.find(
-										(workInfo) =>
-											workInfo.resourceId === data.snippet.resourceId?.videoId
-									)?.description ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === data.snippet.resourceId?.videoId
-									)?.description ||
-									''
-								}
-							/>
-							<Input
-								name='date'
-								type='text'
-								placeholder='날짜'
-								data-resourceid={
-									data.snippet.resourceId
-										? data.snippet.resourceId?.videoId
-										: ''
-								}
-								onChange={inputChange}
-								value={
-									workInfos?.find(
-										(workInfo) =>
-											workInfo.resourceId === data.snippet.resourceId?.videoId
-									)?.date ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === data.snippet.resourceId?.videoId
-									)?.date ||
-									''
-								}
-							/>
-						</div>
-					</div>
-				))}
+					);
+				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
 				{isScrollLoading ? (
