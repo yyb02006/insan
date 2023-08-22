@@ -6,11 +6,12 @@ import { WorkInfos, VimeoVideos, OwnedVideoItems } from '@/pages/work/write';
 import Circles from './circles';
 
 interface videoFeedItem {
-	inputChange: (e: SyntheticEvent<HTMLInputElement>) => void;
 	isScrollLoading: boolean;
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
 	ownedVideos: OwnedVideoItems[];
+	inputBlur: (e: SyntheticEvent<HTMLInputElement>) => void;
+	inputChange: (e: SyntheticEvent<HTMLInputElement>) => void;
 }
 
 interface YoutubefeedProps extends videoFeedItem {
@@ -23,179 +24,141 @@ interface VimeofeedProps extends videoFeedItem {
 
 export function VimeoThumbnailFeed({
 	resource,
-	inputChange,
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
 	ownedVideos,
+	inputChange,
+	inputBlur,
 }: VimeofeedProps) {
 	return (
 		<>
 			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12'>
-				{resource.map((video, arr) => (
-					<div
-						key={arr} /* video.resource_key */
-						className={`w-full flex flex-col justify-between ${
-							workInfos?.find(
-								(workInfo) => workInfo.resourceId === video.player_embed_url
-							)?.title
-								? 'ring-2 ring-palettered'
-								: ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-								  )
-								? 'ring-2 ring-green-500'
-								: ''
-						}`}
-					>
-						<div>
-							<Image
-								src={video.pictures.sizes[3].link}
-								alt='picturesAlter'
-								width={960}
-								height={540}
-								priority={arr < 6 ? true : false}
-							/>
-							<div className='mt-2'>
-								<div className='text-sm text-[#bababa] '>
-									Title : {video.name}
-								</div>
-								<div className='text-xs font-light text-[#bababa] break-words'>
-									<span className='whitespace-nowrap'>Id : </span>
-									{video.resource_key}
+				{resource.map((video, arr) => {
+					const matchedWorkInfos = workInfos?.find(
+						(workInfo) => workInfo.resourceId === video.player_embed_url
+					);
+					const matchedOwnedVideos = ownedVideos.find(
+						(ownedVideo) => ownedVideo.resourceId === video.player_embed_url
+					);
+					return (
+						<div
+							key={arr} /* video.resource_key */
+							className={`w-full flex flex-col justify-between ${
+								matchedWorkInfos
+									? 'ring-2 ring-palettered'
+									: matchedOwnedVideos
+									? 'ring-2 ring-green-500'
+									: ''
+							}`}
+						>
+							<div>
+								<Image
+									src={video.pictures.sizes[3].link}
+									alt='picturesAlter'
+									width={960}
+									height={540}
+									priority={arr < 6 ? true : false}
+								/>
+								<div className='mt-2'>
+									<div className='text-sm text-[#bababa] '>
+										Title : {video.name}
+									</div>
+									<div className='text-xs font-light text-[#bababa] break-words'>
+										<span className='whitespace-nowrap'>Id : </span>
+										{video.resource_key}
+									</div>
 								</div>
 							</div>
-						</div>
-						<div className='mt-2'>
-							<Input
-								name='title'
-								type='text'
-								placeholder='타이틀'
-								data-resourceid={video.player_embed_url}
-								data-thumbnail={video.pictures.sizes[4].link}
-								data-description={
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-									)?.description
-								}
-								data-date={
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-									)?.date
-								}
-								onChange={inputChange}
-								value={
-									workInfos?.find(
-										(workInfo) => workInfo.resourceId === video.player_embed_url
-									)?.title ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-									)?.title ||
-									''
-								}
-							/>
-							<Input
-								name='description'
-								type='text'
-								placeholder='직무'
-								data-resourceid={video.player_embed_url}
-								onChange={inputChange}
-								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === video.player_embed_url;
-									})?.description ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-									)?.description ||
-									''
-								}
-							/>
-							<Input
-								name='date'
-								type='text'
-								placeholder='날짜'
-								data-resourceid={video.player_embed_url}
-								onChange={inputChange}
-								value={
-									workInfos?.find((arr) => {
-										return arr.resourceId === video.player_embed_url;
-									})?.date ||
-									ownedVideos.find(
-										(ownedVideo) =>
-											ownedVideo.resourceId === video.player_embed_url
-									)?.date ||
-									''
-								}
-							/>
-							<Input
-								name={`${video.resource_key}`}
-								type='radio'
-								labelName='Film'
-								value='film'
-								data-resourceid={video.player_embed_url}
-								onClick={inputChange}
-								checked={
-									workInfos?.find(
-										(info) => info.resourceId === video.player_embed_url
-									)
-										? workInfos?.find(
-												(info) => info.resourceId === video.player_embed_url
-										  )?.category === 'film'
+							<div className='mt-2'>
+								<Input
+									name='title'
+									type='text'
+									placeholder='타이틀'
+									data-resourceid={video.player_embed_url}
+									//여기 썸네일 변경
+									data-thumbnail={video.pictures.sizes[4].link}
+									data-description={matchedOwnedVideos?.description}
+									data-date={matchedOwnedVideos?.date}
+									data-category={matchedOwnedVideos?.category}
+									onChange={inputChange}
+									onBlur={inputBlur}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.title
+											: matchedOwnedVideos
+											? matchedOwnedVideos.title
+											: ''
+									}
+								/>
+								<Input
+									name='description'
+									type='text'
+									placeholder='직무'
+									data-resourceid={video.player_embed_url}
+									onChange={inputChange}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.description
+											: matchedOwnedVideos
+											? matchedOwnedVideos.description
+											: ''
+									}
+								/>
+								<Input
+									name='date'
+									type='text'
+									placeholder='날짜'
+									data-resourceid={video.player_embed_url}
+									onChange={inputChange}
+									value={
+										matchedWorkInfos
+											? matchedWorkInfos.date
+											: matchedOwnedVideos
+											? matchedOwnedVideos.date
+											: ''
+									}
+								/>
+								<Input
+									name={`${video.resource_key}`}
+									type='radio'
+									labelName='Film'
+									value='film'
+									data-resourceid={video.player_embed_url}
+									onClick={inputChange}
+									checked={
+										matchedWorkInfos
+											? matchedWorkInfos.category === 'film'
+												? true
+												: false
+											: matchedOwnedVideos?.category === 'film'
 											? true
 											: false
-										: ownedVideos.find(
-												(ownedVideo) =>
-													ownedVideo.resourceId === video.player_embed_url
-										  )?.category === 'film'
-										? true
-										: false
-								}
-								radioDisabled={
-									workInfos?.find(
-										(info) => info.resourceId === video.player_embed_url
-									)?.title
-										? false
-										: true
-								}
-							/>
-							<Input
-								name={`${video.resource_key}`}
-								type='radio'
-								labelName='Short'
-								value='short'
-								data-resourceid={video.player_embed_url}
-								onClick={inputChange}
-								checked={
-									workInfos?.find(
-										(info) => info.resourceId === video.player_embed_url
-									)
-										? workInfos?.find(
-												(info) => info.resourceId === video.player_embed_url
-										  )?.category === 'short'
+									}
+									radioDisabled={matchedWorkInfos ? false : true}
+								/>
+								<Input
+									name={`${video.resource_key}`}
+									type='radio'
+									labelName='Short'
+									value='short'
+									data-resourceid={video.player_embed_url}
+									onClick={inputChange}
+									checked={
+										matchedWorkInfos
+											? matchedWorkInfos.category === 'short'
+												? true
+												: false
+											: matchedOwnedVideos?.category === 'short'
 											? true
 											: false
-										: ownedVideos.find(
-												(ownedVideo) =>
-													ownedVideo.resourceId === video.player_embed_url
-										  )?.category === 'short'
-										? true
-										: false
-								}
-								radioDisabled={
-									workInfos?.find(
-										(info) => info.resourceId === video.player_embed_url
-									)?.title
-										? false
-										: true
-								}
-							/>
+									}
+									radioDisabled={matchedWorkInfos ? false : true}
+								/>
+							</div>
 						</div>
-					</div>
-				))}
+					);
+				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
 				{isScrollLoading ? (

@@ -109,6 +109,7 @@ export default function Write({
 			console.log(error);
 		}
 	}, [error]);
+
 	useEffect(() => {
 		if (category === 'filmShort' && youtubeVideos.length > 0) {
 			if (searchWordSnapshot.category !== category) {
@@ -144,30 +145,43 @@ export default function Write({
 			}
 		}
 	}, [category, youtubeVideos, vimeoVideos]);
+
 	useEffect(() => {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos([]);
 	}, [category]);
+
 	useEffect(() => {
 		if (data?.success) router.reload();
 	}, [data, router]);
+
+	const inputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
+		const {
+			name,
+			value,
+			dataset: { resourceid },
+		} = e.currentTarget;
+		const workIdx = workInfos?.findIndex((i) => i.resourceId === resourceid);
+		if (workIdx !== undefined && workIdx >= 0) {
+			if (name == 'title' && value === '') {
+				setWorkInfos((p) => p.filter((arr) => arr.resourceId !== resourceid));
+			}
+		}
+	};
+
 	const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		const { value, name, dataset, type } = e.currentTarget;
 		const workIdx = workInfos?.findIndex(
 			(i) => i.resourceId === dataset.resourceid
 		);
 		if (workIdx !== undefined && workIdx >= 0) {
-			if (name === 'title' && value !== '') {
+			if (name === 'title') {
 				setWorkInfos((p) =>
 					p.map((arr) =>
 						arr.resourceId === dataset.resourceid
 							? { ...arr, title: value }
 							: arr
 					)
-				);
-			} else if (name === 'title' && value === '') {
-				setWorkInfos((p) =>
-					p.filter((arr) => arr.resourceId !== dataset.resourceid)
 				);
 			} else if (name === 'description') {
 				setWorkInfos((p) =>
@@ -202,7 +216,7 @@ export default function Write({
 						resourceId: dataset.resourceid ? dataset.resourceid : '',
 						title: value,
 						description: dataset.description ? dataset.description : '',
-						category: category === 'filmShort' ? '' : 'outsource',
+						category: dataset.category ? dataset.category : '',
 						date: dataset.date ? dataset.date : '',
 						thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
 					},
@@ -210,8 +224,6 @@ export default function Write({
 			}
 		}
 	};
-
-	console.log(workInfos);
 
 	const onSubmitWrites = () => {
 		if (loading) return;
@@ -229,6 +241,7 @@ export default function Write({
 			[category]: category === 'filmShort' ? vimeoVideos : youtubeVideos,
 		}));
 	};
+
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setSearchWordSnapshot({ searchWord, category });
@@ -266,6 +279,7 @@ export default function Write({
 		}
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 	};
+
 	const onUpdatedListClick = () => {
 		setIsInfiniteScrollEnabled(false);
 		if (!workInfos || workInfos?.length < 1) return;
@@ -316,6 +330,7 @@ export default function Write({
 				{category === 'filmShort' && vimeoVideos.length > 0 ? (
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
+						inputBlur={inputBlur}
 						resource={searchResult.vimeo}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
@@ -331,6 +346,7 @@ export default function Write({
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
 						ownedVideos={ownedVideos.outsource}
+						inputBlur={inputBlur}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<SelectedListButton
