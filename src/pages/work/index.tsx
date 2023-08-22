@@ -957,7 +957,7 @@ const OutroSection = () => {
 			position: 'MiddleLink',
 			name: 'VIMEO',
 			angle: -90,
-			href: '',
+			href: 'https://vimeo.com/user136249834',
 		},
 		{
 			position: 'BottomLink',
@@ -966,12 +966,6 @@ const OutroSection = () => {
 			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
-	//타입스크립트에서 렌더링 없이 데이터변경 때문에 useRef쓸 때 타입 설정
-	/* const textShadow = useRef<{ [key: string]: boolean }>({
-		INSTAGRAM: true,
-		VIMEO: true,
-		YOUTUBE: true,
-	}); */
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
 		snsLinksAnimate(
@@ -1132,7 +1126,6 @@ export default function Work({
 		} else {
 			document.body.style.overflow = 'auto';
 		}
-		const currentScrollY = window.scrollY;
 	}, [onDetail]);
 
 	useEffect(() => {

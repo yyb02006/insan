@@ -1,4 +1,4 @@
-import { cls } from '@/libs/client/utils';
+import { cls, fetchData } from '@/libs/client/utils';
 import {
 	AnimatePresence,
 	stagger,
@@ -83,10 +83,21 @@ const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
 	});
 	const [ispresent, safeToRemove] = usePresence();
 	const [scope, animate] = useAnimate();
+	const [count, setCount] = useState(0);
+	useEffect(() => {
+		const getCount = async () => {
+			const length = await fetchData('/api/work?purpose=length');
+			const {
+				works: { film, short, outsource },
+			} = length;
+			setCount(film + short + outsource);
+		};
+		getCount();
+	}, []);
 	const menu = [
 		{
 			name: 'Work',
-			redWord: '142',
+			redWord: count,
 			whiteletter: ' video works',
 			path: '/work',
 		},
