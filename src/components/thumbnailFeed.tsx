@@ -10,7 +10,7 @@ interface videoFeedItem {
 	isScrollLoading: boolean;
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
-	OwnedVideos: OwnedVideoItems[];
+	ownedVideos: OwnedVideoItems[];
 }
 
 interface YoutubefeedProps extends videoFeedItem {
@@ -27,7 +27,7 @@ export function VimeoThumbnailFeed({
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
-	OwnedVideos,
+	ownedVideos,
 }: VimeofeedProps) {
 	return (
 		<>
@@ -40,9 +40,9 @@ export function VimeoThumbnailFeed({
 								(workInfo) => workInfo.resourceId === video.player_embed_url
 							)?.title
 								? 'ring-2 ring-palettered'
-								: OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === video.player_embed_url
+								: ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
 								  )
 								? 'ring-2 ring-green-500'
 								: ''
@@ -73,14 +73,26 @@ export function VimeoThumbnailFeed({
 								placeholder='타이틀'
 								data-resourceid={video.player_embed_url}
 								data-thumbnail={video.pictures.sizes[4].link}
+								data-description={
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
+									)?.description
+								}
+								data-date={
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
+									)?.date
+								}
 								onChange={inputChange}
 								value={
 									workInfos?.find(
 										(workInfo) => workInfo.resourceId === video.player_embed_url
 									)?.title ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === video.player_embed_url
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
 									)?.title ||
 									''
 								}
@@ -95,9 +107,9 @@ export function VimeoThumbnailFeed({
 									workInfos?.find((arr) => {
 										return arr.resourceId === video.player_embed_url;
 									})?.description ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === video.player_embed_url
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
 									)?.description ||
 									''
 								}
@@ -112,9 +124,9 @@ export function VimeoThumbnailFeed({
 									workInfos?.find((arr) => {
 										return arr.resourceId === video.player_embed_url;
 									})?.date ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === video.player_embed_url
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === video.player_embed_url
 									)?.date ||
 									''
 								}
@@ -135,9 +147,9 @@ export function VimeoThumbnailFeed({
 										  )?.category === 'film'
 											? true
 											: false
-										: OwnedVideos.find(
-												(OwnedVideos) =>
-													OwnedVideos.resourceId === video.player_embed_url
+										: ownedVideos.find(
+												(ownedVideo) =>
+													ownedVideo.resourceId === video.player_embed_url
 										  )?.category === 'film'
 										? true
 										: false
@@ -166,9 +178,9 @@ export function VimeoThumbnailFeed({
 										  )?.category === 'short'
 											? true
 											: false
-										: OwnedVideos.find(
-												(OwnedVideos) =>
-													OwnedVideos.resourceId === video.player_embed_url
+										: ownedVideos.find(
+												(ownedVideo) =>
+													ownedVideo.resourceId === video.player_embed_url
 										  )?.category === 'short'
 										? true
 										: false
@@ -208,7 +220,7 @@ export function YoutubeThumbnailFeed({
 	workInfos,
 	intersectionRef,
 	isScrollLoading,
-	OwnedVideos,
+	ownedVideos,
 }: YoutubefeedProps) {
 	return (
 		<>
@@ -221,9 +233,9 @@ export function YoutubeThumbnailFeed({
 								(info) => info.resourceId === data.snippet.resourceId?.videoId
 							)?.title
 								? 'ring-2 ring-palettered'
-								: OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+								: ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === data.snippet.resourceId?.videoId
 								  )
 								? 'ring-2 ring-green-500'
 								: ''
@@ -269,9 +281,9 @@ export function YoutubeThumbnailFeed({
 										(workInfo) =>
 											workInfo.resourceId === data.snippet.resourceId?.videoId
 									)?.title ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === data.snippet.resourceId?.videoId
 									)?.title ||
 									''
 								}
@@ -291,9 +303,9 @@ export function YoutubeThumbnailFeed({
 										(workInfo) =>
 											workInfo.resourceId === data.snippet.resourceId?.videoId
 									)?.description ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === data.snippet.resourceId?.videoId
 									)?.description ||
 									''
 								}
@@ -313,9 +325,9 @@ export function YoutubeThumbnailFeed({
 										(workInfo) =>
 											workInfo.resourceId === data.snippet.resourceId?.videoId
 									)?.date ||
-									OwnedVideos.find(
-										(OwnedVideo) =>
-											OwnedVideo.resourceId === data.snippet.resourceId?.videoId
+									ownedVideos.find(
+										(ownedVideo) =>
+											ownedVideo.resourceId === data.snippet.resourceId?.videoId
 									)?.date ||
 									''
 								}

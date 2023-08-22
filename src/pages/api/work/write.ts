@@ -11,6 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 		return res.status(401).json({ success: false, message: 'Invalid token' });
 	}
+	console.log(data, secret);
 
 	if (data.length > 0) {
 		try {
@@ -50,6 +51,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			});
 		}
 	} else {
+		console.log('error on here!');
+
 		return res.status(500).json({ success: false });
 	}
 };
