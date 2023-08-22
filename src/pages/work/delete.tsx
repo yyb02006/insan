@@ -306,9 +306,9 @@ export default function Delete({
 		outsource: [],
 	});
 	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
-	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
-		`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
-	);
+	const [send, { loading, data, error }] = useDeleteRequest<{
+		success: boolean;
+	}>(`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
 	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
@@ -320,6 +320,21 @@ export default function Delete({
 	const [fetchLoading, setFetchLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] =
 		useState<VideosMerged<boolean>>(initialHasNextPage);
+
+	useEffect(() => {
+		if (error) {
+			const timeOut = setTimeout(() => {
+				router.push('/work');
+			}, 3000);
+			return () => clearTimeout(timeOut);
+		}
+	}, [error]);
+
+	useEffect(() => {
+		if (data?.success) {
+			router.push('/work');
+		}
+	}, [data]);
 
 	useEffect(() => {
 		setOnSelectedList(false);
@@ -448,8 +463,6 @@ export default function Delete({
 		dependencyArray: [page, fetchLoading],
 	});
 
-	console.log(fetchLoading, onSelectedList, hasNextPage[category]);
-
 	return (
 		<Layout
 			seoTitle='Delete'
@@ -504,6 +517,7 @@ export default function Delete({
 						</div>
 					</div>
 				) : null}
+
 				<SelectedListButton
 					onClick={onSelectedListClick}
 					count={deleteIdList.length}
@@ -528,6 +542,16 @@ export default function Delete({
 								}}
 							/>
 						</div>
+					</div>
+				</div>
+			) : null}
+			{error ? (
+				<div className='fixed top-0 w-screen h-screen z-[1] flex justify-center items-center'>
+					<div className='absolute top-0 w-full h-full opacity-60 bg-black' />
+					<div className='relative text-[#eaeaea] font-bold text-3xl lg:w-1/2 w-auto lg:px-0 px-6 leading-snug'>
+						인산아 <span className='text-palettered'>딜리트</span> 도중 에러가
+						생겼단다 ㅎㅎ 아마도 새로고침하고 다시 해보면 되겠지만 그전에 나에게
+						보고하도록
 					</div>
 				</div>
 			) : null}
