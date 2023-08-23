@@ -322,9 +322,9 @@ export default function Delete({
 		useState<VideosMerged<boolean>>(initialHasNextPage);
 
 	useEffect(() => {
-		if (data?.success) {
+		if (data && data?.success) {
 			router.push('/work');
-		} else {
+		} else if (data && !data?.success) {
 			const timeOut = setTimeout(() => {
 				router.push('/work');
 			}, 3000);

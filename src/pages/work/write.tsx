@@ -96,18 +96,24 @@ export default function Write({
 	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
 	const [isScrollLoading, setIsScrollLoading] = useState(false);
 	const ownedVideos: OwnedVideos = initialOwnedVideos;
+	const [page, setPage] = useState(2);
 	const intersectionRef = useInfiniteScrollFromFlatform({
 		setVimeoVideos,
 		setYoutubeVideos,
 		setIsScrollLoading,
 		category,
 		isInfiniteScrollEnabled,
+		page,
+		setPage,
+		snapshot: searchWordSnapshot.searchWord,
+		searchResultsCount:
+			searchResult[category === 'filmShort' ? 'vimeo' : 'youtube'].length,
 	});
 
 	useEffect(() => {
-		if (data?.success) {
+		if (data && data?.success) {
 			router.push('/work');
-		} else {
+		} else if (data && !data?.success) {
 			const timeOut = setTimeout(() => {
 				router.push('/work');
 			}, 3000);
@@ -154,6 +160,7 @@ export default function Write({
 	useEffect(() => {
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos([]);
+		setPage(2);
 	}, [category]);
 
 	const inputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -245,11 +252,8 @@ export default function Write({
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setPage(2);
 		setSearchWordSnapshot({ searchWord, category });
-		//임시방편 setResult의 infiniteScroll 생각해야함
-		if (!searchWord) {
-			return router.reload();
-		}
 		const filterResources = (kind: ResourceHost) => {
 			if (kind === 'vimeo') {
 				setSearchResult((p) => ({
@@ -337,6 +341,7 @@ export default function Write({
 						intersectionRef={intersectionRef}
 						isScrollLoading={isScrollLoading}
 						ownedVideos={ownedVideos.filmShort}
+						page={page}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
@@ -348,6 +353,7 @@ export default function Write({
 						isScrollLoading={isScrollLoading}
 						ownedVideos={ownedVideos.outsource}
 						inputBlur={inputBlur}
+						page={page}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<SelectedListButton

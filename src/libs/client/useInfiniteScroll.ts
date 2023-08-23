@@ -13,6 +13,15 @@ interface UseInfiniteScrollFromFlatFormProps {
 	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
 	category: FlatformsCategory;
 	isInfiniteScrollEnabled: boolean;
+	page: number;
+	setPage: Dispatch<SetStateAction<number>>;
+	snapshot: string;
+	searchResultsCount: number;
+}
+
+interface apiPage {
+	filmShort: number;
+	outsource: number;
 }
 
 export default function useInfiniteScrollFromFlatform({
@@ -21,6 +30,10 @@ export default function useInfiniteScrollFromFlatform({
 	setIsScrollLoading,
 	category,
 	isInfiniteScrollEnabled,
+	page,
+	setPage,
+	snapshot,
+	searchResultsCount,
 }: UseInfiniteScrollFromFlatFormProps) {
 	const lists = {
 		outsource: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
@@ -31,26 +44,39 @@ export default function useInfiniteScrollFromFlatform({
 		participate: string;
 	}>({ outsource: 'EAAaBlBUOkNBbw', participate: 'EAAaBlBUOkNBbw' });
 	const intersectionRef = useRef<HTMLDivElement | null>(null);
-	const [page, setPage] = useState<number>(2);
+	const [apiPage, setApiPage] = useState<apiPage>({
+		filmShort: 2,
+		outsource: 2,
+	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const [firstIdPerPage, setFirstIdPerPage] = useState(6);
 	const [secondIdPerPage, setSecondIdPerPage] = useState(6);
+
 	useEffect(() => {
 		setIsScrollLoading(isLoading);
 	}, [isLoading, setIsScrollLoading]);
+
 	useEffect(() => {
 		setFirstIdPerPage(6), setSecondIdPerPage(6);
 	}, [category]);
+
+	console.log(apiPage);
+	console.log(page);
+
 	const addData = async () => {
 		if (isLoading) return;
 		setIsLoading(true);
+
 		try {
-			if (category === 'filmShort') {
+			if (
+				category === 'filmShort' &&
+				(snapshot.length === 0 ? apiPage[category] === page : true)
+			) {
 				if (hasNextPage) {
 					const data = await (
 						await fetch(
-							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${page}&per_page=12`,
+							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${apiPage[category]}&per_page=12`,
 							{
 								method: 'get',
 								headers: {
@@ -61,16 +87,20 @@ export default function useInfiniteScrollFromFlatform({
 							}
 						)
 					).json();
+
 					setVimeoVideos((p) => [...p, ...data.data]);
 					if (data.data.length === 12) {
-						setPage((p) => p + 1);
+						setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
 					} else {
 						setHasNextPage(false);
 					}
 				}
 			} else if (category === 'outsource') {
 				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-				if (nextpageToken.outsource !== '') {
+				if (
+					nextpageToken.outsource !== '' &&
+					(snapshot.length === 0 ? apiPage[category] === page : true)
+				) {
 					const data = await (
 						await fetch(
 							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.outsource}&part=snippet&playlistId=${lists.outsource}&maxResults=${firstIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
@@ -86,18 +116,23 @@ export default function useInfiniteScrollFromFlatform({
 					setYoutubeVideos((p) => [...p, ...data.items]);
 
 					if (data.items.length < 6) {
-						setSecondIdPerPage(12 - data.items.length);
-					} else if (data.items.length < 12 && data.items.length > 6) {
 						setFirstIdPerPage(12);
 					}
 
 					if (data.nextPageToken) {
-						setNextpageToken((p) => ({ ...p, outsource: data.nextPageToken }));
+						setNextpageToken((p) => ({
+							...p,
+							outsource: data.nextPageToken,
+						}));
 					} else {
 						setNextpageToken((p) => ({ ...p, outsource: '' }));
 					}
 				}
-				if (nextpageToken.participate !== '') {
+
+				if (
+					nextpageToken.participate !== '' &&
+					(snapshot.length === 0 ? apiPage[category] === page : true)
+				) {
 					const data = await (
 						await fetch(
 							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.participate}&part=snippet&playlistId=${lists.participate}&maxResults=${secondIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
@@ -113,8 +148,6 @@ export default function useInfiniteScrollFromFlatform({
 					setYoutubeVideos((p) => [...p, ...data.items]);
 
 					if (data.items.length < 6) {
-						setFirstIdPerPage(12 - data.items.length);
-					} else if (data.items.length < 12 && data.items.length > 6) {
 						setSecondIdPerPage(12);
 					}
 
@@ -127,9 +160,21 @@ export default function useInfiniteScrollFromFlatform({
 						setNextpageToken((p) => ({ ...p, participate: '' }));
 					}
 				}
+
+				if (
+					(nextpageToken.outsource !== '' ||
+						nextpageToken.participate !== '') &&
+					apiPage[category] === page
+				) {
+					setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+				}
 			}
 		} catch (err) {
 			console.log(err);
+		}
+
+		if (page - 11 / 12 <= searchResultsCount / 12 + 1) {
+			setPage((p) => p + 1);
 		}
 		setIsLoading(false);
 	};
@@ -161,12 +206,17 @@ export default function useInfiniteScrollFromFlatform({
 			}
 		};
 	}, [
-		page,
+		apiPage,
 		hasNextPage,
 		nextpageToken.outsource,
 		nextpageToken.participate,
 		isInfiniteScrollEnabled,
 		category,
+		snapshot,
+		page,
+		searchResultsCount,
+		firstIdPerPage,
+		secondIdPerPage,
 	]);
 	return intersectionRef;
 }

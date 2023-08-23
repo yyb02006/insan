@@ -10,6 +10,7 @@ interface videoFeedItem {
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
 	ownedVideos: OwnedVideoItems[];
+	page: number;
 	inputBlur: (e: SyntheticEvent<HTMLInputElement>) => void;
 	inputChange: (e: SyntheticEvent<HTMLInputElement>) => void;
 }
@@ -28,22 +29,24 @@ export function VimeoThumbnailFeed({
 	intersectionRef,
 	isScrollLoading,
 	ownedVideos,
+	page,
 	inputChange,
 	inputBlur,
 }: VimeofeedProps) {
 	return (
 		<>
 			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12'>
-				{resource.map((video, arr) => {
+				{resource.map((video, idx) => {
 					const matchedWorkInfos = workInfos?.find(
 						(workInfo) => workInfo.resourceId === video.player_embed_url
 					);
 					const matchedOwnedVideos = ownedVideos.find(
 						(ownedVideo) => ownedVideo.resourceId === video.player_embed_url
 					);
-					return (
+
+					return idx < 12 * (page - 1) ? (
 						<div
-							key={arr} /* video.resource_key */
+							key={idx} /* video.resource_key */
 							className={`w-full flex flex-col justify-between ${
 								matchedWorkInfos
 									? 'ring-2 ring-palettered'
@@ -58,7 +61,7 @@ export function VimeoThumbnailFeed({
 									alt='picturesAlter'
 									width={960}
 									height={540}
-									priority={arr < 6 ? true : false}
+									priority={idx < 6 ? true : false}
 								/>
 								<div className='mt-2'>
 									<div className='text-sm text-[#bababa] '>
@@ -157,7 +160,7 @@ export function VimeoThumbnailFeed({
 								/>
 							</div>
 						</div>
-					);
+					) : null;
 				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
@@ -183,13 +186,14 @@ export function YoutubeThumbnailFeed({
 	intersectionRef,
 	isScrollLoading,
 	ownedVideos,
+	page,
 	inputChange,
 	inputBlur,
 }: YoutubefeedProps) {
 	return (
 		<>
 			<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '>
-				{resource.map((video, arr) => {
+				{resource.map((video, idx) => {
 					const matchedWorkInfos = workInfos?.find(
 						(workInfo) =>
 							workInfo.resourceId === video.snippet.resourceId?.videoId
@@ -198,9 +202,9 @@ export function YoutubeThumbnailFeed({
 						(ownedVideo) =>
 							ownedVideo.resourceId === video.snippet.resourceId?.videoId
 					);
-					return (
+					return idx < 12 * (page - 1) ? (
 						<div
-							key={arr}
+							key={idx}
 							className={`w-full flex flex-col justify-between ${
 								matchedWorkInfos
 									? 'ring-2 ring-palettered'
@@ -220,7 +224,7 @@ export function YoutubeThumbnailFeed({
 									alt='Thumbnail not available'
 									width={1280}
 									height={720}
-									priority={arr < 6 ? true : false}
+									priority={idx < 6 ? true : false}
 									className='w-full object-cover'
 								/>
 								<div className='mt-2'>
@@ -282,7 +286,7 @@ export function YoutubeThumbnailFeed({
 								/>
 							</div>
 						</div>
-					);
+					) : null;
 				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
