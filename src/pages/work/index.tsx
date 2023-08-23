@@ -1122,6 +1122,13 @@ export default function Work({
 	}, []);
 
 	useEffect(() => {
+		const bottom = (1 / (((page - 1) * 12) / 3)) * 100;
+		if (intersectionRef.current) {
+			intersectionRef.current.style.bottom = `${bottom}%`;
+		}
+	}, [page]);
+
+	useEffect(() => {
 		if (onDetail?.isOpen === true) {
 			document.body.style.overflow = 'hidden';
 		} else {
@@ -1154,8 +1161,6 @@ export default function Work({
 	};
 
 	const updatePage = () => {
-		console.log('실행실행');
-
 		const getVideos = async () => {
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
@@ -1206,8 +1211,6 @@ export default function Work({
 			fetchLoading,
 		],
 	});
-
-	console.log((1 / (((page - 1) * 12) / 3)) * 100);
 
 	return (
 		<>
@@ -1281,10 +1284,10 @@ export default function Work({
 								)}
 							</AnimatePresence>
 						</div>
-						{/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정 */}
+						{/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정, 명시적으로 toString작성 */}
 						<div
 							ref={intersectionRef}
-							className={`absolute bottom-[${25}%] bg-pink-600 h-1 w-full`}
+							className={`absolute bg-pink-600 h-1 w-full`}
 						/>
 						{fetchLoading ? (
 							<div className='relative w-full h-60 flex justify-center items-center'>
