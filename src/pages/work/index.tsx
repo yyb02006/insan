@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import {
 	Dispatch,
+	RefObject,
 	SetStateAction,
 	SyntheticEvent,
 	useCallback,
@@ -1204,6 +1205,8 @@ export default function Work({
 		],
 	});
 
+	console.log(page);
+
 	return (
 		<>
 			<Layout
@@ -1276,7 +1279,13 @@ export default function Work({
 								)}
 							</AnimatePresence>
 						</div>
-						<div ref={intersectionRef} className='h-1' />
+						{/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정 */}
+						<div
+							ref={intersectionRef}
+							className={`absolute bottom-[${
+								(1 / (((page - 1) * 12) / 3)) * 100
+							}%] bg-pink-600 h-1 w-full`}
+						/>
 						{fetchLoading ? (
 							<div className='relative w-full h-60 flex justify-center items-center'>
 								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
