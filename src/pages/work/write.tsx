@@ -105,17 +105,13 @@ export default function Write({
 	});
 
 	useEffect(() => {
-		if (error) {
+		if (data?.success) {
+			router.push('/work');
+		} else {
 			const timeOut = setTimeout(() => {
 				router.push('/work');
 			}, 3000);
 			return () => clearTimeout(timeOut);
-		}
-	}, [error]);
-
-	useEffect(() => {
-		if (data?.success) {
-			router.push('/work');
 		}
 	}, [data]);
 
@@ -159,10 +155,6 @@ export default function Write({
 		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
 		setWorkInfos([]);
 	}, [category]);
-
-	useEffect(() => {
-		if (data?.success) router.reload();
-	}, [data, router]);
 
 	const inputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
 		const {
