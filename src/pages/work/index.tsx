@@ -1154,6 +1154,8 @@ export default function Work({
 	};
 
 	const updatePage = () => {
+		console.log('실행실행');
+
 		const getVideos = async () => {
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
@@ -1205,7 +1207,7 @@ export default function Work({
 		],
 	});
 
-	console.log(page);
+	console.log((1 / (((page - 1) * 12) / 3)) * 100);
 
 	return (
 		<>
@@ -1282,9 +1284,7 @@ export default function Work({
 						{/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정 */}
 						<div
 							ref={intersectionRef}
-							className={`absolute bottom-[${
-								(1 / (((page - 1) * 12) / 3)) * 100
-							}%] bg-pink-600 h-1 w-full`}
+							className={`absolute bottom-[${25}%] bg-pink-600 h-1 w-full`}
 						/>
 						{fetchLoading ? (
 							<div className='relative w-full h-60 flex justify-center items-center'>
