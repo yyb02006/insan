@@ -14,7 +14,7 @@ interface UseInfiniteScrollFromFlatFormProps {
 	setPage: Dispatch<SetStateAction<number>>;
 	snapshot: string;
 	searchResultsCount: number;
-	setSearchResult: Dispatch<
+	setSearchResults: Dispatch<
 		SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>
 	>;
 }
@@ -26,7 +26,7 @@ interface apiPage {
 
 export default function useInfiniteScrollFromFlatform({
 	setList,
-	setSearchResult,
+	setSearchResults,
 	setFetchLoading,
 	category,
 	onSelectedList,
@@ -90,7 +90,7 @@ export default function useInfiniteScrollFromFlatform({
 						[category]: [...p[category], ...data.data],
 					}));
 
-					setSearchResult((p) => ({
+					setSearchResults((p) => ({
 						...p,
 						[category]: [
 							...p[category],
@@ -131,7 +131,7 @@ export default function useInfiniteScrollFromFlatform({
 						[category]: [...p[category], ...data.items],
 					}));
 
-					setSearchResult((p) => ({
+					setSearchResults((p) => ({
 						...p,
 						[category]: [
 							...p[category],
@@ -178,7 +178,7 @@ export default function useInfiniteScrollFromFlatform({
 						[category]: [...p[category], ...data.items],
 					}));
 
-					setSearchResult((p) => ({
+					setSearchResults((p) => ({
 						...p,
 						[category]: [
 							...p[category],
