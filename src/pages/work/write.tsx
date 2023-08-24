@@ -1,4 +1,5 @@
 import { ciIncludes, fetchData } from '@/libs/client/utils';
+import Image from 'next/image';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
@@ -29,14 +30,17 @@ export interface WorkInfos {
 	category: string;
 	date: string;
 	thumbnailLink: string;
+	animatedThumbnailLink: string;
 }
 
 export interface VimeoVideos {
 	player_embed_url: string;
 	resource_key: string;
-	pictures: { sizes: { link: string }[] };
+	pictures: { base_link: string };
 	name: string;
 	description: string;
+	uri: string;
+	animated_thumbnail: string;
 }
 
 export interface OwnedVideoItems {
@@ -99,6 +103,8 @@ export default function Write({
 		snapshot: searchWordSnapshot,
 		searchResultsCount: searchResults[category].length,
 	});
+
+	console.log(list.filmShort);
 
 	useEffect(() => {
 		if (data && data?.success) {
@@ -182,12 +188,13 @@ export default function Write({
 				setWorkInfos((p) => [
 					...p,
 					{
-						resourceId: dataset.resourceid ? dataset.resourceid : '',
+						resourceId: dataset.resourceid || '',
 						title: value,
-						description: dataset.description ? dataset.description : '',
-						category: dataset.category ? dataset.category : '',
-						date: dataset.date ? dataset.date : '',
-						thumbnailLink: dataset.thumbnail ? dataset.thumbnail : '',
+						description: dataset.description || '',
+						category: dataset.category || '',
+						date: dataset.date || '',
+						thumbnailLink: dataset.thumbnail || '',
+						animatedThumbnailLink: dataset.animated_thumbnail || '',
 					},
 				]);
 			}
@@ -210,19 +217,15 @@ export default function Write({
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({
 					...p,
-					[category]: searchResultsSnapshot[category].filter(
-						(el) =>
-							ciIncludes(el.name, searchWord) ||
-							ciIncludes(el.resource_key, searchWord)
+					[category]: searchResultsSnapshot[category].filter((el) =>
+						ciIncludes(el.name, searchWord)
 					),
 				}));
 			} else if (category === 'outsource') {
 				setSearchResults((p) => ({
 					...p,
-					[category]: searchResultsSnapshot[category].filter(
-						(el) =>
-							ciIncludes(el.snippet.title, searchWord) ||
-							ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
+					[category]: searchResultsSnapshot[category].filter((el) =>
+						ciIncludes(el.snippet.title, searchWord)
 					),
 				}));
 			}
@@ -230,19 +233,15 @@ export default function Write({
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({
 					...p,
-					[category]: list[category].filter(
-						(el) =>
-							ciIncludes(el.name, searchWord) ||
-							ciIncludes(el.resource_key, searchWord)
+					[category]: list[category].filter((el) =>
+						ciIncludes(el.name, searchWord)
 					),
 				}));
 			} else if (category === 'outsource') {
 				setSearchResults((p) => ({
 					...p,
-					[category]: list[category].filter(
-						(el) =>
-							ciIncludes(el.snippet.title, searchWord) ||
-							ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
+					[category]: list[category].filter((el) =>
+						ciIncludes(el.snippet.title, searchWord)
 					),
 				}));
 			}
@@ -405,8 +404,8 @@ export default function Write({
 
 export const getStaticProps: GetStaticProps = async () => {
 	const perPage = 6;
-	const VimeoVideos = await fetchData(
-		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=1&per_page=12`,
+	const vimeoVideos = await fetchData(
+		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.base_link,name,description&page=1&per_page=12`,
 		{
 			headers: {
 				'Content-Type': 'application/json',
@@ -415,7 +414,32 @@ export const getStaticProps: GetStaticProps = async () => {
 		}
 	);
 
-	const YoutubeVideos = await Promise.all(
+	const mergedVimeoVideos = await Promise.all(
+		vimeoVideos.data.map(async (el: VimeoVideos) => {
+			const data = (
+				await fetchData(
+					`https://api.vimeo.com/${el.uri}/animated_thumbsets?fields=sizes.link,sizes.profile_id`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+						},
+					}
+				)
+			).data;
+			return {
+				...el,
+				animated_thumbnail: data[0]
+					? data[0].sizes.find(
+							(el: { profile_id: string; link: string }) =>
+								el.profile_id === 'Low'
+					  ).link
+					: 'no-link',
+			};
+		})
+	);
+
+	const youtubeVideos = await Promise.all(
 		[
 			'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
 			'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
@@ -445,10 +469,10 @@ export const getStaticProps: GetStaticProps = async () => {
 
 	return {
 		props: {
-			initialVimeoVideos: VimeoVideos.data,
+			initialVimeoVideos: mergedVimeoVideos,
 			initialYoutubeVideos: [
-				...YoutubeVideos[0].items,
-				...YoutubeVideos[1].items,
+				...youtubeVideos[0].items,
+				...youtubeVideos[1].items,
 			],
 			initialOwnedVideos,
 		},

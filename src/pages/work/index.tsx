@@ -15,7 +15,6 @@ import {
 import Link from 'next/link';
 import {
 	Dispatch,
-	RefObject,
 	SetStateAction,
 	SyntheticEvent,
 	useCallback,
@@ -66,11 +65,12 @@ interface SearchSectionProp {
 interface VideoProps {
 	index: string;
 	waiting: number;
-	thumbnail: { url: string; width: number; height: number; alt: string };
+	thumbnail: { url: string; alt: string };
 	title: string;
 	description: string;
 	category: VideosCategory;
 	resource: string;
+	animatedThumbnail: string;
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
@@ -291,9 +291,6 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
 							)}
 						>
-							{/* {categoryState === category.kind ? (
-								<div className='absolute bg-[#151515] w-full h-[40%]' />
-							) : null} */}
 							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
 								<div className='inline-block pr-3'>{info.count} </div>
 								{info.title}
@@ -599,7 +596,7 @@ const VideoDetail = ({
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
 				<div className='w-full h-auto py-16 bg-[#101010]'>
 					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
-						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
+						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px] bg-black'>
 							{category === 'film' || category === 'short' ? (
 								<>
 									<VimeoPlayer
@@ -617,7 +614,7 @@ const VideoDetail = ({
 									{!isLoaded ? (
 										<div className='absolute top-0 left-0 w-full aspect-video'>
 											<Image
-												src={thumbnail}
+												src={`${thumbnail}_960x540?r=pad`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
@@ -657,7 +654,7 @@ const VideoDetail = ({
 									{!isLoaded ? (
 										<div className='absolute top-0 left-0 w-full aspect-video'>
 											<Image
-												src={thumbnail}
+												src={`https://i.ytimg.com/vi/${thumbnail}/sddefault.jpg`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
@@ -724,6 +721,7 @@ const Video = ({
 	description,
 	category,
 	resource,
+	animatedThumbnail,
 	date,
 	setOnDetail,
 	setAnimationEnd,
@@ -818,20 +816,35 @@ const Video = ({
 						{isVideoLoadable && !isMobile ? (
 							<>
 								{isHovering ? (
-									<VimeoPlayer
-										url={`${resource}&quality=540p`}
-										controls={false}
-										muted={true}
-										playing={titleScreen}
-										width={'100%'}
-										height={'100%'}
-										loop={true}
-										onStart={() => {
-											setStart(true);
-										}}
-									/>
+									animatedThumbnail === 'no-link' ? (
+										<VimeoPlayer
+											url={`${resource}&quality=540p`}
+											controls={false}
+											muted={true}
+											playing={titleScreen}
+											width={'100%'}
+											height={'100%'}
+											loop={true}
+											onStart={() => {
+												setStart(true);
+											}}
+										/>
+									) : titleScreen ? (
+										<div className='w-full h-full flex justify-center'>
+											<Image
+												src={animatedThumbnail}
+												alt={`${title}thumbnail`}
+												width={270}
+												height={480}
+												onLoad={() => {
+													setStart(true);
+												}}
+												className='h-full w-auto object-contain'
+											/>
+										</div>
+									) : null
 								) : null}
-								{!start ? (
+								{!start && titleScreen ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
 											<Circles
@@ -889,15 +902,23 @@ const Video = ({
 				) : null}
 				<div ref={cover} className='absolute w-full h-full '>
 					<Image
-						src={error ? thumbnail.alt : thumbnail.url}
+						src={
+							error
+								? category === 'film' || category === 'short'
+									? `${thumbnail.alt}_640x360?r=pad`
+									: `https://i.ytimg.com/vi/${thumbnail.alt}/sddefault.jpg`
+								: category === 'film' || category === 'short'
+								? `${thumbnail.url}_640x360?r=pad`
+								: `https://i.ytimg.com/vi/${thumbnail.url}/sddefault.jpg`
+						}
 						onError={() => {
 							setError(true);
 						}}
 						alt={'will fixed'}
-						width={thumbnail.width}
-						height={thumbnail.height}
+						width={640}
+						height={category === 'film' || category === 'short' ? 360 : 480}
 						priority={setpriority}
-						className='relative w-full aspect-video object-cover'
+						className='relative top-0 w-full aspect-video object-cover'
 					/>
 					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
 				</div>
@@ -934,7 +955,13 @@ interface Videos<T> {
 	outsource: T;
 }
 
-const OutroSection = () => {
+interface OutroSectionProps {
+	hasNextPage: boolean;
+	apiPage: number;
+	page: number;
+}
+
+const OutroSection = ({ hasNextPage, apiPage, page }: OutroSectionProps) => {
 	const letterRef = useRef(null);
 	const isLetterInview = useInView(letterRef, {
 		amount: 0.6,
@@ -967,6 +994,7 @@ const OutroSection = () => {
 			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
+
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
 		snsLinksAnimate(
@@ -1019,7 +1047,12 @@ const OutroSection = () => {
 		}
 	}, [isLinksInview, snsLinksAnimate]);
 	return (
-		<section className='hidden sm:flex relative bg-[#101010] h-auto flex-col items-center font-bold'>
+		<section
+			className={cls(
+				!hasNextPage && page === apiPage ? 'flex' : 'hidden',
+				'relative bg-[#101010] h-auto flex-col items-center font-bold -mt-20 sm:-mt-36'
+			)}
+		>
 			<motion.div
 				initial={'hidden'}
 				animate={isLetterInview ? 'visible' : 'hidden'}
@@ -1100,7 +1133,7 @@ export default function Work({
 	const [hasNextPage, setHasNextPage] =
 		useState<Videos<boolean>>(initialHasNextPage);
 	const [page, setPage] = useState(2);
-	const [apipage, setApiPage] = useState<Videos<number>>({
+	const [apiPage, setApiPage] = useState<Videos<number>>({
 		film: 2,
 		short: 2,
 		outsource: 2,
@@ -1122,6 +1155,7 @@ export default function Work({
 	}, []);
 
 	useEffect(() => {
+		/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정, 명시적으로 toString작성 */
 		const bottom = (1 / (((page - 1) * 12) / 3)) * 100;
 		if (intersectionRef.current) {
 			intersectionRef.current.style.bottom = `${bottom}%`;
@@ -1165,7 +1199,7 @@ export default function Work({
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
 				await fetch(
-					`/api/work/list?page=${apipage[category]}&per_page=${perPage}&category=${category}`
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
 				)
 			).json();
 			if (lists.works[category].length < perPage) {
@@ -1193,7 +1227,7 @@ export default function Work({
 			setFetchLoading(false);
 		};
 		if (page > 1 && (!isAnimationEnd || fetchLoading)) return;
-		if (hasNextPage[category] && apipage[category] <= page) {
+		if (hasNextPage[category] && apiPage[category] <= page) {
 			getVideos();
 		}
 		if (page <= searchResults[category].length / perPage + 1) {
@@ -1211,6 +1245,7 @@ export default function Work({
 			fetchLoading,
 		],
 	});
+	console.log(searchResults);
 
 	return (
 		<>
@@ -1218,11 +1253,10 @@ export default function Work({
 				seoTitle='Work'
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
-				footerPosition='mt-20 sm:mt-0'
 			>
 				<main
 					ref={section}
-					className='pt-[100px] font-GmarketSans overflow-x-hidden'
+					className='pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden'
 				>
 					<TitleSection
 						setCategory={setCategory}
@@ -1234,7 +1268,7 @@ export default function Work({
 						onSearch={onSearch}
 						searchWords={searchWords}
 					/>
-					<section className='relative bg-[#101010]'>
+					<section className='relative bg-[#101010] mb-20 sm:mb-36'>
 						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
@@ -1247,18 +1281,17 @@ export default function Work({
 													url:
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
-															: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+															: data.resourceId,
 													alt:
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
-															: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-													width: 480,
-													height: 270,
+															: data.resourceId,
 												}}
 												title={data.title}
 												description={data.description}
 												category={category}
 												resource={data.resourceId}
+												animatedThumbnail={data.animationThumbnailLink}
 												date={data.date}
 												setOnDetail={setOnDetail}
 												setAnimationEnd={
@@ -1284,7 +1317,6 @@ export default function Work({
 								)}
 							</AnimatePresence>
 						</div>
-						{/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정, 명시적으로 toString작성 */}
 						<div
 							ref={intersectionRef}
 							className={`absolute bg-pink-600 h-1 w-full`}
@@ -1301,7 +1333,11 @@ export default function Work({
 							</div>
 						) : null}
 					</section>
-					<OutroSection />
+					<OutroSection
+						hasNextPage={hasNextPage[category]}
+						apiPage={apiPage[category]}
+						page={page}
+					/>
 					<ToTop toScroll={section} position='right' />
 				</main>
 			</Layout>

@@ -57,11 +57,12 @@ export function VimeoThumbnailFeed({
 						>
 							<div>
 								<Image
-									src={video.pictures.sizes[3].link}
-									alt='picturesAlter'
-									width={960}
-									height={540}
+									src={`${video.pictures.base_link}_640x360?r=pad`}
+									alt={`${video.name} thumbnail`}
+									width={640}
+									height={360}
 									priority={idx < 6 ? true : false}
+									className='w-full'
 								/>
 								<div className='mt-2'>
 									<div className='text-sm text-[#bababa] '>
@@ -80,7 +81,8 @@ export function VimeoThumbnailFeed({
 									placeholder='타이틀'
 									data-resourceid={video.player_embed_url}
 									//여기 썸네일 변경
-									data-thumbnail={video.pictures.sizes[4].link}
+									data-thumbnail={video.pictures.base_link}
+									data-animated_thumbnail={video.animated_thumbnail}
 									data-description={matchedOwnedVideos?.description}
 									data-date={matchedOwnedVideos?.date}
 									data-category={matchedOwnedVideos?.category}
