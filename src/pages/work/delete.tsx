@@ -448,7 +448,7 @@ export default function Delete({
 			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
 		};
 		if (fetchLoading) return;
-		if (!onSelectedList && hasNextPage[category]) {
+		if (!onSelectedList && hasNextPage[category] && apiPage[category] <= page) {
 			getList();
 		}
 		if (page <= searchResult[category].length / perPage + 1) {
