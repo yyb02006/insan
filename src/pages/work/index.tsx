@@ -1193,7 +1193,7 @@ export default function Work({
 			setFetchLoading(false);
 		};
 		if (page > 1 && (!isAnimationEnd || fetchLoading)) return;
-		if (hasNextPage[category]) {
+		if (hasNextPage[category] && apipage[category] <= page) {
 			getVideos();
 		}
 		if (page <= searchResults[category].length / perPage + 1) {
