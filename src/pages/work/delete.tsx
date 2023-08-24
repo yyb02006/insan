@@ -227,7 +227,7 @@ export const ButtonsController = ({
 
 interface WorkProps {
 	onClick: () => void;
-	searchResult: VideosMerged<Works[]>;
+	searchResult: VideoCollection<Works[]>;
 	category: FlatformsCategory;
 	selected: boolean;
 	resourceId: string;
@@ -278,14 +278,14 @@ const Work = ({
 	);
 };
 
-interface VideosMerged<T> {
+export interface VideoCollection<T, U = T> {
 	filmShort: T;
-	outsource: T;
+	outsource: U;
 }
 
 interface InitialData {
-	initialWorks: VideosMerged<Works[]>;
-	initialHasNextPage: VideosMerged<boolean>;
+	initialWorks: VideoCollection<Works[]>;
+	initialHasNextPage: VideoCollection<boolean>;
 }
 
 export default function Delete({
@@ -298,14 +298,14 @@ export default function Delete({
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
 	const [searchResult, setSearchResult] =
-		useState<VideosMerged<Works[]>>(initialWorks);
+		useState<VideoCollection<Works[]>>(initialWorks);
 	const [searchResultSnapShot, setSearchResultSnapShot] = useState<
-		VideosMerged<Works[]>
+		VideoCollection<Works[]>
 	>({
 		filmShort: [],
 		outsource: [],
 	});
-	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
+	const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
 	const [send, { loading, data, error }] = useDeleteRequest<{
 		success: boolean;
 	}>(`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`);
@@ -319,7 +319,7 @@ export default function Delete({
 	const [onSelectedList, setOnSelectedList] = useState(false);
 	const [fetchLoading, setFetchLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] =
-		useState<VideosMerged<boolean>>(initialHasNextPage);
+		useState<VideoCollection<boolean>>(initialHasNextPage);
 
 	useEffect(() => {
 		if (data && data?.success) {
@@ -336,6 +336,8 @@ export default function Delete({
 		setOnSelectedList(false);
 		setDeleteIdList([]);
 		setPage(2);
+		setSearchWordSnapShot('');
+		setSearchWord('');
 		setSearchResult((p) => ({
 			...p,
 			[category === 'filmShort' ? 'outsource' : 'filmShort']:

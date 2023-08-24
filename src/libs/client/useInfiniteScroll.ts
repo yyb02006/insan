@@ -2,21 +2,21 @@
 import { FlatformsCategory, VimeoVideos } from '@/pages/work/write';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
-
-type SetVimeoFunc = (value: SetStateAction<VimeoVideos[]>) => void;
-
-type SetYoutubeFunc = (value: SetStateAction<GapiItem[]>) => void;
+import { VideoCollection } from '@/pages/work/delete';
+import { ciIncludes } from './utils';
 
 interface UseInfiniteScrollFromFlatFormProps {
-	setVimeoVideos: SetVimeoFunc;
-	setYoutubeVideos: SetYoutubeFunc;
-	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
+	setList: Dispatch<SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>>;
+	setFetchLoading: Dispatch<SetStateAction<boolean>>;
 	category: FlatformsCategory;
-	isInfiniteScrollEnabled: boolean;
+	onSelectedList: boolean;
 	page: number;
 	setPage: Dispatch<SetStateAction<number>>;
 	snapshot: string;
 	searchResultsCount: number;
+	setSearchResult: Dispatch<
+		SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>
+	>;
 }
 
 interface apiPage {
@@ -25,11 +25,11 @@ interface apiPage {
 }
 
 export default function useInfiniteScrollFromFlatform({
-	setVimeoVideos,
-	setYoutubeVideos,
-	setIsScrollLoading,
+	setList,
+	setSearchResult,
+	setFetchLoading,
 	category,
-	isInfiniteScrollEnabled,
+	onSelectedList,
 	page,
 	setPage,
 	snapshot,
@@ -54,15 +54,12 @@ export default function useInfiniteScrollFromFlatform({
 	const [secondIdPerPage, setSecondIdPerPage] = useState(6);
 
 	useEffect(() => {
-		setIsScrollLoading(isLoading);
-	}, [isLoading, setIsScrollLoading]);
+		setFetchLoading(isLoading);
+	}, [isLoading, setFetchLoading]);
 
 	useEffect(() => {
 		setFirstIdPerPage(6), setSecondIdPerPage(6);
 	}, [category]);
-
-	console.log(apiPage);
-	console.log(page);
 
 	const addData = async () => {
 		if (isLoading) return;
@@ -71,7 +68,7 @@ export default function useInfiniteScrollFromFlatform({
 		try {
 			if (
 				category === 'filmShort' &&
-				(snapshot.length === 0 ? apiPage[category] === page : true)
+				(snapshot.length === 0 ? apiPage[category] <= page : true)
 			) {
 				if (hasNextPage) {
 					const data = await (
@@ -88,7 +85,23 @@ export default function useInfiniteScrollFromFlatform({
 						)
 					).json();
 
-					setVimeoVideos((p) => [...p, ...data.data]);
+					setList((p) => ({
+						...p,
+						[category]: [...p[category], ...data.data],
+					}));
+
+					setSearchResult((p) => ({
+						...p,
+						[category]: [
+							...p[category],
+							...data.data.filter(
+								(el: VimeoVideos) =>
+									ciIncludes(el.name, snapshot) ||
+									ciIncludes(el.resource_key, snapshot)
+							),
+						],
+					}));
+
 					if (data.data.length === 12) {
 						setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
 					} else {
@@ -99,7 +112,7 @@ export default function useInfiniteScrollFromFlatform({
 				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 				if (
 					nextpageToken.outsource !== '' &&
-					(snapshot.length === 0 ? apiPage[category] === page : true)
+					(snapshot.length === 0 ? apiPage[category] <= page : true)
 				) {
 					const data = await (
 						await fetch(
@@ -113,7 +126,22 @@ export default function useInfiniteScrollFromFlatform({
 						)
 					).json();
 
-					setYoutubeVideos((p) => [...p, ...data.items]);
+					setList((p) => ({
+						...p,
+						[category]: [...p[category], ...data.items],
+					}));
+
+					setSearchResult((p) => ({
+						...p,
+						[category]: [
+							...p[category],
+							...data.items.filter(
+								(item: GapiItem) =>
+									ciIncludes(item.snippet.title, snapshot) ||
+									ciIncludes(item.snippet.resourceId?.videoId || '', snapshot)
+							),
+						],
+					}));
 
 					if (data.items.length < 6) {
 						setFirstIdPerPage(12);
@@ -131,7 +159,7 @@ export default function useInfiniteScrollFromFlatform({
 
 				if (
 					nextpageToken.participate !== '' &&
-					(snapshot.length === 0 ? apiPage[category] === page : true)
+					(snapshot.length === 0 ? apiPage[category] <= page : true)
 				) {
 					const data = await (
 						await fetch(
@@ -145,7 +173,22 @@ export default function useInfiniteScrollFromFlatform({
 						)
 					).json();
 
-					setYoutubeVideos((p) => [...p, ...data.items]);
+					setList((p) => ({
+						...p,
+						[category]: [...p[category], ...data.items],
+					}));
+
+					setSearchResult((p) => ({
+						...p,
+						[category]: [
+							...p[category],
+							...data.items.filter(
+								(item: GapiItem) =>
+									ciIncludes(item.snippet.title, snapshot) ||
+									ciIncludes(item.snippet.resourceId?.videoId || '', snapshot)
+							),
+						],
+					}));
 
 					if (data.items.length < 6) {
 						setSecondIdPerPage(12);
@@ -181,13 +224,12 @@ export default function useInfiniteScrollFromFlatform({
 
 	const handleIntersection: IntersectionObserverCallback = (entries) => {
 		const entry = entries[0];
-		if (entry.isIntersecting) {
+		if (entry.isIntersecting && !onSelectedList) {
 			addData();
 		}
 	};
 
 	useEffect(() => {
-		if (!isInfiniteScrollEnabled) return;
 		const options: IntersectionObserverInit = {
 			root: null,
 			rootMargin: '0px',
@@ -210,7 +252,7 @@ export default function useInfiniteScrollFromFlatform({
 		hasNextPage,
 		nextpageToken.outsource,
 		nextpageToken.participate,
-		isInfiniteScrollEnabled,
+		onSelectedList,
 		category,
 		snapshot,
 		page,
