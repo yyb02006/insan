@@ -202,15 +202,6 @@ export default function Write({
 		});
 	};
 
-	const onReset = () => {
-		setOnSelectedList(false);
-		setWorkInfos([]);
-		setSearchResults((p) => ({
-			...p,
-			[category]: list[category],
-		}));
-	};
-
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setPage(2);
@@ -258,39 +249,67 @@ export default function Write({
 		}
 	};
 
+	const resetInit = () => {
+		setOnSelectedList(false);
+		setPage(2);
+		setSearchWord('');
+		setSearchWordSnapshot('');
+		setSearchResults((p) => ({
+			...p,
+			[category]: list[category],
+		}));
+		setSearchResultsSnapshot((p) => ({ ...p, [category]: [] }));
+	};
+
+	const onReset = () => {
+		if (workInfos.length > 0) {
+			setWorkInfos([]);
+			resetInit();
+		}
+	};
+
 	const onSelectedListClick = () => {
-		setOnSelectedList(true);
-		if (!workInfos || workInfos?.length < 1) return;
-		if (category === 'filmShort') {
-			setSearchResults((p) => ({
-				...p,
-				[category]: list[category].filter((info) =>
-					workInfos?.some((video) => video.resourceId === info.player_embed_url)
-				),
-			}));
-			setSearchResultsSnapshot((p) => ({
-				...p,
-				[category]: list[category].filter((info) =>
-					workInfos?.some((video) => video.resourceId === info.player_embed_url)
-				),
-			}));
-		} else if (category === 'outsource') {
-			setSearchResults((p) => ({
-				...p,
-				[category]: list[category].filter((info) =>
-					workInfos?.some(
-						(video) => video.resourceId === info.snippet.resourceId?.videoId
-					)
-				),
-			}));
-			setSearchResultsSnapshot((p) => ({
-				...p,
-				[category]: list[category].filter((info) =>
-					workInfos?.some(
-						(video) => video.resourceId === info.snippet.resourceId?.videoId
-					)
-				),
-			}));
+		if (onSelectedList) {
+			resetInit();
+		} else {
+			if (!workInfos || workInfos?.length < 1) return;
+			setPage(2);
+			setOnSelectedList(true);
+			if (category === 'filmShort') {
+				setSearchResults((p) => ({
+					...p,
+					[category]: list[category].filter((info) =>
+						workInfos?.some(
+							(video) => video.resourceId === info.player_embed_url
+						)
+					),
+				}));
+				setSearchResultsSnapshot((p) => ({
+					...p,
+					[category]: list[category].filter((info) =>
+						workInfos?.some(
+							(video) => video.resourceId === info.player_embed_url
+						)
+					),
+				}));
+			} else if (category === 'outsource') {
+				setSearchResults((p) => ({
+					...p,
+					[category]: list[category].filter((info) =>
+						workInfos?.some(
+							(video) => video.resourceId === info.snippet.resourceId?.videoId
+						)
+					),
+				}));
+				setSearchResultsSnapshot((p) => ({
+					...p,
+					[category]: list[category].filter((info) =>
+						workInfos?.some(
+							(video) => video.resourceId === info.snippet.resourceId?.videoId
+						)
+					),
+				}));
+			}
 		}
 	};
 
@@ -346,12 +365,14 @@ export default function Write({
 				<SelectedListButton
 					onClick={onSelectedListClick}
 					count={workInfos ? workInfos?.length : 0}
-					isMobile={true}
+					isOnMobile={true}
+					onSelectedList={onSelectedList}
 				/>
 				<ButtonsController
 					onReset={onReset}
 					onSave={onSubmitWrites}
 					onSort={onSelectedListClick}
+					onSelectedList={onSelectedList}
 					count={workInfos ? workInfos?.length : 0}
 					action='save'
 				/>
