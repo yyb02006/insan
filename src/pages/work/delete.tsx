@@ -162,23 +162,28 @@ export const SearchForm = ({
 
 interface SelectedListButtonProps {
 	onClick: () => void;
+	onSelectedList: boolean;
 	count: number;
-	isMobile: boolean;
+	isOnMobile: boolean;
 }
 
 export const SelectedListButton = ({
 	onClick,
+	onSelectedList,
 	count,
-	isMobile,
+	isOnMobile,
 }: SelectedListButtonProps) => {
 	return (
 		<button
 			onClick={onClick}
 			className={cls(
-				isMobile
-					? 'fixed sm:hidden bottom-24 right-4 w-16  bg-[#101010] font-bold '
-					: 'hidden sm:inline-block w-full font-light hover:text-palettered hover:font-bold',
-				'ring-1 ring-palettered aspect-square text-sm rounded-full'
+				isOnMobile
+					? 'fixed sm:hidden bottom-24 right-4 w-16 font-bold '
+					: 'hidden sm:inline-block w-full font-light hover:font-bold',
+				onSelectedList
+					? 'bg-palettered'
+					: 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
+				'aspect-square text-sm rounded-full'
 			)}
 		>
 			<div>{count}</div>
@@ -191,6 +196,7 @@ interface ButtonsControllerProps {
 	onReset: () => void;
 	onSave: () => void;
 	onSort: () => void;
+	onSelectedList: boolean;
 	count: number;
 	action?: 'save' | 'delete';
 }
@@ -199,6 +205,7 @@ export const ButtonsController = ({
 	onReset,
 	onSave,
 	onSort,
+	onSelectedList,
 	count,
 	action = 'save',
 }: ButtonsControllerProps) => {
@@ -206,7 +213,13 @@ export const ButtonsController = ({
 		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 			<button
 				onClick={onReset}
-				className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+				className={cls(
+					count > 0
+						? 'sm:hover:text-palettered sm:hover:font-bold'
+						: 'text-[#404040]',
+					'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
+				)}
+				disabled={count === 0}
 			>
 				Reset
 			</button>
@@ -218,8 +231,9 @@ export const ButtonsController = ({
 			</button>
 			<SelectedListButton
 				onClick={onSort}
+				onSelectedList={onSelectedList}
 				count={count}
-				isMobile={false}
+				isOnMobile={false}
 			></SelectedListButton>
 		</div>
 	);
@@ -356,26 +370,38 @@ export default function Delete({
 		send(deleteIdList);
 	};
 
-	const onReset = () => {
+	const resetInit = () => {
 		setOnSelectedList(false);
 		setPage(2);
-		setDeleteIdList([]);
-		setSearchResult((p) => ({ ...p, [category]: list[category] }));
+		setSearchWord('');
 		setSearchWordSnapShot('');
+		setSearchResult((p) => ({ ...p, [category]: list[category] }));
+		setSearchResultSnapShot((p) => ({ ...p, [category]: [] }));
+	};
+
+	const onReset = () => {
+		if (deleteIdList.length > 0) {
+			setDeleteIdList([]);
+			resetInit();
+		}
 	};
 
 	const onSelectedListClick = () => {
-		setOnSelectedList(true);
-		setPage(2);
-		if (!deleteIdList || deleteIdList?.length < 1) return;
-		setSearchResultSnapShot((p) => ({
-			...p,
-			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
-		}));
-		setSearchResult((p) => ({
-			...p,
-			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
-		}));
+		if (onSelectedList) {
+			resetInit();
+		} else {
+			if (!deleteIdList || deleteIdList?.length < 1) return;
+			setOnSelectedList(true);
+			setPage(2);
+			setSearchResultSnapShot((p) => ({
+				...p,
+				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+			}));
+			setSearchResult((p) => ({
+				...p,
+				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+			}));
+		}
 	};
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
@@ -518,13 +544,15 @@ export default function Delete({
 
 				<SelectedListButton
 					onClick={onSelectedListClick}
+					onSelectedList={onSelectedList}
 					count={deleteIdList.length}
-					isMobile={true}
+					isOnMobile={true}
 				/>
 				<ButtonsController
 					onReset={onReset}
 					onSave={onSubmitDelete}
 					onSort={onSelectedListClick}
+					onSelectedList={onSelectedList}
 					count={deleteIdList.length}
 					action='delete'
 				/>
