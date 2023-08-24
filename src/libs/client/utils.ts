@@ -81,3 +81,30 @@ export function ciIncludes(mainString: string, searchString: string) {
 		setFunc
 	);
 }; */
+
+/* 	const filterResults = ({
+		category,
+		list,
+		searchWord,
+		ciIncludes,
+	}: {
+		category: FlatformsCategory;
+		list: VimeoVideos[] | GapiItem[];
+		searchWord: string;
+		ciIncludes: (mainString: string, searchString: string) => boolean;
+	}) => {
+		if (category === 'filmShort') {
+			return (list as VimeoVideos[]).filter(
+				(el) =>
+					ciIncludes(el.name, searchWord) ||
+					ciIncludes(el.resource_key, searchWord)
+			);
+		} else if (category === 'outsource') {
+			return (list as GapiItem[]).filter(
+				(el) =>
+					ciIncludes(el.snippet.title, searchWord) ||
+					ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
+			);
+		}
+		return [];
+	}; */

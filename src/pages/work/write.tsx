@@ -67,12 +67,15 @@ export default function Write({
 	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
-	const [searchResult, setSearchResult] = useState<
+	const [searchResults, setSearchResults] = useState<
 		VideoCollection<VimeoVideos[], GapiItem[]>
 	>({
 		filmShort: initialVimeoVideos,
 		outsource: initialYoutubeVideos,
 	});
+	const [searchResultsSnapshot, setSearchResultsSnapshot] = useState<
+		VideoCollection<VimeoVideos[], GapiItem[]>
+	>({ filmShort: [], outsource: [] });
 	const [list, setList] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
 		filmShort: initialVimeoVideos,
 		outsource: initialYoutubeVideos,
@@ -87,14 +90,14 @@ export default function Write({
 	const [onSelectedList, setOnSelectedList] = useState(false);
 	const intersectionRef = useInfiniteScrollFromFlatform({
 		setList,
-		setSearchResult,
+		setSearchResults,
 		setFetchLoading,
 		category,
 		onSelectedList,
 		page,
 		setPage,
 		snapshot: searchWordSnapshot,
-		searchResultsCount: searchResult[category].length,
+		searchResultsCount: searchResults[category].length,
 	});
 
 	useEffect(() => {
@@ -114,7 +117,7 @@ export default function Write({
 		setPage(2);
 		setSearchWordSnapshot('');
 		setSearchWord('');
-		setSearchResult((p) => ({
+		setSearchResults((p) => ({
 			...p,
 			[category === 'filmShort' ? 'outsource' : 'filmShort']:
 				list[category === 'filmShort' ? 'outsource' : 'filmShort'],
@@ -202,7 +205,7 @@ export default function Write({
 	const onReset = () => {
 		setOnSelectedList(false);
 		setWorkInfos([]);
-		setSearchResult((p) => ({
+		setSearchResults((p) => ({
 			...p,
 			[category]: list[category],
 		}));
@@ -212,42 +215,75 @@ export default function Write({
 		e.preventDefault();
 		setPage(2);
 		setSearchWordSnapshot(searchWord);
-		const filterResources = (kind: FlatformsCategory) => {
-			if (kind === 'filmShort') {
-				setSearchResult((p) => ({
+		if (onSelectedList) {
+			if (category === 'filmShort') {
+				setSearchResults((p) => ({
 					...p,
-					[kind]: list[kind].filter(
+					[category]: searchResultsSnapshot[category].filter(
 						(el) =>
 							ciIncludes(el.name, searchWord) ||
 							ciIncludes(el.resource_key, searchWord)
 					),
 				}));
-			} else if (kind === 'outsource') {
-				setSearchResult((p) => ({
+			} else if (category === 'outsource') {
+				setSearchResults((p) => ({
 					...p,
-					[kind]: list[kind].filter(
+					[category]: searchResultsSnapshot[category].filter(
 						(el) =>
 							ciIncludes(el.snippet.title, searchWord) ||
 							ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
 					),
 				}));
 			}
-		};
-		filterResources(category);
+		} else {
+			if (category === 'filmShort') {
+				setSearchResults((p) => ({
+					...p,
+					[category]: list[category].filter(
+						(el) =>
+							ciIncludes(el.name, searchWord) ||
+							ciIncludes(el.resource_key, searchWord)
+					),
+				}));
+			} else if (category === 'outsource') {
+				setSearchResults((p) => ({
+					...p,
+					[category]: list[category].filter(
+						(el) =>
+							ciIncludes(el.snippet.title, searchWord) ||
+							ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
+					),
+				}));
+			}
+		}
 	};
 
 	const onSelectedListClick = () => {
 		setOnSelectedList(true);
 		if (!workInfos || workInfos?.length < 1) return;
 		if (category === 'filmShort') {
-			setSearchResult((p) => ({
+			setSearchResults((p) => ({
+				...p,
+				[category]: list[category].filter((info) =>
+					workInfos?.some((video) => video.resourceId === info.player_embed_url)
+				),
+			}));
+			setSearchResultsSnapshot((p) => ({
 				...p,
 				[category]: list[category].filter((info) =>
 					workInfos?.some((video) => video.resourceId === info.player_embed_url)
 				),
 			}));
 		} else if (category === 'outsource') {
-			setSearchResult((p) => ({
+			setSearchResults((p) => ({
+				...p,
+				[category]: list[category].filter((info) =>
+					workInfos?.some(
+						(video) => video.resourceId === info.snippet.resourceId?.videoId
+					)
+				),
+			}));
+			setSearchResultsSnapshot((p) => ({
 				...p,
 				[category]: list[category].filter((info) =>
 					workInfos?.some(
@@ -287,7 +323,7 @@ export default function Write({
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
 						inputBlur={inputBlur}
-						resource={searchResult[category]}
+						resource={searchResults[category]}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						fetchLoading={fetchLoading}
@@ -298,7 +334,7 @@ export default function Write({
 				{category === 'outsource' ? (
 					<YoutubeThumbnailFeed
 						inputChange={inputChange}
-						resource={searchResult[category]}
+						resource={searchResults[category]}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
 						fetchLoading={fetchLoading}
