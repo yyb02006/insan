@@ -6,7 +6,7 @@ import { WorkInfos, VimeoVideos, OwnedVideoItems } from '@/pages/work/write';
 import Circles from './circles';
 
 interface videoFeedItem {
-	isScrollLoading: boolean;
+	fetchLoading: boolean;
 	workInfos: WorkInfos[] | undefined;
 	intersectionRef: MutableRefObject<HTMLDivElement | null>;
 	ownedVideos: OwnedVideoItems[];
@@ -27,7 +27,7 @@ export function VimeoThumbnailFeed({
 	resource,
 	workInfos,
 	intersectionRef,
-	isScrollLoading,
+	fetchLoading,
 	ownedVideos,
 	page,
 	inputChange,
@@ -164,7 +164,7 @@ export function VimeoThumbnailFeed({
 				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
-				{isScrollLoading ? (
+				{fetchLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
 							<Circles
@@ -184,7 +184,7 @@ export function YoutubeThumbnailFeed({
 	resource,
 	workInfos,
 	intersectionRef,
-	isScrollLoading,
+	fetchLoading,
 	ownedVideos,
 	page,
 	inputChange,
@@ -290,7 +290,7 @@ export function YoutubeThumbnailFeed({
 				})}
 			</div>
 			<div ref={intersectionRef} className='h-32 my-10 order-last'>
-				{isScrollLoading ? (
+				{fetchLoading ? (
 					<div className='relative w-full h-full flex justify-center items-center'>
 						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
 							<Circles

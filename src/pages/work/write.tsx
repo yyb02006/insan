@@ -1,4 +1,4 @@
-import { fetchData } from '@/libs/client/utils';
+import { ciIncludes, fetchData } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
@@ -15,6 +15,7 @@ import {
 	MenuBar,
 	SearchForm,
 	SelectedListButton,
+	VideoCollection,
 } from './delete';
 import ToTop from '@/components/toTop';
 import { GetStaticProps } from 'next';
@@ -38,22 +39,12 @@ export interface VimeoVideos {
 	description: string;
 }
 
-interface SearchResult {
-	vimeo: VimeoVideos[];
-	youtube: GapiItem[];
-}
-
 export interface OwnedVideoItems {
 	title: string;
 	category: VideosCategory;
 	date: string;
 	description: string;
 	resourceId: string;
-}
-
-interface OwnedVideos {
-	filmShort: OwnedVideoItems[];
-	outsource: OwnedVideoItems[];
 }
 
 export type ResourceHost = 'vimeo' | 'youtube';
@@ -63,7 +54,7 @@ export type FlatformsCategory = 'filmShort' | 'outsource';
 interface InitialData {
 	initialVimeoVideos: VimeoVideos[];
 	initialYoutubeVideos: GapiItem[];
-	initialOwnedVideos: OwnedVideos;
+	initialOwnedVideos: VideoCollection<OwnedVideoItems[]>;
 }
 
 export default function Write({
@@ -73,41 +64,37 @@ export default function Write({
 }: InitialData) {
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
-	const [category, setCategory] = useState<'filmShort' | 'outsource'>(
-		'filmShort'
-	);
+	const [category, setCategory] = useState<FlatformsCategory>('filmShort');
 	const [searchWord, setSearchWord] = useState('');
-	const [searchWordSnapshot, setSearchWordSnapshot] = useState<{
-		searchWord: string;
-		category: FlatformsCategory;
-	}>({ searchWord: '', category: 'filmShort' });
-	const [searchResult, setSearchResult] = useState<SearchResult>({
-		vimeo: initialVimeoVideos,
-		youtube: initialYoutubeVideos,
+	const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
+	const [searchResult, setSearchResult] = useState<
+		VideoCollection<VimeoVideos[], GapiItem[]>
+	>({
+		filmShort: initialVimeoVideos,
+		outsource: initialYoutubeVideos,
 	});
-	const [youtubeVideos, setYoutubeVideos] =
-		useState<GapiItem[]>(initialYoutubeVideos);
-	const [vimeoVideos, setVimeoVideos] =
-		useState<VimeoVideos[]>(initialVimeoVideos);
+	const [list, setList] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
+		filmShort: initialVimeoVideos,
+		outsource: initialYoutubeVideos,
+	});
 	const [sendList, { loading, data, error }] = useMutation<{
 		success: boolean;
 	}>(`/api/work/write`);
 	const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
-	const [isInfiniteScrollEnabled, setIsInfiniteScrollEnabled] = useState(true);
-	const [isScrollLoading, setIsScrollLoading] = useState(false);
-	const ownedVideos: OwnedVideos = initialOwnedVideos;
+	const [fetchLoading, setFetchLoading] = useState(false);
+	const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
 	const [page, setPage] = useState(2);
+	const [onSelectedList, setOnSelectedList] = useState(false);
 	const intersectionRef = useInfiniteScrollFromFlatform({
-		setVimeoVideos,
-		setYoutubeVideos,
-		setIsScrollLoading,
+		setList,
+		setSearchResult,
+		setFetchLoading,
 		category,
-		isInfiniteScrollEnabled,
+		onSelectedList,
 		page,
 		setPage,
-		snapshot: searchWordSnapshot.searchWord,
-		searchResultsCount:
-			searchResult[category === 'filmShort' ? 'vimeo' : 'youtube'].length,
+		snapshot: searchWordSnapshot,
+		searchResultsCount: searchResult[category].length,
 	});
 
 	useEffect(() => {
@@ -122,45 +109,16 @@ export default function Write({
 	}, [data]);
 
 	useEffect(() => {
-		if (category === 'filmShort' && youtubeVideos.length > 0) {
-			if (searchWordSnapshot.category !== category) {
-				setSearchResult((p) => ({ ...p, vimeo: vimeoVideos }));
-				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
-				setSearchWord('');
-			} else {
-				setSearchResult((p) => ({
-					...p,
-					vimeo: vimeoVideos.filter(
-						(el) =>
-							el.name.includes(searchWord) ||
-							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
-					),
-				}));
-			}
-		} else if (category === 'outsource') {
-			if (searchWordSnapshot.category !== category) {
-				setSearchResult((p) => ({ ...p, youtube: youtubeVideos }));
-				setSearchWordSnapshot((p) => ({ ...p, searchWord: '' }));
-				setSearchWord('');
-			} else {
-				setSearchResult((p) => ({
-					...p,
-					youtube: youtubeVideos.filter(
-						(el) =>
-							el.snippet.title.includes(searchWord) ||
-							el.snippet.resourceId?.videoId
-								.toLowerCase()
-								.includes(searchWord.toLowerCase())
-					),
-				}));
-			}
-		}
-	}, [category, youtubeVideos, vimeoVideos]);
-
-	useEffect(() => {
-		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+		setOnSelectedList(false);
 		setWorkInfos([]);
 		setPage(2);
+		setSearchWordSnapshot('');
+		setSearchWord('');
+		setSearchResult((p) => ({
+			...p,
+			[category === 'filmShort' ? 'outsource' : 'filmShort']:
+				list[category === 'filmShort' ? 'outsource' : 'filmShort'],
+		}));
 	}, [category]);
 
 	const inputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -242,63 +200,56 @@ export default function Write({
 	};
 
 	const onReset = () => {
-		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+		setOnSelectedList(false);
 		setWorkInfos([]);
 		setSearchResult((p) => ({
 			...p,
-			[category]: category === 'filmShort' ? vimeoVideos : youtubeVideos,
+			[category]: list[category],
 		}));
 	};
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setPage(2);
-		setSearchWordSnapshot({ searchWord, category });
-		const filterResources = (kind: ResourceHost) => {
-			if (kind === 'vimeo') {
+		setSearchWordSnapshot(searchWord);
+		const filterResources = (kind: FlatformsCategory) => {
+			if (kind === 'filmShort') {
 				setSearchResult((p) => ({
 					...p,
-					[kind]: vimeoVideos.filter(
+					[kind]: list[kind].filter(
 						(el) =>
-							el.name.includes(searchWord) ||
-							el.resource_key.toLowerCase().includes(searchWord.toLowerCase())
+							ciIncludes(el.name, searchWord) ||
+							ciIncludes(el.resource_key, searchWord)
 					),
 				}));
-			} else if (kind === 'youtube') {
+			} else if (kind === 'outsource') {
 				setSearchResult((p) => ({
 					...p,
-					[kind]: youtubeVideos.filter(
+					[kind]: list[kind].filter(
 						(el) =>
-							el.snippet.title.includes(searchWord) ||
-							el.snippet.resourceId?.videoId
-								.toLowerCase()
-								.includes(searchWord.toLowerCase())
+							ciIncludes(el.snippet.title, searchWord) ||
+							ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
 					),
 				}));
 			}
 		};
-		if (category === 'filmShort') {
-			filterResources('vimeo');
-		} else if (category === 'outsource') {
-			filterResources('youtube');
-		}
-		isInfiniteScrollEnabled || setIsInfiniteScrollEnabled(true);
+		filterResources(category);
 	};
 
-	const onUpdatedListClick = () => {
-		setIsInfiniteScrollEnabled(false);
+	const onSelectedListClick = () => {
+		setOnSelectedList(true);
 		if (!workInfos || workInfos?.length < 1) return;
 		if (category === 'filmShort') {
 			setSearchResult((p) => ({
 				...p,
-				vimeo: vimeoVideos.filter((info) =>
+				[category]: list[category].filter((info) =>
 					workInfos?.some((video) => video.resourceId === info.player_embed_url)
 				),
 			}));
 		} else if (category === 'outsource') {
 			setSearchResult((p) => ({
 				...p,
-				youtube: youtubeVideos.filter((info) =>
+				[category]: list[category].filter((info) =>
 					workInfos?.some(
 						(video) => video.resourceId === info.snippet.resourceId?.videoId
 					)
@@ -332,39 +283,39 @@ export default function Write({
 					searchWord={searchWord}
 					setSearchWord={setSearchWord}
 				/>
-				{category === 'filmShort' && vimeoVideos.length > 0 ? (
+				{category === 'filmShort' && list[category].length > 0 ? (
 					<VimeoThumbnailFeed
 						inputChange={inputChange}
 						inputBlur={inputBlur}
-						resource={searchResult.vimeo}
+						resource={searchResult[category]}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
-						isScrollLoading={isScrollLoading}
-						ownedVideos={ownedVideos.filmShort}
+						fetchLoading={fetchLoading}
+						ownedVideos={ownedVideos[category]}
 						page={page}
 					></VimeoThumbnailFeed>
 				) : null}
 				{category === 'outsource' ? (
 					<YoutubeThumbnailFeed
 						inputChange={inputChange}
-						resource={searchResult.youtube}
+						resource={searchResult[category]}
 						workInfos={workInfos}
 						intersectionRef={intersectionRef}
-						isScrollLoading={isScrollLoading}
-						ownedVideos={ownedVideos.outsource}
+						fetchLoading={fetchLoading}
+						ownedVideos={ownedVideos[category]}
 						inputBlur={inputBlur}
 						page={page}
 					></YoutubeThumbnailFeed>
 				) : null}
 				<SelectedListButton
-					onClick={onUpdatedListClick}
+					onClick={onSelectedListClick}
 					count={workInfos ? workInfos?.length : 0}
 					isMobile={true}
 				/>
 				<ButtonsController
 					onReset={onReset}
 					onSave={onSubmitWrites}
-					onSort={onUpdatedListClick}
+					onSort={onSelectedListClick}
 					count={workInfos ? workInfos?.length : 0}
 					action='save'
 				/>
