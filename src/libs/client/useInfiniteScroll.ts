@@ -68,52 +68,52 @@ export default function useInfiniteScrollFromFlatform({
 		try {
 			if (
 				category === 'filmShort' &&
-				(snapshot.length === 0 ? apiPage[category] <= page : true)
+				!onSelectedList &&
+				apiPage[category] <= page &&
+				hasNextPage
 			) {
-				if (hasNextPage) {
-					const data = await (
-						await fetch(
-							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${apiPage[category]}&per_page=12`,
-							{
-								method: 'get',
-								headers: {
-									'Content-Type': 'application/json',
-									Authorization:
-										process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
-								},
-							}
-						)
-					).json();
+				const data = await (
+					await fetch(
+						`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${apiPage[category]}&per_page=12`,
+						{
+							method: 'get',
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+							},
+						}
+					)
+				).json();
 
-					setList((p) => ({
-						...p,
-						[category]: [...p[category], ...data.data],
-					}));
+				setList((p) => ({
+					...p,
+					[category]: [...p[category], ...data.data],
+				}));
 
-					setSearchResults((p) => ({
-						...p,
-						[category]: [
-							...p[category],
-							...data.data.filter(
-								(el: VimeoVideos) =>
-									ciIncludes(el.name, snapshot) ||
-									ciIncludes(el.resource_key, snapshot)
-							),
-						],
-					}));
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...data.data.filter(
+							(el: VimeoVideos) =>
+								ciIncludes(el.name, snapshot) ||
+								ciIncludes(el.resource_key, snapshot)
+						),
+					],
+				}));
 
-					if (data.data.length === 12) {
-						setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
-					} else {
-						setHasNextPage(false);
-					}
+				if (data.data.length === 12) {
+					setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+				} else {
+					setHasNextPage(false);
 				}
-			} else if (category === 'outsource') {
+			} else if (
+				category === 'outsource' &&
+				!onSelectedList &&
+				apiPage[category] <= page
+			) {
 				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-				if (
-					nextpageToken.outsource !== '' &&
-					(snapshot.length === 0 ? apiPage[category] <= page : true)
-				) {
+				if (nextpageToken.outsource !== '') {
 					const data = await (
 						await fetch(
 							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.outsource}&part=snippet&playlistId=${lists.outsource}&maxResults=${firstIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
@@ -157,10 +157,7 @@ export default function useInfiniteScrollFromFlatform({
 					}
 				}
 
-				if (
-					nextpageToken.participate !== '' &&
-					(snapshot.length === 0 ? apiPage[category] <= page : true)
-				) {
+				if (nextpageToken.participate !== '') {
 					const data = await (
 						await fetch(
 							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.participate}&part=snippet&playlistId=${lists.participate}&maxResults=${secondIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
