@@ -32,9 +32,10 @@ interface dataState {
 interface ThumbnailProps {
 	src: { main: string; sub: string };
 	setPriority: boolean;
+	category: FlatformsCategory;
 }
 
-const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
+const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
 	const [error, setError] = useState(false);
 	const handleImageError = () => {
 		setError(true);
@@ -43,8 +44,8 @@ const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
 		<Image
 			src={!error ? src.main : src.sub}
 			alt='picturesAlter'
-			width={1280}
-			height={720}
+			width={640}
+			height={category === 'filmShort' ? 360 : 480}
 			onError={handleImageError}
 			className='w-full object-cover aspect-video'
 			priority={setPriority}
@@ -210,7 +211,7 @@ export const ButtonsController = ({
 	action = 'save',
 }: ButtonsControllerProps) => {
 	return (
-		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
+		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 			<button
 				onClick={onReset}
 				className={cls(
@@ -266,16 +267,17 @@ const Work = ({
 			onClick={onClick}
 		>
 			<Thumbnail
+				category={category}
 				src={
 					searchResult[category].length !== 0
 						? category === 'outsource'
 							? {
-									main: `https://i.ytimg.com/vi/${resourceId}/maxresdefault.jpg`,
+									main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
 									sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
 							  }
 							: {
-									main: thumbnailLink,
-									sub: thumbnailLink,
+									main: `${thumbnailLink}_640x360?r=pad`,
+									sub: `${thumbnailLink}_640x360?r=pad`,
 							  }
 						: { main: '', sub: '' }
 				}
@@ -412,19 +414,15 @@ export default function Delete({
 		if (onSelectedList) {
 			setSearchResult((p) => ({
 				...p,
-				[category]: searchResultSnapShot[category].filter(
-					(result) =>
-						ciIncludes(result.title, searchWord) ||
-						ciIncludes(result.resourceId, searchWord)
+				[category]: searchResultSnapShot[category].filter((result) =>
+					ciIncludes(result.title, searchWord)
 				),
 			}));
 		} else {
 			setSearchResult((p) => ({
 				...p,
-				[category]: list[category].filter(
-					(li) =>
-						ciIncludes(li.title, searchWord) ||
-						ciIncludes(li.resourceId, searchWord)
+				[category]: list[category].filter((li) =>
+					ciIncludes(li.title, searchWord)
 				),
 			}));
 		}
@@ -463,11 +461,7 @@ export default function Delete({
 					...p[category],
 					...lists.works[
 						category === 'filmShort' ? 'film' : 'outsource'
-					].filter(
-						(li) =>
-							ciIncludes(li.title, searchWordSnapShot) ||
-							ciIncludes(li.resourceId, searchWordSnapShot)
-					),
+					].filter((li) => ciIncludes(li.title, searchWordSnapShot)),
 				],
 			}));
 			setFetchLoading(false);

@@ -23,9 +23,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							title: el.title,
 							resourceId: el.resourceId,
 							description: el.description,
-							category: el.category ? el.category : 'film',
-							date: el.date ? el.date : 'no-date',
+							category: el.category || 'film',
+							date: el.date || 'no-date',
 							thumbnailLink: el.thumbnailLink,
+							animationThumbnailLink: el.animatedThumbnailLink,
 						},
 						update: {
 							title: el.title,
@@ -34,6 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							category: el.category ? el.category : 'film',
 							date: el.date ? el.date : 'no-date',
 							thumbnailLink: el.thumbnailLink,
+							animationThumbnailLink: el.animatedThumbnailLink,
 						},
 					});
 				})

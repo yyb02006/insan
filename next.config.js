@@ -15,6 +15,7 @@ module.exports = withBundleAnalyzer({
 			},
 			{ protocol: 'https', hostname: 'i.ytimg.com' },
 			{ protocol: 'https', hostname: 'i.vimeocdn.com' },
+			{ protocol: 'https', hostname: 'videoapi-muybridge.vimeocdn.com' },
 		],
 	},
 });

@@ -12,13 +12,14 @@ datasource db {
 }
 
 model Works {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  title         String
-  description   String
-  category      String   @default("film")
-  date          String   @default("no-date")
-  thumbnailLink String   @default("no-link")
-  resourceId    String   @unique
+  id                     Int      @id @default(autoincrement())
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  title                  String
+  description            String
+  category               String   @default("film")
+  date                   String   @default("no-date")
+  thumbnailLink          String   @default("no-link") @db.VarChar(1000)
+  animationThumbnailLink String   @default("no-link") @db.VarChar(1000)
+  resourceId             String   @unique
 }
