@@ -20,13 +20,13 @@ export default function useDeleteRequest<T = unknown>(
 		error: undefined,
 	});
 	const deleteRequest = (data: unknown, secret: string) => {
+		if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) return;
 		setDeleteState((p) => ({ ...p, loading: true }));
 		fetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
 				'Ids-To-Delete': JSON.stringify(data),
-				'Secret-Token': secret,
 			},
 		})
 			.then((res) =>

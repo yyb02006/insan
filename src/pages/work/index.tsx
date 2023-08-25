@@ -1298,11 +1298,6 @@ export default function Work({
 		})); */
 	};
 
-	console.log(
-		process.env.NEXT_PUBLIC_PROD_ORIGIN,
-		process.env.NEXT_PUBLIC_DEV_ORIGIN
-	);
-
 	useEffect(() => {
 		// const searchWordsArray = searchWordsSnapShot.split(/\s*[,/\\-]\s*/);
 		setPage(1);
