@@ -33,16 +33,16 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {
 			return NextResponse.redirect(
 				process.env.NODE_ENV === 'production'
-					? 'https://insan.vercel.app'
-					: 'http://localhost:3000'
+					? process.env.NEXT_PUBLIC_PROD_ORIGIN!
+					: process.env.NEXT_PUBLIC_DEV_ORIGIN!
 			);
 		}
 	} else {
 		if (req.nextUrl.pathname === '/enter') {
 			return NextResponse.redirect(
 				process.env.NODE_ENV === 'production'
-					? 'https://insan.vercel.app/work/write'
-					: 'http://localhost:3000/work/write'
+					? process.env.NEXT_PUBLIC_PROD_ORIGIN!
+					: process.env.NEXT_PUBLIC_DEV_ORIGIN!
 			);
 		}
 	}

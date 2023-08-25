@@ -350,7 +350,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 };
 
 const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
-	const [tags, setTags] = useState({
+	const initTags = {
 		selected: ['All'],
 		tagList: [
 			{ name: 'All', isSelected: true },
@@ -358,30 +358,81 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 			{ name: 'Director', isSelected: false },
 			{ name: 'Edit', isSelected: false },
 		],
-	});
-	const onTagInsert = (tag: string) => {
-		setTags(
-			(p) =>
-				(p = {
-					selected: [...p.selected, tag],
-					tagList: p.tagList.map((arr) => ({
-						name: arr.name,
-						isSelected: arr.name === tag ? true : arr.isSelected,
-					})),
-				})
-		);
 	};
-	const onTagDelete = (tag: string) => {
-		setTags(
-			(p) =>
-				(p = {
-					selected: p.selected.filter((arr) => arr !== tag),
-					tagList: p.tagList.map((arr) => ({
-						name: arr.name,
-						isSelected: arr.name === tag ? false : arr.isSelected,
+
+	const [tags, setTags] = useState(initTags);
+
+	const deleteHandler = (tag: string) => {
+		setTags((p) => ({
+			selected: p.selected.filter((el) => el !== tag),
+			tagList: p.tagList.map((el) => ({
+				name: el.name,
+				isSelected: el.name === tag ? false : el.isSelected,
+			})),
+		}));
+	};
+
+	const insertHandler = (tag: string) => {
+		setTags((p) => ({
+			selected: [...p.selected, tag],
+			tagList: p.tagList.map((el) => ({
+				name: el.name,
+				isSelected: el.name === tag ? true : el.isSelected,
+			})),
+		}));
+	};
+
+	console.log(tags);
+
+	const onTagInsert = (tag: string) => {
+		if (tag === 'All') {
+			insertHandler(tag);
+			setTimeout(() => {
+				setTags((p) => ({
+					selected: [tag],
+					tagList: p.tagList.map((el) => ({
+						name: el.name,
+						isSelected: el.name === tag ? true : false,
 					})),
-				})
-		);
+				}));
+			}, 100);
+		} else {
+			if (tags.selected.some((el) => el === 'All')) {
+				insertHandler(tag);
+				setTimeout(() => {
+					setTags((p) => ({
+						selected: p.selected.filter((el) => el !== 'All'),
+						tagList: p.tagList.map((el) => ({
+							name: el.name,
+							isSelected: el.name === 'All' ? false : el.isSelected,
+						})),
+					}));
+				}, 100);
+			} else {
+				insertHandler(tag);
+			}
+		}
+	};
+
+	const onTagDelete = (tag: string) => {
+		if (tags.selected.length === 1) {
+			if (tag === 'All') {
+				return;
+			} else {
+				deleteHandler(tag);
+				setTimeout(() => {
+					setTags((p) => ({
+						selected: ['All'],
+						tagList: p.tagList.map((el) => ({
+							name: el.name,
+							isSelected: el.name === 'All' ? true : false,
+						})),
+					}));
+				}, 100);
+			}
+		} else {
+			deleteHandler(tag);
+		}
 	};
 
 	const setSelectedTagsCallback = useCallback(
@@ -394,6 +445,7 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	useEffect(() => {
 		setSelectedTags(tags.selected);
 	}, [tags, setSelectedTagsCallback]);
+
 	return (
 		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
@@ -404,7 +456,7 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 							tag={{ name: tag }}
 							css='border-palettered'
 							onTagFunction={onTagDelete}
-						></TagButton>
+						/>
 					))}
 				</AnimatePresence>
 			</div>
@@ -868,17 +920,16 @@ const Video = ({
 							<>
 								{isHovering ? (
 									<YouTubePlayer
-										url={`https://www.youtube.com/watch?v=${resource}`}
+										url={`https://www.youtube-nocookie.com/watch?v=${resource}&origin=${
+											process.env.NODE_ENV === 'production'
+												? process.env.NEXT_PUBLIC_PROD_ORIGIN
+												: process.env.NEXT_PUBLIC_DEV_ORIGIN
+										}`}
 										controls={false}
 										muted={true}
 										playing={titleScreen}
 										width={'100%'}
 										height={'100%'}
-										config={{
-											embedOptions: {
-												host: 'https://www.youtube-nocookie.com',
-											},
-										}}
 										loop={true}
 										onReady={() => {
 											setStart(true);
@@ -956,12 +1007,10 @@ interface Videos<T> {
 }
 
 interface OutroSectionProps {
-	hasNextPage: boolean;
-	apiPage: number;
-	page: number;
+	isVisible: boolean;
 }
 
-const OutroSection = ({ hasNextPage, apiPage, page }: OutroSectionProps) => {
+const OutroSection = ({ isVisible }: OutroSectionProps) => {
 	const letterRef = useRef(null);
 	const isLetterInview = useInView(letterRef, {
 		amount: 0.6,
@@ -1049,7 +1098,7 @@ const OutroSection = ({ hasNextPage, apiPage, page }: OutroSectionProps) => {
 	return (
 		<section
 			className={cls(
-				!hasNextPage && page === apiPage ? 'flex' : 'hidden',
+				isVisible ? 'flex' : 'hidden',
 				'relative bg-[#101010] h-auto flex-col items-center font-bold -mt-20 sm:-mt-36'
 			)}
 		>
@@ -1245,7 +1294,6 @@ export default function Work({
 			fetchLoading,
 		],
 	});
-	console.log(searchResults);
 
 	return (
 		<>
@@ -1268,7 +1316,7 @@ export default function Work({
 						onSearch={onSearch}
 						searchWords={searchWords}
 					/>
-					<section className='relative bg-[#101010] mb-20 sm:mb-36'>
+					<section className='relative bg-[#101010] pb-20 sm:pb-36'>
 						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
@@ -1334,9 +1382,7 @@ export default function Work({
 						) : null}
 					</section>
 					<OutroSection
-						hasNextPage={hasNextPage[category]}
-						apiPage={apiPage[category]}
-						page={page}
+						isVisible={page > searchResults[category].length / perPage + 1}
 					/>
 					<ToTop toScroll={section} position='right' />
 				</main>
