@@ -331,7 +331,7 @@ export default function Delete({
 	const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
 	const [send, { loading, data, error }] = useDeleteRequest<{
 		success: boolean;
-	}>(`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`);
+	}>(`/api/work`);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
 	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
@@ -343,10 +343,6 @@ export default function Delete({
 	const [fetchLoading, setFetchLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] =
 		useState<VideoCollection<boolean>>(initialHasNextPage);
-
-	useEffect(() => {
-		console.log(error);
-	}, [error]);
 
 	useEffect(() => {
 		if (data && data?.success) {
@@ -374,7 +370,7 @@ export default function Delete({
 
 	const onSubmitDelete = () => {
 		if (loading && deleteIdList.length > 0) return;
-		send(deleteIdList);
+		send(deleteIdList, process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN!);
 	};
 
 	const resetInit = () => {
