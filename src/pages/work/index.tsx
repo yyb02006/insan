@@ -53,6 +53,7 @@ interface TitleSectionProps {
 
 interface TagButtonSectionProps {
 	setSelectedTags: Dispatch<SetStateAction<string[]>>;
+	category: VideosCategory;
 }
 
 interface SearchSectionProp {
@@ -60,6 +61,7 @@ interface SearchSectionProp {
 	setTags: Dispatch<SetStateAction<string[]>>;
 	onSearch: () => void;
 	searchWords: string;
+	category: VideosCategory;
 }
 
 interface VideoProps {
@@ -349,18 +351,24 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	);
 };
 
-const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
+const TagButtonSection = ({
+	setSelectedTags,
+	category,
+}: TagButtonSectionProps) => {
 	const initTags = {
 		selected: ['All'],
 		tagList: [
 			{ name: 'All', isSelected: true },
-			{ name: 'Camera', isSelected: false },
-			{ name: 'Director', isSelected: false },
-			{ name: 'Edit', isSelected: false },
+			{ name: 'camera', isSelected: false },
+			{ name: 'director', isSelected: false },
+			{ name: 'edit', isSelected: false },
 		],
 	};
-
 	const [tags, setTags] = useState(initTags);
+
+	useEffect(() => {
+		setTags(initTags);
+	}, [category]);
 
 	const deleteHandler = (tag: string) => {
 		setTags((p) => ({
@@ -382,32 +390,26 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 		}));
 	};
 
-	console.log(tags);
-
 	const onTagInsert = (tag: string) => {
 		if (tag === 'All') {
 			insertHandler(tag);
-			setTimeout(() => {
-				setTags((p) => ({
-					selected: [tag],
-					tagList: p.tagList.map((el) => ({
-						name: el.name,
-						isSelected: el.name === tag ? true : false,
-					})),
-				}));
-			}, 100);
+			setTags((p) => ({
+				selected: [tag],
+				tagList: p.tagList.map((el) => ({
+					name: el.name,
+					isSelected: el.name === tag ? true : false,
+				})),
+			}));
 		} else {
 			if (tags.selected.some((el) => el === 'All')) {
 				insertHandler(tag);
-				setTimeout(() => {
-					setTags((p) => ({
-						selected: p.selected.filter((el) => el !== 'All'),
-						tagList: p.tagList.map((el) => ({
-							name: el.name,
-							isSelected: el.name === 'All' ? false : el.isSelected,
-						})),
-					}));
-				}, 100);
+				setTags((p) => ({
+					selected: p.selected.filter((el) => el !== 'All'),
+					tagList: p.tagList.map((el) => ({
+						name: el.name,
+						isSelected: el.name === 'All' ? false : el.isSelected,
+					})),
+				}));
 			} else {
 				insertHandler(tag);
 			}
@@ -420,15 +422,13 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 				return;
 			} else {
 				deleteHandler(tag);
-				setTimeout(() => {
-					setTags((p) => ({
-						selected: ['All'],
-						tagList: p.tagList.map((el) => ({
-							name: el.name,
-							isSelected: el.name === 'All' ? true : false,
-						})),
-					}));
-				}, 100);
+				setTags((p) => ({
+					selected: ['All'],
+					tagList: p.tagList.map((el) => ({
+						name: el.name,
+						isSelected: el.name === 'All' ? true : false,
+					})),
+				}));
 			}
 		} else {
 			deleteHandler(tag);
@@ -483,6 +483,7 @@ const SearchSection = ({
 	setTags,
 	onSearch,
 	searchWords,
+	category,
 }: SearchSectionProp) => {
 	const onChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		setSearchWords(e.currentTarget.value);
@@ -522,7 +523,7 @@ const SearchSection = ({
 					value={searchWords}
 				/>
 			</form>
-			<TagButtonSection setSelectedTags={setTags} />
+			<TagButtonSection setSelectedTags={setTags} category={category} />
 		</section>
 	);
 };
@@ -1222,29 +1223,91 @@ export default function Work({
 	useEffect(() => {
 		setIsAnimationEnd(false);
 		setPage(2);
+		setSearchWords('');
+		setSearchWordsSnapShot('');
 		setSearchResults((p) => ({
 			...p,
 			[category]: videos[category],
 		}));
 	}, [category]);
 
+	const searchIncludesTag = (useSnapshot: boolean) => {
+		const filteredTags = tags.filter((el) => el !== 'All');
+		if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+			setSearchResults((p) => ({
+				...p,
+				[category]: videos[category].filter((video) =>
+					ciIncludes(
+						video.title,
+						useSnapshot ? searchWordsSnapShot : searchWords
+					)
+				),
+			}));
+			if (
+				videos[category].filter((video) =>
+					ciIncludes(
+						video.title,
+						useSnapshot ? searchWordsSnapShot : searchWords
+					)
+				).length === 0
+			) {
+				setIsAnimationEnd(true);
+			}
+		} else {
+			setSearchResults((p) => ({
+				...p,
+				[category]: videos[category].filter(
+					(video) =>
+						ciIncludes(
+							video.title,
+							useSnapshot ? searchWordsSnapShot : searchWords
+						) &&
+						video.description
+							.split(/\s*[,/\\-]\s*/)
+							.some((word) => filteredTags.includes(word.toLowerCase()))
+				),
+			}));
+			if (
+				videos[category].filter(
+					(video) =>
+						ciIncludes(
+							video.title,
+							useSnapshot ? searchWordsSnapShot : searchWords
+						) &&
+						video.description
+							.split(/\s*[,/\\-]\s*/)
+							.some((word) => filteredTags.includes(word.toLowerCase()))
+				).length === 0
+			) {
+				setIsAnimationEnd(true);
+			}
+		}
+	};
+
 	const onSearch = () => {
 		//렌더링을 처음부터 다시 시작해야 하기 떄문에 page가 1부터 시작해야 하는데 이때문에 updatePage에 예외가 필요
 		setPage(1);
 		setIsAnimationEnd(false);
 		setSearchWordsSnapShot(searchWords);
-		setSearchResults((p) => ({
+		searchIncludesTag(false);
+		/* setSearchResults((p) => ({
 			...p,
-			[category]: videos[category].filter(
-				(video) =>
-					ciIncludes(video.title, searchWords) ||
-					ciIncludes(video.description, searchWords)
+			[category]: videos[category].filter((video) =>
+				ciIncludes(video.title, searchWords)
 			),
-		}));
+		})); */
 	};
+
+	useEffect(() => {
+		// const searchWordsArray = searchWordsSnapShot.split(/\s*[,/\\-]\s*/);
+		setPage(1);
+		setIsAnimationEnd(false);
+		searchIncludesTag(true);
+	}, [tags]);
 
 	const updatePage = () => {
 		const getVideos = async () => {
+			const filteredTags = tags.filter((el) => el !== 'All');
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
 				await fetch(
@@ -1258,17 +1321,31 @@ export default function Work({
 				...p,
 				[category]: [...p[category], ...lists.works[category]],
 			}));
-			setSearchResults((p) => ({
-				...p,
-				[category]: [
-					...p[category],
-					...lists.works[category].filter(
-						(li) =>
-							ciIncludes(li.title, searchWordsSnapShot) ||
-							ciIncludes(li.description, searchWordsSnapShot)
-					),
-				],
-			}));
+			if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...lists.works[category].filter((li) =>
+							ciIncludes(li.title, searchWordsSnapShot)
+						),
+					],
+				}));
+			} else {
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...lists.works[category].filter(
+							(li) =>
+								ciIncludes(li.title, searchWordsSnapShot) &&
+								li.description
+									.split(/\s*[,/\\-]\s*/)
+									.some((word) => filteredTags.includes(word.toLowerCase()))
+						),
+					],
+				}));
+			}
 			if (lists.works[category].length < perPage) {
 				setHasNextPage((p) => ({ ...p, [category]: false }));
 			}
@@ -1315,6 +1392,7 @@ export default function Work({
 						setTags={setTags}
 						onSearch={onSearch}
 						searchWords={searchWords}
+						category={category}
 					/>
 					<section className='relative bg-[#101010] pb-20 sm:pb-36'>
 						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
@@ -1365,10 +1443,7 @@ export default function Work({
 								)}
 							</AnimatePresence>
 						</div>
-						<div
-							ref={intersectionRef}
-							className={`absolute bg-pink-600 h-1 w-full`}
-						/>
+						<div ref={intersectionRef} className={`absolute h-1 w-full`} />
 						{fetchLoading ? (
 							<div className='relative w-full h-60 flex justify-center items-center'>
 								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
