@@ -345,6 +345,10 @@ export default function Delete({
 		useState<VideoCollection<boolean>>(initialHasNextPage);
 
 	useEffect(() => {
+		console.log(error);
+	}, [error]);
+
+	useEffect(() => {
 		if (data && data?.success) {
 			router.push('/work');
 		} else if (data && !data?.success) {
