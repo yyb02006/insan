@@ -1,3 +1,4 @@
+import Circles from '@/components/circles';
 import Input from '@/components/input';
 import useMutation from '@/libs/client/useMutation';
 import useUser from '@/libs/client/useUser';
@@ -22,6 +23,7 @@ export default function Admin() {
 
 	const onPasswordSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		if (loading) return;
 		sendPassword({
 			password,
 			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
@@ -33,6 +35,8 @@ export default function Admin() {
 			router.push('work/write');
 		}
 	}, [data?.success, router]);
+
+	console.log(data);
 
 	return (
 		<div className='w-screen h-screen flex justify-center items-center bg-pink-500'>
@@ -56,6 +60,24 @@ export default function Admin() {
 					</form>
 				)}
 			</div>
+			{loading ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
+					<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
+						<Circles
+							liMotion={{
+								css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
+							}}
+						/>
+					</div>
+				</div>
+			) : null}
+			{data?.success ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
+					<div>
+						Secret... <span className='text-palettered'>맞춰버렸다구?~♥</span>
+					</div>
+				</div>
+			) : null}
 		</div>
 	);
 }

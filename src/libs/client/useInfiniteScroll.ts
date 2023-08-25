@@ -2,25 +2,51 @@
 import { FlatformsCategory, VimeoVideos } from '@/pages/work/write';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
-
-type SetVimeoFunc = (value: SetStateAction<VimeoVideos[]>) => void;
-
-type SetYoutubeFunc = (value: SetStateAction<GapiItem[]>) => void;
+import { VideoCollection } from '@/pages/work/delete';
+import { ciIncludes, fetchData } from './utils';
 
 interface UseInfiniteScrollFromFlatFormProps {
-	setVimeoVideos: SetVimeoFunc;
-	setYoutubeVideos: SetYoutubeFunc;
-	setIsScrollLoading: Dispatch<SetStateAction<boolean>>;
+	setList: Dispatch<SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>>;
+	setFetchLoading: Dispatch<SetStateAction<boolean>>;
 	category: FlatformsCategory;
-	isInfiniteScrollEnabled: boolean;
+	onSelectedList: boolean;
+	page: number;
+	setPage: Dispatch<SetStateAction<number>>;
+	snapshot: string;
+	searchResultsCount: number;
+	setSearchResults: Dispatch<
+		SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>
+	>;
+}
+
+interface ApiPage {
+	filmShort: number;
+	outsource: number;
+}
+
+export interface ExtendGapiItems {
+	id: string;
+	snippet: {
+		description: string;
+		thumbnails: {
+			[key: string]: { url: string; width: number; height: number };
+		};
+		title: string;
+		resourceId?: { videoId: string };
+	};
+	animated_thumbnail: string;
 }
 
 export default function useInfiniteScrollFromFlatform({
-	setVimeoVideos,
-	setYoutubeVideos,
-	setIsScrollLoading,
+	setList,
+	setSearchResults,
+	setFetchLoading,
 	category,
-	isInfiniteScrollEnabled,
+	onSelectedList,
+	page,
+	setPage,
+	snapshot,
+	searchResultsCount,
 }: UseInfiniteScrollFromFlatFormProps) {
 	const lists = {
 		outsource: 'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
@@ -31,28 +57,39 @@ export default function useInfiniteScrollFromFlatform({
 		participate: string;
 	}>({ outsource: 'EAAaBlBUOkNBbw', participate: 'EAAaBlBUOkNBbw' });
 	const intersectionRef = useRef<HTMLDivElement | null>(null);
-	const [page, setPage] = useState<number>(2);
+	const [apiPage, setApiPage] = useState<ApiPage>({
+		filmShort: 2,
+		outsource: 2,
+	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const [firstIdPerPage, setFirstIdPerPage] = useState(6);
 	const [secondIdPerPage, setSecondIdPerPage] = useState(6);
+
 	useEffect(() => {
-		setIsScrollLoading(isLoading);
-	}, [isLoading, setIsScrollLoading]);
+		setFetchLoading(isLoading);
+	}, [isLoading, setFetchLoading]);
+
 	useEffect(() => {
 		setFirstIdPerPage(6), setSecondIdPerPage(6);
 	}, [category]);
+
 	const addData = async () => {
 		if (isLoading) return;
 		setIsLoading(true);
+
 		try {
-			if (category === 'filmShort') {
-				if (hasNextPage) {
-					const data = await (
-						await fetch(
-							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.sizes.link,name,description&page=${page}&per_page=12`,
+			if (
+				category === 'filmShort' &&
+				!onSelectedList &&
+				apiPage[category] <= page &&
+				hasNextPage
+			) {
+				const mergedVimeoVideos: VimeoVideos[] = await Promise.all(
+					(
+						await fetchData(
+							`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.base_link,name,description&page=${apiPage[category]}&per_page=12`,
 							{
-								method: 'get',
 								headers: {
 									'Content-Type': 'application/json',
 									Authorization:
@@ -60,89 +97,183 @@ export default function useInfiniteScrollFromFlatform({
 								},
 							}
 						)
-					).json();
-					setVimeoVideos((p) => [...p, ...data.data]);
-					if (data.data.length === 12) {
-						setPage((p) => p + 1);
-					} else {
-						setHasNextPage(false);
-					}
+					).data.map(async (el: VimeoVideos) => {
+						const data = (
+							await fetchData(
+								`https://api.vimeo.com/${el.uri}/animated_thumbsets?fields=sizes.link,sizes.profile_id`,
+								{
+									headers: {
+										'Content-Type': 'application/json',
+										Authorization:
+											process.env.NEXT_PUBLIC_VIMEO_ACCESS_TOKEN || '',
+									},
+								}
+							)
+						).data;
+						return {
+							...el,
+							animated_thumbnail: data[0]
+								? data[0].sizes.find(
+										(el: { profile_id: string; link: string }) =>
+											el.profile_id === 'Low'
+								  ).link
+								: 'no-link',
+						};
+					})
+				);
+
+				setList((p) => ({
+					...p,
+					[category]: [...p[category], ...mergedVimeoVideos],
+				}));
+
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...mergedVimeoVideos.filter((el: VimeoVideos) =>
+							ciIncludes(el.name, snapshot)
+						),
+					],
+				}));
+
+				if (mergedVimeoVideos.length === 12) {
+					setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+				} else {
+					setHasNextPage(false);
 				}
-			} else if (category === 'outsource') {
+			} else if (
+				category === 'outsource' &&
+				!onSelectedList &&
+				apiPage[category] <= page
+			) {
 				const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 				if (nextpageToken.outsource !== '') {
-					const data = await (
-						await fetch(
-							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.outsource}&part=snippet&playlistId=${lists.outsource}&maxResults=${firstIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
-							{
-								method: 'get',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-							}
-						)
-					).json();
+					const youtubeData: { nextPageToken: string; items: GapiItem[] } =
+						await (
+							await fetch(
+								`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.outsource}&part=snippet&playlistId=${lists.outsource}&maxResults=${firstIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
+								{
+									method: 'get',
+									headers: {
+										'Content-Type': 'application/json',
+									},
+								}
+							)
+						).json();
 
-					setYoutubeVideos((p) => [...p, ...data.items]);
+					const mergedYoutubeData: ExtendGapiItems[] = youtubeData.items.map(
+						(item: GapiItem) => ({
+							...item,
+							animated_thumbnail: 'no-link',
+						})
+					);
 
-					if (data.items.length < 6) {
-						setSecondIdPerPage(12 - data.items.length);
-					} else if (data.items.length < 12 && data.items.length > 6) {
+					setList((p) => ({
+						...p,
+						[category]: [...p[category], ...mergedYoutubeData],
+					}));
+
+					setSearchResults((p) => ({
+						...p,
+						[category]: [
+							...p[category],
+							...mergedYoutubeData.filter((item: ExtendGapiItems) =>
+								ciIncludes(item.snippet.title, snapshot)
+							),
+						],
+					}));
+
+					if (mergedYoutubeData.length < 6) {
 						setFirstIdPerPage(12);
 					}
 
-					if (data.nextPageToken) {
-						setNextpageToken((p) => ({ ...p, outsource: data.nextPageToken }));
+					if (youtubeData.nextPageToken) {
+						setNextpageToken((p) => ({
+							...p,
+							outsource: youtubeData.nextPageToken,
+						}));
 					} else {
 						setNextpageToken((p) => ({ ...p, outsource: '' }));
 					}
 				}
+
 				if (nextpageToken.participate !== '') {
-					const data = await (
-						await fetch(
-							`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.participate}&part=snippet&playlistId=${lists.participate}&maxResults=${secondIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
-							{
-								method: 'get',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-							}
-						)
-					).json();
+					const youtubeData: { nextPageToken: string; items: GapiItem[] } =
+						await (
+							await fetch(
+								`https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&pageToken=${nextpageToken.participate}&part=snippet&playlistId=${lists.participate}&maxResults=${secondIdPerPage}&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`,
+								{
+									method: 'get',
+									headers: {
+										'Content-Type': 'application/json',
+									},
+								}
+							)
+						).json();
 
-					setYoutubeVideos((p) => [...p, ...data.items]);
+					const mergedYoutubeData: ExtendGapiItems[] = youtubeData.items.map(
+						(item: GapiItem) => ({
+							...item,
+							animated_thumbnail: 'no-link',
+						})
+					);
 
-					if (data.items.length < 6) {
-						setFirstIdPerPage(12 - data.items.length);
-					} else if (data.items.length < 12 && data.items.length > 6) {
+					setList((p) => ({
+						...p,
+						[category]: [...p[category], ...mergedYoutubeData],
+					}));
+
+					setSearchResults((p) => ({
+						...p,
+						[category]: [
+							...p[category],
+							...mergedYoutubeData.filter((item: ExtendGapiItems) =>
+								ciIncludes(item.snippet.title, snapshot)
+							),
+						],
+					}));
+
+					if (mergedYoutubeData.length < 6) {
 						setSecondIdPerPage(12);
 					}
 
-					if (data.nextPageToken) {
+					if (youtubeData.nextPageToken) {
 						setNextpageToken((p) => ({
 							...p,
-							participate: data.nextPageToken,
+							participate: youtubeData.nextPageToken,
 						}));
 					} else {
 						setNextpageToken((p) => ({ ...p, participate: '' }));
 					}
 				}
+
+				if (
+					(nextpageToken.outsource !== '' ||
+						nextpageToken.participate !== '') &&
+					apiPage[category] === page
+				) {
+					setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
+				}
 			}
 		} catch (err) {
 			console.log(err);
+		}
+
+		if (page - 11 / 12 <= searchResultsCount / 12 + 1) {
+			setPage((p) => p + 1);
 		}
 		setIsLoading(false);
 	};
 
 	const handleIntersection: IntersectionObserverCallback = (entries) => {
 		const entry = entries[0];
-		if (entry.isIntersecting) {
+		if (entry.isIntersecting && !onSelectedList) {
 			addData();
 		}
 	};
 
 	useEffect(() => {
-		if (!isInfiniteScrollEnabled) return;
 		const options: IntersectionObserverInit = {
 			root: null,
 			rootMargin: '0px',
@@ -161,12 +292,17 @@ export default function useInfiniteScrollFromFlatform({
 			}
 		};
 	}, [
-		page,
+		apiPage,
 		hasNextPage,
 		nextpageToken.outsource,
 		nextpageToken.participate,
-		isInfiniteScrollEnabled,
+		onSelectedList,
 		category,
+		snapshot,
+		page,
+		searchResultsCount,
+		firstIdPerPage,
+		secondIdPerPage,
 	]);
 	return intersectionRef;
 }

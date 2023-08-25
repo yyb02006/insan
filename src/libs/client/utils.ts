@@ -81,3 +81,80 @@ export function ciIncludes(mainString: string, searchString: string) {
 		setFunc
 	);
 }; */
+
+/* 	const filterResults = ({
+		category,
+		list,
+		searchWord,
+		ciIncludes,
+	}: {
+		category: FlatformsCategory;
+		list: VimeoVideos[] | GapiItem[];
+		searchWord: string;
+		ciIncludes: (mainString: string, searchString: string) => boolean;
+	}) => {
+		if (category === 'filmShort') {
+			return (list as VimeoVideos[]).filter(
+				(el) =>
+					ciIncludes(el.name, searchWord) ||
+					ciIncludes(el.resource_key, searchWord)
+			);
+		} else if (category === 'outsource') {
+			return (list as GapiItem[]).filter(
+				(el) =>
+					ciIncludes(el.snippet.title, searchWord) ||
+					ciIncludes(el.snippet.resourceId?.videoId || '', searchWord)
+			);
+		}
+		return [];
+	}; */
+
+/**
+ * write페이지에서 state들을 리셋시키는 함수지만 정작 쓰기엔 너무 길다.
+ */
+/* const resetStates = ({
+		all = false,
+		onSelectList = all,
+		workInfos = all,
+		page = all,
+		searchWord = all,
+		searchWordSnapshot = all,
+		searchResults = all,
+		searchResultsSnapshot = all,
+	}: {
+		onSelectList: boolean;
+		workInfos: boolean;
+		page: boolean;
+		searchWord: boolean;
+		searchWordSnapshot: boolean;
+		searchResults: boolean;
+		searchResultsSnapshot: boolean;
+		all?: boolean;
+	}) => {
+		const resetProps = [
+			{ condition: onSelectList, action: () => setOnSelectedList(false) },
+			{ condition: workInfos, action: () => setWorkInfos([]) },
+			{ condition: page, action: () => setPage(2) },
+			{ condition: searchWord, action: () => setSearchWord('') },
+			{
+				condition: searchWordSnapshot,
+				action: () => setSearchWordSnapshot(''),
+			},
+			{
+				condition: searchResults,
+				action: () =>
+					setSearchResults((p) => ({
+						...p,
+						[category]: list[category],
+					})),
+			},
+			{
+				condition: searchResultsSnapshot,
+				action: () =>
+					setSearchResultsSnapshot((p) => ({ ...p, [category]: [] })),
+			},
+		];
+		resetProps.forEach((prop) => {
+			prop.condition && prop.action();
+		});
+	}; */

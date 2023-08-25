@@ -53,6 +53,7 @@ interface TitleSectionProps {
 
 interface TagButtonSectionProps {
 	setSelectedTags: Dispatch<SetStateAction<string[]>>;
+	category: VideosCategory;
 }
 
 interface SearchSectionProp {
@@ -60,16 +61,18 @@ interface SearchSectionProp {
 	setTags: Dispatch<SetStateAction<string[]>>;
 	onSearch: () => void;
 	searchWords: string;
+	category: VideosCategory;
 }
 
 interface VideoProps {
 	index: string;
 	waiting: number;
-	thumbnail: { url: string; width: number; height: number; alt: string };
+	thumbnail: { url: string; alt: string };
 	title: string;
 	description: string;
 	category: VideosCategory;
 	resource: string;
+	animatedThumbnail: string;
 	date: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
 	setAnimationEnd?: Dispatch<SetStateAction<boolean>>;
@@ -290,9 +293,6 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
 							)}
 						>
-							{/* {categoryState === category.kind ? (
-								<div className='absolute bg-[#151515] w-full h-[40%]' />
-							) : null} */}
 							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
 								<div className='inline-block pr-3'>{info.count} </div>
 								{info.title}
@@ -351,39 +351,88 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 	);
 };
 
-const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
-	const [tags, setTags] = useState({
+const TagButtonSection = ({
+	setSelectedTags,
+	category,
+}: TagButtonSectionProps) => {
+	const initTags = {
 		selected: ['All'],
 		tagList: [
 			{ name: 'All', isSelected: true },
-			{ name: 'Camera', isSelected: false },
-			{ name: 'Director', isSelected: false },
-			{ name: 'Edit', isSelected: false },
+			{ name: 'camera', isSelected: false },
+			{ name: 'director', isSelected: false },
+			{ name: 'edit', isSelected: false },
 		],
-	});
-	const onTagInsert = (tag: string) => {
-		setTags(
-			(p) =>
-				(p = {
-					selected: [...p.selected, tag],
-					tagList: p.tagList.map((arr) => ({
-						name: arr.name,
-						isSelected: arr.name === tag ? true : arr.isSelected,
-					})),
-				})
-		);
 	};
-	const onTagDelete = (tag: string) => {
-		setTags(
-			(p) =>
-				(p = {
-					selected: p.selected.filter((arr) => arr !== tag),
-					tagList: p.tagList.map((arr) => ({
-						name: arr.name,
-						isSelected: arr.name === tag ? false : arr.isSelected,
+	const [tags, setTags] = useState(initTags);
+
+	useEffect(() => {
+		setTags(initTags);
+	}, [category]);
+
+	const deleteHandler = (tag: string) => {
+		setTags((p) => ({
+			selected: p.selected.filter((el) => el !== tag),
+			tagList: p.tagList.map((el) => ({
+				name: el.name,
+				isSelected: el.name === tag ? false : el.isSelected,
+			})),
+		}));
+	};
+
+	const insertHandler = (tag: string) => {
+		setTags((p) => ({
+			selected: [...p.selected, tag],
+			tagList: p.tagList.map((el) => ({
+				name: el.name,
+				isSelected: el.name === tag ? true : el.isSelected,
+			})),
+		}));
+	};
+
+	const onTagInsert = (tag: string) => {
+		if (tag === 'All') {
+			insertHandler(tag);
+			setTags((p) => ({
+				selected: [tag],
+				tagList: p.tagList.map((el) => ({
+					name: el.name,
+					isSelected: el.name === tag ? true : false,
+				})),
+			}));
+		} else {
+			if (tags.selected.some((el) => el === 'All')) {
+				insertHandler(tag);
+				setTags((p) => ({
+					selected: p.selected.filter((el) => el !== 'All'),
+					tagList: p.tagList.map((el) => ({
+						name: el.name,
+						isSelected: el.name === 'All' ? false : el.isSelected,
 					})),
-				})
-		);
+				}));
+			} else {
+				insertHandler(tag);
+			}
+		}
+	};
+
+	const onTagDelete = (tag: string) => {
+		if (tags.selected.length === 1) {
+			if (tag === 'All') {
+				return;
+			} else {
+				deleteHandler(tag);
+				setTags((p) => ({
+					selected: ['All'],
+					tagList: p.tagList.map((el) => ({
+						name: el.name,
+						isSelected: el.name === 'All' ? true : false,
+					})),
+				}));
+			}
+		} else {
+			deleteHandler(tag);
+		}
 	};
 
 	const setSelectedTagsCallback = useCallback(
@@ -396,6 +445,7 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 	useEffect(() => {
 		setSelectedTags(tags.selected);
 	}, [tags, setSelectedTagsCallback]);
+
 	return (
 		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
 			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
@@ -406,7 +456,7 @@ const TagButtonSection = ({ setSelectedTags }: TagButtonSectionProps) => {
 							tag={{ name: tag }}
 							css='border-palettered'
 							onTagFunction={onTagDelete}
-						></TagButton>
+						/>
 					))}
 				</AnimatePresence>
 			</div>
@@ -433,6 +483,7 @@ const SearchSection = ({
 	setTags,
 	onSearch,
 	searchWords,
+	category,
 }: SearchSectionProp) => {
 	const onChange = (e: SyntheticEvent<HTMLInputElement>) => {
 		setSearchWords(e.currentTarget.value);
@@ -472,7 +523,7 @@ const SearchSection = ({
 					value={searchWords}
 				/>
 			</form>
-			<TagButtonSection setSelectedTags={setTags} />
+			<TagButtonSection setSelectedTags={setTags} category={category} />
 		</section>
 	);
 };
@@ -598,7 +649,7 @@ const VideoDetail = ({
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
 				<div className='w-full h-auto py-16 bg-[#101010]'>
 					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
-						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px]'>
+						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px] bg-black'>
 							{category === 'film' || category === 'short' ? (
 								<>
 									<VimeoPlayer
@@ -616,7 +667,7 @@ const VideoDetail = ({
 									{!isLoaded ? (
 										<div className='absolute top-0 left-0 w-full aspect-video'>
 											<Image
-												src={thumbnail}
+												src={`${thumbnail}_960x540?r=pad`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
@@ -656,7 +707,7 @@ const VideoDetail = ({
 									{!isLoaded ? (
 										<div className='absolute top-0 left-0 w-full aspect-video'>
 											<Image
-												src={thumbnail}
+												src={`https://i.ytimg.com/vi/${thumbnail}/sddefault.jpg`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
@@ -723,6 +774,7 @@ const Video = ({
 	description,
 	category,
 	resource,
+	animatedThumbnail,
 	date,
 	setOnDetail,
 	setAnimationEnd,
@@ -817,20 +869,35 @@ const Video = ({
 						{isVideoLoadable && !isMobile ? (
 							<>
 								{isHovering ? (
-									<VimeoPlayer
-										url={`${resource}&quality=540p`}
-										controls={false}
-										muted={true}
-										playing={titleScreen}
-										width={'100%'}
-										height={'100%'}
-										loop={true}
-										onStart={() => {
-											setStart(true);
-										}}
-									/>
+									animatedThumbnail === 'no-link' ? (
+										<VimeoPlayer
+											url={`${resource}&quality=540p`}
+											controls={false}
+											muted={true}
+											playing={titleScreen}
+											width={'100%'}
+											height={'100%'}
+											loop={true}
+											onStart={() => {
+												setStart(true);
+											}}
+										/>
+									) : titleScreen ? (
+										<div className='w-full h-full flex justify-center'>
+											<Image
+												src={animatedThumbnail}
+												alt={`${title}thumbnail`}
+												width={270}
+												height={480}
+												onLoad={() => {
+													setStart(true);
+												}}
+												className='h-full w-auto object-contain'
+											/>
+										</div>
+									) : null
 								) : null}
-								{!start ? (
+								{!start && titleScreen ? (
 									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
 										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
 											<Circles
@@ -854,17 +921,16 @@ const Video = ({
 							<>
 								{isHovering ? (
 									<YouTubePlayer
-										url={`https://www.youtube.com/watch?v=${resource}`}
+										url={`https://www.youtube-nocookie.com/watch?v=${resource}&origin=${
+											process.env.NODE_ENV === 'production'
+												? process.env.NEXT_PUBLIC_PROD_ORIGIN
+												: process.env.NEXT_PUBLIC_DEV_ORIGIN
+										}`}
 										controls={false}
 										muted={true}
 										playing={titleScreen}
 										width={'100%'}
 										height={'100%'}
-										config={{
-											embedOptions: {
-												host: 'https://www.youtube-nocookie.com',
-											},
-										}}
 										loop={true}
 										onReady={() => {
 											setStart(true);
@@ -888,15 +954,23 @@ const Video = ({
 				) : null}
 				<div ref={cover} className='absolute w-full h-full '>
 					<Image
-						src={error ? thumbnail.alt : thumbnail.url}
+						src={
+							error
+								? category === 'film' || category === 'short'
+									? `${thumbnail.alt}_640x360?r=pad`
+									: `https://i.ytimg.com/vi/${thumbnail.alt}/sddefault.jpg`
+								: category === 'film' || category === 'short'
+								? `${thumbnail.url}_640x360?r=pad`
+								: `https://i.ytimg.com/vi/${thumbnail.url}/sddefault.jpg`
+						}
 						onError={() => {
 							setError(true);
 						}}
 						alt={'will fixed'}
-						width={thumbnail.width}
-						height={thumbnail.height}
+						width={640}
+						height={category === 'film' || category === 'short' ? 360 : 480}
 						priority={setpriority}
-						className='relative w-full aspect-video object-cover'
+						className='relative top-0 w-full aspect-video object-cover'
 					/>
 					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
 				</div>
@@ -933,7 +1007,11 @@ interface Videos<T> {
 	outsource: T;
 }
 
-const OutroSection = () => {
+interface OutroSectionProps {
+	isVisible: boolean;
+}
+
+const OutroSection = ({ isVisible }: OutroSectionProps) => {
 	const letterRef = useRef(null);
 	const isLetterInview = useInView(letterRef, {
 		amount: 0.6,
@@ -957,7 +1035,7 @@ const OutroSection = () => {
 			position: 'MiddleLink',
 			name: 'VIMEO',
 			angle: -90,
-			href: '',
+			href: 'https://vimeo.com/user136249834',
 		},
 		{
 			position: 'BottomLink',
@@ -966,12 +1044,7 @@ const OutroSection = () => {
 			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
-	//타입스크립트에서 렌더링 없이 데이터변경 때문에 useRef쓸 때 타입 설정
-	/* const textShadow = useRef<{ [key: string]: boolean }>({
-		INSTAGRAM: true,
-		VIMEO: true,
-		YOUTUBE: true,
-	}); */
+
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
 		snsLinksAnimate(
@@ -1024,7 +1097,12 @@ const OutroSection = () => {
 		}
 	}, [isLinksInview, snsLinksAnimate]);
 	return (
-		<section className='hidden sm:flex relative bg-[#101010] h-auto flex-col items-center font-bold'>
+		<section
+			className={cls(
+				isVisible ? 'flex' : 'hidden',
+				'relative bg-[#101010] h-auto flex-col items-center font-bold -mt-20 sm:-mt-36'
+			)}
+		>
 			<motion.div
 				initial={'hidden'}
 				animate={isLetterInview ? 'visible' : 'hidden'}
@@ -1105,7 +1183,7 @@ export default function Work({
 	const [hasNextPage, setHasNextPage] =
 		useState<Videos<boolean>>(initialHasNextPage);
 	const [page, setPage] = useState(2);
-	const [apipage, setApiPage] = useState<Videos<number>>({
+	const [apiPage, setApiPage] = useState<Videos<number>>({
 		film: 2,
 		short: 2,
 		outsource: 2,
@@ -1127,44 +1205,113 @@ export default function Work({
 	}, []);
 
 	useEffect(() => {
+		/* 마지막에서 컴포넌트하나의 높이만큼 올려주는 기적의 수학가식 CSS설정, 명시적으로 toString작성 */
+		const bottom = (1 / (((page - 1) * 12) / 3)) * 100;
+		if (intersectionRef.current) {
+			intersectionRef.current.style.bottom = `${bottom}%`;
+		}
+	}, [page]);
+
+	useEffect(() => {
 		if (onDetail?.isOpen === true) {
 			document.body.style.overflow = 'hidden';
 		} else {
 			document.body.style.overflow = 'auto';
 		}
-		const currentScrollY = window.scrollY;
 	}, [onDetail]);
 
 	useEffect(() => {
 		setIsAnimationEnd(false);
 		setPage(2);
+		setSearchWords('');
+		setSearchWordsSnapShot('');
 		setSearchResults((p) => ({
 			...p,
 			[category]: videos[category],
 		}));
 	}, [category]);
 
+	const searchIncludesTag = (useSnapshot: boolean) => {
+		const filteredTags = tags.filter((el) => el !== 'All');
+		if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+			setSearchResults((p) => ({
+				...p,
+				[category]: videos[category].filter((video) =>
+					ciIncludes(
+						video.title,
+						useSnapshot ? searchWordsSnapShot : searchWords
+					)
+				),
+			}));
+			if (
+				videos[category].filter((video) =>
+					ciIncludes(
+						video.title,
+						useSnapshot ? searchWordsSnapShot : searchWords
+					)
+				).length === 0
+			) {
+				setIsAnimationEnd(true);
+			}
+		} else {
+			setSearchResults((p) => ({
+				...p,
+				[category]: videos[category].filter(
+					(video) =>
+						ciIncludes(
+							video.title,
+							useSnapshot ? searchWordsSnapShot : searchWords
+						) &&
+						video.description
+							.split(/\s*[,/\\-]\s*/)
+							.some((word) => filteredTags.includes(word.toLowerCase()))
+				),
+			}));
+			if (
+				videos[category].filter(
+					(video) =>
+						ciIncludes(
+							video.title,
+							useSnapshot ? searchWordsSnapShot : searchWords
+						) &&
+						video.description
+							.split(/\s*[,/\\-]\s*/)
+							.some((word) => filteredTags.includes(word.toLowerCase()))
+				).length === 0
+			) {
+				setIsAnimationEnd(true);
+			}
+		}
+	};
+
 	const onSearch = () => {
 		//렌더링을 처음부터 다시 시작해야 하기 떄문에 page가 1부터 시작해야 하는데 이때문에 updatePage에 예외가 필요
 		setPage(1);
 		setIsAnimationEnd(false);
 		setSearchWordsSnapShot(searchWords);
-		setSearchResults((p) => ({
+		searchIncludesTag(false);
+		/* setSearchResults((p) => ({
 			...p,
-			[category]: videos[category].filter(
-				(video) =>
-					ciIncludes(video.title, searchWords) ||
-					ciIncludes(video.description, searchWords)
+			[category]: videos[category].filter((video) =>
+				ciIncludes(video.title, searchWords)
 			),
-		}));
+		})); */
 	};
+
+	useEffect(() => {
+		// const searchWordsArray = searchWordsSnapShot.split(/\s*[,/\\-]\s*/);
+		setPage(1);
+		setIsAnimationEnd(false);
+		searchIncludesTag(true);
+	}, [tags]);
 
 	const updatePage = () => {
 		const getVideos = async () => {
+			const filteredTags = tags.filter((el) => el !== 'All');
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
 				await fetch(
-					`/api/work/list?page=${apipage[category]}&per_page=${perPage}&category=${category}`
+					`/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
 				)
 			).json();
 			if (lists.works[category].length < perPage) {
@@ -1174,17 +1321,31 @@ export default function Work({
 				...p,
 				[category]: [...p[category], ...lists.works[category]],
 			}));
-			setSearchResults((p) => ({
-				...p,
-				[category]: [
-					...p[category],
-					...lists.works[category].filter(
-						(li) =>
-							ciIncludes(li.title, searchWordsSnapShot) ||
-							ciIncludes(li.description, searchWordsSnapShot)
-					),
-				],
-			}));
+			if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...lists.works[category].filter((li) =>
+							ciIncludes(li.title, searchWordsSnapShot)
+						),
+					],
+				}));
+			} else {
+				setSearchResults((p) => ({
+					...p,
+					[category]: [
+						...p[category],
+						...lists.works[category].filter(
+							(li) =>
+								ciIncludes(li.title, searchWordsSnapShot) &&
+								li.description
+									.split(/\s*[,/\\-]\s*/)
+									.some((word) => filteredTags.includes(word.toLowerCase()))
+						),
+					],
+				}));
+			}
 			if (lists.works[category].length < perPage) {
 				setHasNextPage((p) => ({ ...p, [category]: false }));
 			}
@@ -1192,7 +1353,7 @@ export default function Work({
 			setFetchLoading(false);
 		};
 		if (page > 1 && (!isAnimationEnd || fetchLoading)) return;
-		if (hasNextPage[category]) {
+		if (hasNextPage[category] && apiPage[category] <= page) {
 			getVideos();
 		}
 		if (page <= searchResults[category].length / perPage + 1) {
@@ -1217,11 +1378,10 @@ export default function Work({
 				seoTitle='Work'
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
-				footerPosition='mt-20 sm:mt-0'
 			>
 				<main
 					ref={section}
-					className='pt-[100px] font-GmarketSans overflow-x-hidden'
+					className='pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden'
 				>
 					<TitleSection
 						setCategory={setCategory}
@@ -1232,8 +1392,9 @@ export default function Work({
 						setTags={setTags}
 						onSearch={onSearch}
 						searchWords={searchWords}
+						category={category}
 					/>
-					<section className='relative bg-[#101010]'>
+					<section className='relative bg-[#101010] pb-20 sm:pb-36'>
 						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
@@ -1246,18 +1407,17 @@ export default function Work({
 													url:
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
-															: `https://i.ytimg.com/vi/${data.resourceId}/hqdefault.jpg`,
+															: data.resourceId,
 													alt:
 														category === 'film' || category === 'short'
 															? data.thumbnailLink
-															: `https://i.ytimg.com/vi/${data.resourceId}/mqdefault.jpg`,
-													width: 480,
-													height: 270,
+															: data.resourceId,
 												}}
 												title={data.title}
 												description={data.description}
 												category={category}
 												resource={data.resourceId}
+												animatedThumbnail={data.animationThumbnailLink}
 												date={data.date}
 												setOnDetail={setOnDetail}
 												setAnimationEnd={
@@ -1283,7 +1443,7 @@ export default function Work({
 								)}
 							</AnimatePresence>
 						</div>
-						<div ref={intersectionRef} className='h-1' />
+						<div ref={intersectionRef} className={`absolute h-1 w-full`} />
 						{fetchLoading ? (
 							<div className='relative w-full h-60 flex justify-center items-center'>
 								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
@@ -1296,7 +1456,9 @@ export default function Work({
 							</div>
 						) : null}
 					</section>
-					<OutroSection />
+					<OutroSection
+						isVisible={page > searchResults[category].length / perPage + 1}
+					/>
 					<ToTop toScroll={section} position='right' />
 				</main>
 			</Layout>

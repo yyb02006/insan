@@ -32,9 +32,10 @@ interface dataState {
 interface ThumbnailProps {
 	src: { main: string; sub: string };
 	setPriority: boolean;
+	category: FlatformsCategory;
 }
 
-const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
+const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
 	const [error, setError] = useState(false);
 	const handleImageError = () => {
 		setError(true);
@@ -43,8 +44,8 @@ const Thumbnail = ({ src, setPriority }: ThumbnailProps) => {
 		<Image
 			src={!error ? src.main : src.sub}
 			alt='picturesAlter'
-			width={1280}
-			height={720}
+			width={640}
+			height={category === 'filmShort' ? 360 : 480}
 			onError={handleImageError}
 			className='w-full object-cover aspect-video'
 			priority={setPriority}
@@ -162,24 +163,30 @@ export const SearchForm = ({
 
 interface SelectedListButtonProps {
 	onClick: () => void;
+	onSelectedList: boolean;
 	count: number;
-	isMobile: boolean;
+	isOnMobile: boolean;
 }
 
 export const SelectedListButton = ({
 	onClick,
+	onSelectedList,
 	count,
-	isMobile,
+	isOnMobile,
 }: SelectedListButtonProps) => {
 	return (
 		<button
 			onClick={onClick}
 			className={cls(
-				isMobile
-					? 'fixed sm:hidden bottom-24 right-4 w-16  bg-[#101010] font-bold '
-					: 'hidden sm:inline-block w-full font-light hover:text-palettered hover:font-bold',
-				'ring-1 ring-palettered aspect-square text-sm rounded-full'
+				isOnMobile
+					? 'fixed sm:hidden bottom-24 right-4 w-16 font-bold '
+					: 'hidden sm:inline-block w-full font-light hover:font-bold',
+				onSelectedList
+					? 'bg-palettered'
+					: 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
+				'aspect-square text-sm rounded-full'
 			)}
+			disabled={count === 0}
 		>
 			<div>{count}</div>
 			<div>Lists</div>
@@ -191,6 +198,7 @@ interface ButtonsControllerProps {
 	onReset: () => void;
 	onSave: () => void;
 	onSort: () => void;
+	onSelectedList: boolean;
 	count: number;
 	action?: 'save' | 'delete';
 }
@@ -199,27 +207,41 @@ export const ButtonsController = ({
 	onReset,
 	onSave,
 	onSort,
+	onSelectedList,
 	count,
 	action = 'save',
 }: ButtonsControllerProps) => {
 	return (
-		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
+		<div className='sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0'>
 			<button
 				onClick={onReset}
-				className='w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+				className={cls(
+					count > 0
+						? 'sm:hover:text-palettered sm:hover:font-bold'
+						: 'text-[#404040]',
+					'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
+				)}
+				disabled={count === 0}
 			>
 				Reset
 			</button>
 			<button
 				onClick={onSave}
-				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+				className={cls(
+					count > 0
+						? 'sm:hover:text-palettered sm:hover:font-bold'
+						: 'text-[#404040]',
+					'w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
+				)}
+				disabled={count === 0}
 			>
 				{action === 'save' ? <span>save</span> : <span>delete</span>}
 			</button>
 			<SelectedListButton
 				onClick={onSort}
+				onSelectedList={onSelectedList}
 				count={count}
-				isMobile={false}
+				isOnMobile={false}
 			></SelectedListButton>
 		</div>
 	);
@@ -227,7 +249,7 @@ export const ButtonsController = ({
 
 interface WorkProps {
 	onClick: () => void;
-	searchResult: VideosMerged<Works[]>;
+	searchResult: VideoCollection<Works[]>;
 	category: FlatformsCategory;
 	selected: boolean;
 	resourceId: string;
@@ -252,16 +274,17 @@ const Work = ({
 			onClick={onClick}
 		>
 			<Thumbnail
+				category={category}
 				src={
 					searchResult[category].length !== 0
 						? category === 'outsource'
 							? {
-									main: `https://i.ytimg.com/vi/${resourceId}/maxresdefault.jpg`,
+									main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
 									sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
 							  }
 							: {
-									main: thumbnailLink,
-									sub: thumbnailLink,
+									main: `${thumbnailLink}_640x360?r=pad`,
+									sub: `${thumbnailLink}_640x360?r=pad`,
 							  }
 						: { main: '', sub: '' }
 				}
@@ -278,14 +301,14 @@ const Work = ({
 	);
 };
 
-interface VideosMerged<T> {
+export interface VideoCollection<T, U = T> {
 	filmShort: T;
-	outsource: T;
+	outsource: U;
 }
 
 interface InitialData {
-	initialWorks: VideosMerged<Works[]>;
-	initialHasNextPage: VideosMerged<boolean>;
+	initialWorks: VideoCollection<Works[]>;
+	initialHasNextPage: VideoCollection<boolean>;
 }
 
 export default function Delete({
@@ -298,17 +321,17 @@ export default function Delete({
 	const [searchWord, setSearchWord] = useState('');
 	const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
 	const [searchResult, setSearchResult] =
-		useState<VideosMerged<Works[]>>(initialWorks);
+		useState<VideoCollection<Works[]>>(initialWorks);
 	const [searchResultSnapShot, setSearchResultSnapShot] = useState<
-		VideosMerged<Works[]>
+		VideoCollection<Works[]>
 	>({
 		filmShort: [],
 		outsource: [],
 	});
-	const [list, setList] = useState<VideosMerged<Works[]>>(initialWorks);
-	const [send, { loading, data }] = useDeleteRequest<{ success: boolean }>(
-		`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`
-	);
+	const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
+	const [send, { loading, data, error }] = useDeleteRequest<{
+		success: boolean;
+	}>(`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
 	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
@@ -317,14 +340,27 @@ export default function Delete({
 	}>({ filmShort: 2, outsource: 2 });
 	const perPage = 12;
 	const [onSelectedList, setOnSelectedList] = useState(false);
-	const [fetchLoading, setFetchLoading] = useState(true);
+	const [fetchLoading, setFetchLoading] = useState(false);
 	const [hasNextPage, setHasNextPage] =
-		useState<VideosMerged<boolean>>(initialHasNextPage);
+		useState<VideoCollection<boolean>>(initialHasNextPage);
+
+	useEffect(() => {
+		if (data && data?.success) {
+			router.push('/work');
+		} else if (data && !data?.success) {
+			const timeOut = setTimeout(() => {
+				router.push('/work');
+			}, 3000);
+			return () => clearTimeout(timeOut);
+		}
+	}, [data]);
 
 	useEffect(() => {
 		setOnSelectedList(false);
 		setDeleteIdList([]);
 		setPage(2);
+		setSearchWordSnapShot('');
+		setSearchWord('');
 		setSearchResult((p) => ({
 			...p,
 			[category === 'filmShort' ? 'outsource' : 'filmShort']:
@@ -332,37 +368,45 @@ export default function Delete({
 		}));
 	}, [category]);
 
-	useEffect(() => {
-		if (data?.success) {
-			router.push('/work/write');
-		}
-	}, [router, data]);
-
 	const onSubmitDelete = () => {
-		if (loading) return;
+		if (loading && deleteIdList.length > 0) return;
 		send(deleteIdList);
 	};
 
-	const onReset = () => {
+	const resetInit = () => {
 		setOnSelectedList(false);
 		setPage(2);
-		setDeleteIdList([]);
-		setSearchResult((p) => ({ ...p, [category]: list[category] }));
+		setSearchWord('');
 		setSearchWordSnapShot('');
+		setSearchResult((p) => ({ ...p, [category]: list[category] }));
+		setSearchResultSnapShot((p) => ({ ...p, [category]: [] }));
+	};
+
+	const onReset = () => {
+		if (deleteIdList.length > 0) {
+			setDeleteIdList([]);
+			resetInit();
+		}
 	};
 
 	const onSelectedListClick = () => {
-		setOnSelectedList(true);
-		setPage(2);
-		if (!deleteIdList || deleteIdList?.length < 1) return;
-		setSearchResultSnapShot((p) => ({
-			...p,
-			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
-		}));
-		setSearchResult((p) => ({
-			...p,
-			[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
-		}));
+		if (onSelectedList) {
+			resetInit();
+		} else {
+			if (!deleteIdList || deleteIdList?.length < 1) return;
+			setOnSelectedList(true);
+			setPage(2);
+			setSearchWord('');
+			setSearchWordSnapShot('');
+			setSearchResultSnapShot((p) => ({
+				...p,
+				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+			}));
+			setSearchResult((p) => ({
+				...p,
+				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
+			}));
+		}
 	};
 
 	const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
@@ -373,19 +417,15 @@ export default function Delete({
 		if (onSelectedList) {
 			setSearchResult((p) => ({
 				...p,
-				[category]: searchResultSnapShot[category].filter(
-					(result) =>
-						ciIncludes(result.title, searchWord) ||
-						ciIncludes(result.resourceId, searchWord)
+				[category]: searchResultSnapShot[category].filter((result) =>
+					ciIncludes(result.title, searchWord)
 				),
 			}));
 		} else {
 			setSearchResult((p) => ({
 				...p,
-				[category]: list[category].filter(
-					(li) =>
-						ciIncludes(li.title, searchWord) ||
-						ciIncludes(li.resourceId, searchWord)
+				[category]: list[category].filter((li) =>
+					ciIncludes(li.title, searchWord)
 				),
 			}));
 		}
@@ -424,18 +464,14 @@ export default function Delete({
 					...p[category],
 					...lists.works[
 						category === 'filmShort' ? 'film' : 'outsource'
-					].filter(
-						(li) =>
-							ciIncludes(li.title, searchWordSnapShot) ||
-							ciIncludes(li.resourceId, searchWordSnapShot)
-					),
+					].filter((li) => ciIncludes(li.title, searchWordSnapShot)),
 				],
 			}));
 			setFetchLoading(false);
 			setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
 		};
 		if (fetchLoading) return;
-		if (!onSelectedList && hasNextPage[category]) {
+		if (!onSelectedList && hasNextPage[category] && apiPage[category] <= page) {
 			getList();
 		}
 		if (page <= searchResult[category].length / perPage + 1) {
@@ -490,16 +526,30 @@ export default function Delete({
 						) : null
 					)}
 				</div>
-				<div ref={intersectionRef} className='w-full h-1 my-40'></div>
+				<div ref={intersectionRef} className='w-full h-1 mt-20' />
+				{fetchLoading ? (
+					<div className='relative w-full h-20 flex justify-center items-center mb-20'>
+						<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<Circles
+								liMotion={{
+									css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+								}}
+							/>
+						</div>
+					</div>
+				) : null}
+
 				<SelectedListButton
 					onClick={onSelectedListClick}
+					onSelectedList={onSelectedList}
 					count={deleteIdList.length}
-					isMobile={true}
+					isOnMobile={true}
 				/>
 				<ButtonsController
 					onReset={onReset}
 					onSave={onSubmitDelete}
 					onSort={onSelectedListClick}
+					onSelectedList={onSelectedList}
 					count={deleteIdList.length}
 					action='delete'
 				/>
@@ -515,6 +565,19 @@ export default function Delete({
 								}}
 							/>
 						</div>
+					</div>
+				</div>
+			) : null}
+			{data?.success ? (
+				<div className='fixed top-0 w-screen h-screen z-[1]'></div>
+			) : null}
+			{error ? (
+				<div className='fixed top-0 w-screen h-screen z-[1] flex justify-center items-center'>
+					<div className='absolute top-0 w-full h-full opacity-60 bg-black' />
+					<div className='relative text-[#eaeaea] font-bold text-3xl lg:w-1/2 w-auto lg:px-0 px-6 leading-snug'>
+						인산아 <span className='text-palettered'>딜리트</span> 도중 에러가
+						생겼단다 ㅎㅎ 아마도 새로고침하고 다시 해보면 되겠지만 그전에 나에게
+						보고하도록
 					</div>
 				</div>
 			) : null}

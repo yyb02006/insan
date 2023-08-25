@@ -23,9 +23,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							title: el.title,
 							resourceId: el.resourceId,
 							description: el.description,
-							category: el.category ? el.category : 'film',
-							date: el.date ? el.date : 'no-date',
+							category: el.category || 'film',
+							date: el.date || 'no-date',
 							thumbnailLink: el.thumbnailLink,
+							animationThumbnailLink: el.animatedThumbnailLink,
 						},
 						update: {
 							title: el.title,
@@ -34,15 +35,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							category: el.category ? el.category : 'film',
 							date: el.date ? el.date : 'no-date',
 							thumbnailLink: el.thumbnailLink,
+							animationThumbnailLink: el.animatedThumbnailLink,
 						},
 					});
 				})
 			);
+			console.log('1111111111111111');
 			await res.revalidate('/work');
+			console.log('2222222222222222');
 			await res.revalidate('/work/write');
+			console.log('3333333333333333');
 			await res.revalidate('/work/delete');
+			console.log('4444444444444444');
 			return res.status(200).json({ success: true });
 		} catch (error) {
+			console.log('여기서 에러겠네');
 			return res.status(500).json({
 				success: false,
 				message: 'Error Revalidating OR Error Query',

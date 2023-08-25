@@ -314,7 +314,7 @@ const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 			>
 				{[
 					{ name: 'Instagram', href: 'https://www.instagram.com/yarg__gray' },
-					{ name: 'Vimeo', href: '' },
+					{ name: 'Vimeo', href: 'https://vimeo.com/user136249834' },
 					{ name: 'YouTube', href: 'https://www.youtube.com/@insan8871' },
 				].map((arr, idx) => (
 					<m.li key={idx} variants={snsList} className='hover:text-palettered'>
