@@ -281,6 +281,8 @@ export default function Write({
 			);
 			if (!workInfos || inspectedWorkInfos?.length < 1) return;
 			setPage(2);
+			setSearchWord('');
+			setSearchWordSnapshot('');
 			setOnSelectedList(true);
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({

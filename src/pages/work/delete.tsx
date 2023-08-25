@@ -396,6 +396,8 @@ export default function Delete({
 			if (!deleteIdList || deleteIdList?.length < 1) return;
 			setOnSelectedList(true);
 			setPage(2);
+			setSearchWord('');
+			setSearchWordSnapShot('');
 			setSearchResultSnapShot((p) => ({
 				...p,
 				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
