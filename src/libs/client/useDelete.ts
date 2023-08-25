@@ -6,7 +6,10 @@ interface UseDeleteRequestState<T> {
 	error?: object;
 }
 
-type UseDeleteRequest<T> = [(data: unknown) => void, UseDeleteRequestState<T>];
+type UseDeleteRequest<T> = [
+	(data: unknown, secret: string) => void,
+	UseDeleteRequestState<T>
+];
 
 export default function useDeleteRequest<T = unknown>(
 	url: string
@@ -16,13 +19,14 @@ export default function useDeleteRequest<T = unknown>(
 		data: undefined,
 		error: undefined,
 	});
-	const deleteRequest = (data: unknown) => {
+	const deleteRequest = (data: unknown, secret: string) => {
 		setDeleteState((p) => ({ ...p, loading: true }));
 		fetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
 				'Ids-To-Delete': JSON.stringify(data),
+				'Secret-Token': secret,
 			},
 		})
 			.then((res) =>
