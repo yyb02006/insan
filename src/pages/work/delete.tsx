@@ -186,6 +186,7 @@ export const SelectedListButton = ({
 					: 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
 				'aspect-square text-sm rounded-full'
 			)}
+			disabled={count === 0}
 		>
 			<div>{count}</div>
 			<div>Lists</div>
@@ -226,7 +227,13 @@ export const ButtonsController = ({
 			</button>
 			<button
 				onClick={onSave}
-				className='w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm sm:hover:text-palettered sm:hover:font-bold'
+				className={cls(
+					count > 0
+						? 'sm:hover:text-palettered sm:hover:font-bold'
+						: 'text-[#404040]',
+					'w-full ring-1 ring-palettered aspect-square bg-palettered sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
+				)}
+				disabled={count === 0}
 			>
 				{action === 'save' ? <span>save</span> : <span>delete</span>}
 			</button>
@@ -362,7 +369,7 @@ export default function Delete({
 	}, [category]);
 
 	const onSubmitDelete = () => {
-		if (loading) return;
+		if (loading && deleteIdList.length > 0) return;
 		send(deleteIdList);
 	};
 

@@ -189,7 +189,11 @@ export default function Write({
 						resourceId: dataset.resourceid || '',
 						title: value,
 						description: dataset.description || '',
-						category: category === 'filmShort' ? '' : 'outsource',
+						category: dataset.category
+							? dataset.category
+							: category === 'filmShort'
+							? ''
+							: 'outsource',
 						date: dataset.date || '',
 						thumbnailLink: dataset.thumbnail || '',
 						animatedThumbnailLink: dataset.animated_thumbnail || '',
@@ -199,12 +203,13 @@ export default function Write({
 		}
 	};
 
-	console.log(workInfos);
-
 	const onSubmitWrites = () => {
-		if (loading) return;
+		const inspectedWorkInfos = workInfos.filter(
+			(info) => info.title.length !== 0
+		);
+		if (loading && inspectedWorkInfos.length > 0) return;
 		sendList({
-			data: workInfos,
+			data: inspectedWorkInfos,
 			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
 		});
 	};
@@ -271,14 +276,17 @@ export default function Write({
 		if (onSelectedList) {
 			resetInit();
 		} else {
-			if (!workInfos || workInfos?.length < 1) return;
+			const inspectedWorkInfos = workInfos.filter(
+				(info) => info.title.length !== 0
+			);
+			if (!workInfos || inspectedWorkInfos?.length < 1) return;
 			setPage(2);
 			setOnSelectedList(true);
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({
 					...p,
 					[category]: list[category].filter((info) =>
-						workInfos?.some(
+						inspectedWorkInfos?.some(
 							(video) => video.resourceId === info.player_embed_url
 						)
 					),
@@ -286,7 +294,7 @@ export default function Write({
 				setSearchResultsSnapshot((p) => ({
 					...p,
 					[category]: list[category].filter((info) =>
-						workInfos?.some(
+						inspectedWorkInfos?.some(
 							(video) => video.resourceId === info.player_embed_url
 						)
 					),
@@ -295,7 +303,7 @@ export default function Write({
 				setSearchResults((p) => ({
 					...p,
 					[category]: list[category].filter((info) =>
-						workInfos?.some(
+						inspectedWorkInfos?.some(
 							(video) => video.resourceId === info.snippet.resourceId?.videoId
 						)
 					),
@@ -303,7 +311,7 @@ export default function Write({
 				setSearchResultsSnapshot((p) => ({
 					...p,
 					[category]: list[category].filter((info) =>
-						workInfos?.some(
+						inspectedWorkInfos?.some(
 							(video) => video.resourceId === info.snippet.resourceId?.videoId
 						)
 					),
