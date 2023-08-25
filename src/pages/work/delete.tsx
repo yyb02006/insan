@@ -331,7 +331,7 @@ export default function Delete({
 	const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
 	const [send, { loading, data, error }] = useDeleteRequest<{
 		success: boolean;
-	}>(`/api/work?secret=${process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN}`);
+	}>(`/api/work`);
 	const [deleteIdList, setDeleteIdList] = useState<number[]>([]);
 	const [page, setPage] = useState(2);
 	const [apiPage, setApiPage] = useState<{
