@@ -361,12 +361,6 @@ export default function Delete({
 		}));
 	}, [category]);
 
-	useEffect(() => {
-		if (data?.success) {
-			router.push('/work/write');
-		}
-	}, [router, data]);
-
 	const onSubmitDelete = () => {
 		if (loading) return;
 		send(deleteIdList);
@@ -564,6 +558,9 @@ export default function Delete({
 						</div>
 					</div>
 				</div>
+			) : null}
+			{data?.success ? (
+				<div className='fixed top-0 w-screen h-screen z-[1]'></div>
 			) : null}
 			{error ? (
 				<div className='fixed top-0 w-screen h-screen z-[1] flex justify-center items-center'>

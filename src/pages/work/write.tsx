@@ -104,8 +104,6 @@ export default function Write({
 		searchResultsCount: searchResults[category].length,
 	});
 
-	console.log(list.filmShort);
-
 	useEffect(() => {
 		if (data && data?.success) {
 			router.push('/work');
@@ -191,7 +189,7 @@ export default function Write({
 						resourceId: dataset.resourceid || '',
 						title: value,
 						description: dataset.description || '',
-						category: dataset.category || '',
+						category: category === 'filmShort' ? '' : 'outsource',
 						date: dataset.date || '',
 						thumbnailLink: dataset.thumbnail || '',
 						animatedThumbnailLink: dataset.animated_thumbnail || '',
@@ -200,6 +198,8 @@ export default function Write({
 			}
 		}
 	};
+
+	console.log(workInfos);
 
 	const onSubmitWrites = () => {
 		if (loading) return;
@@ -387,6 +387,9 @@ export default function Write({
 						/>
 					</div>
 				</div>
+			) : null}
+			{data?.success ? (
+				<div className='fixed top-0 w-screen h-screen z-[1]'></div>
 			) : null}
 			{error ? (
 				<div className='fixed top-0 w-screen h-screen z-[1] flex justify-center items-center'>
