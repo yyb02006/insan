@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
-		query: { purpose, secret },
+		query: { purpose },
 	} = req;
 
 	if (req.method === 'GET') {
@@ -28,13 +28,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	if (req.method === 'DELETE') {
 		try {
+			const secret = req.headers['secret-token'];
+			const ids = req.headers['ids-to-delete'];
+
 			if (secret !== process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN) {
 				return res
 					.status(401)
 					.json({ success: false, message: 'Invalid token' });
 			}
-
-			const ids = req.headers['ids-to-delete'];
 
 			if (!ids || Array.isArray(ids))
 				return res.status(500).json({ success: false });
