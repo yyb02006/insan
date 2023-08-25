@@ -19,4 +19,3 @@ module.exports = withBundleAnalyzer({
 		],
 	},
 });
-// i.ytimg.com/vi/qOa0xIE8LWY/default.jpg
