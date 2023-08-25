@@ -36,8 +36,6 @@ export default function Admin() {
 		}
 	}, [data?.success, router]);
 
-	console.log(data);
-
 	return (
 		<div className='w-screen h-screen flex justify-center items-center bg-pink-500'>
 			<div className='max-w-[480px] w-full space-y-1 -translate-y-14'>
