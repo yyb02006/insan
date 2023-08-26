@@ -17,8 +17,6 @@ const transporter = nodemailer.createTransport({
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const { title, email, message } = req.body;
-	console.log(process.env.NAVER_USER);
-	console.log(process.env.NAVER_TEST);
 	await new Promise((resolve, reject) => {
 		transporter.verify((error, success) => {
 			if (error) {
@@ -32,7 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 	});
 	const mailData = {
 		from: process.env.NAVER_USER,
-		to: process.env.NAVER_TEST,
+		to: process.env.NAVER_TO,
 		subject: `${title}`,
 		html: `<div style='background-Color:#101010; padding:32px; color:#eaeaea;'><div style='font-weight:800; font-size:2.5rem; margin-bottom:24px;'>${title}</div><div style='font-weight:400; font-size:1rem'><div>email : ${email}</div><div>message : ${message}</div></div></div>`,
 	};
