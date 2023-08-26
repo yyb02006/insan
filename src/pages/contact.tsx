@@ -1,5 +1,6 @@
 import Input from '@/components/input';
 import Layout from '@/components/layout';
+import useMutation from '@/libs/client/useMutation';
 import { useAnimate, motion, stagger } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -48,11 +49,12 @@ export default function Contact() {
 		email: '',
 		message: '',
 	});
-	const [loading, setLoading] = useState(false);
-	const [errors, setErrors] = useState({
+	const [validationError, setValidationError] = useState({
 		isInit: true,
 		message: '',
 	});
+	const [send, { loading, error }] = useMutation('/api/contact');
+
 	const onChange = (
 		e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
@@ -64,31 +66,30 @@ export default function Contact() {
 	};
 	const onSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		if (loading) return;
 		if (!inputDatas.title || !inputDatas.email || !inputDatas.message) {
-			setErrors((p) => ({
+			setValidationError((p) => ({
 				...p,
 				message: '빈 칸을 작성해주십숑',
 			}));
 			return;
-		}
-		if (!inputDatas.email.includes('@')) {
-			setErrors((p) => ({
+		} else if (!inputDatas.email.includes('@')) {
+			setValidationError((p) => ({
 				...p,
 				message: '이메일 형식을 확인해주십숑',
 			}));
 			return;
+		} else {
+			setValidationError((p) => ({ ...p, message: '' }));
+			send(inputDatas);
 		}
-		setLoading((p) => (p = true));
-		fetch('/api/contact', {
-			method: 'POST',
-			body: JSON.stringify(inputDatas),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		}).then(() => {
-			setLoading((p) => (p = false));
-		});
 	};
+
+	useEffect(() => {
+		if (error) {
+			console.log(error);
+		}
+	}, [error]);
 
 	return (
 		<Layout seoTitle='Contact' nav={{ isShort: true }} footerPosition='hidden'>
@@ -183,7 +184,7 @@ export default function Contact() {
 						/>
 						<div className='space-x-4'>
 							<span className='font-Pretendard font-medium text-sm text-palettered'>
-								{errors.message}
+								{validationError.message}
 							</span>
 							<button className='Input placeholder:text-[#eaeaea] opacity-0 w-[100px] h-8 bg-[#eaeaea] text-[#101010] font-bold'>
 								<div className='h-full flex justify-center items-center -mb-1'>
