@@ -17,6 +17,8 @@ const transporter = nodemailer.createTransport({
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const { title, email, message } = req.body;
+	console.log(process.env.NAVER_USER);
+	console.log(process.env.NAVER_TEST);
 	await new Promise((resolve, reject) => {
 		transporter.verify((error, success) => {
 			if (error) {
