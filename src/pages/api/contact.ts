@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 		await transporter.sendMail(
 			{
 				from: process.env.NAVER_USER,
-				to: process.env.NAVER_TO,
+				to: process.env.NAVER_TEST,
 				subject: `${title}`,
 				html: `<div style='background-Color:#101010; padding:32px; color:#eaeaea;'><div style='font-weight:800; font-size:2.5rem; margin-bottom:24px;'>${title}</div><div style='font-weight:400; font-size:1rem'><div>email : ${email}</div><div>message : ${message}</div></div></div>`,
 			},
