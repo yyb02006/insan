@@ -1,6 +1,7 @@
 import Input from '@/components/input';
 import Layout from '@/components/layout';
 import useMutation from '@/libs/client/useMutation';
+import { cls } from '@/libs/client/utils';
 import { useAnimate, motion, stagger } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -49,11 +50,13 @@ export default function Contact() {
 		email: '',
 		message: '',
 	});
-	const [validationError, setValidationError] = useState({
-		isInit: true,
-		message: '',
-	});
-	const [send, { loading, error }] = useMutation('/api/contact');
+	const [resultMessage, setResultMessage] = useState<{
+		state: 'error' | 'resolve';
+		message: string;
+	}>({ state: 'error', message: '' });
+	const [send, { loading, data }] = useMutation<{ success: boolean }>(
+		'/api/contact'
+	);
 
 	const onChange = (
 		e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -68,28 +71,33 @@ export default function Contact() {
 		e.preventDefault();
 		if (loading) return;
 		if (!inputDatas.title || !inputDatas.email || !inputDatas.message) {
-			setValidationError((p) => ({
-				...p,
-				message: '빈 칸을 작성해주십숑',
-			}));
+			setResultMessage({ state: 'error', message: '빈 칸을 작성해주십숑' });
 			return;
 		} else if (!inputDatas.email.includes('@')) {
-			setValidationError((p) => ({
-				...p,
+			setResultMessage({
+				state: 'error',
 				message: '이메일 형식을 확인해주십숑',
-			}));
+			});
 			return;
 		} else {
-			setValidationError((p) => ({ ...p, message: '' }));
+			setResultMessage({ state: 'resolve', message: '' });
 			send(inputDatas);
 		}
 	};
 
 	useEffect(() => {
-		if (error) {
-			console.log(error);
+		if (data?.success === true) {
+			setResultMessage({
+				state: 'resolve',
+				message: '메일이 성공적으로 전송되었습니다!',
+			});
+			setInputDatas({ title: '', email: '', message: '' });
+		} else if (data?.success === false) {
+			setResultMessage({ state: 'error', message: '메일전송에 실패했습니다.' });
+		} else {
+			return;
 		}
-	}, [error]);
+	}, [data]);
 
 	return (
 		<Layout seoTitle='Contact' nav={{ isShort: true }} footerPosition='hidden'>
@@ -183,8 +191,15 @@ export default function Contact() {
 							value={inputDatas.message}
 						/>
 						<div className='space-x-4'>
-							<span className='font-Pretendard font-medium text-sm text-palettered'>
-								{validationError.message}
+							<span
+								className={cls(
+									resultMessage.state === 'resolve'
+										? 'text-green-500'
+										: 'text-palettered',
+									'font-Pretendard font-medium text-sm'
+								)}
+							>
+								{resultMessage.message}
 							</span>
 							<button className='Input placeholder:text-[#eaeaea] opacity-0 w-[100px] h-8 bg-[#eaeaea] text-[#101010] font-bold'>
 								<div className='h-full flex justify-center items-center -mb-1'>
