@@ -34,18 +34,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 		subject: `${title}`,
 		html: `<div style='background-Color:#101010; padding:32px; color:#eaeaea;'><div style='font-weight:800; font-size:2.5rem; margin-bottom:24px;'>${title}</div><div style='font-weight:400; font-size:1rem'><div>email : ${email}</div><div>message : ${message}</div></div></div>`,
 	};
-	await new Promise((resolve, reject) => {
-		transporter.sendMail(mailData, (error, info) => {
-			if (error) {
-				console.log(error);
-				reject(error);
-			} else {
-				console.log(info);
-				resolve(info);
-			}
-		});
-	});
-	res.status(200).json({ success: true });
+	const response: { ok: boolean; [key: string]: unknown } = await new Promise(
+		(resolve, reject) => {
+			transporter.sendMail(mailData, (error, info) => {
+				if (error) {
+					console.log(error);
+					reject({ ok: false, error });
+				} else {
+					console.log(info);
+					resolve({ ok: true, info });
+				}
+			});
+		}
+	);
+	if (response.ok) {
+		res.status(200).json({ success: true });
+	} else {
+		res.status(500).json({ success: false });
+	}
 }
 
 export default withHandler({ methods: ['POST'], handlerFunc: handler });
