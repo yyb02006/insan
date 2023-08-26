@@ -506,9 +506,6 @@ const Wave: NextPage<WaveProps> = ({
 						index === 3
 							? 'bg-wave-pattern-gradation3-4 sm:bg-wave-pattern-gradation3-2'
 							: '',
-						/* waveReverse
-							? 'bg-wave-pattern-reverse-4 sm:bg-wave-pattern-reverse-2'
-							: 'bg-wave-pattern-forward-4 sm:bg-wave-pattern-forward-2', */
 						'relative w-[200vw] max-h-[400px] aspect-[1920/400] bg-[length:100vw] bg-repeat-x'
 					)}
 				></m.div>

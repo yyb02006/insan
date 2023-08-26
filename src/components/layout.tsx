@@ -374,6 +374,7 @@ export default function Layout({
 				<title>
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
 				</title>
+				<link rel='icon' href='/insan_favicon.ico' />
 			</Head>
 			{logo ? (
 				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
