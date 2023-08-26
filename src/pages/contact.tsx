@@ -80,7 +80,7 @@ export default function Contact() {
 			});
 			return;
 		} else {
-			setResultMessage({ state: 'resolve', message: '' });
+			setResultMessage({ state: 'resolve', message: '메일 전송중...' });
 			send(inputDatas);
 		}
 	};
@@ -89,7 +89,7 @@ export default function Contact() {
 		if (data?.success === true) {
 			setResultMessage({
 				state: 'resolve',
-				message: '메일이 성공적으로 전송되었습니다!',
+				message: '메일전송에 성공했습니다!',
 			});
 			setInputDatas({ title: '', email: '', message: '' });
 		} else if (data?.success === false) {
