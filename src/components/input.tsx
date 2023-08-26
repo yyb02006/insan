@@ -109,6 +109,7 @@ export default function Input({
 						) => void
 					}
 					name={name}
+					value={value}
 					placeholder={placeholder}
 					rows={rows}
 					spellCheck='false'
