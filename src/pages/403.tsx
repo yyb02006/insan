@@ -7,13 +7,13 @@ export default function Error403() {
 	};
 	return (
 		<div className='w-screen h-screen flex flex-col justify-center items-center gap-5'>
-			<div className='text-6xl text-palettered font-bold'>
-				워<span className='text-[#fafafa]'>닝</span>! 워
-				<span className='text-[#fafafa]'>닝</span>!
+			<div className='text-sm font-medium'>
+				<span className='text-palettered'>403</span> 에러발생!{' '}
+				<span className='text-palettered'>403</span> 에러발생!
 			</div>
-			<div className='mb-8 text-sm'>
-				<span className='text-palettered'>403</span>에러발생!{' '}
-				<span className='text-palettered'>403</span>에러발생!
+			<div className='mb-8 text-6xl text-palettered leading-tight text-center font-bold'>
+				워<span className='text-[#fafafa]'>닝</span>! 워
+				<span className='text-[#fafafa]'>닝</span>!<p>당신... 봇 아니야?!</p>
 			</div>
 			<button
 				onClick={onButtonClick}
