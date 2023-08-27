@@ -27,28 +27,33 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 
 	if (req.method === 'DELETE') {
-		const ids = req.headers['ids-to-delete'];
+		try {
+			const ids = req.headers['ids-to-delete'];
 
-		if (!ids || Array.isArray(ids))
-			return res.status(500).json({ success: false });
-		const parsedIds = JSON.parse(ids);
+			if (!ids || Array.isArray(ids))
+				return res.status(500).json({ success: false });
+			const parsedIds = JSON.parse(ids);
 
-		/* iterable한 변수인지 구분법
+			/* iterable한 변수인지 구분법
 			typeof ids[Symbol.iterator] === 'function' */
 
-		await Promise.all(
-			parsedIds.map(async (el: string) => {
-				await client.works.delete({ where: { id: +el } });
-			})
-		);
+			await Promise.all(
+				parsedIds.map(async (el: string) => {
+					await client.works.delete({ where: { id: +el } });
+				})
+			);
 
-		const revalidatePages = ['/work', '/work/write', '/work/delete'];
-		await Promise.all(
-			revalidatePages.map(async (el: string) => {
-				await res.revalidate(el);
-			})
-		);
-		return res.status(200).json({ success: true });
+			const revalidatePages = ['/work', '/work/write', '/work/delete'];
+			await Promise.all(
+				revalidatePages.map(async (el: string) => {
+					await res.revalidate(el);
+				})
+			);
+			return res.status(200).json({ success: true });
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, error });
+		}
 	}
 };
 
