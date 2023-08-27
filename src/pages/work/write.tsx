@@ -269,6 +269,7 @@ export default function Write({
 		if (workInfos.length > 0) {
 			setWorkInfos([]);
 			resetInit();
+			topElement.current?.scrollIntoView();
 		}
 	};
 
@@ -284,6 +285,7 @@ export default function Write({
 			setSearchWord('');
 			setSearchWordSnapshot('');
 			setOnSelectedList(true);
+			topElement.current?.scrollIntoView();
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({
 					...p,

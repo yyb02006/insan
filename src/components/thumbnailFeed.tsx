@@ -130,7 +130,7 @@ export function VimeoThumbnailFeed({
 									labelName='Film'
 									value='film'
 									data-resourceid={video.player_embed_url}
-									onClick={inputChange}
+									onChange={inputChange}
 									checked={
 										matchedWorkInfos
 											? matchedWorkInfos.category === 'film'
@@ -148,7 +148,7 @@ export function VimeoThumbnailFeed({
 									labelName='Short'
 									value='short'
 									data-resourceid={video.player_embed_url}
-									onClick={inputChange}
+									onChange={inputChange}
 									checked={
 										matchedWorkInfos
 											? matchedWorkInfos.category === 'short'
