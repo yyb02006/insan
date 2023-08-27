@@ -83,6 +83,7 @@ export default function Input({
 			{type === 'radio' ? (
 				<label>
 					<input
+						onChange={onChange}
 						type='radio'
 						id={radioId}
 						name={name}

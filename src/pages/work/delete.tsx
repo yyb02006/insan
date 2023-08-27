@@ -386,6 +386,7 @@ export default function Delete({
 		if (deleteIdList.length > 0) {
 			setDeleteIdList([]);
 			resetInit();
+			topElement.current?.scrollIntoView();
 		}
 	};
 
@@ -398,6 +399,7 @@ export default function Delete({
 			setPage(2);
 			setSearchWord('');
 			setSearchWordSnapShot('');
+			topElement.current?.scrollIntoView();
 			setSearchResultSnapShot((p) => ({
 				...p,
 				[category]: list[category].filter((li) => deleteIdList.includes(li.id)),
