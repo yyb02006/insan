@@ -20,6 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				.status(200)
 				.json({ success: true, message: 'Session Expired' });
 		} catch (error) {
+			console.log(error);
 			return res.status(500).json({ success: false, error });
 		}
 	} else if (action === 'login' && password === process.env.ADMIN_PASSWORD) {
