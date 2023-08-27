@@ -14,7 +14,7 @@ export default function Admin() {
 	const router = useRouter();
 	const [password, setPassword] = useState<string>('');
 	const [sendPassword, { loading, data }] =
-		useMutation<AuthResponse>(`/api/enter`);
+		useMutation<AuthResponse>(`/api/admin`);
 	const [user, authLoading] = useUser({ approvedRedirectUrl: '/work/write' });
 
 	const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -26,6 +26,7 @@ export default function Admin() {
 		if (loading) return;
 		sendPassword({
 			password,
+			action: 'login',
 			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
 		});
 	};
