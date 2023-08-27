@@ -47,4 +47,20 @@ input:-webkit-autofill:active {
 .pause {
 	animation-play-state: paused;
 }
+.multiline-underline {
+	@apply relative inline; /* 요소가 인라인으로 나타나도록 설정 */
+}
+
+.multiline-underline::after {
+	@apply absolute left-0 bottom-[-4px] w-full h-1 bg-palettered; /* 원하는 밑줄 색상 설정 */
+	content: '';
+	visibility: visible; /* 기본적으로 가시성 설정 */
+}
+
+/* 텍스트가 여러 줄로 나타날 때만 밑줄 표시 */
+@media (min-width: 768px) {
+	.multiline-underline::after {
+		content: '';
+	}
+}
 /* @layer base에 적힌 스타일은 항상 다른 스타일보다 우선된다*/
