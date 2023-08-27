@@ -1,10 +1,6 @@
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Error403() {
-	const router = useRouter();
-	const onButtonClick = () => {
-		router.push('/');
-	};
 	return (
 		<div className='w-screen h-screen flex flex-col justify-center items-center gap-5'>
 			<div className='text-sm font-medium'>
@@ -15,12 +11,12 @@ export default function Error403() {
 				워<span className='text-[#fafafa]'>닝</span>! 워
 				<span className='text-[#fafafa]'>닝</span>!<p>당신... 봇 아니야?!</p>
 			</div>
-			<button
-				onClick={onButtonClick}
+			<Link
+				href={'/'}
 				className='border p-4 rounded-2xl hover:border-palettered hover:text-palettered'
 			>
 				메인페이지로 {`<냉큼/>`}돌아가기
-			</button>
+			</Link>
 		</div>
 	);
 }

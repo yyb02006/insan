@@ -55,7 +55,7 @@ export default function Contact() {
 		message: string;
 	}>({ state: 'error', message: '' });
 	const [send, { loading, data }] = useMutation<{ success: boolean }>(
-		'/api/contact'
+		'/api/email'
 	);
 
 	const onChange = (

@@ -269,6 +269,7 @@ export default function Write({
 		if (workInfos.length > 0) {
 			setWorkInfos([]);
 			resetInit();
+			topElement.current?.scrollIntoView();
 		}
 	};
 
@@ -284,6 +285,7 @@ export default function Write({
 			setSearchWord('');
 			setSearchWordSnapshot('');
 			setOnSelectedList(true);
+			topElement.current?.scrollIntoView();
 			if (category === 'filmShort') {
 				setSearchResults((p) => ({
 					...p,
@@ -431,7 +433,7 @@ export const getStaticProps: GetStaticProps = async () => {
 		vimeoVideos.data.map(async (el: VimeoVideos) => {
 			const data = (
 				await fetchData(
-					`https://api.vimeo.com/${el.uri}/animated_thumbsets?fields=sizes.link,sizes.profile_id`,
+					`https://api.vimeo.com${el.uri}/animated_thumbsets?fields=sizes.link,sizes.profile_id`,
 					{
 						headers: {
 							'Content-Type': 'application/json',
@@ -442,12 +444,11 @@ export const getStaticProps: GetStaticProps = async () => {
 			).data;
 			return {
 				...el,
-				animated_thumbnail: data[0]
-					? data[0].sizes.find(
-							(el: { profile_id: string; link: string }) =>
-								el.profile_id === 'Low'
-					  ).link
-					: 'no-link',
+				animated_thumbnail:
+					data[0]?.sizes?.find(
+						(el: { profile_id: string; link: string }) =>
+							el.profile_id === 'Low'
+					)?.link || 'no-link',
 			};
 		})
 	);

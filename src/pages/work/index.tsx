@@ -588,6 +588,7 @@ interface VideoDetailProps {
 	title: string;
 	date: string;
 	resource: string;
+	role: string;
 	category: VideosCategory;
 	thumbnail: string;
 	setOnDetail: Dispatch<SetStateAction<OnDetail | undefined>>;
@@ -607,11 +608,13 @@ const VideoDetail = ({
 	resource,
 	category,
 	thumbnail,
+	role,
 	setOnDetail,
 }: VideoDetailProps) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [description, setDescription] = useState<string>();
-	const pattern = /\/([^/]+)\?/;
+	const pattern = /\/(\d+)\?/;
+	const vimeoId: RegExpMatchArray | null = resource.match(pattern);
 	useEffect(() => {
 		if (category === 'film' || category === 'short') {
 			fetch(
@@ -643,36 +646,55 @@ const VideoDetail = ({
 			);
 		}
 	}, [pattern]);
+
 	return (
 		<>
 			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80' />
 			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
-				<div className='w-full h-auto py-16 bg-[#101010]'>
+				<div className='w-full py-16 bg-[#101010]'>
 					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
-						<div className='relative w-full xl:max-w-[1400px] lg:max-w-[1100px] max-w-[1280px] bg-black'>
+						<div
+							className={cls(
+								category === 'short'
+									? 'aspect-[12/16] sm:aspect-video'
+									: 'aspect-video',
+								'relative h-full w-full xl:max-w-none lg:max-w-[1100px] max-w-[1280px] bg-black'
+							)}
+						>
 							{category === 'film' || category === 'short' ? (
 								<>
 									<VimeoPlayer
 										url={`${resource}`}
 										controls={true}
-										width={'100%'}
-										height={'auto'}
-										style={{ aspectRatio: 16 / 9 }}
-										onReady={() => {
-											setInterval(() => {
+										width={'auto'}
+										height={'100%'}
+										onProgress={() => {
+											setTimeout(() => {
 												setIsLoaded(true);
 											}, 80);
 										}}
 									/>
 									{!isLoaded ? (
-										<div className='absolute top-0 left-0 w-full aspect-video'>
+										<div
+											className={cls(
+												category === 'short'
+													? 'h-full sm:aspect-video'
+													: 'aspect-video',
+												'absolute top-0 left-0 w-full'
+											)}
+										>
 											<Image
 												src={`${thumbnail}_960x540?r=pad`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
 												priority
-												className='absolute top-0 left-0 w-full aspect-video object-cover'
+												className={cls(
+													category === 'short'
+														? 'h-full sm:w-full sm:h-auto sm:aspect-video'
+														: 'w-full h-auto aspect-video',
+													'absolute top-0 left-0 object-cover'
+												)}
 											/>
 											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
 											<div className='absolute w-full h-full flex justify-center items-center'>
@@ -690,20 +712,17 @@ const VideoDetail = ({
 							) : null}
 							{category === 'outsource' ? (
 								<>
-									<div className='w-full h-full bg-green-500'>
-										<YouTubePlayer
-											url={`https://www.youtube.com/watch?v=${resource}`}
-											controls={true}
-											width={'auto'}
-											height={'full'}
-											style={{ aspectRatio: 16 / 9 }}
-											onReady={() => {
-												setInterval(() => {
-													setIsLoaded(true);
-												}, 80);
-											}}
-										/>
-									</div>
+									<YouTubePlayer
+										url={`https://www.youtube.com/watch?v=${resource}`}
+										controls={true}
+										width={'auto'}
+										height={'100%'}
+										onReady={() => {
+											setInterval(() => {
+												setIsLoaded(true);
+											}, 80);
+										}}
+									/>
 									{!isLoaded ? (
 										<div className='absolute top-0 left-0 w-full aspect-video'>
 											<Image
@@ -729,13 +748,36 @@ const VideoDetail = ({
 								</>
 							) : null}
 						</div>
-						<div className='xl:min-w-[360px] xl:max-w-[500px] h-[300px] xl:h-auto xl:w-[calc(100vw-1500px)] px-8 flex flex-col items-center justify-between text-[#eaeaea]'>
-							<div className='font-semibold text-xl self-start'>{title}</div>
-							<div className='font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]'>
+						<div className='xl:min-w-[440px] h-auto w-full xl:max-w-[500px] xl:max-h-[calc(100vh-128px)] xl:w-[calc(100vw-1500px)] px-8 flex flex-col justify-between text-[#eaeaea]'>
+							<div className='font-GmarketSans font-semibold text-4xl cursor-default'>
+								<span className='multiline-underline whitespace-break-spaces break-words sm:hover:text-palettered sm:hover:border-palettered'>
+									{title}
+								</span>
+								<div className='text-xl text-[#dadada] right font-medium mt-4 sm:hover:text-palettered'>
+									{role}
+								</div>
+								<div className='text-sm text-[#dadada] font-light sm:hover:text-palettered'>
+									{date}
+								</div>
+							</div>
+							<div className='h-full text-[#c4c4c4] my-16 font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]'>
 								{description ? description : null}
 							</div>
-							<div className='font-light text-sm self-end text-[#aaaaaa]'>
-								{date}
+							<div className='font-light text-sm self-end text-[#aaaaaa] hover:text-palettered'>
+								<Link
+									href={
+										category === 'outsource'
+											? `https://www.youtube.com/watch?v=${resource}`
+											: `https://vimeo.com/${
+													vimeoId && vimeoId[1] ? vimeoId[1] : ''
+											  }`
+									}
+									target='_blank'
+								>
+									{category === 'outsource'
+										? 'Youtube에서 보기'
+										: 'Vimeo에서 보기'}
+								</Link>
 							</div>
 						</div>
 					</div>
@@ -1470,6 +1512,7 @@ export default function Work({
 					title={onDetail.title}
 					setOnDetail={setOnDetail}
 					thumbnail={onDetail.imageUrl}
+					role={onDetail.description}
 				></VideoDetail>
 			) : null}
 		</>

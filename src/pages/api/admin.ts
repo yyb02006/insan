@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	const {
-		body: { password, secret },
+		body: { password, secret, action },
 		session,
 	} = req;
 
@@ -12,13 +12,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		return res.status(401).json({ success: false, message: 'Invalid token' });
 	}
 
-	if (password === process.env.ADMIN_PASSWORD) {
+	if (action === 'logout') {
+		try {
+			req.session.destroy();
+			await res.revalidate('/work');
+			return res
+				.status(200)
+				.json({ success: true, message: 'Session Expired' });
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, error });
+		}
+	} else if (action === 'login' && password === process.env.ADMIN_PASSWORD) {
 		try {
 			session.admin = {
 				password,
 			};
 			await req.session.save();
-			await res.revalidate('/work/write');
+			const revalidatePages = ['/work', '/work/write', '/work/delete'];
+			await Promise.all(
+				revalidatePages.map(async (el: string) => {
+					await res.revalidate(el);
+				})
+			);
 			return res.status(200).json({ success: true, message: 'Autorized' });
 		} catch (error) {
 			return res.status(500).json({ success: false, error });

@@ -1,10 +1,6 @@
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Error403() {
-	const router = useRouter();
-	const onButtonClick = () => {
-		router.push('/');
-	};
 	return (
 		<div className='w-screen h-screen flex flex-col justify-center items-center'>
 			<div className='text-sm font-medium'>
@@ -18,13 +14,13 @@ export default function Error403() {
 				<br />이 페이지는 <span className='text-palettered'>없는</span> 페이지
 				입니다.
 			</div>
-			<button
-				onClick={onButtonClick}
+			<Link
+				href={'/'}
 				className='border p-4 rounded-2xl hover:border-palettered hover:text-palettered'
 			>
 				메인페이지로 <span className='text-palettered'>{`<냉큼/>`}</span>
 				돌아가기
-			</button>
+			</Link>
 		</div>
 	);
 }
