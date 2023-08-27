@@ -1463,7 +1463,6 @@ export default function Work({
 												date={data.date}
 												setOnDetail={setOnDetail}
 												setAnimationEnd={
-													//serachResults가 페이지 제한 때문에 보이는 것보다 많은 상황이면 먹히지 않기때문에 수정됨.
 													idx ===
 													(searchResults[category].length < (page - 1) * perPage
 														? searchResults[category].length - 1

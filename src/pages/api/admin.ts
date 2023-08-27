@@ -37,6 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			);
 			return res.status(200).json({ success: true, message: 'Autorized' });
 		} catch (error) {
+			console.log(error);
 			return res.status(500).json({ success: false, error });
 		}
 	} else {
