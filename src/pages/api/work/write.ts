@@ -14,7 +14,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	if (data.length > 0) {
 		try {
-			//forEach 쓰니까 pending돼서 재대로 초기화가 안됨
 			await Promise.all(
 				data.map(async (el: WorkInfos) => {
 					await client.works.upsert({
@@ -40,16 +39,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					});
 				})
 			);
-			await res.revalidate('/work');
-			await res.revalidate('/work/write');
-			await res.revalidate('/work/delete');
+			const revalidatePages = ['/work', '/work/write', '/work/delete'];
+			await Promise.all(
+				revalidatePages.map(async (el: string) => {
+					await res.revalidate(el);
+				})
+			);
 			return res.status(200).json({ success: true });
 		} catch (error) {
-			return res.status(500).json({
-				success: false,
-				message: 'Error Revalidating OR Error Query',
-				error,
-			});
+			console.log(error);
+			return res.status(500).json({ success: false });
 		}
 	} else {
 		return res.status(500).json({ success: false });

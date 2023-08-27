@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			? 'https://insan.vercel.app'
 			: 'http://localhost:3000'
 	); */
-	const deniedPathname = ['/work/write', '/work/delete'];
+	const deniedPathname = ['/work/write', '/work/delete', '/exit'];
 
 	if (session.admin?.password !== process.env.ADMIN_PASSWORD) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {
@@ -41,8 +41,8 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 		if (req.nextUrl.pathname === '/enter') {
 			return NextResponse.redirect(
 				process.env.NODE_ENV === 'production'
-					? process.env.NEXT_PUBLIC_PROD_ORIGIN!
-					: process.env.NEXT_PUBLIC_DEV_ORIGIN!
+					? `${process.env.NEXT_PUBLIC_PROD_ORIGIN}/work/write`
+					: `${process.env.NEXT_PUBLIC_DEV_ORIGIN}/work/write`
 			);
 		}
 	}
