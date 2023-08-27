@@ -2,6 +2,7 @@ import useMutation from '@/libs/client/useMutation';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { AuthResponse } from './enter';
+import Circles from '@/components/circles';
 
 export default function Exit() {
 	const router = useRouter();
@@ -17,7 +18,9 @@ export default function Exit() {
 
 	useEffect(() => {
 		if (data?.success === true) {
-			router.push('work');
+			router.push('/work');
+		} else if (data?.success === false) {
+			console.log(data.error);
 		}
 	}, [data?.success, router]);
 
@@ -29,9 +32,33 @@ export default function Exit() {
 					onClick={onClick}
 					className='bg-green-600 w-full h-10 font-semibold'
 				>
-					깔끔하게 퇴장하기
+					손씻고 퇴장하기
 				</button>
 			</div>
+			{loading ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
+					<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
+						<Circles
+							liMotion={{
+								css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
+							}}
+						/>
+					</div>
+				</div>
+			) : null}
+			{data?.success === true ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
+					<div>
+						잘가... <span className='text-palettered'>쟉이~♥</span>
+					</div>
+				</div>
+			) : data?.error ? (
+				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
+					<div>
+						먼가 문제가 있는디? F12 관리자창 열어서 개발자놈한테 에러메세지 ㄱㄱ
+					</div>
+				</div>
+			) : null}
 		</div>
 	);
 }
