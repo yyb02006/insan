@@ -35,6 +35,12 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	); */
 	const deniedPathname = ['/work/write', '/work/delete', '/exit'];
 
+	if (
+		req.nextUrl.pathname.includes('.') ||
+		req.nextUrl.pathname.startsWith('/api') ||
+		req.headers.has('x-prerender-revalidate')
+	)
+		return;
 	if (session.admin?.password !== process.env.ADMIN_PASSWORD) {
 		if (deniedPathname.includes(req.nextUrl.pathname)) {
 			return NextResponse.redirect(
