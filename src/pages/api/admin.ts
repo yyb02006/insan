@@ -31,8 +31,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			await req.session.save();
 			const revalidatePages = ['/work', '/work/write', '/work/delete'];
 			await Promise.all(
-				revalidatePages.map((el: string) => {
-					res.revalidate(el);
+				revalidatePages.map(async (el: string) => {
+					await res.revalidate(el);
 				})
 			);
 			return res.status(200).json({ success: true, message: 'Autorized' });
