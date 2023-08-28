@@ -10,7 +10,13 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	const res = NextResponse.next();
 	const { isBot } = userAgent(req);
 	if (isBot) {
-		return NextResponse.redirect('/403');
+		return NextResponse.redirect(
+			`${
+				process.env.NODE_ENV === 'production'
+					? process.env.NEXT_PUBLIC_PROD_ORIGIN
+					: process.env.NEXT_PUBLIC_DEV_ORIGIN
+			}/403`
+		);
 	}
 	const session = await getIronSession(req, res, {
 		cookieName: 'insanSession',
@@ -40,9 +46,11 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 	} else {
 		if (req.nextUrl.pathname === '/enter') {
 			return NextResponse.redirect(
-				process.env.NODE_ENV === 'production'
-					? `${process.env.NEXT_PUBLIC_PROD_ORIGIN}/work/write`
-					: `${process.env.NEXT_PUBLIC_DEV_ORIGIN}/work/write`
+				`${
+					process.env.NODE_ENV === 'production'
+						? process.env.NEXT_PUBLIC_PROD_ORIGIN
+						: process.env.NEXT_PUBLIC_DEV_ORIGIN
+				}/work/write`
 			);
 		}
 	}

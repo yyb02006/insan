@@ -135,7 +135,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 					{ x: [40, 0], opacity: 1 },
 					{ duration: 0.3 }
 				);
-				await chevronAnimate('div', { opacity: [0, 1] }, { duration: 0.1 });
+				await chevronAnimate('.Desc', { opacity: [0, 1] }, { duration: 0.1 });
 			};
 			enterAnimation();
 		} else {
@@ -145,7 +145,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 					{ x: [0, 40], opacity: 0 },
 					{ duration: 0.3 }
 				);
-				await chevronAnimate('div', { opacity: [1, 0] }, { duration: 0.1 });
+				await chevronAnimate('.Desc', { opacity: [1, 0] }, { duration: 0.1 });
 				safeToRemove();
 			};
 			exitAnimation();
