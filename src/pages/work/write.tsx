@@ -59,12 +59,14 @@ interface InitialData {
 	initialVimeoVideos: VimeoVideos[];
 	initialYoutubeVideos: GapiItem[];
 	initialOwnedVideos: VideoCollection<OwnedVideoItems[]>;
+	initialNextPageToken: string;
 }
 
 export default function Write({
 	initialVimeoVideos,
 	initialYoutubeVideos,
 	initialOwnedVideos,
+	initialNextPageToken,
 }: InitialData) {
 	const router = useRouter();
 	const topElement = useRef<HTMLDivElement>(null);
@@ -102,6 +104,7 @@ export default function Write({
 		setPage,
 		snapshot: searchWordSnapshot,
 		searchResultsCount: searchResults[category].length,
+		initialNextPageToken,
 	});
 
 	useEffect(() => {
@@ -323,6 +326,8 @@ export default function Write({
 			}
 		}
 	};
+	console.log(initialYoutubeVideos);
+	console.log(initialNextPageToken);
 
 	return (
 		<Layout
@@ -418,9 +423,9 @@ export default function Write({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-	const perPage = 6;
+	const perPage = 12;
 	const vimeoVideos = await fetchData(
-		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.base_link,name,description&page=1&per_page=12`,
+		`https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.base_link,name,description&page=1&per_page=${perPage}`,
 		{
 			headers: {
 				'Content-Type': 'application/json',
@@ -453,15 +458,10 @@ export const getStaticProps: GetStaticProps = async () => {
 		})
 	);
 
-	const youtubeVideos = await Promise.all(
-		[
-			'PL3Sx9O__-BGnKsABX4khAMW6BBFF_Hf40',
-			'PL3Sx9O__-BGlyWzd0DnpZT9suTNy4kBW1',
-		].map((id) =>
-			fetchData(
-				`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${id}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=${perPage}&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
-			)
-		)
+	const youtubePlaylistId = 'PL3Sx9O__-BGlt-FYFXIO15RbxFwegMs8C';
+
+	const youtubeVideos = await fetchData(
+		`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${youtubePlaylistId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=${perPage}&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
 	);
 
 	const lists = await client.works.findMany({
@@ -484,10 +484,8 @@ export const getStaticProps: GetStaticProps = async () => {
 	return {
 		props: {
 			initialVimeoVideos: mergedVimeoVideos,
-			initialYoutubeVideos: [
-				...youtubeVideos[0].items,
-				...youtubeVideos[1].items,
-			],
+			initialYoutubeVideos: youtubeVideos.items,
+			initialNextPageToken: youtubeVideos.nextPageToken,
 			initialOwnedVideos,
 		},
 		revalidate: 86400,
