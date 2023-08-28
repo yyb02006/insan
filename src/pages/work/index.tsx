@@ -130,12 +130,12 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
-				await chevronAnimate(
+				chevronAnimate(
 					chevron.current,
 					{ x: [40, 0], opacity: 1 },
 					{ duration: 0.3 }
 				);
-				await chevronAnimate('.Desc', { opacity: [0, 1] }, { duration: 0.1 });
+				chevronAnimate('.Desc', { opacity: [0, 1] }, { duration: 0.6 });
 			};
 			enterAnimation();
 		} else {
@@ -150,7 +150,7 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 			};
 			exitAnimation();
 		}
-	}, [isPresent, chevron, chevronAnimate, safeToRemove]);
+	}, [isPresent, chevronAnimate, safeToRemove]);
 	return (
 		<div ref={chevron} className='relative opacity-0 flex items-center'>
 			<svg
