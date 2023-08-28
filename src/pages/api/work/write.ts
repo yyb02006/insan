@@ -14,9 +14,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	if (data.length > 0) {
 		try {
-			await Promise.all(
-				data.map(async (el: WorkInfos) => {
-					await client.works.upsert({
+			await client.$transaction(
+				data.map((el: WorkInfos) =>
+					client.works.upsert({
 						where: { resourceId: el.resourceId },
 						create: {
 							title: el.title,
@@ -36,8 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							thumbnailLink: el.thumbnailLink,
 							animationThumbnailLink: el.animatedThumbnailLink,
 						},
-					});
-				})
+					})
+				)
 			);
 			const revalidatePages = ['/work', '/work/write', '/work/delete'];
 			await Promise.all(
