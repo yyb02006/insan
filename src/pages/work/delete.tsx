@@ -256,6 +256,7 @@ interface WorkProps {
 	title: string;
 	thumbnailLink: string;
 	setPriority: boolean;
+	kind: string;
 }
 
 const Work = ({
@@ -267,10 +268,14 @@ const Work = ({
 	searchResult,
 	thumbnailLink,
 	setPriority,
+	kind,
 }: WorkProps) => {
 	return (
 		<div
-			className={cls(selected ? 'ring-2' : 'ring-0', 'ring-palettered')}
+			className={cls(
+				selected ? 'ring-2' : 'ring-0',
+				'ring-palettered relative'
+			)}
 			onClick={onClick}
 		>
 			<Thumbnail
@@ -290,9 +295,23 @@ const Work = ({
 				}
 				setPriority={setPriority}
 			/>
-			<div className='mt-2'>
-				<div className='text-sm'>Title : {title}</div>
-				<div className='text-xs font-light break-words'>
+
+			<div className='mt-2 text-xs'>
+				<div className='relative text-base break-words'>
+					<span className='whitespace-nowrap'>Title : </span>
+					{title}{' '}
+					{category !== 'outsource' ? (
+						<div
+							className={cls(
+								kind === 'film' ? 'text-palettered' : 'text-green-500',
+								'text-sm font-semibold absolute top-0 right-0'
+							)}
+						>
+							{kind === 'film' ? 'FILM' : 'SHORT'}
+						</div>
+					) : null}
+				</div>
+				<div className='font-light break-words text-[#606060]'>
 					<span className='whitespace-nowrap'>Id : </span>
 					{resourceId}
 				</div>
@@ -516,6 +535,7 @@ export default function Delete({
 								key={li.id}
 								category={category}
 								selected={deleteIdList.includes(li.id)}
+								kind={li.category}
 								resourceId={li.resourceId}
 								title={li.title}
 								thumbnailLink={li.thumbnailLink}
