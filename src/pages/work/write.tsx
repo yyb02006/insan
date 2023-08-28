@@ -326,8 +326,6 @@ export default function Write({
 			}
 		}
 	};
-	console.log(initialYoutubeVideos);
-	console.log(initialNextPageToken);
 
 	return (
 		<Layout

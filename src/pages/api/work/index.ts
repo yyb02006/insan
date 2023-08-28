@@ -37,11 +37,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			/* iterable한 변수인지 구분법
 			typeof ids[Symbol.iterator] === 'function' */
 
-			await Promise.all(
+			await client.works.deleteMany({ where: { id: { in: parsedIds } } });
+
+			/* await Promise.all(
 				parsedIds.map(async (el: string) => {
 					await client.works.delete({ where: { id: +el } });
 				})
-			);
+			); */
+			console.log(parsedIds);
 
 			const revalidatePages = ['/work', '/work/write', '/work/delete'];
 			await Promise.all(
