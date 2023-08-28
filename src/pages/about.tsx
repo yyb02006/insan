@@ -208,7 +208,7 @@ const WorkIntroSection = () => {
 		offset: ['start end', 'end center'],
 	});
 	return (
-		<section className=''>
+		<section>
 			<div
 				ref={title}
 				className='h-[30vh] sm:h-[100vh] px-16 sm:px-32 flex items-start sm:items-center'
@@ -250,7 +250,7 @@ const WorkIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative z-[1] px-[9vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight tracking-tighter font-Pretendard font-bold'
+				className='relative z-[1] px-[8vw] sm:px-[16vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight tracking-tighter font-Pretendard font-bold'
 			>
 				{descDatas.map((data, idx) => (
 					<WorkIntroSectionMotionLi
@@ -291,8 +291,8 @@ const RoleIntroSection = () => {
 		}
 	}, [isInview, animate]);
 	return (
-		<section ref={scope} className='sm:px-[9vw] pb-40'>
-			<div className='relative w-full mt-8 sm:mt-20 aspect-video'>
+		<section ref={scope} className='sm:px-[9vw] pb-40 mt-8 sm:mt-10'>
+			<div className='relative w-full aspect-video'>
 				<motion.div
 					initial={{ y: 200, scale: 0.5, opacity: 0.3 }}
 					className='Image relative w-full aspect-video overflow-hidden'
