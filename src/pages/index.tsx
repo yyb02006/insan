@@ -301,15 +301,15 @@ const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef] z-[1]'
 		>
 			<m.div
-				/* style={{ scale }}
+				style={{ scale }}
 				initial='hidden'
 				animate='visible'
-				variants={sideCircle} */
+				variants={sideCircle}
 				className='absolute w-[200px] lg:w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
 			/>
 			<m.ul
-				/* animate={!isInView ? 'visible' : 'disappear'}
-				variants={snsAnchor} */
+				animate={!isInView ? 'visible' : 'disappear'}
+				variants={snsAnchor}
 				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2 z-[1]'
 			>
 				{[
@@ -1203,7 +1203,6 @@ const Home: NextPage = () => {
 				nav={{
 					isShort: innerWidth > 640 ? !isInBackground : true,
 				}}
-				menu={false}
 			>
 				<CircleSection
 					inheritRef={circle}
