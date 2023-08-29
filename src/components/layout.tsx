@@ -388,14 +388,14 @@ export default function Layout({
 				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
 					<Link href={'/'} className='flex justify-center items-center'>
 						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
-						{/* <Image
+						<Image
 							src='/images/Logo.svg'
 							alt='INSAN'
 							width={28}
 							height={42}
 							className='relative cursor-pointer'
 							priority
-						/> */}
+						/>
 					</Link>
 				</div>
 			) : null}
