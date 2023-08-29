@@ -1,8 +1,7 @@
 import '@/styles/globals.css';
-// import { LazyMotion, domAnimation } from 'framer-motion';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import type { AppProps } from 'next/app';
 import { Roboto } from 'next/font/google';
-import { SWRConfig } from 'swr/_internal';
 import localFont from 'next/font/local';
 import { cls } from '@/libs/client/utils';
 
@@ -36,14 +35,10 @@ const gMarKetSans = localFont({
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
-		<SWRConfig
-			value={{ fetcher: (url: string) => fetch(url).then((res) => res.json()) }}
-		>
-			{/* <LazyMotion features={domAnimation}> */}
+		<LazyMotion features={domAnimation}>
 			<main className={cls(roboto.variable, gMarKetSans.variable)}>
 				<Component {...pageProps} />
 			</main>
-			{/* </LazyMotion> */}
-		</SWRConfig>
+		</LazyMotion>
 	);
 }
