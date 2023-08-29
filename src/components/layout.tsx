@@ -394,7 +394,7 @@ export default function Layout({
 							width={28}
 							height={42}
 							className='relative cursor-pointer'
-							priority={true}
+							priority
 						/>
 					</Link>
 				</div>
