@@ -1,5 +1,4 @@
 import { ciIncludes, fetchData } from '@/libs/client/utils';
-import Image from 'next/image';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';

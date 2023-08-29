@@ -100,7 +100,12 @@ export default function Contact() {
 	}, [data]);
 
 	return (
-		<Layout seoTitle='Contact' nav={{ isShort: true }} footerPosition='hidden'>
+		<Layout
+			seoTitle='Contact'
+			nav={{ isShort: true }}
+			footerPosition='hidden'
+			description='문의는 nokedny1117@gmail.com 주소로 연락주시면 감사하겠습니다.'
+		>
 			<section
 				ref={scope}
 				className='relative w-full h-auto min-h-screen lg:h-screen lg:grid lg:grid-cols-2 gap-10 font-GmarketSans overflow-hidden lg:overflow-x-hidden lg:overflow-y-scroll scrollbar-hide'
