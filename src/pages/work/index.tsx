@@ -1416,91 +1416,94 @@ export default function Work({
 
 	return (
 		<>
-			{/* <Layout
+			<Layout
 				seoTitle='Work'
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
-				description='디렉터 여인산의 개인작업물을 위주로 외주제작, 참여영상 작업물들을 확인할 수 있습니다.'
-			> */}
-			<main
-				ref={section}
-				className='pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden'
+				description='디렉터 여인산의 개인 제작 영상을 위주로 외주 제작, 참여 영상 작업물들을 확인할 수 있습니다.'
 			>
-				<TitleSection setCategory={setCategory} initialLength={initialLength} />
-				<SearchSection
-					setSearchWords={setSearchWords}
-					setTags={setTags}
-					onSearch={onSearch}
-					searchWords={searchWords}
-					category={category}
-				/>
-				<section className='relative bg-[#101010] pb-20 sm:pb-36'>
-					<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
-						<AnimatePresence>
-							{searchResults[category].map((data, idx) =>
-								idx < perPage * (page - 1) ? (
-									<div key={data.id}>
-										<Video
-											index={data.id.toString()}
-											waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
-											thumbnail={{
-												url:
-													category === 'film' || category === 'short'
-														? data.thumbnailLink
-														: data.resourceId,
-												alt:
-													category === 'film' || category === 'short'
-														? data.thumbnailLink
-														: data.resourceId,
-											}}
-											title={data.title}
-											description={data.description}
-											category={category}
-											resource={data.resourceId}
-											animatedThumbnail={data.animationThumbnailLink}
-											date={data.date}
-											setOnDetail={setOnDetail}
-											setAnimationEnd={
-												idx ===
-												(searchResults[category].length < (page - 1) * perPage
-													? searchResults[category].length - 1
-													: (page - 1) * perPage - 1)
-													? setIsAnimationEnd
-													: undefined
-											}
-											isMobile={isMobile}
-											setpriority={idx < 6 ? true : false}
-										/>
-										<div className='block sm:hidden'>
-											<div className='mt-1 font-semibold'>{data.title}</div>
-											<div className='font-light text-xs'>
-												{data.description}
+				<main
+					ref={section}
+					className='pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden'
+				>
+					<TitleSection
+						setCategory={setCategory}
+						initialLength={initialLength}
+					/>
+					<SearchSection
+						setSearchWords={setSearchWords}
+						setTags={setTags}
+						onSearch={onSearch}
+						searchWords={searchWords}
+						category={category}
+					/>
+					<section className='relative bg-[#101010] pb-20 sm:pb-36'>
+						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
+							<AnimatePresence>
+								{searchResults[category].map((data, idx) =>
+									idx < perPage * (page - 1) ? (
+										<div key={data.id}>
+											<Video
+												index={data.id.toString()}
+												waiting={idx > 11 ? idx - (page - 2) * 12 : idx}
+												thumbnail={{
+													url:
+														category === 'film' || category === 'short'
+															? data.thumbnailLink
+															: data.resourceId,
+													alt:
+														category === 'film' || category === 'short'
+															? data.thumbnailLink
+															: data.resourceId,
+												}}
+												title={data.title}
+												description={data.description}
+												category={category}
+												resource={data.resourceId}
+												animatedThumbnail={data.animationThumbnailLink}
+												date={data.date}
+												setOnDetail={setOnDetail}
+												setAnimationEnd={
+													idx ===
+													(searchResults[category].length < (page - 1) * perPage
+														? searchResults[category].length - 1
+														: (page - 1) * perPage - 1)
+														? setIsAnimationEnd
+														: undefined
+												}
+												isMobile={isMobile}
+												setpriority={idx < 6 ? true : false}
+											/>
+											<div className='block sm:hidden'>
+												<div className='mt-1 font-semibold'>{data.title}</div>
+												<div className='font-light text-xs'>
+													{data.description}
+												</div>
 											</div>
 										</div>
-									</div>
-								) : null
-							)}
-						</AnimatePresence>
-					</div>
-					<div ref={intersectionRef} className={`absolute h-1 w-full`} />
-					{fetchLoading ? (
-						<div className='relative w-full h-60 flex justify-center items-center'>
-							<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
-								<Circles
-									liMotion={{
-										css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
-									}}
-								/>
-							</div>
+									) : null
+								)}
+							</AnimatePresence>
 						</div>
-					) : null}
-				</section>
-				<OutroSection
-					isVisible={page > searchResults[category].length / perPage + 1}
-				/>
-				<ToTop toScroll={section} position='right' />
-			</main>
-			{/* </Layout> */}
+						<div ref={intersectionRef} className={`absolute h-1 w-full`} />
+						{fetchLoading ? (
+							<div className='relative w-full h-60 flex justify-center items-center'>
+								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+									<Circles
+										liMotion={{
+											css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+										}}
+									/>
+								</div>
+							</div>
+						) : null}
+					</section>
+					<OutroSection
+						isVisible={page > searchResults[category].length / perPage + 1}
+					/>
+					<ToTop toScroll={section} position='right' />
+				</main>
+			</Layout>
 			{onDetail && onDetail.isOpen === true ? (
 				<VideoDetail
 					resource={onDetail.resource}

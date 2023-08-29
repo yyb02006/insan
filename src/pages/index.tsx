@@ -1198,29 +1198,29 @@ const Home: NextPage = () => {
 		>
 			<Chevron scrollYProgress={scrollYProgress} isInView={isInView} />
 			<SnsLink scrollYProgress={scrollYProgress} isInView={isInView} />
-			<Layout
+			{/* <Layout
 				seoTitle='INSAN'
 				nav={{
 					isShort: innerWidth > 640 ? !isInBackground : true,
 				}}
-			>
-				<CircleSection
-					inheritRef={circle}
-					innerWidth={innerWidth}
-					mouseX={mouseX}
-					mouseY={mouseY}
-					scrollYProgress={scrollYProgress}
-					isMobile={isMobile}
-				/>
-				<WavesSection
-					inheritRef={wave}
-					scrollYProgress={scrollYProgress}
-					innerWidth={innerWidth}
-				/>
-				<VideosSection isMobile={isMobile} innerWidth={innerWidth} />
-				<TextSection />
-				<OutroSection />
-			</Layout>
+			> */}
+			<CircleSection
+				inheritRef={circle}
+				innerWidth={innerWidth}
+				mouseX={mouseX}
+				mouseY={mouseY}
+				scrollYProgress={scrollYProgress}
+				isMobile={isMobile}
+			/>
+			<WavesSection
+				inheritRef={wave}
+				scrollYProgress={scrollYProgress}
+				innerWidth={innerWidth}
+			/>
+			<VideosSection isMobile={isMobile} innerWidth={innerWidth} />
+			<TextSection />
+			<OutroSection />
+			{/* </Layout> */}
 		</div>
 	);
 };
