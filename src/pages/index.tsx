@@ -10,6 +10,7 @@ import {
 	useScroll,
 	useTransform,
 	m,
+	motion,
 	useAnimate,
 	usePresence,
 	AnimatePresence,
@@ -296,18 +297,18 @@ const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 		}
 	});
 	return (
-		<m.div
+		<motion.div
 			style={{ visibility }}
 			className='fixed right-0 w-full h-full flex justify-end items-end text-[#efefef] z-[1]'
 		>
-			<m.div
+			<motion.div
 				style={{ scale }}
 				initial='hidden'
 				animate='visible'
 				variants={sideCircle}
 				className='absolute w-[200px] lg:w-[260px] aspect-square rounded-full border border-[#bababa] -bottom-12 -right-10 origin-bottom-right'
 			/>
-			<m.ul
+			<motion.ul
 				animate={!isInView ? 'visible' : 'disappear'}
 				variants={snsAnchor}
 				className='pr-[40px] md:pr-[60px] pb-8 flex flex-col items-end font-Roboto font-light text-sm lg:text-lg gap-2 z-[1]'
@@ -317,14 +318,18 @@ const SnsLink: NextPage<SnsLinkProps> = ({ scrollYProgress, isInView }) => {
 					{ name: 'Vimeo', href: 'https://vimeo.com/user136249834' },
 					{ name: 'YouTube', href: 'https://www.youtube.com/@insan8871' },
 				].map((arr, idx) => (
-					<m.li key={idx} variants={snsList} className='hover:text-palettered'>
+					<motion.li
+						key={idx}
+						variants={snsList}
+						className='hover:text-palettered'
+					>
 						<Link href={arr.href} target='_blank'>
 							{arr.name}
 						</Link>
-					</m.li>
+					</motion.li>
 				))}
-			</m.ul>
-		</m.div>
+			</motion.ul>
+		</motion.div>
 	);
 };
 
