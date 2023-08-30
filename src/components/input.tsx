@@ -44,7 +44,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered border border-[#606060]'
 					)}
 					value={value ? value : ''}
 					{...rest}
@@ -59,7 +59,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered border border-[#606060]'
 					)}
 					value={value ? value : ''}
 					{...rest}
@@ -74,14 +74,14 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full bg-[#101010] focus:ring-0 focus:border-palettered border border-[#606060]'
 					)}
 					value={value ? value : ''}
 					{...rest}
 				/>
 			) : null}
 			{type === 'radio' ? (
-				<label>
+				<label className='cursor-pointer block h-full'>
 					<input
 						onChange={onChange}
 						type='radio'
@@ -95,7 +95,7 @@ export default function Input({
 					<div
 						className={cls(
 							labelCss ? labelCss : '',
-							'peer-checked:text-palettered text-[#bababa]'
+							'peer-checked:bg-palettered text-[#bababa] h-full flex justify-center items-center'
 						)}
 					>
 						{labelName}
@@ -116,7 +116,7 @@ export default function Input({
 					spellCheck='false'
 					className={cls(
 						css ? css : '',
-						'font-light placeholder:text-[#bababa] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered'
+						'font-light placeholder:text-[#bababa] w-full block bg-[#101010] resize-none focus:ring-0 focus:border-palettered border border-[#606060]'
 					)}
 					{...rest}
 				/>

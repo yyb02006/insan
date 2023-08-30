@@ -124,42 +124,50 @@ export function VimeoThumbnailFeed({
 											: ''
 									}
 								/>
-								<Input
-									name={`${video.resource_key}`}
-									type='radio'
-									labelName='Film'
-									value='film'
-									data-resourceid={video.player_embed_url}
-									onChange={inputChange}
-									checked={
-										matchedWorkInfos
-											? matchedWorkInfos.category === 'film'
-												? true
-												: false
-											: matchedOwnedVideos?.category === 'film'
-											? true
-											: false
-									}
-									radioDisabled={matchedWorkInfos ? false : true}
-								/>
-								<Input
-									name={`${video.resource_key}`}
-									type='radio'
-									labelName='Short'
-									value='short'
-									data-resourceid={video.player_embed_url}
-									onChange={inputChange}
-									checked={
-										matchedWorkInfos
-											? matchedWorkInfos.category === 'short'
-												? true
-												: false
-											: matchedOwnedVideos?.category === 'short'
-											? true
-											: false
-									}
-									radioDisabled={matchedWorkInfos ? false : true}
-								/>
+								<div className='flex h-12'>
+									<div className='w-full'>
+										<Input
+											name={`${video.resource_key}`}
+											type='radio'
+											labelName='Film'
+											value='film'
+											data-resourceid={video.player_embed_url}
+											onChange={inputChange}
+											checked={
+												matchedWorkInfos
+													? matchedWorkInfos.category === 'film'
+														? true
+														: false
+													: matchedOwnedVideos?.category === 'film'
+													? true
+													: false
+											}
+											radioDisabled={matchedWorkInfos ? false : true}
+											labelCss='peer-checked:border-none peer-checked:text-[#eaeaea] peer-checked:font-bold border border-[#606060]'
+										/>
+									</div>
+									<div className='w-full'>
+										<Input
+											name={`${video.resource_key}`}
+											type='radio'
+											labelName='Short'
+											value='short'
+											data-resourceid={video.player_embed_url}
+											onChange={inputChange}
+											checked={
+												matchedWorkInfos
+													? matchedWorkInfos.category === 'short'
+														? true
+														: false
+													: matchedOwnedVideos?.category === 'short'
+													? true
+													: false
+											}
+											radioDisabled={matchedWorkInfos ? false : true}
+											labelCss='peer-checked:border-none peer-checked:text-[#eaeaea] peer-checked:font-bold border border-[#606060]'
+										/>
+									</div>
+								</div>
 							</div>
 						</div>
 					) : null;
