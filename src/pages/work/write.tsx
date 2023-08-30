@@ -328,7 +328,7 @@ export default function Write({
 
 	return (
 		<Layout
-			seoTitle='Write'
+			seoTitle='WRITE'
 			footerPosition='hidden'
 			nav={{ isShort: true }}
 			menu={false}
