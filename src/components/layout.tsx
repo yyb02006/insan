@@ -11,7 +11,13 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useState } from 'react';
+import {
+	Dispatch,
+	ReactNode,
+	SetStateAction,
+	useEffect,
+	useState,
+} from 'react';
 import Circles from './circles';
 import useMouseSpring from '@/libs/client/useMouseSpring';
 
@@ -76,7 +82,13 @@ const ListMenu = () => {
 	);
 };
 
-const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
+const ExtendedNav = ({
+	isMobile,
+	setIsLoading,
+}: {
+	isMobile: boolean;
+	setIsLoading: Dispatch<SetStateAction<boolean>>;
+}) => {
 	const router = useRouter();
 	const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
 		limitHeight: 0,
@@ -131,6 +143,7 @@ const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
 	useEffect(() => {
 		if (ispresent) {
 			const enterAnimation = async () => {
+				setIsLoading(true);
 				animate(scope.current, { scale: 1 }, { duration: 0.4 });
 				await animate(scope.current, { borderRadius: 0 }, { duration: 0.4 });
 				await animate(
@@ -148,10 +161,12 @@ const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
 					{ scale: [0.7, 1.2, 1], opacity: [0, 1] },
 					{ duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
 				);
+				setIsLoading(false);
 			};
 			enterAnimation();
 		} else {
 			const exitAnimation = async () => {
+				setIsLoading(true);
 				animate(
 					'.Circles',
 					{ scale: [1, 1.5], opacity: [1, 0] },
@@ -173,6 +188,7 @@ const ExtendedNav = ({ isMobile }: { isMobile: boolean }) => {
 				);
 				await animate(scope.current, { scale: 0 }, { duration: 0.4 });
 				safeToRemove();
+				setIsLoading(false);
 			};
 			exitAnimation();
 		}
@@ -279,6 +295,7 @@ const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
 	const [isPresent, safeToRemove] = usePresence();
 	const [isOpen, setIsOpen] = useState(false);
 	const [navRef, animate] = useAnimate();
+	const [isLoading, setIsLoading] = useState(false);
 	useEffect(() => {
 		if (isPresent) {
 			const enterAnimation = async () => {
@@ -322,10 +339,13 @@ const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
 			className='absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
 		>
 			<AnimatePresence>
-				{isOpen ? <ExtendedNav isMobile={isMobile} /> : null}
+				{isOpen ? (
+					<ExtendedNav setIsLoading={setIsLoading} isMobile={isMobile} />
+				) : null}
 			</AnimatePresence>
 			<div
 				onClick={() => {
+					if (isLoading) return;
 					setIsOpen((p) => !p);
 				}}
 				className='relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group'
