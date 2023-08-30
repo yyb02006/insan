@@ -318,7 +318,7 @@ const RoleIntroSection = () => {
 				style={{ x: useTransform(scrollYProgress, [0.6, 1], [-300, 0]) }}
 				className='w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end pl-60'
 			>
-				and Cemera, Lighting, Drone pilot
+				and Camera, Lighting, Drone Operator
 			</motion.div>
 		</section>
 	);
