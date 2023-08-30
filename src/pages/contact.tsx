@@ -101,7 +101,7 @@ export default function Contact() {
 
 	return (
 		<Layout
-			seoTitle='Contact'
+			seoTitle='CONTACT'
 			nav={{ isShort: true }}
 			footerPosition='hidden'
 			description='문의는 nokedny1117@gmail.com 주소로 연락주시면 감사하겠습니다.'

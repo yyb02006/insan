@@ -309,16 +309,16 @@ const RoleIntroSection = () => {
 					style={{ x: useTransform(scrollYProgress, [0.5, 0.9], [300, 0]) }}
 					className='relative sm:absolute font-GmarketSans top-0 sm:top-auto sm:bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[calc(40px+1.3vw)] font-bold px-6 py-2'
 				>
-					<span className='block sm:inline'>Camera,</span>{' '}
 					<span className='block sm:inline'>Director,</span>{' '}
-					<span className='block sm:inline'>Video&nbsp;Editor</span>
+					<span className='block sm:inline'>PD,</span>{' '}
+					<span className='block sm:inline'>Editor</span>
 				</motion.div>
 			</div>
 			<motion.div
 				style={{ x: useTransform(scrollYProgress, [0.6, 1], [-300, 0]) }}
-				className='w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end pl-40'
+				className='w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end pl-60'
 			>
-				also Product Designer, Drone pilot
+				and Cemera, Lighting, Drone pilot
 			</motion.div>
 		</section>
 	);
@@ -517,7 +517,7 @@ const OutroSection = () => {
 
 export default function About() {
 	return (
-		<Layout seoTitle='About' nav={{ isShort: true }}>
+		<Layout seoTitle='ABOUT' nav={{ isShort: true }}>
 			{/* overflow-X-hidden시에 스크롤 버그 생김 */}
 			<main className='w-full overflow-x-hidden scrollbar-hide'>
 				<HeaderSection />

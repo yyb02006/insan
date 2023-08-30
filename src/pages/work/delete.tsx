@@ -507,7 +507,7 @@ export default function Delete({
 
 	return (
 		<Layout
-			seoTitle='Delete'
+			seoTitle='DELETE'
 			footerPosition='hidden'
 			nav={{ isShort: true }}
 			menu={false}
