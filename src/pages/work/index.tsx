@@ -37,7 +37,7 @@ import { GetStaticProps } from 'next';
 export type VideosCategory = 'film' | 'short' | 'outsource';
 
 interface TagButtonProps {
-	tag: { name: string };
+	tag: { name: string; id: string };
 	css: string;
 	onTagFunction: (tag: string) => void;
 }
@@ -330,7 +330,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 				await buttonAnimate(
 					button.current,
 					{ y: [0, -20], opacity: [1, 0] },
-					{ duration: 0.1 }
+					{ duration: 0 }
 				);
 				safeToRemove();
 			};
@@ -341,7 +341,7 @@ const TagButton = ({ tag, css, onTagFunction }: TagButtonProps) => {
 		<div ref={button}>
 			<button
 				onClick={() => {
-					onTagFunction(tag.name);
+					onTagFunction(tag.id);
 				}}
 				className={cls(css, 'border rounded-full p-2')}
 			>
@@ -356,12 +356,14 @@ const TagButtonSection = ({
 	category,
 }: TagButtonSectionProps) => {
 	const initTags = {
-		selected: ['All'],
+		selected: ['all'],
 		tagList: [
-			{ name: 'All', isSelected: true },
-			{ name: 'camera', isSelected: false },
-			{ name: 'director', isSelected: false },
-			{ name: 'edit', isSelected: false },
+			{ name: 'All', id: 'all', isSelected: true },
+			{ name: 'Camera', id: 'camera', isSelected: false },
+			{ name: 'Director', id: 'director', isSelected: false },
+			{ name: 'DOP', id: 'dop', isSelected: false },
+			{ name: 'Drone', id: 'drone', isSelected: false },
+			{ name: 'Edit', id: 'edit', isSelected: false },
 		],
 	};
 	const [tags, setTags] = useState(initTags);
@@ -374,40 +376,42 @@ const TagButtonSection = ({
 		setTags((p) => ({
 			selected: p.selected.filter((el) => el !== tag),
 			tagList: p.tagList.map((el) => ({
-				name: el.name,
-				isSelected: el.name === tag ? false : el.isSelected,
+				...el,
+				isSelected: el.id === tag ? false : el.isSelected,
 			})),
 		}));
 	};
 
 	const insertHandler = (tag: string) => {
 		setTags((p) => ({
-			selected: [...p.selected, tag],
+			selected: [
+				...p.selected,
+				...p.tagList.filter((el) => el.id === tag).map((el) => el.id),
+			],
 			tagList: p.tagList.map((el) => ({
-				name: el.name,
-				isSelected: el.name === tag ? true : el.isSelected,
+				...el,
+				isSelected: el.id === tag ? true : el.isSelected,
 			})),
 		}));
 	};
 
 	const onTagInsert = (tag: string) => {
-		if (tag === 'All') {
-			insertHandler(tag);
+		if (tag === 'all') {
 			setTags((p) => ({
-				selected: [tag],
+				selected: ['all'],
 				tagList: p.tagList.map((el) => ({
-					name: el.name,
-					isSelected: el.name === tag ? true : false,
+					...el,
+					isSelected: el.id === tag ? true : false,
 				})),
 			}));
 		} else {
-			if (tags.selected.some((el) => el === 'All')) {
+			if (tags.selected.some((el) => el === 'all')) {
 				insertHandler(tag);
 				setTags((p) => ({
-					selected: p.selected.filter((el) => el !== 'All'),
+					selected: p.selected.filter((el) => el !== 'all'),
 					tagList: p.tagList.map((el) => ({
-						name: el.name,
-						isSelected: el.name === 'All' ? false : el.isSelected,
+						...el,
+						isSelected: el.id === 'all' ? false : el.isSelected,
 					})),
 				}));
 			} else {
@@ -418,15 +422,15 @@ const TagButtonSection = ({
 
 	const onTagDelete = (tag: string) => {
 		if (tags.selected.length === 1) {
-			if (tag === 'All') {
+			if (tag === 'all') {
 				return;
 			} else {
 				deleteHandler(tag);
 				setTags((p) => ({
-					selected: ['All'],
+					selected: ['all'],
 					tagList: p.tagList.map((el) => ({
-						name: el.name,
-						isSelected: el.name === 'All' ? true : false,
+						...el,
+						isSelected: el.id === 'all' ? true : false,
 					})),
 				}));
 			}
@@ -447,20 +451,23 @@ const TagButtonSection = ({
 	}, [tags, setSelectedTagsCallback]);
 
 	return (
-		<section className='relative bg-[#101010] py-6 flex justify-between px-9'>
-			<div className='flex font-medium text-palettered leading-none text-sm gap-2'>
+		<section className='relative bg-[#101010] py-6 px-9 sm:flex sm:justify-between'>
+			<div className='flex justify-start flex-wrap font-medium text-palettered leading-none text-sm gap-2'>
 				<AnimatePresence>
 					{tags.selected.map((tag) => (
 						<TagButton
 							key={tag}
-							tag={{ name: tag }}
+							tag={{
+								name: initTags.tagList.find((el) => el.id === tag)?.name || '',
+								id: initTags.tagList.find((el) => el.id === tag)?.id || '',
+							}}
 							css='border-palettered'
 							onTagFunction={onTagDelete}
 						/>
 					))}
 				</AnimatePresence>
 			</div>
-			<div className='flex font-medium text-[#bababa] leading-none text-sm gap-2'>
+			<div className='mt-4 sm:mt-0 flex justify-end flex-wrap font-medium text-[#bababa] leading-none text-sm gap-2'>
 				<AnimatePresence>
 					{tags.tagList.map((tag) =>
 						!tag.isSelected ? (
@@ -1274,8 +1281,8 @@ export default function Work({
 	}, [category]);
 
 	const searchIncludesTag = (useSnapshot: boolean) => {
-		const filteredTags = tags.filter((el) => el !== 'All');
-		if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+		const filteredTags = tags.filter((el) => el !== 'all');
+		if (tags.length === 1 && tags.some((tag) => tag === 'all')) {
 			setSearchResults((p) => ({
 				...p,
 				[category]: videos[category].filter((video) =>
@@ -1349,7 +1356,7 @@ export default function Work({
 
 	const updatePage = () => {
 		const getVideos = async () => {
-			const filteredTags = tags.filter((el) => el !== 'All');
+			const filteredTags = tags.filter((el) => el !== 'all');
 			setFetchLoading(true);
 			const lists: VideoResponse = await (
 				await fetch(
@@ -1363,7 +1370,7 @@ export default function Work({
 				...p,
 				[category]: [...p[category], ...lists.works[category]],
 			}));
-			if (tags.length === 1 && tags.some((tag) => tag === 'All')) {
+			if (tags.length === 1 && tags.some((tag) => tag === 'all')) {
 				setSearchResults((p) => ({
 					...p,
 					[category]: [
@@ -1417,7 +1424,7 @@ export default function Work({
 	return (
 		<>
 			<Layout
-				seoTitle='Work'
+				seoTitle='WORK'
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
 				description='디렉터 여인산의 개인 제작 영상을 위주로 외주 제작, 참여 영상 작업물들을 확인할 수 있습니다.'

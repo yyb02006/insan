@@ -89,7 +89,7 @@ interface VideoContainerProps {
 	title: string;
 	role: string;
 	description: string;
-	date: string;
+	genre: string;
 	videoId: string;
 	innerWidth: number;
 	thumbnailLink: string;
@@ -700,7 +700,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 	title,
 	role,
 	description,
-	date,
+	genre,
 	videoId,
 	innerWidth,
 	thumbnailLink,
@@ -717,7 +717,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 			{ kind: '.Title', move: 'down', range: 100 },
 			{ kind: '.Role', move: 'down', range: 100 },
 			{ kind: '.Desc', move: 'up', range: 100 },
-			{ kind: '.Date', move: 'up', range: 100 },
+			{ kind: '.Genre', move: 'up', range: 100 },
 		];
 		const textMotion = (reverse = false) => {
 			motionInfos.forEach((motionInfo) => {
@@ -808,7 +808,7 @@ const VideoContainer: NextPage<VideoContainerProps> = ({
 							{description}
 						</div>
 					</div>
-					<div className='Date text-sm sm:text-2xl'>{date}</div>
+					<div className='Genre text-sm sm:text-xl'>{genre}</div>
 				</div>
 			</div>
 		</section>
@@ -825,7 +825,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 			title: 'EMOTIONAL',
 			role: 'Director',
 			description: '확장과 재창조, 창작의 결과물',
-			date: '2023.2.22',
+			genre: 'MV / Series / Film',
 			videoId: '852566352',
 			thumbnailLink:
 				'https://i.vimeocdn.com/video/1707755112-18437e1930810b2d8db1a3018ebed3871d824a547ada768ed8f67d7855ef1cf3-d_960x540?r=pad',
@@ -833,9 +833,9 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 		{
 			index: 2,
 			title: 'TRENDY',
-			role: 'Camera',
+			role: 'D.O.P',
 			description: '엔터테인먼트와 현실의 연결',
-			date: '2023.2.23',
+			genre: 'Motion / CV / Doc',
 			videoId: '844725783',
 			thumbnailLink:
 				'https://i.vimeocdn.com/video/1696967917-3e7e0ff4aa681be7e2acf1a61c6155ccb7420d768a8e615cc8e7d64c80606920-d_960x540?r=pad',
@@ -843,9 +843,9 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 		{
 			index: 3,
 			title: 'CREATIVE',
-			role: 'Art Director',
-			description: '확장과 재창조, 창작의 결과물',
-			date: '2023.2.24',
+			role: 'Drone Operator',
+			description: '기술을 바탕으로 한 끊임없는 도전정신',
+			genre: 'CF / Edu / Short Film',
 			videoId: '844717748',
 			thumbnailLink:
 				'https://i.vimeocdn.com/video/1696959898-14f7b78bd35137dcd561717429b265947ce7272a735e7b7ed8b4bc56ec229666-d_960x540?r=pad',
@@ -853,9 +853,9 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 		{
 			index: 4,
 			title: 'INTUITIVE',
-			role: 'Lead Developer',
+			role: 'Camera Crews',
 			description: '영감을 주고 받은 기록',
-			date: '2023.2.25',
+			genre: 'Film / MV / Animation',
 			videoId: '852566292',
 			thumbnailLink:
 				'https://i.vimeocdn.com/video/1707754967-f097f998c5b730464d3e56cfd8c0c7c9fdc9376ca910ed687f63faa3d7c27db2-d_640x360?r=pad',
@@ -892,7 +892,7 @@ const VideosSection: NextPage<VideoSectionProps> = ({
 							title={data.title}
 							role={data.role}
 							description={data.description}
-							date={data.date}
+							genre={data.genre}
 							videoId={data.videoId}
 							thumbnailLink={data.thumbnailLink}
 							innerWidth={innerWidth}
