@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
 import { ciIncludes, cls, fetchYouTubeApi } from '@/libs/client/utils';
@@ -152,22 +153,22 @@ const TitleSvgPresense = ({ explanation }: TitleSvgPresenseProps) => {
 		}
 	}, [isPresent, chevronAnimate, safeToRemove]);
 	return (
-		<div ref={chevron} className='relative opacity-0 flex items-center'>
+		<div ref={chevron} className="relative opacity-0 flex items-center">
 			<svg
-				xmlns='http://www.w3.org/2000/svg'
-				fill='none'
-				viewBox='0 0 24 24'
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
 				strokeWidth={1.5}
-				stroke='currentColor'
-				className='w-6 h-6 inline-block'
+				stroke="currentColor"
+				className="w-6 h-6 inline-block"
 			>
 				<path
-					strokeLinecap='round'
-					strokeLinejoin='round'
-					d='M15.75 19.5L8.25 12l7.5-7.5'
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					d="M15.75 19.5L8.25 12l7.5-7.5"
 				/>
 			</svg>
-			<div className='Desc text-lg opacity-0 ml-2 mt-1'>{explanation}</div>
+			<div className="Desc text-lg opacity-0 ml-2 mt-1">{explanation}</div>
 		</div>
 	);
 };
@@ -242,7 +243,7 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 		}
 	}, [categoryState, setCategory]);
 	return (
-		<section className='relative px-9'>
+		<section className="relative px-9">
 			<motion.div
 				style={{ rotate: rotate.current }}
 				className={
@@ -251,23 +252,23 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 			>
 				<Circles liMotion={{ css: 'w-[calc(50px+100%)]' }} />
 			</motion.div>
-			<div className='relative inline-block'>
-				<motion.div className='relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none'>
-					<span className='font-light'>
-						<span ref={ref} className='absolute'></span>
-						<span className='invisible'>{totalDatasLength}&nbsp;</span>
+			<div className="relative inline-block">
+				<motion.div className="relative flex flex-wrap text-[calc(60px+4.5vw)] sm:text-[calc(20px+6.5vw)] font-bold leading-none">
+					<span className="font-light">
+						<span ref={ref} className="absolute"></span>
+						<span className="invisible">{totalDatasLength}&nbsp;</span>
 					</span>
 					<motion.span
 						initial={'initial'}
 						animate={'animate'}
 						variants={titleContainer}
-						className='flex'
+						className="flex"
 					>
 						{Array.from('Works').map((spell, idx) => (
 							<motion.span
 								key={idx}
 								variants={titleChild}
-								className='text-[#101010]'
+								className="text-[#101010]"
 							>
 								{spell}
 							</motion.span>
@@ -293,8 +294,8 @@ const TitleSection = ({ setCategory, initialLength }: TitleSectionProps) => {
 								'relative flex justify-between items-center font-light cursor-pointer transition-color duration-300'
 							)}
 						>
-							<div className='relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight'>
-								<div className='inline-block pr-3'>{info.count} </div>
+							<div className="relative text-[1.5rem] sm:text-[calc(20px+0.7vw)] leading-tight">
+								<div className="inline-block pr-3">{info.count} </div>
 								{info.title}
 							</div>
 							<AnimatePresence>
@@ -355,6 +356,7 @@ const TagButtonSection = ({
 	setSelectedTags,
 	category,
 }: TagButtonSectionProps) => {
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const initTags = {
 		selected: ['all'],
 		tagList: [
@@ -370,7 +372,7 @@ const TagButtonSection = ({
 
 	useEffect(() => {
 		setTags(initTags);
-	}, [category]);
+	}, [category, initTags]);
 
 	const deleteHandler = (tag: string) => {
 		setTags((p) => ({
@@ -448,11 +450,11 @@ const TagButtonSection = ({
 
 	useEffect(() => {
 		setSelectedTags(tags.selected);
-	}, [tags, setSelectedTagsCallback]);
+	}, [tags, setSelectedTagsCallback, setSelectedTags]);
 
 	return (
-		<section className='relative bg-[#101010] py-6 px-9 sm:flex sm:justify-between'>
-			<div className='flex justify-start flex-wrap font-medium text-palettered leading-none text-sm gap-2'>
+		<section className="relative bg-[#101010] py-6 px-9 sm:flex sm:justify-between">
+			<div className="flex justify-start flex-wrap font-medium text-palettered leading-none text-sm gap-2">
 				<AnimatePresence>
 					{tags.selected.map((tag) => (
 						<TagButton
@@ -461,20 +463,20 @@ const TagButtonSection = ({
 								name: initTags.tagList.find((el) => el.id === tag)?.name || '',
 								id: initTags.tagList.find((el) => el.id === tag)?.id || '',
 							}}
-							css='border-palettered'
+							css="border-palettered"
 							onTagFunction={onTagDelete}
 						/>
 					))}
 				</AnimatePresence>
 			</div>
-			<div className='mt-4 sm:mt-0 flex justify-end flex-wrap font-medium text-[#bababa] leading-none text-sm gap-2'>
+			<div className="mt-4 sm:mt-0 flex justify-end flex-wrap font-medium text-[#bababa] leading-none text-sm gap-2">
 				<AnimatePresence>
 					{tags.tagList.map((tag) =>
 						!tag.isSelected ? (
 							<TagButton
 								key={tag.name}
 								tag={tag}
-								css='border-[#9a9a9a] hover:border-palettered hover:text-palettered transition-colors duration-200'
+								css="border-[#9a9a9a] hover:border-palettered hover:text-palettered transition-colors duration-200"
 								onTagFunction={onTagInsert}
 							/>
 						) : null
@@ -503,29 +505,29 @@ const SearchSection = ({
 		<section>
 			<form
 				onSubmit={onSubmit}
-				className='relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]'
+				className="relative mt-[10vh] mx-9 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]"
 			>
 				<button>
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						fill='none'
-						viewBox='0 0 24 24'
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
 						strokeWidth={2}
-						stroke='currentColor'
-						className='w-6 h-6'
+						stroke="currentColor"
+						className="w-6 h-6"
 					>
 						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
 						/>
 					</svg>
 				</button>
 				<Input
-					name='search'
-					type='text'
-					placeholder='search'
-					css='border-none placeholder:font-bold bg-transparent'
+					name="search"
+					type="text"
+					placeholder="search"
+					css="border-none placeholder:font-bold bg-transparent"
 					onChange={onChange}
 					value={searchWords}
 				/>
@@ -582,11 +584,11 @@ const VideoTitlePresense = ({
 	return (
 		<div
 			ref={intro}
-			className='absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none'
+			className="absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none"
 		>
-			<div className='absolute top-0 left-0 w-full h-full bg-[#101010] opacity-30'></div>
-			<div className='relative Title'>{title}</div>
-			<div className='relative Desc font-medium text-xl'>{description}</div>
+			<div className="absolute top-0 left-0 w-full h-full bg-[#101010] opacity-30"></div>
+			<div className="relative Title">{title}</div>
+			<div className="relative Desc font-medium text-xl">{description}</div>
 		</div>
 	);
 };
@@ -652,14 +654,14 @@ const VideoDetail = ({
 				resource
 			);
 		}
-	}, [pattern]);
+	}, [category, pattern]);
 
 	return (
 		<>
-			<div className='fixed w-screen h-screen top-0 left-0 bg-black opacity-80' />
-			<div className='fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent'>
-				<div className='w-full py-16 bg-[#101010]'>
-					<div className='w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12'>
+			<div className="fixed w-screen h-screen top-0 left-0 bg-black opacity-80" />
+			<div className="fixed overflow-y-scroll scrollbar-hide top-0 left-0 w-screen h-full p-4 bg-transparent">
+				<div className="w-full py-16 bg-[#101010]">
+					<div className="w-full flex xl:flex-nowrap flex-wrap justify-evenly gap-y-12">
 						<div
 							className={cls(
 								category === 'short'
@@ -703,9 +705,9 @@ const VideoDetail = ({
 													'absolute top-0 left-0 object-cover'
 												)}
 											/>
-											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
-											<div className='absolute w-full h-full flex justify-center items-center'>
-												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+											<div className="absolute bg-[#000000] opacity-30 w-full h-full" />
+											<div className="absolute w-full h-full flex justify-center items-center">
+												<div className="animate-spin-middle contrast-50 absolute w-[80px] aspect-square">
 													<Circles
 														liMotion={{
 															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
@@ -731,18 +733,18 @@ const VideoDetail = ({
 										}}
 									/>
 									{!isLoaded ? (
-										<div className='absolute top-0 left-0 w-full aspect-video'>
+										<div className="absolute top-0 left-0 w-full aspect-video">
 											<Image
 												src={`https://i.ytimg.com/vi/${thumbnail}/sddefault.jpg`}
 												alt={'will fixed'}
 												width={960}
 												height={540}
 												priority
-												className='absolute top-0 left-0 w-full aspect-video object-cover'
+												className="absolute top-0 left-0 w-full aspect-video object-cover"
 											/>
-											<div className='absolute bg-[#000000] opacity-30 w-full h-full' />
-											<div className='absolute w-full h-full flex justify-center items-center'>
-												<div className='animate-spin-middle contrast-50 absolute w-[80px] aspect-square'>
+											<div className="absolute bg-[#000000] opacity-30 w-full h-full" />
+											<div className="absolute w-full h-full flex justify-center items-center">
+												<div className="animate-spin-middle contrast-50 absolute w-[80px] aspect-square">
 													<Circles
 														liMotion={{
 															css: 'w-[calc(25px+100%)] border-[#eaeaea] border-2',
@@ -755,22 +757,22 @@ const VideoDetail = ({
 								</>
 							) : null}
 						</div>
-						<div className='xl:min-w-[440px] h-auto w-full xl:max-w-[500px] xl:max-h-[calc(100vh-128px)] xl:w-[calc(100vw-1500px)] px-8 flex flex-col justify-between text-[#eaeaea]'>
-							<div className='font-GmarketSans font-semibold text-4xl cursor-default'>
-								<span className='multiline-underline whitespace-break-spaces break-words sm:hover:text-palettered sm:hover:border-palettered'>
+						<div className="xl:min-w-[440px] h-auto w-full xl:max-w-[500px] xl:max-h-[calc(100vh-128px)] xl:w-[calc(100vw-1500px)] px-8 flex flex-col justify-between text-[#eaeaea]">
+							<div className="font-GmarketSans font-semibold text-4xl cursor-default">
+								<span className="multiline-underline whitespace-break-spaces break-words sm:hover:text-palettered sm:hover:border-palettered">
 									{title}
 								</span>
-								<div className='text-xl text-[#dadada] right font-medium mt-4 sm:hover:text-palettered'>
+								<div className="text-xl text-[#dadada] right font-medium mt-4 sm:hover:text-palettered">
 									{role}
 								</div>
-								<div className='text-sm text-[#dadada] font-light sm:hover:text-palettered'>
+								<div className="text-sm text-[#dadada] font-light sm:hover:text-palettered">
 									{date}
 								</div>
 							</div>
-							<div className='h-full text-[#c4c4c4] my-16 font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]'>
+							<div className="h-full text-[#c4c4c4] my-16 font-light text-sm leading-7 overflow-y-scroll scrollbar-hide max-h-[600px]">
 								{description ? description : null}
 							</div>
-							<div className='font-light text-sm self-end text-[#aaaaaa] hover:text-palettered'>
+							<div className="font-light text-sm self-end text-[#aaaaaa] hover:text-palettered">
 								<Link
 									href={
 										category === 'outsource'
@@ -779,7 +781,7 @@ const VideoDetail = ({
 													vimeoId && vimeoId[1] ? vimeoId[1] : ''
 											  }`
 									}
-									target='_blank'
+									target="_blank"
 								>
 									{category === 'outsource'
 										? 'Youtube에서 보기'
@@ -790,23 +792,23 @@ const VideoDetail = ({
 					</div>
 				</div>
 				<button
-					className='absolute m-2 top-4 right-4'
+					className="absolute m-2 top-4 right-4"
 					onClick={() => {
 						setOnDetail((p) => (p ? { ...p, isOpen: false } : undefined));
 					}}
 				>
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						fill='none'
-						viewBox='0 0 24 24'
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
 						strokeWidth={1}
-						stroke='currentColor'
-						className='w-10 h-10 stroke-[#707070]'
+						stroke="currentColor"
+						className="w-10 h-10 stroke-[#707070]"
 					>
 						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							d='M6 18L18 6M6 6l12 12'
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M6 18L18 6M6 6l12 12"
 						/>
 					</svg>
 				</button>
@@ -905,12 +907,12 @@ const Video = ({
 					}));
 				}}
 				key={index}
-				className='relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer'
+				className="relative overflow-hidden w-full flex justify-center items-center aspect-video sm:text-2xl text-[1.25rem] border cursor-pointer"
 			>
 				{category === 'film' || category === 'short' ? (
 					<div
 						ref={videoRef}
-						className='absolute w-full aspect-video bg-[#050505]'
+						className="absolute w-full aspect-video bg-[#050505]"
 					>
 						{/* 이전에 intersecting에 대한 조건이 있었는데,
 						맨 앞의 6개는 처음부터 보이는 상태라 인터섹팅에 포함이 안될 때도 있어서
@@ -932,7 +934,7 @@ const Video = ({
 											}}
 										/>
 									) : titleScreen ? (
-										<div className='w-full h-full flex justify-center'>
+										<div className="w-full h-full flex justify-center">
 											<Image
 												src={animatedThumbnail}
 												alt={`${title}thumbnail`}
@@ -941,14 +943,14 @@ const Video = ({
 												onLoad={() => {
 													setStart(true);
 												}}
-												className='h-full w-auto object-contain'
+												className="h-full w-auto object-contain"
 											/>
 										</div>
 									) : null
 								) : null}
 								{!start && titleScreen ? (
-									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
-										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+									<div className="absolute top-0 w-full h-full flex justify-center items-center">
+										<div className="animate-spin-middle contrast-50 absolute w-[54px] aspect-square">
 											<Circles
 												liMotion={{
 													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
@@ -964,7 +966,7 @@ const Video = ({
 				{category === 'outsource' ? (
 					<div
 						ref={videoRef}
-						className='absolute w-full aspect-video bg-[#050505]'
+						className="absolute w-full aspect-video bg-[#050505]"
 					>
 						{isVideoLoadable && !isMobile ? (
 							<>
@@ -987,8 +989,8 @@ const Video = ({
 									/>
 								) : null}
 								{!start ? (
-									<div className='absolute top-0 w-full h-full flex justify-center items-center'>
-										<div className='animate-spin-middle contrast-50 absolute w-[54px] aspect-square'>
+									<div className="absolute top-0 w-full h-full flex justify-center items-center">
+										<div className="animate-spin-middle contrast-50 absolute w-[54px] aspect-square">
 											<Circles
 												liMotion={{
 													css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
@@ -1001,7 +1003,7 @@ const Video = ({
 						) : null}
 					</div>
 				) : null}
-				<div ref={cover} className='absolute w-full h-full '>
+				<div ref={cover} className="absolute w-full h-full ">
 					<Image
 						src={
 							error
@@ -1019,9 +1021,9 @@ const Video = ({
 						width={640}
 						height={category === 'film' || category === 'short' ? 360 : 480}
 						priority={setpriority}
-						className='relative top-0 w-full aspect-video object-cover'
+						className="relative top-0 w-full aspect-video object-cover"
 					/>
-					<div className='relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none'></div>
+					<div className="relative bg-[#101010] opacity-40 font-bold flex justify-center items-center pointer-events-none"></div>
 				</div>
 				<AnimatePresence>
 					{titleScreen ? (
@@ -1158,7 +1160,7 @@ const OutroSection = ({ isVisible }: OutroSectionProps) => {
 				variants={waveContainer}
 				custom={0.05}
 				ref={letterRef}
-				className='text-[calc(10px+3vw)] h-[40vh] sm:h-[60vh] flex items-end'
+				className="text-[calc(10px+3vw)] h-[40vh] sm:h-[60vh] flex items-end"
 			>
 				{letter.map((letter, idx) => (
 					<motion.span variants={waveChild} key={idx}>
@@ -1168,9 +1170,9 @@ const OutroSection = ({ isVisible }: OutroSectionProps) => {
 			</motion.div>
 			<ul
 				ref={snsLinks}
-				className='text-[calc(40px+3.5vw)] h-[100vh] sm:h-[140vh] flex flex-col justify-center items-center text-[#101010]'
+				className="text-[calc(40px+3.5vw)] h-[100vh] sm:h-[140vh] flex flex-col justify-center items-center text-[#101010]"
 			>
-				<motion.div initial={{ rotate: -60 }} className='Circles absolute'>
+				<motion.div initial={{ rotate: -60 }} className="Circles absolute">
 					{Array.from({ length: 3 }).map((_, idx) => (
 						<motion.div
 							key={idx}
@@ -1184,7 +1186,7 @@ const OutroSection = ({ isVisible }: OutroSectionProps) => {
 					))}
 				</motion.div>
 				{links.map((link) => (
-					<Link key={link.name} href={link.href} target='_blank'>
+					<Link key={link.name} href={link.href} target="_blank">
 						<motion.li
 							style={{ WebkitTextStroke: '1px #9c9c9c' }}
 							onMouseEnter={() => {
@@ -1424,14 +1426,14 @@ export default function Work({
 	return (
 		<>
 			<Layout
-				seoTitle='WORK'
+				seoTitle="WORK"
 				nav={{ isShort: true }}
 				css={onDetail?.isOpen === true ? `invisible` : 'visible'}
-				description='디렉터 여인산의 개인 제작 영상을 위주로 외주 제작, 참여 영상 작업물들을 확인할 수 있습니다.'
+				description="디렉터 여인산의 개인 제작 영상을 위주로 외주 제작, 참여 영상 작업물들을 확인할 수 있습니다."
 			>
 				<main
 					ref={section}
-					className='pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden'
+					className="pt-[100px] font-GmarketSans overflow-x-hidden overflow-y-hidden"
 				>
 					<TitleSection
 						setCategory={setCategory}
@@ -1444,8 +1446,8 @@ export default function Work({
 						searchWords={searchWords}
 						category={category}
 					/>
-					<section className='relative bg-[#101010] pb-20 sm:pb-36'>
-						<div className='relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 '>
+					<section className="relative bg-[#101010] pb-20 sm:pb-36">
+						<div className="relative grid lg:grid-cols-3 sm:gap-0 gap-4 sm:grid-cols-2 grid-cols-1 px-9 ">
 							<AnimatePresence>
 								{searchResults[category].map((data, idx) =>
 									idx < perPage * (page - 1) ? (
@@ -1481,9 +1483,9 @@ export default function Work({
 												isMobile={isMobile}
 												setpriority={idx < 6 ? true : false}
 											/>
-											<div className='block sm:hidden'>
-												<div className='mt-1 font-semibold'>{data.title}</div>
-												<div className='font-light text-xs'>
+											<div className="block sm:hidden">
+												<div className="mt-1 font-semibold">{data.title}</div>
+												<div className="font-light text-xs">
 													{data.description}
 												</div>
 											</div>
@@ -1494,8 +1496,8 @@ export default function Work({
 						</div>
 						<div ref={intersectionRef} className={`absolute h-1 w-full`} />
 						{fetchLoading ? (
-							<div className='relative w-full h-60 flex justify-center items-center'>
-								<div className='animate-spin-middle contrast-50 absolute w-[40px] aspect-square'>
+							<div className="relative w-full h-60 flex justify-center items-center">
+								<div className="animate-spin-middle contrast-50 absolute w-[40px] aspect-square">
 									<Circles
 										liMotion={{
 											css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
@@ -1508,7 +1510,7 @@ export default function Work({
 					<OutroSection
 						isVisible={page > searchResults[category].length / perPage + 1}
 					/>
-					<ToTop toScroll={section} position='right' />
+					<ToTop toScroll={section} position="right" />
 				</main>
 			</Layout>
 			{onDetail && onDetail.isOpen === true ? (
