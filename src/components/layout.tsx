@@ -64,7 +64,7 @@ const ListMenu = () => {
 	return (
 		<ul
 			ref={navRef}
-			className='relative z-[1] top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 '
+			className="relative z-[1] top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 "
 		>
 			{[
 				{ href: '/work', name: 'Work' },
@@ -73,7 +73,7 @@ const ListMenu = () => {
 			].map((arr, idx) => (
 				<li
 					key={idx}
-					className='relative opacity-0 hover:text-palettered transition-colors duration-300'
+					className="relative opacity-0 hover:text-palettered transition-colors duration-300"
 				>
 					<Link href={arr.href}>{arr.name}</Link>
 				</li>
@@ -225,19 +225,19 @@ const ExtendedNav = ({
 			initial={{ scale: 0 }}
 			onMouseMove={onMove}
 			onMouseLeave={onLeave}
-			className='origin-top-right box-content fixed rounded-es-full left-0 top-0 w-[100vw] h-[100vh] bg-[#101010]'
+			className="origin-top-right box-content fixed rounded-es-full left-0 top-0 w-[100vw] h-[100vh] bg-[#101010]"
 		>
-			<div className='font-bold font-GmarketSans flex flex-col items-center justify-center w-full h-full'>
-				<ul className='flex flex-col justify-center items-center leading-none space-y-14'>
+			<div className="font-bold font-GmarketSans flex flex-col items-center justify-center w-full h-full">
+				<ul className="flex flex-col justify-center items-center leading-none space-y-14">
 					{menu.map((menu, idx) => (
-						<li key={idx} className='opacity-0 Menu relative'>
+						<li key={idx} className="opacity-0 Menu relative">
 							<motion.div
 								className={cls(
 									`${menu.name}Letter`,
 									'absolute bottom-0 right-0 text-[calc(10px+0.75vw)] leading-normal font-extralight text-[#eaeaea] text-right'
 								)}
 							>
-								<span className='text-palettered'>{menu.redWord}</span>
+								<span className="text-palettered">{menu.redWord}</span>
 								{menu.whiteletter}
 							</motion.div>
 							<Link href={menu.path}>
@@ -336,7 +336,7 @@ const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
 	return (
 		<ul
 			ref={navRef}
-			className='absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9'
+			className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
 		>
 			<AnimatePresence>
 				{isOpen ? (
@@ -348,9 +348,9 @@ const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
 					if (isLoading) return;
 					setIsOpen((p) => !p);
 				}}
-				className='relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group'
+				className="relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group"
 			>
-				<ul className='h-6 aspect-square flex flex-col justify-between items-end'>
+				<ul className="h-6 aspect-square flex flex-col justify-between items-end">
 					{[
 						{ position: 'top', width: 'w-6' },
 						{ position: 'middle', width: 'w-4' },
@@ -397,30 +397,34 @@ export default function Layout({
 					{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}
 				</title>
 				<meta
-					name='description'
+					name="description"
 					content={
 						description ||
 						'선 좀 넘는 디렉터 여인산입니다. 주로 서울에서 활동하며 M/V, P/V, 유튜브, 숏폼, 관광/외식 등 다양한 영상분야에서 활동 중입니다.'
 					}
 				/>
+				<meta
+					name="google-site-verification"
+					content="2xWAj__7dmJHQCCBs01Y9G7NUZ1uV2tOhnHDhwsSrN0"
+				/>
 			</Head>
 			{logo ? (
-				<div className='fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center'>
-					<Link href={'/'} className='flex justify-center items-center'>
-						<div className='absolute h-16 aspect-square bg-[#101010] rounded-full' />
+				<div className="fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center">
+					<Link href={'/'} className="flex justify-center items-center">
+						<div className="absolute h-16 aspect-square bg-[#101010] rounded-full" />
 						<Image
-							src='/images/Logo.svg'
-							alt='INSAN'
+							src="/images/Logo.svg"
+							alt="INSAN"
 							width={28}
 							height={42}
-							className='relative cursor-pointer'
+							className="relative cursor-pointer"
 							priority
 						/>
 					</Link>
 				</div>
 			) : null}
 			{menu ? (
-				<div className='fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center'>
+				<div className="fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
 					<AnimatePresence>
 						{!nav.isShort ? <ListMenu /> : null}
 					</AnimatePresence>
