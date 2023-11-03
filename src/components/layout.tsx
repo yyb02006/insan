@@ -403,10 +403,6 @@ export default function Layout({
 						'선 좀 넘는 디렉터 여인산입니다. 주로 서울에서 활동하며 M/V, P/V, 유튜브, 숏폼, 관광/외식 등 다양한 영상분야에서 활동 중입니다.'
 					}
 				/>
-				<meta
-					name="google-site-verification"
-					content="2xWAj__7dmJHQCCBs01Y9G7NUZ1uV2tOhnHDhwsSrN0"
-				/>
 			</Head>
 			{logo ? (
 				<div className="fixed z-[1000] left-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center">
