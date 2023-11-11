@@ -356,8 +356,7 @@ const TagButtonSection = ({
 	setSelectedTags,
 	category,
 }: TagButtonSectionProps) => {
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const initTags = {
+	const initTagsRef = useRef({
 		selected: ['all'],
 		tagList: [
 			{ name: 'All', id: 'all', isSelected: true },
@@ -367,12 +366,19 @@ const TagButtonSection = ({
 			{ name: 'Drone', id: 'drone', isSelected: false },
 			{ name: 'Edit', id: 'edit', isSelected: false },
 		],
-	};
+	});
+
+	const initTags = initTagsRef.current;
+
 	const [tags, setTags] = useState(initTags);
 
 	useEffect(() => {
+		setSelectedTags(tags.selected);
+	}, [tags, setSelectedTags]);
+
+	useEffect(() => {
 		setTags(initTags);
-	}, [category, initTags]);
+	}, [category, initTags, setTags]);
 
 	const deleteHandler = (tag: string) => {
 		setTags((p) => ({
@@ -440,17 +446,6 @@ const TagButtonSection = ({
 			deleteHandler(tag);
 		}
 	};
-
-	const setSelectedTagsCallback = useCallback(
-		(selected: string[]) => {
-			setSelectedTags(selected);
-		},
-		[setSelectedTags]
-	);
-
-	useEffect(() => {
-		setSelectedTags(tags.selected);
-	}, [tags, setSelectedTagsCallback, setSelectedTags]);
 
 	return (
 		<section className="relative bg-[#101010] py-6 px-9 sm:flex sm:justify-between">
@@ -1422,6 +1417,8 @@ export default function Work({
 			fetchLoading,
 		],
 	});
+
+	console.log('is inifinite re-rendered?');
 
 	return (
 		<>
