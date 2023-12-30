@@ -391,8 +391,6 @@ export default function Layout({
 		);
 	}, []);
 
-	console.log('Is Infinite Re-Rendered From Layout?');
-
 	return (
 		<section className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
 			<Head>
