@@ -269,7 +269,7 @@ const ExtendedNav = ({
 							/>
 						</li>
 					))}
-					<div className="font-light self-end text-[#909090] hover:text-palettered">
+					<div className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered">
 						<Link href={'/enter'}>{'Admin >'}</Link>
 					</div>
 				</ul>
