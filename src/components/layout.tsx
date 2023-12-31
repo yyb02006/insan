@@ -70,6 +70,7 @@ const ListMenu = () => {
 				{ href: '/work', name: 'Work' },
 				{ href: '/about', name: 'About' },
 				{ href: '/contact', name: 'Contact' },
+				{ href: '/enter', name: 'Admin' },
 			].map((arr, idx) => (
 				<li
 					key={idx}
@@ -268,7 +269,11 @@ const ExtendedNav = ({
 							/>
 						</li>
 					))}
+					<div className="font-light self-end text-[#909090] hover:text-palettered">
+						<Link href={'/enter'}>{'Admin >'}</Link>
+					</div>
 				</ul>
+
 				{/* 컴포넌트를 쪼개서 만드는 수밖에... */}
 				{circles.map((element, idx) => (
 					<motion.div
