@@ -82,26 +82,26 @@ const HeaderSection = () => {
 	return (
 		<section
 			ref={scope}
-			className='relative h-screen text-[calc(60px+2.8vw)] flex flex-col items-center justify-center leading-none font-GmarketSans font-bold'
+			className="relative h-screen text-[calc(60px+2.8vw)] flex flex-col items-center justify-center leading-none font-GmarketSans font-bold"
 		>
 			<motion.div
 				initial={{ scale: 0 }}
-				className='CircleContainer absolute w-[70vw] max-w-[716px] aspect-square flex justify-center items-center'
+				className="CircleContainer absolute w-[70vw] max-w-[716px] aspect-square flex justify-center items-center"
 			>
 				<Image
-					alt='face'
+					alt="face"
 					width={716}
 					height={716}
-					src='/images/face.png'
-					className='relative w-full'
+					src="/images/face.png"
+					className="relative w-full"
 				/>
 				<ScrollTransformDiv
 					scrollYProgress={scrollYProgress}
 					scrollEnd={1}
 					valueStart={0}
 					valueEnd={360}
-					transform='rotate'
-					css='absolute w-full h-full origin-center'
+					transform="rotate"
+					css="absolute w-full h-full origin-center"
 				>
 					<Circles
 						liMotion={{ css: 'w-[calc(28px+100%)] sm:w-[calc(50px+100%)]' }}
@@ -113,8 +113,8 @@ const HeaderSection = () => {
 				scrollEnd={0.5}
 				valueStart={0}
 				valueEnd={-800}
-				transform='y'
-				css='TopLetter opacity-0 relative flex justify-start break-keep w-[73%]'
+				transform="y"
+				css="TopLetter opacity-0 relative flex justify-start break-keep w-[73%]"
 			>
 				선 좀 넘는 디렉터,
 			</ScrollTransformDiv>
@@ -124,7 +124,7 @@ const HeaderSection = () => {
 				valueStart={0}
 				valueEnd={-200}
 				transform={'y'}
-				css='Line relative border-t w-0'
+				css="Line relative border-t w-0"
 			/>
 			<ScrollTransformDiv
 				scrollYProgress={scrollYProgress}
@@ -132,7 +132,7 @@ const HeaderSection = () => {
 				valueStart={0}
 				valueEnd={-400}
 				transform={'y'}
-				css='BottomLetter opacity-0 relative flex mt-5 break-keep justify-end w-[73%]'
+				css="BottomLetter opacity-0 relative flex mt-5 break-keep justify-end w-[73%]"
 			>
 				여인산
 				<wbr />
@@ -211,7 +211,7 @@ const WorkIntroSection = () => {
 		<section>
 			<div
 				ref={title}
-				className='h-[30vh] sm:h-[100vh] px-16 sm:px-32 flex items-start sm:items-center'
+				className="h-[30vh] sm:h-[100vh] px-16 sm:px-32 flex items-start sm:items-center"
 			>
 				<DoubleQuotation>
 					<motion.div
@@ -219,7 +219,7 @@ const WorkIntroSection = () => {
 						animate={isInview ? 'visible' : 'hidden'}
 						variants={waveContainer}
 						custom={0.05}
-						className='font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end'
+						className="font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end"
 					>
 						{Array.from('저는 이런 일을 합니다').map((letter, idx) => {
 							if (idx > 2 && idx < 7) {
@@ -227,7 +227,7 @@ const WorkIntroSection = () => {
 									<motion.span
 										variants={waveChild}
 										style={{ WebkitTextStroke: 0 }}
-										className='text-[#eaeaea]'
+										className="text-[#eaeaea]"
 										key={idx}
 									>
 										{letter === ' ' ? '\u00A0' : letter}
@@ -237,7 +237,7 @@ const WorkIntroSection = () => {
 								return (
 									<motion.span
 										variants={waveChild}
-										className='text-[#101010]'
+										className="text-[#101010]"
 										key={idx}
 									>
 										{letter === ' ' ? '\u00A0' : letter}
@@ -250,7 +250,7 @@ const WorkIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative z-[1] px-[8vw] sm:px-[16vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight tracking-tighter font-Pretendard font-bold'
+				className="relative z-[1] px-[8vw] sm:px-[16vw] text-[calc(6px+4vw)] text-[#eaeaea] leading-tight tracking-tighter font-Pretendard font-bold"
 			>
 				{descDatas.map((data, idx) => (
 					<WorkIntroSectionMotionLi
@@ -264,7 +264,7 @@ const WorkIntroSection = () => {
 						)}
 					>
 						{data.firstLetter}
-						<span className='font-thin text-[#bababa]'>
+						<span className="font-thin text-[#bababa]">
 							{data.secondLetter}
 						</span>
 					</WorkIntroSectionMotionLi>
@@ -291,32 +291,32 @@ const RoleIntroSection = () => {
 		}
 	}, [isInview, animate]);
 	return (
-		<section ref={scope} className='sm:px-[9vw] pb-40 mt-8 sm:mt-10'>
-			<div className='relative w-full aspect-video'>
+		<section ref={scope} className="sm:px-[9vw] pb-40 mt-8 sm:mt-10">
+			<div className="relative w-full aspect-video">
 				<motion.div
 					initial={{ y: 200, scale: 0.5, opacity: 0.3 }}
-					className='Image relative w-full aspect-video overflow-hidden'
+					className="Image relative w-full aspect-video overflow-hidden"
 				>
 					<Image
-						src='/images/field.png'
-						alt='fieldPicture'
+						src="/images/field.png"
+						alt="fieldPicture"
 						width={1600}
 						height={900}
-						className='w-full'
+						className="w-full"
 					/>
 				</motion.div>
 				<motion.div
 					style={{ x: useTransform(scrollYProgress, [0.5, 0.9], [300, 0]) }}
-					className='relative sm:absolute font-GmarketSans top-0 sm:top-auto sm:bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[calc(40px+1.3vw)] font-bold px-6 py-2'
+					className="relative sm:absolute font-GmarketSans top-0 sm:top-auto sm:bottom-16 right-4 bg-[#eaeaea] text-[#101010] text-[calc(40px+1.3vw)] font-bold px-6 py-2"
 				>
-					<span className='block sm:inline'>Director,</span>{' '}
-					<span className='block sm:inline'>PD,</span>{' '}
-					<span className='block sm:inline'>Editor</span>
+					<span className="block sm:inline">Director,</span>{' '}
+					<span className="block sm:inline">PD,</span>{' '}
+					<span className="block sm:inline">Editor</span>
 				</motion.div>
 			</div>
 			<motion.div
 				style={{ x: useTransform(scrollYProgress, [0.6, 1], [-300, 0]) }}
-				className='w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end pl-60'
+				className="w-full py-8 sm:py-16 text-5xl leading-tight sm:leading-none font-bold font-GmarketSans flex items-end sm:pl-60"
 			>
 				and Camera, Lighting, Drone Operator
 			</motion.div>
@@ -389,10 +389,10 @@ const JobIntroSection = () => {
 		offset: ['start end', 'end center'],
 	});
 	return (
-		<section className=''>
+		<section className="">
 			<div
 				ref={title}
-				className='h-[80vh] sm:h-[100vh] pt-32 sm:pt-0 pb-32 flex justify-center sm:justify-end items-start sm:items-center sm:px-32'
+				className="h-[80vh] sm:h-[100vh] pt-32 sm:pt-0 pb-32 flex justify-center sm:justify-end items-start sm:items-center sm:px-32"
 			>
 				<DoubleQuotation>
 					<motion.div
@@ -400,7 +400,7 @@ const JobIntroSection = () => {
 						animate={isInview ? 'visible' : 'hidden'}
 						variants={waveContainer}
 						custom={0.05}
-						className='font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end'
+						className="font-GmarketSans font-bold text-[calc(6px+5.5vw)] flex items-end"
 					>
 						{Array.from('저는 이런 디렉터 입니다').map((letter, idx) => {
 							if (idx > 5 && idx < 9) {
@@ -408,7 +408,7 @@ const JobIntroSection = () => {
 									<motion.span
 										variants={waveChild}
 										style={{ WebkitTextStroke: 0 }}
-										className='text-[#eaeaea]'
+										className="text-[#eaeaea]"
 										key={idx}
 									>
 										{letter === ' ' ? '\u00A0' : letter}
@@ -418,7 +418,7 @@ const JobIntroSection = () => {
 								return (
 									<motion.span
 										variants={waveChild}
-										className='text-[#101010]'
+										className="text-[#101010]"
 										key={idx}
 									>
 										{letter === ' ' ? '\u00A0' : letter}
@@ -431,26 +431,26 @@ const JobIntroSection = () => {
 			</div>
 			<ul
 				ref={desc}
-				className='relative w-full sm:w-[75%] gap-y-[20vh] sm:gap-x-4 m-auto grid sm:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed'
+				className="relative w-full sm:w-[75%] gap-y-[20vh] sm:gap-x-4 m-auto grid sm:grid-cols-2 grid-cols-1 justify-items-center text-[15px] items-center aspect-square leading-relaxed"
 			>
 				{descDatas.map((data, idx) => (
 					<li
 						key={idx}
-						className='relative xl:w-[340px] md:w-[260px] sm:w-[200px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between'
+						className="relative xl:w-[340px] md:w-[260px] sm:w-[200px] w-full px-9 sm:px-0 h-[250px] aspect-square flex flex-col items-center justify-between"
 					>
-						<div className='absolute w-full h-full flex justify-center items-center'>
+						<div className="absolute w-full h-full flex justify-center items-center">
 							<JobIntroSectionMotionDiv
 								scrollYProgress={scrollYProgress}
 								idx={idx}
 								startValue={-300}
-								css='absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full'
+								css="absolute min-w-[500px] w-[40vw] aspect-square border border-[#707070] rounded-full"
 							/>
 						</div>
 						<JobIntroSectionMotionDiv
 							scrollYProgress={scrollYProgress}
 							idx={idx}
 							startValue={-100}
-							css='relative w-full text-[2rem] font-bold font-GmarketSans'
+							css="relative w-full text-[2rem] font-bold font-GmarketSans"
 						>
 							{data.title}
 						</JobIntroSectionMotionDiv>
@@ -458,9 +458,9 @@ const JobIntroSection = () => {
 							scrollYProgress={scrollYProgress}
 							idx={idx}
 							startValue={200}
-							css='relative font-extralight text-sm sm:text-[0.9375rem] sm:text-[#cacaca] mb-10 sm:mb-6 sm:leading-7 tracking-tighter'
+							css="relative font-extralight text-sm sm:text-[0.9375rem] sm:text-[#cacaca] mb-10 sm:mb-6 sm:leading-7 tracking-tighter"
 						>
-							<span className='leading-relaxed'>{data.desc}</span>
+							<span className="leading-relaxed">{data.desc}</span>
 						</JobIntroSectionMotionDiv>
 					</li>
 				))}
@@ -489,14 +489,14 @@ const OutroSection = () => {
 	}, [isInview, outroAnimate, scope]);
 	return (
 		<section ref={scope}>
-			<Link href='/contact'>
-				<div className='relative mt-[40vh] w-full h-[100vh] flex justify-center items-center'>
+			<Link href="/contact">
+				<div className="relative mt-[40vh] w-full h-[100vh] flex justify-center items-center">
 					<div
 						onMouseEnter={onCircleEnter}
 						onMouseLeave={onCircleLeave}
-						className='relative w-[calc(160px+20vw)] aspect-square rounded-full flex justify-center items-center'
+						className="relative w-[calc(160px+20vw)] aspect-square rounded-full flex justify-center items-center"
 					>
-						<div className='Circle absolute w-full aspect-square'>
+						<div className="Circle absolute w-full aspect-square">
 							<Circles
 								ulMotion={{ css: 'animate-spin-slow' }}
 								liMotion={{ css: 'w-[110%]' }}
@@ -504,7 +504,7 @@ const OutroSection = () => {
 						</div>
 						<span
 							style={{ WebkitTextStroke: '1px #eaeaea' }}
-							className='Text relative font-GmarketSans font-bold text-[calc(40px+8.2vw)] text-[#101010]'
+							className="Text relative font-GmarketSans font-bold text-[calc(40px+8.2vw)] text-[#101010]"
 						>
 							Contact
 						</span>
@@ -517,9 +517,9 @@ const OutroSection = () => {
 
 export default function About() {
 	return (
-		<Layout seoTitle='ABOUT' nav={{ isShort: true }}>
+		<Layout seoTitle="ABOUT" nav={{ isShort: true }}>
 			{/* overflow-X-hidden시에 스크롤 버그 생김 */}
-			<main className='w-full overflow-x-hidden scrollbar-hide'>
+			<main className="w-full overflow-x-hidden scrollbar-hide">
 				<HeaderSection />
 				<WorkIntroSection />
 				<RoleIntroSection />

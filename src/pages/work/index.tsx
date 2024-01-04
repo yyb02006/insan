@@ -362,7 +362,7 @@ const TagButtonSection = ({
 			{ name: 'All', id: 'all', isSelected: true },
 			{ name: 'Camera', id: 'camera', isSelected: false },
 			{ name: 'Director', id: 'director', isSelected: false },
-			{ name: 'DOP', id: 'dop', isSelected: false },
+			{ name: 'D.O.P', id: 'd.o.p', isSelected: false },
 			{ name: 'Drone', id: 'drone', isSelected: false },
 			{ name: 'Edit', id: 'edit', isSelected: false },
 		],
@@ -579,7 +579,7 @@ const VideoTitlePresense = ({
 	return (
 		<div
 			ref={intro}
-			className="absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none"
+			className="absolute w-full h-[40%] flex flex-col justify-center items-center font-bold pointer-events-none px-6 text-center"
 		>
 			<div className="absolute top-0 left-0 w-full h-full bg-[#101010] opacity-30"></div>
 			<div className="relative Title">{title}</div>
@@ -1418,8 +1418,6 @@ export default function Work({
 		],
 	});
 
-	console.log('is inifinite re-rendered?');
-
 	return (
 		<>
 			<Layout
@@ -1537,14 +1535,17 @@ export const getStaticProps: GetStaticProps = async () => {
 		film: await client.works.findMany({
 			where: { category: 'film' },
 			take: 12,
+			orderBy: { createdAt: 'desc' },
 		}),
 		short: await client.works.findMany({
 			where: { category: 'short' },
 			take: 12,
+			orderBy: { createdAt: 'desc' },
 		}),
 		outsource: await client.works.findMany({
 			where: { category: 'outsource' },
 			take: 12,
+			orderBy: { createdAt: 'desc' },
 		}),
 	};
 	let initialHasNextPage = { film: false, short: false, outsource: false };
