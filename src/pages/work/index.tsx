@@ -1545,7 +1545,6 @@ export const getStaticProps: GetStaticProps = async () => {
 		outsource: await client.works.findMany({
 			where: { category: 'outsource' },
 			take: 12,
-			orderBy: { createdAt: 'desc' },
 		}),
 	};
 	let initialHasNextPage = { film: false, short: false, outsource: false };
