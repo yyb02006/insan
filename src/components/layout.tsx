@@ -11,7 +11,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import Circles from './circles';
 import useMouseSpring from '@/libs/client/useMouseSpring';
 import ScrollBar from './scrollbar';
@@ -19,6 +19,7 @@ import ScrollBar from './scrollbar';
 interface LayoutProps {
   seoTitle: string;
   children: ReactNode;
+  scrollbar?: boolean;
   css?: string;
   footerPosition?: string;
   nav?: { exist?: boolean; isShort: boolean };
@@ -368,17 +369,18 @@ export default function Layout({
   nav = { exist: true, isShort: false },
   logo = true,
   menu = true,
+  scrollbar = true,
   description,
 }: LayoutProps) {
+  const layoutRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(true);
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsMobile(/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent));
   }, []);
-
   return (
-    <section className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
+    <section ref={layoutRef} className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
       <Head>
         <title>{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}</title>
         <meta
@@ -421,7 +423,7 @@ export default function Layout({
       >
         2023 Insan - all rights reserved
       </footer>
-      <ScrollBar paddingY={12} right={8} />
+      {scrollbar ? <ScrollBar paddingY={12} right={8} /> : null}
     </section>
   );
 }
