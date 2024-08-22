@@ -1090,7 +1090,6 @@ const OutroSection = ({ isVisible }: OutroSectionProps) => {
 			href: 'https://www.youtube.com/@insan8871',
 		},
 	];
-
 	const onLinksEnter = (angle: number, selector: string) => {
 		snsLinksAnimate('.Circles', { rotate: angle }, { duration: 0.4 });
 		snsLinksAnimate(
