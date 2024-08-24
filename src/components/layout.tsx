@@ -11,14 +11,18 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import Circles from './circles';
 import useMouseSpring from '@/libs/client/useMouseSpring';
 import ScrollBar from './scrollbar';
+import useMutation from '@/libs/client/useMutation';
+import { AuthResponse } from '@/pages/enter';
+import LoaidngIndicator from './loadingIndicator';
 
 interface LayoutProps {
   seoTitle: string;
   children: ReactNode;
+  scrollbar?: boolean;
   css?: string;
   footerPosition?: string;
   nav?: { exist?: boolean; isShort: boolean };
@@ -27,7 +31,58 @@ interface LayoutProps {
   description?: string;
 }
 
-const ListMenu = () => {
+interface ListMenuProps {
+  isAdmin: boolean;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+interface LogoutButtonProps {
+  name: string;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+const LogoutButton = ({ name, setIsLoading }: LogoutButtonProps) => {
+  const router = useRouter();
+  const [send, { loading, data }] = useMutation<AuthResponse>('/api/admin');
+  const handleOnLogoutClick = () => {
+    if (loading) return;
+    send({
+      action: 'logout',
+      secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
+    });
+  };
+  useEffect(() => {
+    if (data?.success === true) {
+      switch (router.pathname) {
+        case '/':
+          router.reload();
+          break;
+        default:
+          router.push('/');
+          break;
+      }
+    } else if (data?.success === false) {
+      console.error(data.error);
+    }
+  }, [data?.success, router]);
+  useEffect(() => {
+    setIsLoading(loading);
+  }, [loading]);
+  return <button onClick={handleOnLogoutClick}>{name}</button>;
+};
+
+const ListMenu = ({ isAdmin, setIsLoading }: ListMenuProps) => {
+  const menuList = [
+    { id: 'work', href: '/work', name: 'Work', type: 'link' },
+    { id: 'about', href: '/about', name: 'About', type: 'link' },
+    { id: 'contact', href: '/contact', name: 'Contact', type: 'link' },
+    {
+      id: 'auth',
+      href: '/enter',
+      name: isAdmin ? 'Logout' : 'Admin',
+      type: isAdmin ? 'button' : 'link',
+    },
+  ];
   const [isPresent, safeToRemove] = usePresence();
   const [navRef, animate] = useAnimate();
   useEffect(() => {
@@ -61,17 +116,16 @@ const ListMenu = () => {
       ref={navRef}
       className="relative z-[1] top-0 right-0 font-Roboto font-light text-[15px] text-[#E1E1E1] flex gap-9 "
     >
-      {[
-        { href: '/work', name: 'Work' },
-        { href: '/about', name: 'About' },
-        { href: '/contact', name: 'Contact' },
-        { href: '/enter', name: 'Admin' },
-      ].map((arr, idx) => (
+      {menuList.map((arr, idx) => (
         <li
           key={idx}
           className="relative opacity-0 hover:text-palettered transition-colors duration-300"
         >
-          <Link href={arr.href}>{arr.name}</Link>
+          {arr.name === 'Logout' ? (
+            <LogoutButton setIsLoading={setIsLoading} name={arr.name} />
+          ) : (
+            <Link href={arr.href}>{arr.name}</Link>
+          )}
         </li>
       ))}
     </ul>
@@ -368,17 +422,25 @@ export default function Layout({
   nav = { exist: true, isShort: false },
   logo = true,
   menu = true,
+  scrollbar = true,
   description,
 }: LayoutProps) {
+  const layoutRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsMobile(/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent));
+    const getUser = async () => {
+      const userInfo = await (await fetch('/api/work/own')).json();
+      setIsAdmin(userInfo.success);
+    };
+    getUser();
   }, []);
-
   return (
-    <section className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
+    <section ref={layoutRef} className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
       <Head>
         <title>{router.pathname === '/' ? `${seoTitle}` : `${seoTitle} | INSAN`}</title>
         <meta
@@ -406,7 +468,9 @@ export default function Layout({
       ) : null}
       {menu ? (
         <div className="fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
-          <AnimatePresence>{!nav.isShort ? <ListMenu /> : null}</AnimatePresence>
+          <AnimatePresence>
+            {!nav.isShort ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
+          </AnimatePresence>
           <AnimatePresence>
             {nav.isShort ? <HamburgerMenu isMobile={isMobile} /> : null}
           </AnimatePresence>
@@ -421,7 +485,8 @@ export default function Layout({
       >
         2023 Insan - all rights reserved
       </footer>
-      <ScrollBar paddingY={12} right={8} />
+      {scrollbar ? <ScrollBar paddingY={12} right={8} /> : null}
+      {isLoading ? <LoaidngIndicator /> : null}
     </section>
   );
 }

@@ -1,86 +1,89 @@
 import Circles from '@/components/circles';
 import Input from '@/components/input';
+import LoaidngIndicator from '@/components/loadingIndicator';
 import useMutation from '@/libs/client/useMutation';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { SyntheticEvent, useEffect, useState } from 'react';
 
 export interface AuthResponse {
-	success: boolean;
-	message: string;
-	error?: unknown;
+  success: boolean;
+  message: string;
+  error?: unknown;
 }
 
 export default function Admin() {
-	const router = useRouter();
-	const [password, setPassword] = useState<string>('');
-	const [sendPassword, { loading, data }] =
-		useMutation<AuthResponse>(`/api/admin`);
+  const router = useRouter();
+  const [password, setPassword] = useState<string>('');
+  const [sendPassword, { loading, data }] = useMutation<AuthResponse>(`/api/admin`);
 
-	const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
-		setPassword(e.currentTarget.value);
-	};
+  const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
+    setPassword(e.currentTarget.value);
+  };
 
-	const onPasswordSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		if (loading) return;
-		sendPassword({
-			password,
-			action: 'login',
-			secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
-		});
-	};
+  const onPasswordSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (loading) return;
+    sendPassword({
+      password,
+      action: 'login',
+      secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
+    });
+  };
 
-	useEffect(() => {
-		if (data?.success === true) {
-			router.push('work/write');
-		} else if (data?.success === false && data.error) {
-			console.log(data.error);
-		}
-	}, [data?.success, router]);
+  useEffect(() => {
+    if (data?.success === true) {
+      router.push('work/write');
+    } else if (data?.success === false && data.error) {
+      console.log(data.error);
+    }
+  }, [data?.success, router]);
 
-	return (
-		<div className='w-screen h-screen flex justify-center items-center bg-pink-500'>
-			<div className='max-w-[480px] w-full space-y-1 -translate-y-14'>
-				<form onSubmit={onPasswordSubmit}>
-					<Input
-						type='text'
-						name='password'
-						css='border-none placeholder:text-[#bababa]'
-						onChange={onPasswordChange}
-						value={password}
-						placeholder='쟈갸 우리 비밀번호 알지♡'
-					></Input>
-					<button className='bg-green-600 w-full h-10 font-semibold'>
-						여자친구 몰래 입장~♡
-					</button>
-					{data?.success === false && !data.error ? (
-						<span>오빵 실망이양...ㅠㅠ</span>
-					) : data?.success === false && data.error ? (
-						<span>
-							먼가 문제가 있는디? F12 관리자창 열어서 개발자놈한테 에러메세지
-							ㄱㄱ
-						</span>
-					) : null}
-				</form>
-			</div>
-			{loading ? (
-				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
-					<div className='animate-spin-middle contrast-50 absolute w-[100px] aspect-square'>
-						<Circles
-							liMotion={{
-								css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
-							}}
-						/>
-					</div>
-				</div>
-			) : null}
-			{data?.success === true ? (
-				<div className='fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black'>
-					<div>
-						Secret... <span className='text-palettered'>맞춰버렸다구?~♥</span>
-					</div>
-				</div>
-			) : null}
-		</div>
-	);
+  return (
+    <div className="relative w-screen h-screen flex justify-center items-center bg-[#101010]">
+      <div className="fixed z-[1000] left-0 top-0 mt-6 ml-[40px] md:ml-[60px] w-[42px] h-[42px] flex justify-start items-center">
+        <Link href="/" className="flex justify-center items-center">
+          <div className="absolute h-16 aspect-square bg-[#101010] rounded-full" />
+          <Image
+            src="/images/Logo.svg"
+            alt="INSAN"
+            width={28}
+            height={42}
+            className="relative cursor-pointer"
+            priority
+          />
+        </Link>
+      </div>
+      <div className="max-w-[480px] w-full -translate-y-14">
+        <div className="relative w-full space-y-1">
+          <div className="absolute w-[120%] aspect-square top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]">
+            <Circles liMotion={{ css: 'w-[110%]' }} />
+          </div>
+          <form onSubmit={onPasswordSubmit} className="relative">
+            <Input
+              type="text"
+              name="password"
+              css="border border-[#eaeaea] placeholder:text-[#bababa]"
+              onChange={onPasswordChange}
+              value={password}
+              placeholder="Enter Your Password"
+            />
+            <button className="bg-green-600 w-full h-10 font-semibold">Submit</button>
+          </form>
+        </div>
+        {data?.success === false && !data.error ? (
+          <span>Invalid password. Please try again</span>
+        ) : data?.success === false && data.error ? (
+          <span>F12 관리자모드의 console 내용 개발자에게 전달 필요</span>
+        ) : null}
+      </div>
+      {loading ? <LoaidngIndicator /> : null}
+      {data?.success === true ? (
+        <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black">
+          <div>Authentication Successful</div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
