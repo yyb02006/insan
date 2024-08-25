@@ -29,7 +29,6 @@ export async function middleware(req: NextRequest, ev: NextFetchEvent) {
 			: 'http://localhost:3000'
 	); */
   const deniedPathname = ['/work/write', '/work/delete', '/exit'];
-
   if (
     req.nextUrl.pathname.includes('.') ||
     req.nextUrl.pathname.startsWith('/api') ||
@@ -66,6 +65,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|images/.*|favicon.ico).*)',
   ],
 };

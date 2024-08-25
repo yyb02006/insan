@@ -16,7 +16,7 @@ export interface AuthResponse {
 export default function Admin() {
   const router = useRouter();
   const [password, setPassword] = useState<string>('');
-  const [sendPassword, { loading, data }] = useMutation<AuthResponse>(`/api/admin`);
+  const [sendPassword, { loading, data, error }] = useMutation<AuthResponse>(`/api/admin`);
 
   const onPasswordChange = (e: SyntheticEvent<HTMLInputElement>) => {
     setPassword(e.currentTarget.value);
@@ -74,7 +74,7 @@ export default function Admin() {
         </div>
         {data?.success === false && !data.error ? (
           <span>Invalid password. Please try again</span>
-        ) : data?.success === false && data.error ? (
+        ) : data?.success === false && (data.error || error) ? (
           <span>F12 관리자모드의 console 내용 개발자에게 전달 필요</span>
         ) : null}
       </div>
