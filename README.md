@@ -105,3 +105,8 @@ This project is licensed under the MIT License
   - **_/exit_** 글로벌 메뉴의 Logout 버튼으로 기능 대체
   - PC 환경에서 기존 스크롤 바를 대체하는 자체적인 스크롤 바 추가
   - pscale에서 vercel postgres로 DB 마이그레이션
+
+- **Version 0.3.1 (2024-08-26):**
+
+  - 확장 메뉴를 열었을 때 스크롤을 잠그고 스크롤 바 숨김
+  - 확장 메뉴를 열었을 때 로고 버튼 숨김
