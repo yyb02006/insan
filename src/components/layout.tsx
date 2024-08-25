@@ -332,12 +332,15 @@ const ExtendedNav = ({
 const HamburgerMenu = ({
   isMobile,
   videoLength,
+  isExtended,
+  setIsExtended,
 }: {
   isMobile: boolean;
   videoLength: VideoLength;
+  isExtended: boolean;
+  setIsExtended: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [isPresent, safeToRemove] = usePresence();
-  const [isOpen, setIsOpen] = useState(false);
   const [navRef, animate] = useAnimate();
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
@@ -367,30 +370,30 @@ const HamburgerMenu = ({
     }
   }, [isPresent, animate, safeToRemove]);
   useEffect(() => {
-    if (isOpen && isPresent) {
+    if (isExtended && isPresent) {
       animate('.top', { y: 11.5, rotate: -45 });
       animate('.bottom', { y: -11.5, rotate: 45 });
       animate('.middle', { opacity: 0 });
-    } else if (!isOpen && isPresent) {
+    } else if (!isExtended && isPresent) {
       animate('.top', { y: 0, rotate: 0 });
       animate('.bottom', { y: 0, rotate: 0 });
       animate('.middle', { opacity: 1 });
     }
-  }, [isOpen, isPresent, animate]);
+  }, [isExtended, isPresent, animate]);
   return (
     <ul
       ref={navRef}
       className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
     >
       <AnimatePresence>
-        {isOpen ? (
+        {isExtended ? (
           <ExtendedNav videoLength={videoLength} setIsLoading={setIsLoading} isMobile={isMobile} />
         ) : null}
       </AnimatePresence>
       <div
         onClick={() => {
           if (isLoading) return;
-          setIsOpen((p) => !p);
+          setIsExtended((p) => !p);
         }}
         className="relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group"
       >
@@ -431,6 +434,8 @@ export default function Layout({
   const [isMobile, setIsMobile] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExtended, setIsExtended] = useState(false);
+
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsMobile(/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent));
@@ -450,6 +455,19 @@ export default function Layout({
     }
     getUser();
   }, []);
+
+  useEffect(() => {
+    if (isExtended) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isExtended]);
+
   return (
     <section ref={layoutRef} className={cls(css ? css : '', 'relative min-h-screen h-auto')}>
       <Head>
@@ -478,12 +496,19 @@ export default function Layout({
         </div>
       ) : null}
       {menu ? (
-        <div className="fixed z-[999] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
+        <div className="fixed z-[1001] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
           <AnimatePresence>
             {!nav.isShort ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
           </AnimatePresence>
           <AnimatePresence>
-            {nav.isShort ? <HamburgerMenu videoLength={videoLength} isMobile={isMobile} /> : null}
+            {nav.isShort ? (
+              <HamburgerMenu
+                isExtended={isExtended}
+                setIsExtended={setIsExtended}
+                videoLength={videoLength}
+                isMobile={isMobile}
+              />
+            ) : null}
           </AnimatePresence>
         </div>
       ) : null}
@@ -496,7 +521,7 @@ export default function Layout({
       >
         2023 Insan - all rights reserved
       </footer>
-      {scrollbar || !(menu && nav.isShort) ? <ScrollBar paddingY={12} right={8} /> : null}
+      {scrollbar && !isExtended ? <ScrollBar paddingY={12} right={8} /> : null}
       {isLoading ? <LoaidngIndicator /> : null}
     </section>
   );
