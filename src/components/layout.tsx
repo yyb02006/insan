@@ -485,7 +485,7 @@ export default function Layout({
       >
         2023 Insan - all rights reserved
       </footer>
-      {scrollbar ? <ScrollBar paddingY={12} right={8} /> : null}
+      {scrollbar || !(menu && nav.isShort) ? <ScrollBar paddingY={12} right={8} /> : null}
       {isLoading ? <LoaidngIndicator /> : null}
     </section>
   );
