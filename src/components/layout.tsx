@@ -18,6 +18,7 @@ import ScrollBar from './scrollbar';
 import useMutation from '@/libs/client/useMutation';
 import { AuthResponse } from '@/pages/enter';
 import LoaidngIndicator from './loadingIndicator';
+import { VideoLength, useAppContext } from '@/appContext';
 
 interface LayoutProps {
   seoTitle: string;
@@ -134,9 +135,11 @@ const ListMenu = ({ isAdmin, setIsLoading }: ListMenuProps) => {
 
 const ExtendedNav = ({
   isMobile,
+  videoLength,
   setIsLoading,
 }: {
   isMobile: boolean;
+  videoLength: VideoLength;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
@@ -146,22 +149,11 @@ const ExtendedNav = ({
   });
   const [ispresent, safeToRemove] = usePresence();
   const [scope, animate] = useAnimate();
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const getCount = async () => {
-      const length = await fetchData('/api/work?purpose=length');
-      const {
-        works: { film, short, outsource },
-      } = length;
-      setCount(film + short + outsource);
-    };
-    getCount();
-  }, []);
   const menu = [
     {
       name: 'Work',
-      redWord: count,
-      whiteletter: ' video works',
+      redWord: videoLength === undefined ? '' : videoLength,
+      whiteletter: videoLength === undefined ? '' : ' video works',
       path: '/work',
     },
     {
@@ -337,7 +329,13 @@ const ExtendedNav = ({
   );
 };
 
-const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
+const HamburgerMenu = ({
+  isMobile,
+  videoLength,
+}: {
+  isMobile: boolean;
+  videoLength: VideoLength;
+}) => {
   const [isPresent, safeToRemove] = usePresence();
   const [isOpen, setIsOpen] = useState(false);
   const [navRef, animate] = useAnimate();
@@ -385,7 +383,9 @@ const HamburgerMenu = ({ isMobile }: { isMobile: boolean }) => {
       className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
     >
       <AnimatePresence>
-        {isOpen ? <ExtendedNav setIsLoading={setIsLoading} isMobile={isMobile} /> : null}
+        {isOpen ? (
+          <ExtendedNav videoLength={videoLength} setIsLoading={setIsLoading} isMobile={isMobile} />
+        ) : null}
       </AnimatePresence>
       <div
         onClick={() => {
@@ -425,6 +425,7 @@ export default function Layout({
   scrollbar = true,
   description,
 }: LayoutProps) {
+  const { videoLength, setVideoLength } = useAppContext();
   const layoutRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(true);
@@ -437,6 +438,16 @@ export default function Layout({
       const userInfo = await (await fetch('/api/work/own')).json();
       setIsAdmin(userInfo.success);
     };
+    const getLength = async () => {
+      const length = await fetchData('/api/work?purpose=length');
+      const {
+        works: { film, short, outsource },
+      } = length;
+      setVideoLength(film + short + outsource);
+    };
+    if (videoLength === undefined) {
+      getLength();
+    }
     getUser();
   }, []);
   return (
@@ -472,7 +483,7 @@ export default function Layout({
             {!nav.isShort ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
           </AnimatePresence>
           <AnimatePresence>
-            {nav.isShort ? <HamburgerMenu isMobile={isMobile} /> : null}
+            {nav.isShort ? <HamburgerMenu videoLength={videoLength} isMobile={isMobile} /> : null}
           </AnimatePresence>
         </div>
       ) : null}
