@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app';
 import { Roboto } from 'next/font/google';
 import localFont from 'next/font/local';
 import { cls } from '@/libs/client/utils';
+import { AppProvider } from '../appContext';
 
 const roboto = Roboto({
   weight: ['100', '300', '400', '500', '700', '900'],
@@ -35,10 +36,12 @@ const gMarKetSans = localFont({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <LazyMotion features={domAnimation}>
-      <main className={cls(roboto.variable, gMarKetSans.variable)}>
-        <Component {...pageProps} />
-      </main>
-    </LazyMotion>
+    <AppProvider>
+      <LazyMotion features={domAnimation}>
+        <main className={cls(roboto.variable, gMarKetSans.variable)}>
+          <Component {...pageProps} />
+        </main>
+      </LazyMotion>
+    </AppProvider>
   );
 }
