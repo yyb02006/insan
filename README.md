@@ -110,3 +110,7 @@ This project is licensed under the MIT License
 
   - 확장 메뉴를 열었을 때 스크롤을 잠그고 스크롤 바 숨김
   - 확장 메뉴를 열었을 때 로고 버튼 숨김
+
+- **Version 0.4.1 (2024-08-27):**
+
+  - **_/work/write_, _/work/delete_** 버튼을 클릭해 리스트 방식의 레이아웃으로 스위칭 가능
