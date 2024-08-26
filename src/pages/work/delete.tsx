@@ -210,7 +210,7 @@ export const UitilButtons = ({
           'w-full flex justify-center items-center ring-1 ring-palettered aspect-square bg-[#101010] rounded-full'
         )}
       >
-        {isGrid ? <GridIcon /> : <ListIcon />}
+        {isGrid ? <ListIcon /> : <GridIcon />}
       </button>
     </div>
   );
