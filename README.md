@@ -114,3 +114,7 @@ This project is licensed under the MIT License
 - **Version 0.4.1 (2024-08-27):**
 
   - **_/work/write_, _/work/delete_** 버튼을 클릭해 리스트 방식의 레이아웃으로 스위칭 가능
+
+- **Version 0.4.2 (2024-08-28):**
+
+  - 모바일 기종 인식 정규식 개선
