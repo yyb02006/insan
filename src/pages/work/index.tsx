@@ -1156,7 +1156,11 @@ export default function Work({ initialLength, initialWorks, initialHasNextPage }
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
-    setIsMobile(/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent));
+    setIsMobile(
+      /android(?!.*tablet)|iphone|blackberry|iemobile|opera mini|windows phone|mobile|lg|samsung|nokia|htc|xiaomi|sony|google|oneplus|realme/i.test(
+        userAgent
+      )
+    );
   }, []);
 
   useEffect(() => {
@@ -1254,7 +1258,7 @@ export default function Work({ initialLength, initialWorks, initialHasNextPage }
       setFetchLoading(true);
       const lists: VideoResponse = await (
         await fetch(
-          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
+          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}&order=desc`
         )
       ).json();
       if (lists.works[category].length < perPage) {
@@ -1417,16 +1421,17 @@ export const getStaticProps: GetStaticProps = async () => {
     film: await client.works.findMany({
       where: { category: 'film' },
       take: 12,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { id: 'desc' },
     }),
     short: await client.works.findMany({
       where: { category: 'short' },
       take: 12,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { id: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
+      orderBy: { id: 'desc' },
     }),
   };
   let initialHasNextPage = { film: false, short: false, outsource: false };
