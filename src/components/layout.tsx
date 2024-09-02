@@ -438,7 +438,11 @@ export default function Layout({
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
-    setIsMobile(/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent));
+    setIsMobile(
+      /android(?!.*tablet)|iphone|blackberry|iemobile|opera mini|windows phone|mobile|lg|samsung|nokia|htc|xiaomi|sony|google|oneplus|realme/i.test(
+        userAgent
+      )
+    );
     const getUser = async () => {
       const userInfo = await (await fetch('/api/work/own')).json();
       setIsAdmin(userInfo.success);
