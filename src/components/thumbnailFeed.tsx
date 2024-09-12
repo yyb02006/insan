@@ -1,6 +1,58 @@
 import Image from 'next/image';
 import Input from './input';
 import Circles from './circles';
+import { VimeofeedProps, YoutubefeedProps } from './typings/components';
+import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
+import { WorkInfos } from '@/pages/work/write';
+
+export const createInputChange = (
+  setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>,
+  workInfos: WorkInfos[] | undefined
+) => {
+  return (e?: SyntheticEvent<HTMLInputElement>) => {
+    if (e === undefined) return;
+    const { value, name, dataset, type } = e.currentTarget;
+    const workIdx = workInfos?.findIndex((i) => i.resourceId === dataset.resourceid);
+    if (workIdx !== undefined && workIdx >= 0) {
+      if (name === 'title') {
+        setWorkInfos((p) =>
+          p.map((arr) => (arr.resourceId === dataset.resourceid ? { ...arr, title: value } : arr))
+        );
+      } else if (name === 'description') {
+        setWorkInfos((p) =>
+          p.map((arr) =>
+            arr.resourceId === dataset.resourceid ? { ...arr, description: value } : arr
+          )
+        );
+      } else if (name === 'date') {
+        setWorkInfos((p) =>
+          p.map((arr) => (arr.resourceId === dataset.resourceid ? { ...arr, date: value } : arr))
+        );
+      } else if (type === 'radio') {
+        setWorkInfos((p) =>
+          p.map((arr) =>
+            arr.resourceId === dataset.resourceid ? { ...arr, category: value } : arr
+          )
+        );
+      }
+    } else {
+      if (name === 'title') {
+        setWorkInfos((p) => [
+          ...p,
+          {
+            resourceId: dataset.resourceid || '',
+            title: value,
+            description: dataset.description || '',
+            category: dataset.category || '',
+            date: dataset.date || '',
+            thumbnailLink: dataset.thumbnail || '',
+            animatedThumbnailLink: dataset.animated_thumbnail || '',
+          },
+        ]);
+      }
+    }
+  };
+};
 
 export function VimeoThumbnailFeed({
   resource,
@@ -9,9 +61,10 @@ export function VimeoThumbnailFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: VimeofeedProps) {
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
@@ -183,9 +236,10 @@ export function YoutubeThumbnailFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: YoutubefeedProps) {
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 ">
