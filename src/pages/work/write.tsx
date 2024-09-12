@@ -141,6 +141,8 @@ export default function Write({
     }
   };
 
+  /* Legacy inputChange Function Code
+
   const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value, name, dataset, type } = e.currentTarget;
     const workIdx = workInfos?.findIndex((i) => i.resourceId === dataset.resourceid);
@@ -186,7 +188,7 @@ export default function Write({
         ]);
       }
     }
-  };
+  }; */
 
   const onSubmitWrites = () => {
     const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
@@ -316,10 +318,10 @@ export default function Write({
         {category === 'filmShort' && list[category].length > 0 ? (
           isGrid ? (
             <VimeoThumbnailFeed
-              inputChange={inputChange}
               inputBlur={inputBlur}
-              resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
+              resource={searchResults[category]}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
               ownedVideos={ownedVideos[category]}
@@ -327,10 +329,10 @@ export default function Write({
             />
           ) : (
             <VimeoListFeed
-              inputChange={inputChange}
               inputBlur={inputBlur}
-              resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
+              resource={searchResults[category]}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
               ownedVideos={ownedVideos[category]}
@@ -341,8 +343,8 @@ export default function Write({
         {category === 'outsource' ? (
           isGrid ? (
             <YoutubeThumbnailFeed
-              inputChange={inputChange}
               resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
@@ -352,8 +354,8 @@ export default function Write({
             />
           ) : (
             <YoutubeListFeed
-              inputChange={inputChange}
               resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}

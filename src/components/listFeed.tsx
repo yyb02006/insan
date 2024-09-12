@@ -3,6 +3,8 @@ import Circles from './circles';
 import Input from './input';
 import { useState } from 'react';
 import Image from 'next/image';
+import { VimeofeedProps, YoutubefeedProps } from './typings/components';
+import { createInputChange } from './thumbnailFeed';
 
 const VimeoThumbnailPreview = ({
   altName,
@@ -47,10 +49,11 @@ export function VimeoListFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: VimeofeedProps) {
   const alterColor = 'bg-[#1a1a1a]';
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <ul className="space-y-4">
@@ -257,10 +260,11 @@ export function YoutubeListFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: YoutubefeedProps) {
   const alterColor = 'bg-[#1a1a1a]';
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <ul className="space-y-4">
