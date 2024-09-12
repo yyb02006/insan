@@ -569,6 +569,11 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     dependencyArray: [page, fetchLoading],
   });
 
+  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
+    if (category === categoryLabel) return;
+    setCategory(categoryLabel);
+  };
+
   return (
     <Layout seoTitle="DELETE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
@@ -576,10 +581,10 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
-            setCategory('filmShort');
+            onCategoryClick('filmShort');
           }}
           onOutsourceClick={() => {
-            setCategory('outsource');
+            onCategoryClick('outsource');
           }}
         />
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />

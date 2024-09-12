@@ -299,6 +299,12 @@ export default function Write({
     }
   };
 
+  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
+    if (category === categoryLabel) return;
+    setCategory(categoryLabel);
+    setWorkInfos([]);
+  };
+
   return (
     <Layout seoTitle="WRITE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
@@ -306,12 +312,10 @@ export default function Write({
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
-            setCategory('filmShort');
-            setWorkInfos([]);
+            onCategoryClick('filmShort');
           }}
           onOutsourceClick={() => {
-            setCategory('outsource');
-            setWorkInfos([]);
+            onCategoryClick('outsource');
           }}
         />
         <SearchForm onSearch={onSearch} searchWord={searchWord} setSearchWord={setSearchWord} />
