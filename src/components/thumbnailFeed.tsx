@@ -35,14 +35,23 @@ export function VimeoThumbnailFeed({
               }`}
             >
               <div>
-                <Image
-                  src={`${video.pictures.base_link}_640x360?r=pad`}
-                  alt={`${video.name} thumbnail`}
-                  width={640}
-                  height={360}
-                  priority={idx < 6 ? true : false}
-                  className="w-full"
-                />
+                <div className="relative">
+                  <Image
+                    src={`${video.pictures.base_link}_640x360?r=pad`}
+                    alt={`${video.name} thumbnail`}
+                    width={640}
+                    height={360}
+                    priority={idx < 6 ? true : false}
+                    className="w-full"
+                  />
+                  {video.animated_thumbnail !== 'no-link' ? (
+                    <ul className="w-full h-10 pb-3 px-3 absolute bottom-0 right-0 flex justify-end gap-2">
+                      <li className="w-auto text-sm font-semibold bg-palettered p-2 flex justify-center items-center rounded-md">
+                        Thumb
+                      </li>
+                    </ul>
+                  ) : null}
+                </div>
                 <div className="mt-2">
                   <div className="text-sm text-[#bababa] ">Title : {video.name}</div>
                   <div className="text-xs font-light text-[#bababa] break-words">

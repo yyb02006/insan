@@ -22,7 +22,7 @@ const VimeoThumbnailPreview = ({
       }}
       className="text-xs sm:text-sm ml-2 font-normal cursor-pointer hover:text-palettered"
     >
-      <span className="whitespace-nowrap">( 썸네일 보기 )</span>
+      <span className="whitespace-nowrap text-[#888888] hover:text-palettered">( 미리보기 )</span>
       {onThumbnail ? (
         <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
           <div className="bg-black opacity-80 w-full h-full absolute left-0 top-0"></div>
@@ -84,7 +84,12 @@ export function VimeoListFeed({
                         : ''
                     }`}
                   >{`${idx + 1}. `}</span>
-                  <span>{video.name} </span>
+                  <span className="mr-2">{video.name}</span>
+                  {video.animated_thumbnail !== 'no-link' ? (
+                    <span className="text-xs text-[#eaeaea] font-semibold bg-palettered inline-flex p-1 rounded-md">
+                      Thumb
+                    </span>
+                  ) : null}
                   <VimeoThumbnailPreview
                     altName={video.name}
                     baseLink={video.pictures.base_link}
