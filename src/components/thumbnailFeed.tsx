@@ -4,6 +4,7 @@ import Circles from './circles';
 import { VimeofeedProps, YoutubefeedProps } from './typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
 import { OwnedVideoItems, VimeoVideos, WorkInfos } from '@/pages/work/write';
+import { cls } from '@/libs/client/utils';
 
 export const createInputChange = (
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>,
@@ -99,7 +100,7 @@ export function VimeoThumbnailFeed({
   const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
         {resource.map(
           (
             { animated_thumbnail, name, pictures: { base_link }, player_embed_url, resource_key },
@@ -111,9 +112,8 @@ export function VimeoThumbnailFeed({
             const matchedOwnedVideo = ownedVideos.find(
               (ownedVideo) => ownedVideo.resourceId === player_embed_url
             );
-
             return idx < 12 * (page - 1) ? (
-              <div
+              <li
                 key={idx} /* resource_key */
                 className={`w-full flex flex-col justify-between ${
                   matchedWorkInfo
@@ -137,7 +137,10 @@ export function VimeoThumbnailFeed({
                         matchedOwnedVideo,
                       });
                     }}
-                    className="relative"
+                    className={cls(
+                      !matchedWorkInfo ? 'hover:ring-2 hover:ring-palettered' : '',
+                      'relative cursor-pointer'
+                    )}
                   >
                     <Image
                       src={`${base_link}_640x360?r=pad`}
@@ -258,11 +261,11 @@ export function VimeoThumbnailFeed({
                     </div>
                   </div>
                 </div>
-              </div>
+              </li>
             ) : null;
           }
         )}
-      </div>
+      </ul>
       <div ref={intersectionRef} className="h-32 my-10 order-last">
         {fetchLoading ? (
           <div className="relative w-full h-full flex justify-center items-center">
@@ -293,7 +296,7 @@ export function YoutubeThumbnailFeed({
   const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 ">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 ">
         {resource.map((video, idx) => {
           const matchedWorkInfo = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.snippet.resourceId?.videoId
@@ -302,7 +305,7 @@ export function YoutubeThumbnailFeed({
             (ownedVideo) => ownedVideo.resourceId === video.snippet.resourceId?.videoId
           );
           return idx < 12 * (page - 1) ? (
-            <div
+            <li
               key={idx}
               className={`w-full flex flex-col justify-between ${
                 matchedWorkInfo
@@ -381,10 +384,10 @@ export function YoutubeThumbnailFeed({
                   }
                 />
               </div>
-            </div>
+            </li>
           ) : null;
         })}
-      </div>
+      </ul>
       <div ref={intersectionRef} className="h-32 my-10 order-last">
         {fetchLoading ? (
           <div className="relative w-full h-full flex justify-center items-center">
