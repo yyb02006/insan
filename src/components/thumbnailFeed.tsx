@@ -55,18 +55,18 @@ export const createInputChange = (
   };
 };
 
-const onPictureClick = ({
+export const onListItemClick = ({
   matchedWorkInfo,
   matchedOwnedVideo,
-  currentVideo,
+  currentVideoDetails,
   setWorkInfos,
 }: {
   matchedWorkInfo?: WorkInfos;
   matchedOwnedVideo?: OwnedVideoItems;
-  currentVideo: { resourceId: string; thumbnailLink: string; animatedThumbnailLink: string };
+  currentVideoDetails: { resourceId: string; thumbnailLink: string; animatedThumbnailLink: string };
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>;
 }) => {
-  const { animatedThumbnailLink, thumbnailLink, resourceId } = currentVideo;
+  const { animatedThumbnailLink, thumbnailLink, resourceId } = currentVideoDetails;
   if (matchedWorkInfo) {
     setWorkInfos((prev) =>
       prev.filter(({ resourceId }) => resourceId !== matchedWorkInfo.resourceId)
@@ -126,8 +126,8 @@ export function VimeoThumbnailFeed({
                 <div>
                   <div
                     onClick={() => {
-                      onPictureClick({
-                        currentVideo: {
+                      onListItemClick({
+                        currentVideoDetails: {
                           resourceId: player_embed_url,
                           thumbnailLink: base_link,
                           animatedThumbnailLink: animated_thumbnail,
