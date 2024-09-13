@@ -199,10 +199,10 @@ export const UtilButtons = ({
             : 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
           'aspect-square text-sm rounded-full'
         )}
-        disabled={count === 0}
+        disabled={!onSelectedList && count === 0}
       >
         <div>{count}</div>
-        <div>Lists</div>
+        <div>Videos</div>
       </button>
       <button
         onClick={onViewSwitch}
