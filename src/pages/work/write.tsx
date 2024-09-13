@@ -11,7 +11,7 @@ import {
   CategoryTab,
   MenuBar,
   SearchForm,
-  UitilButtons,
+  UtilButtons,
   VideoCollection,
 } from './delete';
 import ToTop from '@/components/toTop';
@@ -369,20 +369,22 @@ export default function Write({
             />
           )
         ) : null}
-        <UitilButtons
-          onViewClick={() => {
+        {/* These buttons will be used in mobile environment */}
+        <UtilButtons
+          onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
-          onClick={onSelectedListClick}
+          onListClick={onSelectedListClick}
           isGrid={isGrid}
           count={workInfos ? workInfos?.length : 0}
-          isOnMobile={true}
+          useOnMobile={true}
           onSelectedList={onSelectedList}
         />
+        {/* These Buttons for any other environmnet */}
         <ButtonsController
-          onReset={onReset}
-          onSave={onSubmitWrites}
-          onSort={onSelectedListClick}
+          onResetClick={onReset}
+          onSaveClick={onSubmitWrites}
+          onListClick={onSelectedListClick}
           onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
