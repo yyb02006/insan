@@ -247,19 +247,17 @@ export default function Write({
   };
 
   const onReset = () => {
-    if (workInfos.length > 0) {
-      setWorkInfos([]);
-      resetInit();
-      topElement.current?.scrollIntoView();
-    }
+    if (workInfos.length < 1) return;
+    setWorkInfos([]);
+    resetInit();
+    topElement.current?.scrollIntoView();
   };
 
   const onSelectedListClick = () => {
     if (onSelectedList) {
       resetInit();
     } else {
-      const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
-      if (!workInfos || inspectedWorkInfos?.length < 1) return;
+      if (workInfos.length < 1) return;
       setPage(2);
       setSearchWord('');
       setSearchWordSnapshot('');
@@ -269,30 +267,26 @@ export default function Write({
         setSearchResults((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some((video) => video.resourceId === info.player_embed_url)
+            workInfos?.some((video) => video.resourceId === info.player_embed_url)
           ),
         }));
         setSearchResultsSnapshot((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some((video) => video.resourceId === info.player_embed_url)
+            workInfos?.some((video) => video.resourceId === info.player_embed_url)
           ),
         }));
       } else if (category === 'outsource') {
         setSearchResults((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some(
-              (video) => video.resourceId === info.snippet.resourceId?.videoId
-            )
+            workInfos?.some((video) => video.resourceId === info.snippet.resourceId?.videoId)
           ),
         }));
         setSearchResultsSnapshot((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some(
-              (video) => video.resourceId === info.snippet.resourceId?.videoId
-            )
+            workInfos?.some((video) => video.resourceId === info.snippet.resourceId?.videoId)
           ),
         }));
       }
@@ -376,7 +370,7 @@ export default function Write({
           }}
           onListClick={onSelectedListClick}
           isGrid={isGrid}
-          count={workInfos ? workInfos?.length : 0}
+          count={workInfos.length}
           useOnMobile={true}
           onSelectedList={onSelectedList}
         />
@@ -390,7 +384,7 @@ export default function Write({
           }}
           isGrid={isGrid}
           onSelectedList={onSelectedList}
-          count={workInfos ? workInfos?.length : 0}
+          count={workInfos.length}
           action="save"
         />
       </section>
