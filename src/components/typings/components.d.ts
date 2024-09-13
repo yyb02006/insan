@@ -1,4 +1,5 @@
-import { OwnedVideoItems, WorkInfos } from '@/pages/work/write';
+import { GapiItem } from '@/pages/work';
+import { OwnedVideoItems, VimeoVideos, WorkInfos } from '@/pages/work/write';
 import { Dispatch, MutableRefObject, SetStateAction, SyntheticEvent } from 'react'; // import를 사용하는 순간 global에서 local로 변경
 
 interface videoFeedItem {
