@@ -63,10 +63,13 @@ export const onListItemClick = ({
 }: {
   matchedWorkInfo?: WorkInfos;
   matchedOwnedVideo?: OwnedVideoItems;
-  currentVideoDetails: { resourceId: string; thumbnailLink: string; animatedThumbnailLink: string };
+  currentVideoDetails?: {
+    resourceId?: string;
+    thumbnailLink?: string;
+    animatedThumbnailLink?: string;
+  };
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>;
 }) => {
-  const { animatedThumbnailLink, thumbnailLink, resourceId } = currentVideoDetails;
   if (matchedWorkInfo) {
     setWorkInfos((prev) =>
       prev.filter(({ resourceId }) => resourceId !== matchedWorkInfo.resourceId)
@@ -79,9 +82,9 @@ export const onListItemClick = ({
         description: matchedOwnedVideo?.description || '',
         date: matchedOwnedVideo?.date || '',
         category: matchedOwnedVideo?.category || '',
-        resourceId,
-        thumbnailLink,
-        animatedThumbnailLink,
+        resourceId: currentVideoDetails?.resourceId || '',
+        thumbnailLink: currentVideoDetails?.thumbnailLink || '',
+        animatedThumbnailLink: currentVideoDetails?.animatedThumbnailLink || '',
       },
     ]);
   }
@@ -316,18 +319,37 @@ export function YoutubeThumbnailFeed({
               }`}
             >
               <div>
-                <Image
-                  src={
-                    resource.length !== 0
-                      ? video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.medium?.url
-                      : ''
-                  }
-                  alt="Thumbnail not available"
-                  width={1280}
-                  height={720}
-                  priority={idx < 6 ? true : false}
-                  className="w-full object-cover"
-                />
+                <div
+                  onClick={() => {
+                    onListItemClick({
+                      currentVideoDetails: {
+                        resourceId: video.snippet.resourceId?.videoId,
+                        thumbnailLink: video.snippet.resourceId?.videoId,
+                      },
+                      setWorkInfos,
+                      matchedOwnedVideo,
+                      matchedWorkInfo,
+                    });
+                  }}
+                  className={cls(
+                    !matchedWorkInfo ? 'hover:ring-2 hover:ring-palettered' : '',
+                    'relative cursor-pointer'
+                  )}
+                >
+                  <Image
+                    src={
+                      resource.length !== 0
+                        ? video.snippet.thumbnails.maxres?.url ||
+                          video.snippet.thumbnails.medium?.url
+                        : ''
+                    }
+                    alt="Thumbnail not available"
+                    width={1280}
+                    height={720}
+                    priority={idx < 6 ? true : false}
+                    className="w-full object-cover"
+                  />
+                </div>
                 <div className="mt-2">
                   <div className="text-sm text-[#bababa]">Title : {video.snippet.title}</div>
                   <div className="text-xs font-light text-[#bababa]">
