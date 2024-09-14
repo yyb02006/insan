@@ -303,7 +303,10 @@ const Work = ({
   const [onThumbnail, setOnThumbnail] = useState(false);
   return (
     <div
-      className={cls(selected ? 'ring-1' : 'ring-0', 'ring-palettered relative')}
+      className={cls(
+        selected ? 'ring-2' : 'ring-0',
+        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+      )}
       onClick={onClick}
     >
       {isGrid ? (
@@ -362,9 +365,10 @@ const Work = ({
                 e.stopPropagation();
                 setOnThumbnail((p) => !p);
               }}
-              className="cursor-pointer hover:text-palettered"
             >
-              <span className="whitespace-nowrap">(썸네일 보기)</span>
+              <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
+                (미리보기)
+              </span>
               {onThumbnail ? (
                 <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
                   <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
@@ -485,10 +489,10 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       resetInit();
     } else {
       if (!deleteIdList || deleteIdList?.length < 1) return;
-      setOnSelectedList(true);
       setPage(2);
       setSearchWord('');
       setSearchWordSnapShot('');
+      setOnSelectedList(true);
       topElement.current?.scrollIntoView();
       setSearchResultSnapShot((p) => ({
         ...p,
