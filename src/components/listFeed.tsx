@@ -90,16 +90,17 @@ export function VimeoListFeed({
                         matchedWorkInfo,
                       });
                     }}
-                    className="inline-block hover:text-palettered cursor-pointer"
+                    className="inline-block group hover:text-palettered cursor-pointer"
                   >
                     <span
-                      className={`${
+                      className={cls(
+                        'group-hover:text-palettered',
                         matchedWorkInfo
                           ? 'text-palettered'
                           : matchedOwnedVideo
                           ? 'text-green-500'
                           : ''
-                      }`}
+                      )}
                     >{`${idx + 1}. `}</span>
                     <span className="mr-2">{video.name}</span>
                   </div>
@@ -302,12 +303,32 @@ export function YoutubeListFeed({
               }`}
             >
               <div className="ml-3 text-lg font-bold text-[#bababa] ">
-                <span
-                  className={`${
-                    matchedWorkInfo ? 'text-palettered' : matchedOwnedVideo ? 'text-green-500' : ''
-                  }`}
-                >{`${idx + 1}. `}</span>
-                <span>{video.snippet.title} </span>
+                <div
+                  onClick={() => {
+                    onListItemClick({
+                      currentVideoDetails: {
+                        resourceId: video.snippet.resourceId?.videoId,
+                        thumbnailLink: video.snippet.resourceId?.videoId,
+                      },
+                      setWorkInfos,
+                      matchedOwnedVideo,
+                      matchedWorkInfo,
+                    });
+                  }}
+                  className="inline-block group hover:text-palettered cursor-pointer"
+                >
+                  <span
+                    className={cls(
+                      'group-hover:text-palettered',
+                      matchedWorkInfo
+                        ? 'text-palettered'
+                        : matchedOwnedVideo
+                        ? 'text-green-500'
+                        : ''
+                    )}
+                  >{`${idx + 1}. `}</span>
+                  <span>{video.snippet.title} </span>
+                </div>
                 <YoutubeThumbnailPreview
                   imageLink={
                     resource.length !== 0
