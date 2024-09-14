@@ -163,35 +163,35 @@ const GridIcon = () => {
   );
 };
 
-interface UitilButtonsProps {
-  onClick: () => void;
-  onViewClick: () => void;
+interface UtilButtonsProps {
+  onListClick: () => void;
+  onViewSwitch: () => void;
   isGrid: boolean;
   onSelectedList: boolean;
   count: number;
-  isOnMobile: boolean;
+  useOnMobile: boolean;
 }
 
-export const UitilButtons = ({
-  onClick,
-  onViewClick,
+export const UtilButtons = ({
+  onListClick,
+  onViewSwitch,
   isGrid,
   onSelectedList,
   count,
-  isOnMobile,
-}: UitilButtonsProps) => {
+  useOnMobile,
+}: UtilButtonsProps) => {
   return (
     <div
       className={`${
-        isOnMobile
+        useOnMobile
           ? 'fixed sm:hidden bottom-24 right-4 w-16 font-bold '
           : 'hidden sm:inline-block w-full font-light hover:font-bold'
       }`}
     >
       <button
-        onClick={onClick}
+        onClick={onListClick}
         className={cls(
-          isOnMobile
+          useOnMobile
             ? 'mb-4 sm:hidden w-16 font-bold'
             : 'hidden sm:inline-block w-full font-light hover:font-bold',
           onSelectedList
@@ -199,13 +199,13 @@ export const UitilButtons = ({
             : 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
           'aspect-square text-sm rounded-full'
         )}
-        disabled={count === 0}
+        disabled={!onSelectedList && count === 0}
       >
         <div>{count}</div>
-        <div>Lists</div>
+        <div>Videos</div>
       </button>
       <button
-        onClick={onViewClick}
+        onClick={onViewSwitch}
         className={cls(
           'w-full flex justify-center items-center ring-1 ring-palettered aspect-square bg-[#101010] rounded-full'
         )}
@@ -217,9 +217,9 @@ export const UitilButtons = ({
 };
 
 interface ButtonsControllerProps {
-  onReset: () => void;
-  onSave: () => void;
-  onSort: () => void;
+  onResetClick: () => void;
+  onSaveClick: () => void;
+  onListClick: () => void;
   onViewSwitch: () => void;
   isGrid: boolean;
   onSelectedList: boolean;
@@ -228,9 +228,9 @@ interface ButtonsControllerProps {
 }
 
 export const ButtonsController = ({
-  onReset,
-  onSave,
-  onSort,
+  onResetClick,
+  onSaveClick,
+  onListClick,
   onViewSwitch,
   isGrid,
   onSelectedList,
@@ -240,7 +240,7 @@ export const ButtonsController = ({
   return (
     <div className="sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0">
       <button
-        onClick={onReset}
+        onClick={onResetClick}
         className={cls(
           count > 0 ? 'sm:hover:text-palettered sm:hover:font-bold' : 'text-[#404040]',
           'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
@@ -250,7 +250,7 @@ export const ButtonsController = ({
         Reset
       </button>
       <button
-        onClick={onSave}
+        onClick={onSaveClick}
         className={cls(
           count > 0
             ? 'sm:hover:text-palettered sm:hover:font-bold bg-palettered'
@@ -261,13 +261,13 @@ export const ButtonsController = ({
       >
         {action === 'save' ? <span>Save</span> : <span>Delete</span>}
       </button>
-      <UitilButtons
-        onViewClick={onViewSwitch}
-        onClick={onSort}
+      <UtilButtons
+        onViewSwitch={onViewSwitch}
+        onListClick={onListClick}
         isGrid={isGrid}
         onSelectedList={onSelectedList}
         count={count}
-        isOnMobile={false}
+        useOnMobile={false}
       />
     </div>
   );
@@ -303,7 +303,10 @@ const Work = ({
   const [onThumbnail, setOnThumbnail] = useState(false);
   return (
     <div
-      className={cls(selected ? 'ring-1' : 'ring-0', 'ring-palettered relative')}
+      className={cls(
+        selected ? 'ring-2' : 'ring-0',
+        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+      )}
       onClick={onClick}
     >
       {isGrid ? (
@@ -362,9 +365,10 @@ const Work = ({
                 e.stopPropagation();
                 setOnThumbnail((p) => !p);
               }}
-              className="cursor-pointer hover:text-palettered"
             >
-              <span className="whitespace-nowrap">(썸네일 보기)</span>
+              <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
+                (미리보기)
+              </span>
               {onThumbnail ? (
                 <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
                   <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
@@ -485,10 +489,10 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       resetInit();
     } else {
       if (!deleteIdList || deleteIdList?.length < 1) return;
-      setOnSelectedList(true);
       setPage(2);
       setSearchWord('');
       setSearchWordSnapShot('');
+      setOnSelectedList(true);
       topElement.current?.scrollIntoView();
       setSearchResultSnapShot((p) => ({
         ...p,
@@ -569,6 +573,11 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     dependencyArray: [page, fetchLoading],
   });
 
+  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
+    if (category === categoryLabel) return;
+    setCategory(categoryLabel);
+  };
+
   return (
     <Layout seoTitle="DELETE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
@@ -576,10 +585,10 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
-            setCategory('filmShort');
+            onCategoryClick('filmShort');
           }}
           onOutsourceClick={() => {
-            setCategory('outsource');
+            onCategoryClick('outsource');
           }}
         />
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />
@@ -624,20 +633,20 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
           </div>
         ) : null}
 
-        <UitilButtons
-          onViewClick={() => {
+        <UtilButtons
+          onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
           isGrid={isGrid}
-          onClick={onSelectedListClick}
+          onListClick={onSelectedListClick}
           onSelectedList={onSelectedList}
           count={deleteIdList.length}
-          isOnMobile={true}
+          useOnMobile={true}
         />
         <ButtonsController
-          onReset={onReset}
-          onSave={onSubmitDelete}
-          onSort={onSelectedListClick}
+          onResetClick={onReset}
+          onSaveClick={onSubmitDelete}
+          onListClick={onSelectedListClick}
           onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}

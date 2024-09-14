@@ -11,7 +11,7 @@ import {
   CategoryTab,
   MenuBar,
   SearchForm,
-  UitilButtons,
+  UtilButtons,
   VideoCollection,
 } from './delete';
 import ToTop from '@/components/toTop';
@@ -141,6 +141,8 @@ export default function Write({
     }
   };
 
+  /* Legacy inputChange Function Code
+
   const inputChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value, name, dataset, type } = e.currentTarget;
     const workIdx = workInfos?.findIndex((i) => i.resourceId === dataset.resourceid);
@@ -186,7 +188,7 @@ export default function Write({
         ]);
       }
     }
-  };
+  }; */
 
   const onSubmitWrites = () => {
     const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
@@ -245,19 +247,17 @@ export default function Write({
   };
 
   const onReset = () => {
-    if (workInfos.length > 0) {
-      setWorkInfos([]);
-      resetInit();
-      topElement.current?.scrollIntoView();
-    }
+    if (workInfos.length < 1) return;
+    setWorkInfos([]);
+    resetInit();
+    topElement.current?.scrollIntoView();
   };
 
   const onSelectedListClick = () => {
     if (onSelectedList) {
       resetInit();
     } else {
-      const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
-      if (!workInfos || inspectedWorkInfos?.length < 1) return;
+      if (workInfos.length < 1) return;
       setPage(2);
       setSearchWord('');
       setSearchWordSnapshot('');
@@ -267,34 +267,36 @@ export default function Write({
         setSearchResults((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some((video) => video.resourceId === info.player_embed_url)
+            workInfos?.some((video) => video.resourceId === info.player_embed_url)
           ),
         }));
         setSearchResultsSnapshot((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some((video) => video.resourceId === info.player_embed_url)
+            workInfos?.some((video) => video.resourceId === info.player_embed_url)
           ),
         }));
       } else if (category === 'outsource') {
         setSearchResults((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some(
-              (video) => video.resourceId === info.snippet.resourceId?.videoId
-            )
+            workInfos?.some((video) => video.resourceId === info.snippet.resourceId?.videoId)
           ),
         }));
         setSearchResultsSnapshot((p) => ({
           ...p,
           [category]: list[category].filter((info) =>
-            inspectedWorkInfos?.some(
-              (video) => video.resourceId === info.snippet.resourceId?.videoId
-            )
+            workInfos?.some((video) => video.resourceId === info.snippet.resourceId?.videoId)
           ),
         }));
       }
     }
+  };
+
+  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
+    if (category === categoryLabel) return;
+    setCategory(categoryLabel);
+    setWorkInfos([]);
   };
 
   return (
@@ -304,22 +306,20 @@ export default function Write({
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
-            setCategory('filmShort');
-            setWorkInfos([]);
+            onCategoryClick('filmShort');
           }}
           onOutsourceClick={() => {
-            setCategory('outsource');
-            setWorkInfos([]);
+            onCategoryClick('outsource');
           }}
         />
         <SearchForm onSearch={onSearch} searchWord={searchWord} setSearchWord={setSearchWord} />
         {category === 'filmShort' && list[category].length > 0 ? (
           isGrid ? (
             <VimeoThumbnailFeed
-              inputChange={inputChange}
               inputBlur={inputBlur}
-              resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
+              resource={searchResults[category]}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
               ownedVideos={ownedVideos[category]}
@@ -327,10 +327,10 @@ export default function Write({
             />
           ) : (
             <VimeoListFeed
-              inputChange={inputChange}
               inputBlur={inputBlur}
-              resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
+              resource={searchResults[category]}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
               ownedVideos={ownedVideos[category]}
@@ -341,8 +341,8 @@ export default function Write({
         {category === 'outsource' ? (
           isGrid ? (
             <YoutubeThumbnailFeed
-              inputChange={inputChange}
               resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
@@ -352,8 +352,8 @@ export default function Write({
             />
           ) : (
             <YoutubeListFeed
-              inputChange={inputChange}
               resource={searchResults[category]}
+              setWorkInfos={setWorkInfos}
               workInfos={workInfos}
               intersectionRef={intersectionRef}
               fetchLoading={fetchLoading}
@@ -363,26 +363,28 @@ export default function Write({
             />
           )
         ) : null}
-        <UitilButtons
-          onViewClick={() => {
+        {/* These buttons will be used in mobile environment */}
+        <UtilButtons
+          onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
-          onClick={onSelectedListClick}
+          onListClick={onSelectedListClick}
           isGrid={isGrid}
-          count={workInfos ? workInfos?.length : 0}
-          isOnMobile={true}
+          count={workInfos.length}
+          useOnMobile={true}
           onSelectedList={onSelectedList}
         />
+        {/* These Buttons for any other environmnet */}
         <ButtonsController
-          onReset={onReset}
-          onSave={onSubmitWrites}
-          onSort={onSelectedListClick}
+          onResetClick={onReset}
+          onSaveClick={onSubmitWrites}
+          onListClick={onSelectedListClick}
           onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
           isGrid={isGrid}
           onSelectedList={onSelectedList}
-          count={workInfos ? workInfos?.length : 0}
+          count={workInfos.length}
           action="save"
         />
       </section>

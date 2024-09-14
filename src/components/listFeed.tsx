@@ -3,6 +3,8 @@ import Circles from './circles';
 import Input from './input';
 import { useState } from 'react';
 import Image from 'next/image';
+import { VimeofeedProps, YoutubefeedProps } from './typings/components';
+import { createInputChange, onListItemClick } from './thumbnailFeed';
 
 const VimeoThumbnailPreview = ({
   altName,
@@ -20,9 +22,9 @@ const VimeoThumbnailPreview = ({
         e.stopPropagation();
         setOnThumbnail((p) => !p);
       }}
-      className="text-xs sm:text-sm ml-2 font-normal cursor-pointer hover:text-palettered"
+      className="text-xs sm:text-sm font-normal cursor-pointer hover:text-palettered"
     >
-      <span className="whitespace-nowrap">( 썸네일 보기 )</span>
+      <span className="whitespace-nowrap text-[#888888] hover:text-palettered">( 미리보기 )</span>
       {onThumbnail ? (
         <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
           <div className="bg-black opacity-80 w-full h-full absolute left-0 top-0"></div>
@@ -47,44 +49,66 @@ export function VimeoListFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: VimeofeedProps) {
   const alterColor = 'bg-[#1a1a1a]';
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <ul className="space-y-4">
         {resource.map((video, idx) => {
-          const matchedWorkInfos = workInfos?.find(
+          const matchedWorkInfo = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.player_embed_url
           );
-          const matchedOwnedVideos = ownedVideos.find(
+          const matchedOwnedVideo = ownedVideos.find(
             (ownedVideo) => ownedVideo.resourceId === video.player_embed_url
           );
-
           return idx < 12 * (page - 1) ? (
-            <div
+            <li
               key={idx} /* video.resource_key */
               className={`w-full py-2 ${idx % 2 === 0 ? alterColor : ''} ${
-                matchedWorkInfos
+                matchedWorkInfo
                   ? 'ring-1 ring-palettered'
-                  : matchedOwnedVideos
+                  : matchedOwnedVideo
                   ? 'ring-1 ring-green-500'
                   : ''
               }`}
             >
               <div className="flex justify-between items-center">
                 <div className="ml-3 text-lg font-bold text-[#bababa] ">
-                  <span
-                    className={`${
-                      matchedWorkInfos
-                        ? 'text-palettered'
-                        : matchedOwnedVideos
-                        ? 'text-green-500'
-                        : ''
-                    }`}
-                  >{`${idx + 1}. `}</span>
-                  <span>{video.name} </span>
+                  <div
+                    onClick={() => {
+                      onListItemClick({
+                        currentVideoDetails: {
+                          resourceId: video.player_embed_url,
+                          thumbnailLink: video.pictures.base_link,
+                          animatedThumbnailLink: video.animated_thumbnail,
+                        },
+                        setWorkInfos,
+                        matchedOwnedVideo,
+                        matchedWorkInfo,
+                      });
+                    }}
+                    className="inline-block group hover:text-palettered cursor-pointer"
+                  >
+                    <span
+                      className={cls(
+                        'group-hover:text-palettered',
+                        matchedWorkInfo
+                          ? 'text-palettered'
+                          : matchedOwnedVideo
+                          ? 'text-green-500'
+                          : ''
+                      )}
+                    >{`${idx + 1}. `}</span>
+                    <span className="mr-2">{video.name}</span>
+                  </div>
+                  {video.animated_thumbnail !== 'no-link' ? (
+                    <span className="text-xs mr-2 text-[#eaeaea] font-semibold bg-palettered inline-flex p-1 rounded-md">
+                      Thumb
+                    </span>
+                  ) : null}
                   <VimeoThumbnailPreview
                     altName={video.name}
                     baseLink={video.pictures.base_link}
@@ -101,15 +125,15 @@ export function VimeoListFeed({
                       data-resourceid={video.player_embed_url}
                       onChange={inputChange}
                       checked={
-                        matchedWorkInfos
-                          ? matchedWorkInfos.category === 'film'
+                        matchedWorkInfo
+                          ? matchedWorkInfo.category === 'film'
                             ? true
                             : false
-                          : matchedOwnedVideos?.category === 'film'
+                          : matchedOwnedVideo?.category === 'film'
                           ? true
                           : false
                       }
-                      radioDisabled={matchedWorkInfos ? false : true}
+                      radioDisabled={matchedWorkInfo ? false : true}
                       labelCss={cls(
                         idx % 2 === 0 ? alterColor : '',
                         'peer-checked:border-none peer-checked:text-[#eaeaea] peer-checked:font-bold border border-[#606060]'
@@ -125,15 +149,15 @@ export function VimeoListFeed({
                       data-resourceid={video.player_embed_url}
                       onChange={inputChange}
                       checked={
-                        matchedWorkInfos
-                          ? matchedWorkInfos.category === 'short'
+                        matchedWorkInfo
+                          ? matchedWorkInfo.category === 'short'
                             ? true
                             : false
-                          : matchedOwnedVideos?.category === 'short'
+                          : matchedOwnedVideo?.category === 'short'
                           ? true
                           : false
                       }
-                      radioDisabled={matchedWorkInfos ? false : true}
+                      radioDisabled={matchedWorkInfo ? false : true}
                       labelCss={cls(
                         idx % 2 === 0 ? alterColor : '',
                         'peer-checked:border-none peer-checked:text-[#eaeaea] peer-checked:font-bold border border-[#606060]'
@@ -151,16 +175,16 @@ export function VimeoListFeed({
                   //여기 썸네일 변경
                   data-thumbnail={video.pictures.base_link}
                   data-animated_thumbnail={video.animated_thumbnail}
-                  data-description={matchedOwnedVideos?.description}
-                  data-date={matchedOwnedVideos?.date}
-                  data-category={matchedOwnedVideos?.category}
+                  data-description={matchedOwnedVideo?.description}
+                  data-date={matchedOwnedVideo?.date}
+                  data-category={matchedOwnedVideo?.category}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.title
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.title
+                    matchedWorkInfo
+                      ? matchedWorkInfo.title
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.title
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
@@ -172,10 +196,10 @@ export function VimeoListFeed({
                   data-resourceid={video.player_embed_url}
                   onChange={inputChange}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.description
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.description
+                    matchedWorkInfo
+                      ? matchedWorkInfo.description
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.description
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
@@ -187,16 +211,16 @@ export function VimeoListFeed({
                   data-resourceid={video.player_embed_url}
                   onChange={inputChange}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.date
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.date
+                    matchedWorkInfo
+                      ? matchedWorkInfo.date
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.date
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
                 />
               </div>
-            </div>
+            </li>
           ) : null;
         })}
       </ul>
@@ -252,42 +276,59 @@ export function YoutubeListFeed({
   fetchLoading,
   ownedVideos,
   page,
-  inputChange,
+  setWorkInfos,
   inputBlur,
 }: YoutubefeedProps) {
   const alterColor = 'bg-[#1a1a1a]';
+  const inputChange = createInputChange(setWorkInfos, workInfos);
   return (
     <>
       <ul className="space-y-4">
         {resource.map((video, idx) => {
-          const matchedWorkInfos = workInfos?.find(
+          const matchedWorkInfo = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.snippet.resourceId?.videoId
           );
-          const matchedOwnedVideos = ownedVideos.find(
+          const matchedOwnedVideo = ownedVideos.find(
             (ownedVideo) => ownedVideo.resourceId === video.snippet.resourceId?.videoId
           );
           return idx < 12 * (page - 1) ? (
-            <div
+            <li
               key={idx} /* video.resource_key */
               className={`w-full py-2 ${idx % 2 === 0 ? alterColor : ''} ${
-                matchedWorkInfos
+                matchedWorkInfo
                   ? 'ring-1 ring-palettered'
-                  : matchedOwnedVideos
+                  : matchedOwnedVideo
                   ? 'ring-1 ring-green-500'
                   : ''
               }`}
             >
               <div className="ml-3 text-lg font-bold text-[#bababa] ">
-                <span
-                  className={`${
-                    matchedWorkInfos
-                      ? 'text-palettered'
-                      : matchedOwnedVideos
-                      ? 'text-green-500'
-                      : ''
-                  }`}
-                >{`${idx + 1}. `}</span>
-                <span>{video.snippet.title} </span>
+                <div
+                  onClick={() => {
+                    onListItemClick({
+                      currentVideoDetails: {
+                        resourceId: video.snippet.resourceId?.videoId,
+                        thumbnailLink: video.snippet.resourceId?.videoId,
+                      },
+                      setWorkInfos,
+                      matchedOwnedVideo,
+                      matchedWorkInfo,
+                    });
+                  }}
+                  className="inline-block group hover:text-palettered cursor-pointer"
+                >
+                  <span
+                    className={cls(
+                      'group-hover:text-palettered',
+                      matchedWorkInfo
+                        ? 'text-palettered'
+                        : matchedOwnedVideo
+                        ? 'text-green-500'
+                        : ''
+                    )}
+                  >{`${idx + 1}. `}</span>
+                  <span>{video.snippet.title} </span>
+                </div>
                 <YoutubeThumbnailPreview
                   imageLink={
                     resource.length !== 0
@@ -304,16 +345,16 @@ export function YoutubeListFeed({
                   placeholder="타이틀"
                   data-resourceid={video.snippet.resourceId?.videoId}
                   data-thumbnail={video.snippet.resourceId?.videoId}
-                  data-description={matchedOwnedVideos?.description}
-                  data-date={matchedOwnedVideos?.date}
-                  data-category={matchedOwnedVideos?.category}
+                  data-description={matchedOwnedVideo?.description}
+                  data-date={matchedOwnedVideo?.date}
+                  data-category={matchedOwnedVideo?.category}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.title
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.title
+                    matchedWorkInfo
+                      ? matchedWorkInfo.title
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.title
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
@@ -325,10 +366,10 @@ export function YoutubeListFeed({
                   data-resourceid={video.snippet.resourceId?.videoId}
                   onChange={inputChange}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.description
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.description
+                    matchedWorkInfo
+                      ? matchedWorkInfo.description
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.description
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
@@ -340,16 +381,16 @@ export function YoutubeListFeed({
                   data-resourceid={video.snippet.resourceId?.videoId}
                   onChange={inputChange}
                   value={
-                    matchedWorkInfos
-                      ? matchedWorkInfos.date
-                      : matchedOwnedVideos
-                      ? matchedOwnedVideos.date
+                    matchedWorkInfo
+                      ? matchedWorkInfo.date
+                      : matchedOwnedVideo
+                      ? matchedOwnedVideo.date
                       : ''
                   }
                   css={cls(idx % 2 === 0 ? alterColor : '', 'text-sm text-[#aaaaaa]')}
                 />
               </div>
-            </div>
+            </li>
           ) : null;
         })}
       </ul>
