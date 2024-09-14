@@ -19,6 +19,7 @@ import useMutation from '@/libs/client/useMutation';
 import { AuthResponse } from '@/pages/enter';
 import LoaidngIndicator from './loadingIndicator';
 import { VideoLength, useAppContext } from '@/appContext';
+import useUser from '@/libs/client/useUser';
 
 interface LayoutProps {
   seoTitle: string;
@@ -143,6 +144,7 @@ const ExtendedNav = ({
   setIsLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
+  const [isUser] = useUser();
   const { onMove, onLeave, mouseX, mouseY } = useMouseSpring({
     limitHeight: 0,
     isMobile: isMobile,
@@ -303,7 +305,7 @@ const ExtendedNav = ({
             </li>
           ))}
           <div className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered">
-            <Link href={'/enter'}>{'Admin >'}</Link>
+            <Link href={isUser ? '/work/write' : '/enter'}>{'Admin >'}</Link>
           </div>
         </ul>
 
