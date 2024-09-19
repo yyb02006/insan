@@ -156,7 +156,7 @@ export function VimeoThumbnailFeed({
                     {animated_thumbnail !== 'no-link' ? (
                       <ul className="w-full h-10 pb-3 px-3 absolute bottom-0 right-0 flex justify-end gap-2">
                         <li className="w-auto text-sm font-semibold bg-palettered p-2 flex justify-center items-center rounded-md">
-                          Thumb
+                          Gif
                         </li>
                       </ul>
                     ) : null}

@@ -106,7 +106,7 @@ export function VimeoListFeed({
                   </div>
                   {video.animated_thumbnail !== 'no-link' ? (
                     <span className="text-xs mr-2 text-[#eaeaea] font-semibold bg-palettered inline-flex p-1 rounded-md">
-                      Thumb
+                      Gif
                     </span>
                   ) : null}
                   <VimeoThumbnailPreview
