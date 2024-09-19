@@ -2,10 +2,6 @@ import withHandler from '@/libs/server/withHandler';
 import { apiSessionWrapper } from '@/libs/server/withSession';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export const config = {
-  runtime: 'edge',
-};
-
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const {
     body: { password, secret, action },
@@ -18,12 +14,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (action === 'logout') {
     try {
-      console.time('Logout session destroy Start');
       req.session.destroy();
-      console.timeEnd('Logout session destroy End');
-      console.time('Logout revalidate Start');
-      await res.revalidate('/work');
-      console.timeEnd('Logout revalidate End');
+      // await res.revalidate('/work');
       return res.status(200).json({ success: true, message: 'Session Expired' });
     } catch (error) {
       console.log(error);
@@ -34,17 +26,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       session.admin = {
         password,
       };
-      console.time('Login session save Start');
       await req.session.save();
-      console.timeEnd('Login session save End');
-      const revalidatePages = ['/work', '/work/write', '/work/delete'];
-      console.time('Login revalidate Start');
+      /*       const revalidatePages = ['/work', '/work/write', '/work/delete'];
       await Promise.all(
         revalidatePages.map(async (el: string) => {
           await res.revalidate(el);
         })
-      );
-      console.timeEnd('Login revalidate End');
+      ); */
       return res.status(200).json({ success: true, message: 'Autorized' });
     } catch (error) {
       console.log(error);
