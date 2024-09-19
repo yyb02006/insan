@@ -15,7 +15,7 @@ import {
   VideoCollection,
 } from './delete';
 import ToTop from '@/components/toTop';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import Circles from '@/components/circles';
 import { VimeoListFeed, YoutubeListFeed } from '@/components/listFeed';
@@ -414,7 +414,7 @@ export default function Write({
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const perPage = 12;
   const vimeoVideos = await fetchData(
     `https://api.vimeo.com/users/136249834/videos?fields=uri,player_embed_url,resource_key,pictures.base_link,name,description&page=1&per_page=${perPage}`,
@@ -450,7 +450,6 @@ export const getStaticProps: GetStaticProps = async () => {
   );
 
   const youtubePlaylistId = 'PL3Sx9O__-BGlt-FYFXIO15RbxFwegMs8C';
-
   const youtubeVideos = await fetchData(
     `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${youtubePlaylistId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=${perPage}&part=snippet&fields=(items(id,snippet(resourceId(videoId),thumbnails(medium,standard,maxres),title)),nextPageToken)`
   );
@@ -477,6 +476,5 @@ export const getStaticProps: GetStaticProps = async () => {
       initialNextPageToken: youtubeVideos.nextPageToken,
       initialOwnedVideos,
     },
-    revalidate: 86400,
   };
 };
