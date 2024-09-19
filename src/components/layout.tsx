@@ -138,10 +138,14 @@ const ExtendedNav = ({
   isMobile,
   videoLength,
   setIsLoading,
+  setIsNavigating,
+  isNavigating,
 }: {
   isMobile: boolean;
   videoLength: VideoLength;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  setIsNavigating: Dispatch<SetStateAction<boolean>>;
+  isNavigating: boolean;
 }) => {
   const router = useRouter();
   const [isUser] = useUser();
@@ -304,8 +308,16 @@ const ExtendedNav = ({
               />
             </li>
           ))}
-          <div className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered">
-            <Link href={isUser ? '/work/write' : '/enter'}>{'Admin >'}</Link>
+          <div
+            onClick={() => {
+              if (isNavigating) return;
+              setIsNavigating(true);
+            }}
+            className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered"
+          >
+            <Link href={isUser ? '/work/write' : '/enter'} prefetch={!!isUser}>
+              {'Admin >'}
+            </Link>
           </div>
         </ul>
 
@@ -342,6 +354,7 @@ const HamburgerMenu = ({
   isExtended: boolean;
   setIsExtended: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const [isNavigating, setIsNavigating] = useState(false);
   const [isPresent, safeToRemove] = usePresence();
   const [navRef, animate] = useAnimate();
   const [isLoading, setIsLoading] = useState(false);
@@ -389,7 +402,13 @@ const HamburgerMenu = ({
     >
       <AnimatePresence>
         {isExtended ? (
-          <ExtendedNav videoLength={videoLength} setIsLoading={setIsLoading} isMobile={isMobile} />
+          <ExtendedNav
+            videoLength={videoLength}
+            setIsLoading={setIsLoading}
+            isMobile={isMobile}
+            setIsNavigating={setIsNavigating}
+            isNavigating={isNavigating}
+          />
         ) : null}
       </AnimatePresence>
       <div
@@ -415,6 +434,7 @@ const HamburgerMenu = ({
           ))}
         </ul>
       </div>
+      {isNavigating ? <LoaidngIndicator /> : null}
     </ul>
   );
 };
