@@ -181,3 +181,4 @@ This project is licensed under the MIT License
 - **Version 0.6.01 (2024-09-20):**
 
   - **_/enter_** 로그인 성공 후 리다이렉트가 완료될 때 까지 보이는 로딩 인디케이터 추가
+  - **_/enter_** 로그인 성공 시 메세지 한글로 변경
