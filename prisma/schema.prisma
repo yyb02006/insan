@@ -23,3 +23,14 @@ model Works {
   animationThumbnailLink String   @default("no-link") @db.VarChar(1000)
   resourceId             String   @unique
 }
+
+model RevalidationStatus {
+  id        Int                @id @default(autoincrement())
+  action    RevalidationAction @unique
+  timestamp DateTime           @default(now())
+}
+
+enum RevalidationAction {
+  revalidate
+  update
+}

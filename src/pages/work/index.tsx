@@ -34,6 +34,7 @@ import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import { VideoResponseItem } from '../api/work/list';
 import client from '@/libs/server/client';
 import { GetStaticProps } from 'next';
+import useRevalidate from '@/libs/client/useRevalidate';
 
 export type VideosCategory = 'film' | 'short' | 'outsource';
 
@@ -1133,6 +1134,7 @@ interface initialData {
 }
 
 export default function Work({ initialLength, initialWorks, initialHasNextPage }: initialData) {
+  const [_] = useRevalidate('/work');
   const [isMobile, setIsMobile] = useState<boolean>(true);
   const [onDetail, setOnDetail] = useState<OnDetail>();
   const [category, setCategory] = useState<VideosCategory>('film');

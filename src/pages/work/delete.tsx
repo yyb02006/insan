@@ -9,10 +9,11 @@ import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import useDeleteRequest from '@/libs/client/useDelete';
 import ToTop from '@/components/toTop';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
 import Circles from '@/components/circles';
+import LoaidngIndicator from '@/components/loadingIndicator';
 
 interface list extends WorkInfos {
   id: number;
@@ -52,12 +53,19 @@ interface MenuBarProps {
 }
 
 export const MenuBar = ({ currentPage = 'write' }: MenuBarProps) => {
+  const [isNavigating, setIsNavigating] = useState(false);
   return (
     <>
       <div className="h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl">
         {currentPage === 'write' ? <span>추가하기</span> : <span>삭제하기</span>}
       </div>
-      <div className="absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm">
+      <div
+        onClick={() => {
+          if (isNavigating) return;
+          setIsNavigating(true);
+        }}
+        className="absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm"
+      >
         <Link
           href={`/work/${currentPage === 'write' ? 'delete' : 'write'}`}
           className="hover:text-palettered"
@@ -65,6 +73,7 @@ export const MenuBar = ({ currentPage = 'write' }: MenuBarProps) => {
           {currentPage === 'write' ? <span>삭제하기</span> : <span>추가하기</span>}
         </Link>
       </div>
+      {isNavigating ? <LoaidngIndicator /> : null}
     </>
   );
 };
@@ -570,7 +579,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
 
   const intersectionRef = useInfiniteScroll({
     processIntersection,
-    dependencyArray: [page, fetchLoading],
+    dependencyArray: [page, fetchLoading, isGrid],
   });
 
   const onCategoryClick = (categoryLabel: FlatformsCategory) => {
@@ -684,15 +693,17 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const initialWorks = {
     filmShort: await client.works.findMany({
       where: { OR: [{ category: 'film' }, { category: 'short' }] },
       take: 12,
+      orderBy: { id: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
+      orderBy: { id: 'desc' },
     }),
   };
   let initialHasNextPage = { filmShort: false, outsource: false };

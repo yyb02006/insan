@@ -88,6 +88,7 @@ export function VimeoListFeed({
                         setWorkInfos,
                         matchedOwnedVideo,
                         matchedWorkInfo,
+                        category: matchedOwnedVideo?.category,
                       });
                     }}
                     className="inline-block group hover:text-palettered cursor-pointer"
@@ -106,7 +107,7 @@ export function VimeoListFeed({
                   </div>
                   {video.animated_thumbnail !== 'no-link' ? (
                     <span className="text-xs mr-2 text-[#eaeaea] font-semibold bg-palettered inline-flex p-1 rounded-md">
-                      Thumb
+                      Gif
                     </span>
                   ) : null}
                   <VimeoThumbnailPreview
@@ -313,6 +314,7 @@ export function YoutubeListFeed({
                       setWorkInfos,
                       matchedOwnedVideo,
                       matchedWorkInfo,
+                      category: 'outsource',
                     });
                   }}
                   className="inline-block group hover:text-palettered cursor-pointer"
@@ -347,7 +349,7 @@ export function YoutubeListFeed({
                   data-thumbnail={video.snippet.resourceId?.videoId}
                   data-description={matchedOwnedVideo?.description}
                   data-date={matchedOwnedVideo?.date}
-                  data-category={matchedOwnedVideo?.category}
+                  data-category={'outsource'}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={

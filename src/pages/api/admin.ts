@@ -15,7 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (action === 'logout') {
     try {
       req.session.destroy();
-      await res.revalidate('/work');
+      // await res.revalidate('/work');
       return res.status(200).json({ success: true, message: 'Session Expired' });
     } catch (error) {
       console.log(error);
@@ -27,12 +27,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         password,
       };
       await req.session.save();
-      const revalidatePages = ['/work', '/work/write', '/work/delete'];
+      /*       const revalidatePages = ['/work', '/work/write', '/work/delete'];
       await Promise.all(
         revalidatePages.map(async (el: string) => {
           await res.revalidate(el);
         })
-      );
+      ); */
       return res.status(200).json({ success: true, message: 'Autorized' });
     } catch (error) {
       console.log(error);
