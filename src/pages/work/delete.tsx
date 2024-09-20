@@ -579,7 +579,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
 
   const intersectionRef = useInfiniteScroll({
     processIntersection,
-    dependencyArray: [page, fetchLoading],
+    dependencyArray: [page, fetchLoading, isGrid],
   });
 
   const onCategoryClick = (categoryLabel: FlatformsCategory) => {
