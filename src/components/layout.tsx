@@ -315,9 +315,7 @@ const ExtendedNav = ({
             }}
             className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered"
           >
-            <Link href={isUser ? '/work/write' : '/enter'} prefetch={!!isUser}>
-              {'Admin >'}
-            </Link>
+            <Link href={isUser ? '/work/write' : '/enter'}>{'Admin >'}</Link>
           </div>
         </ul>
 
