@@ -159,6 +159,19 @@ This project is licensed under the MIT License
 
   - 로그인된 상태에서 확장메뉴 Admin 버튼 클릭 시 로그인 페이지로 리다이렉트되던 버그 수정
 
+  ***
+
 - **Version 0.5.2 (2024-09-18):**
 
   - 로그인 / 로그아웃 후 로딩 중에 사용자가 백그라운드 오버레이 뒤의 영역을 클릭할 수 없도록 수정
+
+  ***
+
+- **Version 0.6.0 (2024-09-20):**
+
+  - **_/work_, _/work/write_, _/work/delete_, _/enter_** 로그인 / 로그아웃, 비디오 등록 / 삭제 기능 수행시 응답 속도 개선
+  - **_/work/write_**
+    - Animated Thumbnail 뱃지의 라벨 수정 Thumb => Gif
+    - list view 스위칭 시 스크롤로 데이터 불러오기가 안 되던 이슈 수정
+  - **_/work/delete_** 비디오들이 내림차순으로 정렬되도록 수정
+  - outsource 비디오 등록 시 film카테고리로 저장되던 이슈 수정
