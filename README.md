@@ -175,9 +175,3 @@ This project is licensed under the MIT License
     - list view 스위칭 시 스크롤로 데이터 불러오기가 안 되던 이슈 수정
   - **_/work/delete_** 비디오들이 내림차순으로 정렬되도록 수정
   - outsource 비디오 등록 시 film카테고리로 저장되던 이슈 수정
-
-  ***
-
-- **Version 0.6.01 (2024-09-20):**
-
-  - **_/enter_** 로그인 성공 후 리다이렉트가 완료될 때 까지 보이는 로딩 인디케이터 추가
