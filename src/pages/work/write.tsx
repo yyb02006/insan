@@ -101,6 +101,7 @@ export default function Write({
     snapshot: searchWordSnapshot,
     searchResultsCount: searchResults[category].length,
     initialNextPageToken,
+    dependencies: [isGrid],
   });
 
   useEffect(() => {
