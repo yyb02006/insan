@@ -3,7 +3,7 @@ import Input from './input';
 import Circles from './circles';
 import { VimeofeedProps, YoutubefeedProps } from './typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
-import { OwnedVideoItems, VimeoVideos, WorkInfos } from '@/pages/work/write';
+import { OwnedVideoItems, WorkInfos } from '@/pages/work/write';
 import { cls } from '@/libs/client/utils';
 
 export const createInputChange = (
@@ -60,6 +60,7 @@ export const onListItemClick = ({
   matchedOwnedVideo,
   currentVideoDetails,
   setWorkInfos,
+  category,
 }: {
   matchedWorkInfo?: WorkInfos;
   matchedOwnedVideo?: OwnedVideoItems;
@@ -69,6 +70,7 @@ export const onListItemClick = ({
     animatedThumbnailLink?: string;
   };
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>;
+  category?: string;
 }) => {
   if (matchedWorkInfo) {
     setWorkInfos((prev) =>
@@ -81,7 +83,7 @@ export const onListItemClick = ({
         title: matchedOwnedVideo?.title || '',
         description: matchedOwnedVideo?.description || '',
         date: matchedOwnedVideo?.date || '',
-        category: matchedOwnedVideo?.category || '',
+        category: category || '',
         resourceId: currentVideoDetails?.resourceId || '',
         thumbnailLink: currentVideoDetails?.thumbnailLink || '',
         animatedThumbnailLink: currentVideoDetails?.animatedThumbnailLink || '',
@@ -138,6 +140,7 @@ export function VimeoThumbnailFeed({
                         setWorkInfos,
                         matchedWorkInfo,
                         matchedOwnedVideo,
+                        category: matchedOwnedVideo?.category,
                       });
                     }}
                     className={cls(
@@ -329,6 +332,7 @@ export function YoutubeThumbnailFeed({
                       setWorkInfos,
                       matchedOwnedVideo,
                       matchedWorkInfo,
+                      category: 'outsource',
                     });
                   }}
                   className={cls(
@@ -366,7 +370,7 @@ export function YoutubeThumbnailFeed({
                   data-thumbnail={video.snippet.resourceId?.videoId}
                   data-description={matchedOwnedVideo?.description}
                   data-date={matchedOwnedVideo?.date}
-                  data-category={matchedOwnedVideo?.category}
+                  data-category={'outsource'}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={
