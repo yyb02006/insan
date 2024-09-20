@@ -78,7 +78,7 @@ export default function Admin() {
           <span>F12 관리자모드의 console 내용 개발자에게 전달 필요</span>
         ) : null}
       </div>
-      {loading ? <LoaidngIndicator /> : null}
+      {loading || data?.success === true ? <LoaidngIndicator /> : null}
       {data?.success === true ? (
         <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black">
           <div>Authentication Successful</div>
