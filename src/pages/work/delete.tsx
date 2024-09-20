@@ -698,10 +698,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
     filmShort: await client.works.findMany({
       where: { OR: [{ category: 'film' }, { category: 'short' }] },
       take: 12,
+      orderBy: { id: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
+      orderBy: { id: 'desc' },
     }),
   };
   let initialHasNextPage = { filmShort: false, outsource: false };
