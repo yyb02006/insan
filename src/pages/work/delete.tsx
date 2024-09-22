@@ -52,7 +52,7 @@ interface MenuBarProps {
   currentPage: 'write' | 'delete';
 }
 
-export const MenuBar = ({ currentPage = 'write' }: MenuBarProps) => {
+export const PostManagementNav = ({ currentPage = 'write' }: MenuBarProps) => {
   const [isNavigating, setIsNavigating] = useState(false);
   return (
     <>
@@ -590,7 +590,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   return (
     <Layout seoTitle="DELETE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <MenuBar currentPage="delete" />
+        <PostManagementNav currentPage="delete" />
         <CategoryTab
           category={category}
           onFilmShortClick={() => {

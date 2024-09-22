@@ -9,8 +9,8 @@ import { useRouter } from 'next/router';
 import {
   ButtonsController,
   CategoryTab,
-  MenuBar,
   SearchForm,
+  PostManagementNav,
   UtilButtons,
   VideoCollection,
 } from './delete';
@@ -303,7 +303,7 @@ export default function Write({
   return (
     <Layout seoTitle="WRITE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <MenuBar currentPage="write" />
+        <PostManagementNav currentPage="write" />
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
