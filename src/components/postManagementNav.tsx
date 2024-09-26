@@ -1,5 +1,14 @@
 import { AnimatePresence, stagger, useAnimate, usePresence } from 'framer-motion';
-import { Dispatch, ReactElement, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import {
+  Children,
+  cloneElement,
+  Dispatch,
+  isValidElement,
+  ReactElement,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import LoaidngIndicator from './loadingIndicator';
 import HamburgerButton from './hamburgerButton';
 
@@ -58,6 +67,13 @@ export default function AdminNavContainer({ isOpen, setIsOpen, children }: Admin
       animate('.middle', { opacity: 1 });
     }
   }, [isOpen, isPresent, animate]);
+
+  const childrenWithProps = Children.map(children, (child) =>
+    isValidElement(child)
+      ? cloneElement(child, { setIsLoading, setIsNavigating, isNavigating })
+      : child
+  );
+
   return (
     <ul
       ref={navRef}
@@ -70,13 +86,11 @@ export default function AdminNavContainer({ isOpen, setIsOpen, children }: Admin
             setIsNavigating={setIsNavigating}
             isNavigating={isNavigating}
           /> */}
-      <AnimatePresence>{isOpen ? children : null}</AnimatePresence>
+      <AnimatePresence>{isOpen ? childrenWithProps : null}</AnimatePresence>
       <HamburgerButton isAbort={isLoading} setIsOpen={setIsOpen} />
       {isNavigating ? <LoaidngIndicator /> : null}
     </ul>
   );
 }
 
-const Test = () => {
-  return <div></div>;
-};
+// 부모 컴포넌트에서 자식 컴포넌트의 프로퍼티를 엮는 건 실패
