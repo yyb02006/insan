@@ -22,14 +22,20 @@ interface AdminNavProps {
 interface AdminNavContainerProps {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  isNavigating: boolean;
+  isLoading: boolean;
   children: ReactElement<AdminNavProps>;
 }
 
-export default function AdminNavContainer({ isOpen, setIsOpen, children }: AdminNavContainerProps) {
-  const [isNavigating, setIsNavigating] = useState(false);
+export default function AdminNavContainer({
+  isOpen,
+  setIsOpen,
+  isLoading,
+  isNavigating,
+  children,
+}: AdminNavContainerProps) {
   const [isPresent, safeToRemove] = usePresence();
   const [navRef, animate] = useAnimate();
-  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (isPresent) {
       const enterAnimation = async () => {
@@ -67,13 +73,13 @@ export default function AdminNavContainer({ isOpen, setIsOpen, children }: Admin
       animate('.middle', { opacity: 1 });
     }
   }, [isOpen, isPresent, animate]);
-
+  /* 
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
       ? cloneElement(child, { setIsLoading, setIsNavigating, isNavigating })
       : child
   );
-
+ */
   return (
     <ul
       ref={navRef}
@@ -86,7 +92,7 @@ export default function AdminNavContainer({ isOpen, setIsOpen, children }: Admin
             setIsNavigating={setIsNavigating}
             isNavigating={isNavigating}
           /> */}
-      <AnimatePresence>{isOpen ? childrenWithProps : null}</AnimatePresence>
+      <AnimatePresence>{isOpen ? children : null}</AnimatePresence>
       <HamburgerButton isAbort={isLoading} setIsOpen={setIsOpen} />
       {isNavigating ? <LoaidngIndicator /> : null}
     </ul>
