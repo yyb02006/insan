@@ -301,7 +301,7 @@ export default function Write({
   };
 
   return (
-    <Layout seoTitle="WRITE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
+    <Layout seoTitle="WRITE" footerPosition="hidden" menu={{ hasMenu: false }}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
         <PostManagementNav currentPage="write" />
         <CategoryTab

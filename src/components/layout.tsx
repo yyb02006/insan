@@ -28,9 +28,9 @@ interface LayoutProps {
   scrollbar?: boolean;
   css?: string;
   footerPosition?: string;
-  nav?: { exist?: boolean; isShort: boolean };
+  nav?: { hasNav?: boolean; isCollapsed: boolean };
   logo?: boolean;
-  menu?: boolean;
+  menu?: { hasMenu?: boolean; menuComponent?: ReactNode };
   description?: string;
 }
 
@@ -347,9 +347,9 @@ export default function Layout({
   children,
   css,
   footerPosition = 'relative',
-  nav = { exist: true, isShort: false },
+  nav = { hasNav: true, isCollapsed: false },
   logo = true,
-  menu = true,
+  menu = { hasMenu: true, menuComponent: undefined },
   scrollbar = true,
   description,
 }: LayoutProps) {
@@ -362,6 +362,7 @@ export default function Layout({
   const [isExtended, setIsExtended] = useState(false);
   const [isAborted, setIsAborted] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const { hasMenu, menuComponent } = menu;
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -426,13 +427,13 @@ export default function Layout({
           </Link>
         </div>
       ) : null}
-      {menu ? (
+      {hasMenu ? (
         <div className="fixed z-[1001] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
           <AnimatePresence>
-            {!nav.isShort ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
+            {!nav.isCollapsed ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
           </AnimatePresence>
           <AnimatePresence>
-            {nav.isShort ? (
+            {nav.isCollapsed ? (
               <HamburgerMenuWrapper
                 isOpen={isExtended}
                 isAborted={isAborted}

@@ -588,7 +588,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   };
 
   return (
-    <Layout seoTitle="DELETE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
+    <Layout seoTitle="DELETE" footerPosition="hidden" menu={{ hasMenu: false }}>
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
         <PostManagementNav currentPage="delete" />
         <CategoryTab
