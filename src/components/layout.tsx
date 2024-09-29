@@ -20,7 +20,7 @@ import { AuthResponse } from '@/pages/enter';
 import LoaidngIndicator from './loadingIndicator';
 import { VideoLength, useAppContext } from '@/appContext';
 import useUser from '@/libs/client/useUser';
-import HamburgerMenuWrapper from './postManagementNav';
+import HamburgerMenuContainer from './hamburgerMenuContainer';
 
 interface LayoutProps {
   seoTitle: string;
@@ -434,20 +434,22 @@ export default function Layout({
           </AnimatePresence>
           <AnimatePresence>
             {nav.isCollapsed ? (
-              <HamburgerMenuWrapper
+              <HamburgerMenuContainer
                 isOpen={isExtended}
                 isAborted={isAborted}
                 isNavigating={isNavigating}
                 setIsOpen={setIsExtended}
               >
-                <ExtendedNav
-                  videoLength={videoLength}
-                  setIsLoading={setIsAborted}
-                  isMobile={isMobile}
-                  setIsNavigating={setIsNavigating}
-                  isNavigating={isNavigating}
-                />
-              </HamburgerMenuWrapper>
+                {menuComponent || (
+                  <ExtendedNav
+                    videoLength={videoLength}
+                    setIsLoading={setIsAborted}
+                    isMobile={isMobile}
+                    setIsNavigating={setIsNavigating}
+                    isNavigating={isNavigating}
+                  />
+                )}
+              </HamburgerMenuContainer>
             ) : null}
           </AnimatePresence>
         </div>

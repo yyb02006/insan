@@ -11,7 +11,7 @@ interface HamburgerMenuWrapperProps {
   children: ReactNode;
 }
 
-export default function HamburgerMenuWrapper({
+export default function HamburgerMenuContainer({
   isOpen,
   setIsOpen,
   isAborted,
