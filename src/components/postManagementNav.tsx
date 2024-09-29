@@ -1,39 +1,23 @@
 import { AnimatePresence, stagger, useAnimate, usePresence } from 'framer-motion';
-import {
-  Children,
-  cloneElement,
-  Dispatch,
-  isValidElement,
-  ReactElement,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react';
 import LoaidngIndicator from './loadingIndicator';
 import HamburgerButton from './hamburgerButton';
 
-interface AdminNavProps {
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  setIsNavigating: Dispatch<SetStateAction<boolean>>;
-  isNavigating: boolean;
-  [key: string]: any;
-}
-
-interface AdminNavContainerProps {
+interface HamburgerMenuWrapperProps {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   isNavigating: boolean;
-  isLoading: boolean;
-  children: ReactElement<AdminNavProps>;
+  isAborted: boolean;
+  children: ReactNode;
 }
 
-export default function AdminNavContainer({
+export default function HamburgerMenuWrapper({
   isOpen,
   setIsOpen,
-  isLoading,
+  isAborted,
   isNavigating,
   children,
-}: AdminNavContainerProps) {
+}: HamburgerMenuWrapperProps) {
   const [isPresent, safeToRemove] = usePresence();
   const [navRef, animate] = useAnimate();
   useEffect(() => {
@@ -73,30 +57,14 @@ export default function AdminNavContainer({
       animate('.middle', { opacity: 1 });
     }
   }, [isOpen, isPresent, animate]);
-  /* 
-  const childrenWithProps = Children.map(children, (child) =>
-    isValidElement(child)
-      ? cloneElement(child, { setIsLoading, setIsNavigating, isNavigating })
-      : child
-  );
- */
   return (
-    <ul
+    <div
       ref={navRef}
       className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
     >
-      {/* <ExtendedNav
-            videoLength={videoLength}
-            setIsLoading={setIsLoading}
-            isMobile={isMobile}
-            setIsNavigating={setIsNavigating}
-            isNavigating={isNavigating}
-          /> */}
       <AnimatePresence>{isOpen ? children : null}</AnimatePresence>
-      <HamburgerButton isAbort={isLoading} setIsOpen={setIsOpen} />
+      <HamburgerButton isAbort={isAborted} setIsOpen={setIsOpen} />
       {isNavigating ? <LoaidngIndicator /> : null}
-    </ul>
+    </div>
   );
 }
-
-// 부모 컴포넌트에서 자식 컴포넌트의 프로퍼티를 엮는 건 실패
