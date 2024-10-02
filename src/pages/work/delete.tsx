@@ -4,7 +4,6 @@ import { ciIncludes, cls } from '@/libs/client/utils';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout';
-import Link from 'next/link';
 import Input from '@/components/input';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import useDeleteRequest from '@/libs/client/useDelete';
@@ -13,7 +12,8 @@ import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
 import Circles from '@/components/circles';
-import LoaidngIndicator from '@/components/loadingIndicator';
+import HamburgerMenuContainer from '@/components/hamburgerMenuContainer';
+import PostManagementNav from '@/components/postManagementNav';
 
 interface list extends WorkInfos {
   id: number;
@@ -45,36 +45,6 @@ const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
       className="w-full object-cover aspect-video"
       priority={setPriority}
     />
-  );
-};
-
-interface MenuBarProps {
-  currentPage: 'write' | 'delete';
-}
-
-export const PostManagementNav = ({ currentPage = 'write' }: MenuBarProps) => {
-  const [isNavigating, setIsNavigating] = useState(false);
-  return (
-    <>
-      <div className="h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl">
-        {currentPage === 'write' ? <span>추가하기</span> : <span>삭제하기</span>}
-      </div>
-      <div
-        onClick={() => {
-          if (isNavigating) return;
-          setIsNavigating(true);
-        }}
-        className="absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm"
-      >
-        <Link
-          href={`/work/${currentPage === 'write' ? 'delete' : 'write'}`}
-          className="hover:text-palettered"
-        >
-          {currentPage === 'write' ? <span>삭제하기</span> : <span>추가하기</span>}
-        </Link>
-      </div>
-      {isNavigating ? <LoaidngIndicator /> : null}
-    </>
   );
 };
 
@@ -420,6 +390,30 @@ interface InitialData {
   initialHasNextPage: VideoCollection<boolean>;
 }
 
+export const Title = ({ name }: { name: string }) => {
+  return (
+    <div className="relative h-[100px] flex justify-center items-center font-GmarketSans font-bold text-3xl">
+      {name}
+    </div>
+  );
+};
+
+export const MenuComponent = () => {
+  const [isAborted, setIsAborted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  return (
+    <HamburgerMenuContainer
+      isAborted={isAborted}
+      isNavigating={isNavigating}
+      setIsOpen={setIsOpen}
+      isOpen={isOpen}
+    >
+      <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setIsNavigating} />
+    </HamburgerMenuContainer>
+  );
+};
+
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
   const router = useRouter();
   const topElement = useRef<HTMLDivElement>(null);
@@ -588,9 +582,14 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   };
 
   return (
-    <Layout seoTitle="DELETE" footerPosition="hidden" menu={{ hasMenu: false }}>
+    <Layout
+      seoTitle="DELETE"
+      footerPosition="hidden"
+      menu={{ hasMenu: true, menuComponent: <MenuComponent /> }}
+      nav={{ isCollapsed: true }}
+    >
+      <Title name="삭제하기" />
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <PostManagementNav currentPage="delete" />
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
