@@ -1,72 +1,81 @@
-import { stagger, useAnimate, usePresence, motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useAnimate, usePresence, motion } from 'framer-motion';
+import Link from 'next/link';
+import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 
 export default function PostManagementNav({
+  setIsNavigating,
   setIsAborted,
 }: {
+  setIsNavigating: Dispatch<SetStateAction<boolean>>;
   setIsAborted: Dispatch<SetStateAction<boolean>>;
 }) {
-  const router = useRouter();
-  const [ispresent, safeToRemove] = usePresence();
+  const [isPresent, safeToRemove] = usePresence();
   const [scope, animate] = useAnimate();
+  const menuItems = useRef([
+    { name: '추가하기', path: '/work/write' },
+    { name: '삭제하기', path: '/work/delete' },
+    { name: '정렬하기', path: '/work/sort' },
+  ]);
   useEffect(() => {
-    console.log(ispresent);
-    if (ispresent) {
+    // safeToRemove는 isPresent가 false로 변하는 순간 생성되는 방식으로 isPresent에 의존하고 있다.
+    // 따라서 의존성 배열에 safeToRemove를 넣으면 safeToRemove가 생성되며 useEffect를 한 번 더 실행시켜 의도치 않은 동작을 발생시킬 수 있다.
+    if (isPresent) {
       const enterAnimation = async () => {
         setIsAborted(true);
-        await animate(scope.current, { scale: 1 }, { duration: 0.4 });
-        await animate(
-          '.Circles',
-          { scale: [1.5, 1], opacity: [0, 1] },
-          {
-            duration: 0.3,
-            ease: 'easeOut',
-            type: 'spring',
-            delay: stagger(0.2),
-          }
-        );
-        animate(
-          '.Menu',
-          { scale: [0.7, 1.2, 1], opacity: [0, 1] },
-          { duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
-        );
+        animate(scope.current, { scale: 1 }, { duration: 0.3 });
+        await animate('.Inner', { scale: 1 }, { duration: 0.35 });
         setIsAborted(false);
       };
       enterAnimation();
     } else {
       const exitAnimation = async () => {
         setIsAborted(true);
-        animate(
-          '.Circles',
-          { scale: [1, 1.5], opacity: [1, 0] },
-          {
-            duration: 0.3,
-            ease: 'easeOut',
-            type: 'spring',
-          }
-        );
-        await animate(
-          '.Menu',
-          { scale: [1, 1.2, 0.7], opacity: [1, 0] },
-          { duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
-        );
-        animate(scope.current, { borderRadius: '0% 0% 0% 100%' }, { duration: 0.2 });
-        await animate(scope.current, { scale: 0 }, { duration: 4 });
+        animate('.Inner', { scale: 0 }, { duration: 0.3 });
+        await animate(scope.current, { scale: 0 }, { duration: 0.35 });
         safeToRemove();
         setIsAborted(false);
       };
       exitAnimation();
     }
-  }, [ispresent, animate, scope, setIsAborted]);
+  }, [isPresent, animate, scope, setIsAborted]);
+  const handleMenuClick = () => {
+    setIsNavigating(true);
+  };
   return (
     <motion.div
       ref={scope}
       initial={{ scale: 0 }}
-      className="origin-top-right box-content fixed right-0 top-0 w-[100vw] h-[100vh] bg-sky-500"
+      className="origin-top-right rounded-bl-[24px] box-content fixed right-0 top-0 w-[200px] h-[360px] bg-[#101010] border-b border-l border-[#eaeaea]"
     >
-      <div className="Menu"></div>
-      <div className="Circles"></div>
+      <motion.div
+        initial={{ scale: 0 }}
+        className="Inner origin-top-right w-[calc(100%-6px)] h-[calc(100%-6px)] border-b border-l float-right rounded-bl-[16px] border-[#eaeaea]"
+      >
+        <ul className="font-Pretendard pt-[100px] pb-[60px] font-light text-base w-full h-full flex flex-col justify-between items-center">
+          {menuItems.current.map((item) => {
+            const { name, path } = item;
+            return (
+              <li
+                key={name}
+                onClick={() => {
+                  handleMenuClick();
+                }}
+                className="hover:text-palettered cursor-pointer"
+              >
+                <Link href={path}>{name}</Link>
+              </li>
+            );
+          })}
+          <li
+            onClick={() => {
+              handleMenuClick();
+            }}
+            className="hover:text-palettered cursor-pointer"
+          >
+            로그아웃
+          </li>
+        </ul>
+      </motion.div>
     </motion.div>
   );
 }
