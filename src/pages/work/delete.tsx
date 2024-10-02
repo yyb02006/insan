@@ -1,4 +1,12 @@
-import { SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
+import {
+  ReactNode,
+  RefObject,
+  SetStateAction,
+  SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
 import { ciIncludes, cls } from '@/libs/client/utils';
 import Image from 'next/image';
@@ -392,9 +400,9 @@ interface InitialData {
 
 export const Title = ({ name }: { name: string }) => {
   return (
-    <div className="relative h-[100px] flex justify-center items-center font-GmarketSans font-bold text-3xl">
+    <h1 className="relative h-[100px] flex justify-center items-center font-GmarketSans font-bold text-3xl">
       {name}
-    </div>
+    </h1>
   );
 };
 
@@ -411,6 +419,36 @@ export const MenuComponent = () => {
     >
       <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setIsNavigating} />
     </HamburgerMenuContainer>
+  );
+};
+
+export const PostManagementLayout = ({
+  topElementRef,
+  category,
+  title,
+  onCategoryClick,
+  children,
+}: {
+  topElementRef: RefObject<HTMLDivElement>;
+  category: FlatformsCategory;
+  title: string;
+  onCategoryClick: (categoryLabel: FlatformsCategory) => void;
+  children: ReactNode;
+}) => {
+  return (
+    <section ref={topElementRef} className="relative xl:px-40 sm:px-24 px-16">
+      <Title name={title} />
+      <CategoryTab
+        category={category}
+        onFilmShortClick={() => {
+          onCategoryClick('filmShort');
+        }}
+        onOutsourceClick={() => {
+          onCategoryClick('outsource');
+        }}
+      />
+      {children}
+    </section>
   );
 };
 
