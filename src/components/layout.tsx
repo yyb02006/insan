@@ -138,13 +138,13 @@ const ListMenu = ({ isAdmin, setIsLoading }: ListMenuProps) => {
 const ExtendedNav = ({
   isMobile,
   videoLength,
-  setIsLoading,
+  setIsAborted,
   setIsNavigating,
   isNavigating,
 }: {
   isMobile: boolean;
   videoLength: VideoLength;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
+  setIsAborted: Dispatch<SetStateAction<boolean>>;
   setIsNavigating: Dispatch<SetStateAction<boolean>>;
   isNavigating: boolean;
 }) => {
@@ -192,7 +192,7 @@ const ExtendedNav = ({
   useEffect(() => {
     if (ispresent) {
       const enterAnimation = async () => {
-        setIsLoading(true);
+        setIsAborted(true);
         animate(scope.current, { scale: 1 }, { duration: 0.4 });
         await animate(scope.current, { borderRadius: 0 }, { duration: 0.4 });
         await animate(
@@ -210,12 +210,12 @@ const ExtendedNav = ({
           { scale: [0.7, 1.2, 1], opacity: [0, 1] },
           { duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
         );
-        setIsLoading(false);
+        setIsAborted(false);
       };
       enterAnimation();
     } else {
       const exitAnimation = async () => {
-        setIsLoading(true);
+        setIsAborted(true);
         animate(
           '.Circles',
           { scale: [1, 1.5], opacity: [1, 0] },
@@ -233,11 +233,11 @@ const ExtendedNav = ({
         animate(scope.current, { borderRadius: '0% 0% 0% 100%' }, { duration: 0.2 });
         await animate(scope.current, { scale: 0 }, { duration: 0.4 });
         safeToRemove();
-        setIsLoading(false);
+        setIsAborted(false);
       };
       exitAnimation();
     }
-  }, [ispresent, animate, safeToRemove, scope, setIsLoading]);
+  }, [ispresent, animate, safeToRemove, scope, setIsAborted]);
   const onLinkEnter = (selector: string) => {
     animate(`.${selector}`, { color: '#eaeaea', webkitTextStroke: '0px' }, { duration: 0.2 });
     animate(`.${selector}Letter`, { y: '110%' });
@@ -433,24 +433,26 @@ export default function Layout({
             {!nav.isCollapsed ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
           </AnimatePresence>
           <AnimatePresence>
-            {nav.isCollapsed ? (
-              <HamburgerMenuContainer
-                isOpen={isExtended}
-                isAborted={isAborted}
-                isNavigating={isNavigating}
-                setIsOpen={setIsExtended}
-              >
-                {menuComponent || (
-                  <ExtendedNav
-                    videoLength={videoLength}
-                    setIsLoading={setIsAborted}
-                    isMobile={isMobile}
-                    setIsNavigating={setIsNavigating}
+            {nav.isCollapsed
+              ? menuComponent || (
+                  <HamburgerMenuContainer
+                    isOpen={isExtended}
+                    isAborted={isAborted}
                     isNavigating={isNavigating}
-                  />
-                )}
-              </HamburgerMenuContainer>
-            ) : null}
+                    setIsOpen={setIsExtended}
+                  >
+                    {
+                      <ExtendedNav
+                        videoLength={videoLength}
+                        setIsAborted={setIsAborted}
+                        isMobile={isMobile}
+                        setIsNavigating={setIsNavigating}
+                        isNavigating={isNavigating}
+                      />
+                    }
+                  </HamburgerMenuContainer>
+                )
+              : null}
           </AnimatePresence>
         </div>
       ) : null}
