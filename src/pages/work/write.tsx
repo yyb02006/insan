@@ -9,8 +9,9 @@ import { useRouter } from 'next/router';
 import {
   ButtonsController,
   CategoryTab,
+  MenuComponent,
   SearchForm,
-  PostManagementNav,
+  Title,
   UtilButtons,
   VideoCollection,
 } from './delete';
@@ -301,9 +302,14 @@ export default function Write({
   };
 
   return (
-    <Layout seoTitle="WRITE" footerPosition="hidden" menu={{ hasMenu: false }}>
+    <Layout
+      seoTitle="WRITE"
+      footerPosition="hidden"
+      menu={{ hasMenu: true, menuComponent: <MenuComponent /> }}
+      nav={{ isCollapsed: true }}
+    >
+      <Title name="추가하기" />
       <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <PostManagementNav currentPage="write" />
         <CategoryTab
           category={category}
           onFilmShortClick={() => {
