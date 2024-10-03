@@ -139,14 +139,14 @@ const ExtendedNav = ({
   isMobile,
   videoLength,
   setIsAborted,
-  setIsNavigating,
-  isNavigating,
+  setOnNavigating,
+  onNavigating,
 }: {
   isMobile: boolean;
   videoLength: VideoLength;
   setIsAborted: Dispatch<SetStateAction<boolean>>;
-  setIsNavigating: Dispatch<SetStateAction<boolean>>;
-  isNavigating: boolean;
+  setOnNavigating: Dispatch<SetStateAction<boolean>>;
+  onNavigating: boolean;
 }) => {
   const router = useRouter();
   const [isUser] = useUser();
@@ -311,8 +311,8 @@ const ExtendedNav = ({
           ))}
           <div
             onClick={() => {
-              if (isNavigating) return;
-              setIsNavigating(true);
+              if (onNavigating) return;
+              setOnNavigating(true);
             }}
             className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered"
           >
@@ -361,7 +361,7 @@ export default function Layout({
   const [isLoading, setIsLoading] = useState(false);
   const [isExtended, setIsExtended] = useState(false);
   const [isAborted, setIsAborted] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [onNavigating, setOnNavigating] = useState(false);
   const { hasMenu, menuComponent } = menu;
 
   useEffect(() => {
@@ -438,7 +438,7 @@ export default function Layout({
                   <HamburgerMenuContainer
                     isOpen={isExtended}
                     isAborted={isAborted}
-                    isNavigating={isNavigating}
+                    onNavigating={onNavigating}
                     setIsOpen={setIsExtended}
                   >
                     {
@@ -446,8 +446,8 @@ export default function Layout({
                         videoLength={videoLength}
                         setIsAborted={setIsAborted}
                         isMobile={isMobile}
-                        setIsNavigating={setIsNavigating}
-                        isNavigating={isNavigating}
+                        setOnNavigating={setOnNavigating}
+                        onNavigating={onNavigating}
                       />
                     }
                   </HamburgerMenuContainer>

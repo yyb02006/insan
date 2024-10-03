@@ -6,7 +6,7 @@ import HamburgerButton from '@/components/nav/hamburgerButton';
 interface HamburgerMenuWrapperProps {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  isNavigating: boolean;
+  onNavigating: boolean;
   isAborted: boolean;
   children: ReactNode;
 }
@@ -15,7 +15,7 @@ export default function HamburgerMenuContainer({
   isOpen,
   setIsOpen,
   isAborted,
-  isNavigating,
+  onNavigating,
   children,
 }: HamburgerMenuWrapperProps) {
   const [isPresent, safeToRemove] = usePresence();
@@ -64,7 +64,7 @@ export default function HamburgerMenuContainer({
     >
       <AnimatePresence>{isOpen ? children : null}</AnimatePresence>
       <HamburgerButton isAbort={isAborted} setIsOpen={setIsOpen} />
-      {isNavigating ? <LoaidngIndicator /> : null}
+      {onNavigating ? <LoaidngIndicator /> : null}
     </div>
   );
 }
