@@ -14,15 +14,7 @@ import {
   Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import {
-  Dispatch,
-  SetStateAction,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
