@@ -63,7 +63,7 @@ export default function HamburgerMenuContainer({
       className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
     >
       <AnimatePresence>{isOpen ? children : null}</AnimatePresence>
-      <HamburgerButton isAbort={isAborted} setIsOpen={setIsOpen} />
+      <HamburgerButton isAborted={isAborted} setIsOpen={setIsOpen} />
       {onNavigating ? <LoaidngIndicator /> : null}
     </div>
   );

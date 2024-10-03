@@ -3,15 +3,15 @@ import { Dispatch, SetStateAction } from 'react';
 
 export default function HamburgerButton({
   setIsOpen,
-  isAbort,
+  isAborted,
 }: {
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  isAbort: boolean;
+  isAborted: boolean;
 }) {
   return (
     <div
       onClick={() => {
-        if (isAbort) return;
+        if (isAborted) return;
         setIsOpen((p) => !p);
       }}
       className="relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group"
