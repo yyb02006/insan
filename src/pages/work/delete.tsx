@@ -454,7 +454,7 @@ export const PostManagementLayout = ({
 
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
   const router = useRouter();
-  const topElement = useRef<HTMLDivElement>(null);
+  const topElementRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
@@ -521,7 +521,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     if (deleteIdList.length > 0) {
       setDeleteIdList([]);
       resetInit();
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
     }
   };
 
@@ -534,7 +534,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       setSearchWord('');
       setSearchWordSnapShot('');
       setOnSelectedList(true);
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
       setSearchResultSnapShot((p) => ({
         ...p,
         [category]: list[category].filter((li) => deleteIdList.includes(li.id)),
@@ -626,17 +626,12 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       menu={{ hasMenu: true, menuComponent: <MenuComponent /> }}
       nav={{ isCollapsed: true }}
     >
-      <Title name="삭제하기" />
-      <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <CategoryTab
-          category={category}
-          onFilmShortClick={() => {
-            onCategoryClick('filmShort');
-          }}
-          onOutsourceClick={() => {
-            onCategoryClick('outsource');
-          }}
-        />
+      <PostManagementLayout
+        category={category}
+        onCategoryClick={onCategoryClick}
+        title="삭제하기"
+        topElementRef={topElementRef}
+      >
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />
         <div
           className={
@@ -701,8 +696,8 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
           count={deleteIdList.length}
           action="delete"
         />
-        <ToTop toScroll={topElement} />
-      </section>
+        <ToTop toScroll={topElementRef} />
+      </PostManagementLayout>
       {loading ? (
         <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] bg-black">
           <div className="absolute top-0 w-full h-full flex justify-center items-center">

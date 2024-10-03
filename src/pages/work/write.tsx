@@ -10,6 +10,7 @@ import {
   ButtonsController,
   CategoryTab,
   MenuComponent,
+  PostManagementLayout,
   SearchForm,
   Title,
   UtilButtons,
@@ -67,7 +68,7 @@ export default function Write({
   initialNextPageToken,
 }: InitialData) {
   const router = useRouter();
-  const topElement = useRef<HTMLDivElement>(null);
+  const topElementRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
@@ -252,7 +253,7 @@ export default function Write({
     if (workInfos.length < 1) return;
     setWorkInfos([]);
     resetInit();
-    topElement.current?.scrollIntoView();
+    topElementRef.current?.scrollIntoView();
   };
 
   const onSelectedListClick = () => {
@@ -264,7 +265,7 @@ export default function Write({
       setSearchWord('');
       setSearchWordSnapshot('');
       setOnSelectedList(true);
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
       if (category === 'filmShort') {
         setSearchResults((p) => ({
           ...p,
@@ -308,17 +309,12 @@ export default function Write({
       menu={{ hasMenu: true, menuComponent: <MenuComponent /> }}
       nav={{ isCollapsed: true }}
     >
-      <Title name="추가하기" />
-      <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <CategoryTab
-          category={category}
-          onFilmShortClick={() => {
-            onCategoryClick('filmShort');
-          }}
-          onOutsourceClick={() => {
-            onCategoryClick('outsource');
-          }}
-        />
+      <PostManagementLayout
+        category={category}
+        onCategoryClick={onCategoryClick}
+        title="추가하기"
+        topElementRef={topElementRef}
+      >
         <SearchForm onSearch={onSearch} searchWord={searchWord} setSearchWord={setSearchWord} />
         {category === 'filmShort' && list[category].length > 0 ? (
           isGrid ? (
@@ -394,8 +390,8 @@ export default function Write({
           count={workInfos.length}
           action="save"
         />
-      </section>
-      <ToTop toScroll={topElement} />
+        <ToTop toScroll={topElementRef} />
+      </PostManagementLayout>
       {loading ? (
         <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black">
           <div className="animate-spin-middle contrast-50 absolute w-[100px] aspect-square">
