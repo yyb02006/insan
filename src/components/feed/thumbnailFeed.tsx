@@ -3,8 +3,8 @@ import Circles from '@/components/circles';
 import Input from '@/components/input';
 import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
-import { OwnedVideoItems, WorkInfos } from '@/pages/work/write';
 import { cls } from '@/libs/client/utils';
+import { OwnedVideoItems, WorkInfos } from '@/pages/work/work';
 
 export const createInputChange = (
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>,

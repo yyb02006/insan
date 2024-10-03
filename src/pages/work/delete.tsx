@@ -1,20 +1,21 @@
-import { SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { FlatformsCategory, WorkInfos } from './write';
-import { ciIncludes, cls } from '@/libs/client/utils';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
+import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
-import useDeleteRequest from '@/libs/client/useDelete';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
+import SearchForm from '@/components/searchForm';
 import ToTop from '@/components/toTop';
-import { GetServerSideProps } from 'next';
+import useDeleteRequest from '@/libs/client/useDelete';
+import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
+import { ciIncludes, cls } from '@/libs/client/utils';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
-import Circles from '@/components/circles';
-import HamburgerMenuContainer from '@/components/nav/hamburgerMenuContainer';
-import PostManagementNav from '@/components/nav/postManagementNav';
-import SearchForm from '@/components/searchForm';
-import PostManagementLayout from '@/components/nav/PostManagementLayout';
+import { GetServerSideProps } from 'next';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
+import ButtonsController from '@/components/butttons/buttonsController';
+import UtilButtons from '@/components/butttons/utilButtons';
+import { FlatformsCategory, VideoCollection, WorkInfos } from '@/pages/work/work';
 
 interface list extends WorkInfos {
   id: number;
@@ -46,168 +47,6 @@ const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
       className="w-full object-cover aspect-video"
       priority={setPriority}
     />
-  );
-};
-
-interface CategoryTabProps {
-  onFilmShortClick: () => void;
-  onOutsourceClick: () => void;
-  category: FlatformsCategory;
-}
-
-export const CategoryTab = ({ onFilmShortClick, onOutsourceClick, category }: CategoryTabProps) => {
-  return (
-    <div className="flex py-4">
-      <button
-        onClick={onFilmShortClick}
-        className={cls(
-          category === 'filmShort' ? 'text-palettered' : '',
-          'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-        )}
-      >
-        Film / Short
-      </button>
-      <button
-        onClick={onOutsourceClick}
-        className={cls(
-          category === 'outsource' ? 'text-palettered' : '',
-          'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-        )}
-      >
-        Outsource
-      </button>
-    </div>
-  );
-};
-
-const ListIcon = () => {
-  return (
-    <ul className="w-[50%] h-[50%] flex flex-col justify-around">
-      <li className="w-full border-y-[1px] bg-white" />
-      <li className="w-full border-y-[1px] bg-white" />
-      <li className="w-full border-y-[1px] bg-white" />
-    </ul>
-  );
-};
-
-const GridIcon = () => {
-  return (
-    <ul className="w-[50%] h-[50%] grid grid-cols-2 gap-1">
-      <li className="w-full aspect-square bg-[#eaeaea]" />
-      <li className="w-full aspect-square border border-[#eaeaea]" />
-      <li className="w-full aspect-square border border-[#eaeaea]" />
-      <li className="w-full aspect-square bg-[#eaeaea]" />
-    </ul>
-  );
-};
-
-interface UtilButtonsProps {
-  onListClick: () => void;
-  onViewSwitch: () => void;
-  isGrid: boolean;
-  onSelectedList: boolean;
-  count: number;
-  useOnMobile: boolean;
-}
-
-export const UtilButtons = ({
-  onListClick,
-  onViewSwitch,
-  isGrid,
-  onSelectedList,
-  count,
-  useOnMobile,
-}: UtilButtonsProps) => {
-  return (
-    <div
-      className={`${
-        useOnMobile
-          ? 'fixed sm:hidden bottom-24 right-4 w-16 font-bold '
-          : 'hidden sm:inline-block w-full font-light hover:font-bold'
-      }`}
-    >
-      <button
-        onClick={onListClick}
-        className={cls(
-          useOnMobile
-            ? 'mb-4 sm:hidden w-16 font-bold'
-            : 'hidden sm:inline-block w-full font-light hover:font-bold',
-          onSelectedList
-            ? 'bg-palettered'
-            : 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
-          'aspect-square text-sm rounded-full'
-        )}
-        disabled={!onSelectedList && count === 0}
-      >
-        <div>{count}</div>
-        <div>Videos</div>
-      </button>
-      <button
-        onClick={onViewSwitch}
-        className={cls(
-          'w-full flex justify-center items-center ring-1 ring-palettered aspect-square bg-[#101010] rounded-full'
-        )}
-      >
-        {isGrid ? <ListIcon /> : <GridIcon />}
-      </button>
-    </div>
-  );
-};
-
-interface ButtonsControllerProps {
-  onResetClick: () => void;
-  onSaveClick: () => void;
-  onListClick: () => void;
-  onViewSwitch: () => void;
-  isGrid: boolean;
-  onSelectedList: boolean;
-  count: number;
-  action?: 'save' | 'delete';
-}
-
-export const ButtonsController = ({
-  onResetClick,
-  onSaveClick,
-  onListClick,
-  onViewSwitch,
-  isGrid,
-  onSelectedList,
-  count,
-  action = 'save',
-}: ButtonsControllerProps) => {
-  return (
-    <div className="sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0">
-      <button
-        onClick={onResetClick}
-        className={cls(
-          count > 0 ? 'sm:hover:text-palettered sm:hover:font-bold' : 'text-[#404040]',
-          'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
-        )}
-        disabled={count === 0}
-      >
-        Reset
-      </button>
-      <button
-        onClick={onSaveClick}
-        className={cls(
-          count > 0
-            ? 'sm:hover:text-palettered sm:hover:font-bold bg-palettered'
-            : 'text-[#404040]',
-          'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
-        )}
-        disabled={count === 0}
-      >
-        {action === 'save' ? <span>Save</span> : <span>Delete</span>}
-      </button>
-      <UtilButtons
-        onViewSwitch={onViewSwitch}
-        onListClick={onListClick}
-        isGrid={isGrid}
-        onSelectedList={onSelectedList}
-        count={count}
-        useOnMobile={false}
-      />
-    </div>
   );
 };
 
@@ -339,39 +178,10 @@ const Work = ({
   );
 };
 
-export interface VideoCollection<T, U = T> {
-  filmShort: T;
-  outsource: U;
-}
-
 interface InitialData {
   initialWorks: VideoCollection<Works[]>;
   initialHasNextPage: VideoCollection<boolean>;
 }
-
-export const Title = ({ name }: { name: string }) => {
-  return (
-    <h1 className="relative h-[100px] flex justify-center items-center font-GmarketSans font-bold text-3xl">
-      {name}
-    </h1>
-  );
-};
-
-export const PostManagementMenu = () => {
-  const [isAborted, setIsAborted] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [onNavigating, setOnNavigating] = useState(false);
-  return (
-    <HamburgerMenuContainer
-      isAborted={isAborted}
-      onNavigating={onNavigating}
-      setIsOpen={setIsOpen}
-      isOpen={isOpen}
-    >
-      <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setOnNavigating} />
-    </HamburgerMenuContainer>
-  );
-};
 
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
   const router = useRouter();

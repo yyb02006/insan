@@ -1,51 +1,28 @@
 import { ciIncludes, fetchData } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { GapiItem, VideosCategory } from '.';
+import { GapiItem } from '.';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
 import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/feed/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
-import { ButtonsController, PostManagementMenu, UtilButtons, VideoCollection } from './delete';
-import PostManagementLayout from '@/components/nav/PostManagementLayout';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
 import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import Circles from '@/components/circles';
 import { VimeoListFeed, YoutubeListFeed } from '@/components/feed/listFeed';
 import SearchForm from '@/components/searchForm';
-
-export interface WorkInfos {
-  title: string;
-  description: string;
-  resourceId: string;
-  category: string;
-  date: string;
-  thumbnailLink: string;
-  animatedThumbnailLink: string;
-}
-
-export interface VimeoVideos {
-  player_embed_url: string;
-  resource_key: string;
-  pictures: { base_link: string };
-  name: string;
-  description: string;
-  uri: string;
-  animated_thumbnail: string;
-}
-
-export interface OwnedVideoItems {
-  title: string;
-  category: VideosCategory;
-  date: string;
-  description: string;
-  resourceId: string;
-}
-
-export type ResourceHost = 'vimeo' | 'youtube';
-
-export type FlatformsCategory = 'filmShort' | 'outsource';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
+import UtilButtons from '@/components/butttons/utilButtons';
+import ButtonsController from '@/components/butttons/buttonsController';
+import {
+  FlatformsCategory,
+  OwnedVideoItems,
+  VideoCollection,
+  VimeoVideos,
+  WorkInfos,
+} from '@/pages/work/work';
 
 interface InitialData {
   initialVimeoVideos: VimeoVideos[];

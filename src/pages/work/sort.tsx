@@ -1,15 +1,15 @@
-import Layout from '@/components/layout';
-import { PostManagementMenu } from './delete';
-import PostManagementLayout from '@/components/nav/PostManagementLayout';
-import { FlatformsCategory, WorkInfos } from './write';
-import { useRef, useState } from 'react';
-import SearchForm from '@/components/searchForm';
 import { GetServerSideProps } from 'next';
+import { useRef, useState } from 'react';
+import Layout from '@/components/layout';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
+import SearchForm from '@/components/searchForm';
 import client from '@/libs/server/client';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
+import { FlatformsCategory, WorkInfos } from '@/pages/work/work';
 
 export default function Sort() {
-  const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
+  const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const topElementRef = useRef<HTMLDivElement>(null);
   const onCategoryClick = (categoryLabel: FlatformsCategory) => {
