@@ -8,11 +8,8 @@ import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
 import {
   ButtonsController,
-  CategoryTab,
   MenuComponent,
   PostManagementLayout,
-  SearchForm,
-  Title,
   UtilButtons,
   VideoCollection,
 } from './delete';
@@ -21,6 +18,7 @@ import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import Circles from '@/components/circles';
 import { VimeoListFeed, YoutubeListFeed } from '@/components/feed/listFeed';
+import SearchForm from '@/components/searchForm';
 
 export interface WorkInfos {
   title: string;
