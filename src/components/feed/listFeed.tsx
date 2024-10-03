@@ -1,10 +1,10 @@
 import { cls } from '@/libs/client/utils';
-import Circles from './circles';
-import Input from './input';
+import Circles from '@/components/circles';
+import Input from '@/components/input';
 import { useState } from 'react';
 import Image from 'next/image';
-import { VimeofeedProps, YoutubefeedProps } from './typings/components';
-import { createInputChange, onListItemClick } from './thumbnailFeed';
+import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
+import { createInputChange, onListItemClick } from '@/components/feed/thumbnailFeed';
 
 const VimeoThumbnailPreview = ({
   altName,

@@ -20,7 +20,7 @@ import { AuthResponse } from '@/pages/enter';
 import LoaidngIndicator from './loadingIndicator';
 import { VideoLength, useAppContext } from '@/appContext';
 import useUser from '@/libs/client/useUser';
-import HamburgerMenuContainer from './hamburgerMenuContainer';
+import HamburgerMenuContainer from '@/components/nav/hamburgerMenuContainer';
 
 interface LayoutProps {
   seoTitle: string;

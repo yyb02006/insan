@@ -20,8 +20,8 @@ import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
 import Circles from '@/components/circles';
-import HamburgerMenuContainer from '@/components/hamburgerMenuContainer';
-import PostManagementNav from '@/components/postManagementNav';
+import HamburgerMenuContainer from '@/components/nav/hamburgerMenuContainer';
+import PostManagementNav from '@/components/nav/postManagementNav';
 
 interface list extends WorkInfos {
   id: number;

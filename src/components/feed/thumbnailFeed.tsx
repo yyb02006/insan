@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Input from './input';
-import Circles from './circles';
-import { VimeofeedProps, YoutubefeedProps } from './typings/components';
+import Circles from '@/components/circles';
+import Input from '@/components/input';
+import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
 import { OwnedVideoItems, WorkInfos } from '@/pages/work/write';
 import { cls } from '@/libs/client/utils';

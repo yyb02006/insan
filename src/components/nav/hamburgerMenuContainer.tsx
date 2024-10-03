@@ -1,7 +1,7 @@
 import { AnimatePresence, stagger, useAnimate, usePresence } from 'framer-motion';
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react';
-import LoaidngIndicator from './loadingIndicator';
-import HamburgerButton from './hamburgerButton';
+import LoaidngIndicator from '@/components/loadingIndicator';
+import HamburgerButton from '@/components/nav/hamburgerButton';
 
 interface HamburgerMenuWrapperProps {
   isOpen: boolean;

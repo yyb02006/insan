@@ -3,7 +3,7 @@ import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { GapiItem, VideosCategory } from '.';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
-import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/thumbnailFeed';
+import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/feed/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
 import {
@@ -19,7 +19,7 @@ import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
 import Circles from '@/components/circles';
-import { VimeoListFeed, YoutubeListFeed } from '@/components/listFeed';
+import { VimeoListFeed, YoutubeListFeed } from '@/components/feed/listFeed';
 
 export interface WorkInfos {
   title: string;
