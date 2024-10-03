@@ -6,13 +6,8 @@ import Layout from '@/components/layout';
 import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/feed/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
-import {
-  ButtonsController,
-  MenuComponent,
-  PostManagementLayout,
-  UtilButtons,
-  VideoCollection,
-} from './delete';
+import { ButtonsController, MenuComponent, UtilButtons, VideoCollection } from './delete';
+import PostManagementLayout from '@/components/nav/PostManagementLayout';
 import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';

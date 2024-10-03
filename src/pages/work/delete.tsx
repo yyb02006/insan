@@ -1,4 +1,4 @@
-import { ReactNode, RefObject, SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { FlatformsCategory, WorkInfos } from './write';
 import { ciIncludes, cls } from '@/libs/client/utils';
 import Image from 'next/image';
@@ -14,6 +14,7 @@ import Circles from '@/components/circles';
 import HamburgerMenuContainer from '@/components/nav/hamburgerMenuContainer';
 import PostManagementNav from '@/components/nav/postManagementNav';
 import SearchForm from '@/components/searchForm';
+import PostManagementLayout from '@/components/nav/PostManagementLayout';
 
 interface list extends WorkInfos {
   id: number;
@@ -369,36 +370,6 @@ export const MenuComponent = () => {
     >
       <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setIsNavigating} />
     </HamburgerMenuContainer>
-  );
-};
-
-export const PostManagementLayout = ({
-  topElementRef,
-  category,
-  title,
-  onCategoryClick,
-  children,
-}: {
-  topElementRef: RefObject<HTMLDivElement>;
-  category: FlatformsCategory;
-  title: string;
-  onCategoryClick: (categoryLabel: FlatformsCategory) => void;
-  children: ReactNode;
-}) => {
-  return (
-    <section ref={topElementRef} className="relative xl:px-40 sm:px-24 px-16">
-      <Title name={title} />
-      <CategoryTab
-        category={category}
-        onFilmShortClick={() => {
-          onCategoryClick('filmShort');
-        }}
-        onOutsourceClick={() => {
-          onCategoryClick('outsource');
-        }}
-      />
-      {children}
-    </section>
   );
 };
 
