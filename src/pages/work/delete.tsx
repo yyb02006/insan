@@ -357,18 +357,18 @@ export const Title = ({ name }: { name: string }) => {
   );
 };
 
-export const MenuComponent = () => {
+export const PostManagementWrapper = () => {
   const [isAborted, setIsAborted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [onNavigating, setOnNavigating] = useState(false);
   return (
     <HamburgerMenuContainer
       isAborted={isAborted}
-      isNavigating={isNavigating}
+      onNavigating={onNavigating}
       setIsOpen={setIsOpen}
       isOpen={isOpen}
     >
-      <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setIsNavigating} />
+      <PostManagementNav setIsAborted={setIsAborted} setIsNavigating={setOnNavigating} />
     </HamburgerMenuContainer>
   );
 };
@@ -544,7 +544,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     <Layout
       seoTitle="DELETE"
       footerPosition="hidden"
-      menu={{ hasMenu: true, menuComponent: <MenuComponent /> }}
+      menu={{ hasMenu: true, menuComponent: <PostManagementWrapper /> }}
       nav={{ isCollapsed: true }}
     >
       <PostManagementLayout
