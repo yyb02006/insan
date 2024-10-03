@@ -6,7 +6,7 @@ import Layout from '@/components/layout';
 import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/feed/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
-import { ButtonsController, PostManagementWrapper, UtilButtons, VideoCollection } from './delete';
+import { ButtonsController, PostManagementMenu, UtilButtons, VideoCollection } from './delete';
 import PostManagementLayout from '@/components/nav/PostManagementLayout';
 import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
@@ -299,7 +299,7 @@ export default function Write({
     <Layout
       seoTitle="WRITE"
       footerPosition="hidden"
-      menu={{ hasMenu: true, menuComponent: <PostManagementWrapper /> }}
+      menu={{ hasMenu: true, menuComponent: <PostManagementMenu /> }}
       nav={{ isCollapsed: true }}
     >
       <PostManagementLayout

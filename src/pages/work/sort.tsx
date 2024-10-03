@@ -1,5 +1,5 @@
 import Layout from '@/components/layout';
-import { PostManagementWrapper } from './delete';
+import { PostManagementMenu } from './delete';
 import PostManagementLayout from '@/components/nav/PostManagementLayout';
 import { FlatformsCategory, WorkInfos } from './write';
 import { useRef, useState } from 'react';
@@ -25,7 +25,7 @@ export default function Sort() {
       nav={{ isCollapsed: true }}
       menu={{
         hasMenu: true,
-        menuComponent: <PostManagementWrapper />,
+        menuComponent: <PostManagementMenu />,
       }}
     >
       <PostManagementLayout

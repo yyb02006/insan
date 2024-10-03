@@ -357,7 +357,7 @@ export const Title = ({ name }: { name: string }) => {
   );
 };
 
-export const PostManagementWrapper = () => {
+export const PostManagementMenu = () => {
   const [isAborted, setIsAborted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [onNavigating, setOnNavigating] = useState(false);
@@ -544,7 +544,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     <Layout
       seoTitle="DELETE"
       footerPosition="hidden"
-      menu={{ hasMenu: true, menuComponent: <PostManagementWrapper /> }}
+      menu={{ hasMenu: true, menuComponent: <PostManagementMenu /> }}
       nav={{ isCollapsed: true }}
     >
       <PostManagementLayout
