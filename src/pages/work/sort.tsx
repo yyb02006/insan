@@ -1,5 +1,5 @@
 import { GetServerSideProps } from 'next';
-import { SyntheticEvent, useRef, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Layout from '@/components/layout';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
 import SearchForm from '@/components/searchForm';
@@ -25,10 +25,7 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
   const [searchResult, setSearchResult] =
     useState<VideoCollection<WorksUsedInSort[]>>(initialWorks);
-  const [selectedList, setselectedList] = useState<VideoCollection<Works[]>>({
-    filmShort: [],
-    outsource: [],
-  });
+  const [selectedList, setSelectedList] = useState<WorksUsedInSort[]>([]);
   const [hasNextPage, setHasNextPage] = useState<VideoCollection<boolean>>(initialHasNextPage);
   const [isGrid, setIsGrid] = useState(true);
   const [fetchLoading, setFetchLoading] = useState(false);
@@ -39,16 +36,41 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
     if (category === categoryLabel) return;
     setCategory(categoryLabel);
   };
+  const onVideoClick = (video: WorksUsedInSort) => {
+    setSelectedList((p) =>
+      p.some((obj) => obj.id === video.id)
+        ? p.filter((item) => item.id !== video.id)
+        : [...p, video]
+    );
+  };
   const searchSubmitHandler = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPage(1); // page 부분이 2부터 시작할 필요가 있는지 살피고 수정 필요
     setSearchWordSnapShot(searchWord);
-    const currentList = isSelectedListOpen ? selectedList[category] : videoList[category]; // 퍼킹 상상치도 못한방법
+    const currentList = isSelectedListOpen ? selectedList : videoList[category]; // 뻐킹 상상치도 못한방법
     setSearchResult((p) => ({
       ...p,
       [category]: currentList.filter((li) => ciIncludes(li.title, searchWord)),
     }));
   };
+  useEffect(() => {
+    setIsSelectedListOpen(false);
+    setSelectedList([]);
+    setPage(1);
+    setSearchWordSnapShot('');
+    setSearchWord('');
+    setSearchResult((p) => ({
+      ...p,
+      [category === 'filmShort' ? 'outsource' : 'filmShort']:
+        videoList[category === 'filmShort' ? 'outsource' : 'filmShort'],
+    }));
+  }, [category, videoList]);
+  useEffect(() => {
+    console.log(selectedList);
+  }, [selectedList]);
+  useEffect(() => {
+    console.log(searchResult);
+  }, [searchResult]);
   return (
     <Layout
       seoTitle="SORT"
@@ -72,8 +94,22 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
         />
         {searchResult[category].map((li, index) =>
           index < 12 * page ? (
-            <div key={li.id}>
-              <Image alt={li.title} src={li.thumbnailLink} width={640} height={360} />
+            <div
+              key={li.id}
+              onClick={() => {
+                onVideoClick(li);
+              }}
+            >
+              <Image
+                alt={li.title}
+                src={
+                  category === 'outsource'
+                    ? `https://i.ytimg.com/vi/${li.thumbnailLink}/sddefault.jpg`
+                    : `${li.thumbnailLink}_640x360?r=pad`
+                }
+                width={640}
+                height={360}
+              />
             </div>
           ) : null
         )}
