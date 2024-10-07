@@ -65,6 +65,22 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
         videoList[category === 'filmShort' ? 'outsource' : 'filmShort'],
     }));
   }, [category, videoList]);
+  const processIntersection = () => {
+    const getList = async () => {
+      // if(!hasNextPage) return
+      setFetchLoading(true);
+      // fetch(`/api/work/list?page=${}`)
+      const value = searchResult[category].length - perPage * page;
+      switch (true) {
+        case value > 0:
+          setPage((p) => p + 1);
+          break;
+        default:
+          setSearchResult((p) => ({ ...p, [category]: [...p[category]] }));
+          break;
+      }
+    };
+  };
   useEffect(() => {
     console.log(selectedList);
   }, [selectedList]);
