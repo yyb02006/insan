@@ -15,16 +15,7 @@ import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
-import { FlatformsCategory, VideoCollection, WorkInfos } from '@/pages/work/work';
-
-interface list extends WorkInfos {
-  id: number;
-}
-
-interface dataState {
-  success: boolean;
-  works: { film: list[]; short: list[]; outsource: list[] };
-}
+import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 
 interface ThumbnailProps {
   src: { main: string; sub: string };
@@ -304,7 +295,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const processIntersection = () => {
     const getList = async () => {
       setFetchLoading(true);
-      const lists: dataState = await (
+      const lists: VideoResponseState = await (
         await fetch(
           `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
         )

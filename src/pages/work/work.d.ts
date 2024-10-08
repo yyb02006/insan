@@ -3,6 +3,15 @@ export interface VideoCollection<T, U = T> {
   outsource: U;
 }
 
+export interface WorkInfosWithId extends WorkInfos {
+  id: number;
+}
+
+export interface VideoResponseState {
+  success: boolean;
+  works: { film: WorkInfosWithId[]; short: WorkInfosWithId[]; outsource: WorkInfosWithId[] };
+}
+
 export interface WorkInfos {
   title: string;
   description: string;
