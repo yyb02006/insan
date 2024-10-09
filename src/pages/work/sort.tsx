@@ -1,5 +1,5 @@
 import { GetServerSideProps } from 'next';
-import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Layout from '@/components/layout';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
 import SearchForm from '@/components/searchForm';
@@ -8,171 +8,301 @@ import PostManagementMenu from '@/components/nav/postManagementMenu';
 import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 import { Works } from '@prisma/client';
 import { ciIncludes, cls } from '@/libs/client/utils';
-import Image from 'next/image';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
+import Thumbnail from '@/components/thumbnail';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
-interface InitialData {
-  initialWorks: VideoCollection<WorksUsedInSort[]>;
-  initialHasNextPage: VideoCollection<boolean>;
+type IdWithOrder = { id: number; order: number };
+
+type IdWithOrderByCategory = VideoCollection<Array<IdWithOrder>>;
+
+interface VideoItemInputProps {
+  video: WorksUsedInSort;
+  setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
+  swapItems: IdWithOrder[];
 }
 
-interface ThumbnailProps {
-  src: { main: string; sub: string };
-  setPriority: boolean;
-  category: FlatformsCategory;
-}
+const VideoItemInput = ({ video, setSwapItems, swapItems }: VideoItemInputProps) => {
+  const swapItem = swapItems.find((item) => item.id === video.id);
+  const [orderValue, setOrderValue] = useState(swapItem?.order || 0);
+  useEffect(() => {
+    setOrderValue(swapItem?.order || 0);
+  }, [swapItem?.order]);
 
-const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
-  const [error, setError] = useState(false);
-  const handleImageError = () => {
-    setError(true);
+  const onOrderChange = (e: SyntheticEvent<HTMLInputElement>) => {
+    const { value } = e.currentTarget;
+    const numValue = Number(value);
+    setOrderValue(numValue);
+  };
+  const onInputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
+    const { value } = e.currentTarget;
+    const currentValue = Number(value);
+    const previousValue = swapItem?.order;
+    const duplicateOrder = swapItems.find(
+      (item) => item.order === currentValue && item.id !== video.id
+    );
+    if (
+      previousValue &&
+      duplicateOrder &&
+      duplicateOrder.id !== video.id && // 값을 바꾸지 않아서 입력된 값으로 검색된 id가 자기 자신인 경우가 아닐 때
+      currentValue <= swapItems.length && // 전체 길이보다 낮은 값일 때
+      currentValue > 0 // 전체 길이보다 높은 값일 때
+    ) {
+      setSwapItems((p) => {
+        return p.map((item) => {
+          {
+            switch (true) {
+              // 자신일 경우
+              case item.id === video.id:
+                return { ...item, order: currentValue };
+              // 전보다 낮은 order를 입력했을 때, 이전 order와 현재 order 사이의 item일 경우
+              case item.order >= currentValue && item.order < previousValue:
+                return { ...item, order: item.order + 1 };
+              // 전보다 높은 order를 입력했을 때, 이전 order와 현재 order 사이의 item일 경우
+              case item.order <= currentValue && item.order > previousValue:
+                return { ...item, order: item.order - 1 };
+              // order 변경에 해당되지 않는 경우
+              default:
+                return item;
+            }
+          }
+        });
+      });
+    } else {
+      setOrderValue(previousValue || 0); // 값 원상복귀
+    }
   };
   return (
-    <Image
-      src={!error ? src.main : src.sub}
-      alt="picturesAlter"
-      width={640}
-      height={category === 'filmShort' ? 360 : 480}
-      onError={handleImageError}
-      className="w-full object-cover aspect-video"
-      priority={setPriority}
+    <input
+      className="mr-2 h-10 w-16 border px-1 border-palettered flex justify-center items-center text-lg text-center bg-[#101010]"
+      type="number"
+      value={orderValue}
+      onChange={onOrderChange}
+      onBlur={onInputBlur}
     />
   );
 };
 
-interface WorkProps {
-  onClick: () => void;
-  searchResult: VideoCollection<WorksUsedInSort[]>;
+interface VideoItemTitleProps {
   category: FlatformsCategory;
-  selected: boolean;
-  resourceId: string;
-  title: string;
-  thumbnailLink: string;
-  setPriority: boolean;
   kind: string;
-  isGrid: boolean;
-  idx: number;
+  title: string;
 }
 
-const Work = ({
-  category,
-  selected,
-  resourceId,
-  title,
-  onClick,
-  searchResult,
-  thumbnailLink,
-  setPriority,
-  kind,
-  isGrid,
-  idx,
-}: WorkProps) => {
-  const [onThumbnail, setOnThumbnail] = useState(false);
+const VideoItemTitle = ({ category, kind, title }: VideoItemTitleProps) => {
   return (
-    <div
-      className={cls(
-        selected ? 'ring-2' : 'ring-0',
-        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
-      )}
-      onClick={onClick}
-    >
-      {isGrid ? (
-        <Thumbnail
-          category={category}
-          src={
-            searchResult[category].length !== 0
-              ? category === 'outsource'
-                ? {
-                    main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
-                    sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
-                  }
-                : {
-                    main: `${thumbnailLink}_640x360?r=pad`,
-                    sub: `${thumbnailLink}_640x360?r=pad`,
-                  }
-              : { main: '', sub: '' }
-          }
-          setPriority={setPriority}
-        />
-      ) : null}
-
-      <div
-        className={cls(
-          isGrid
-            ? 'mt-2'
-            : `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
-                idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
-              } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `,
-          'text-xs'
-        )}
-      >
-        <div className="relative text-base break-words">
-          <span className="whitespace-nowrap">
-            {category !== 'outsource' ? (
-              <span
-                className={cls(
-                  kind === 'film' ? 'text-palettered' : 'text-green-500',
-                  'text-base font-semibold'
-                )}
-              >
-                {kind === 'film' ? '[FILM]' : '[SHORT]'}
-              </span>
-            ) : null}{' '}
+    <div className="relative text-base break-words">
+      <span className="whitespace-nowrap">
+        {category !== 'outsource' ? (
+          <span
+            className={cls(
+              kind === 'film' ? 'text-palettered' : 'text-green-500',
+              'text-base font-semibold'
+            )}
+          >
+            {kind === 'film' ? '[FILM]' : '[SHORT]'}
           </span>
-          {title}
-        </div>
-        <div className="flex justify-between">
-          <div className="font-light break-words text-[#606060]">
-            <span className="whitespace-nowrap">Id : </span>
-            {resourceId}
-          </div>
-          {!isGrid ? (
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                setOnThumbnail((p) => !p);
-              }}
-            >
-              <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
-                (미리보기)
-              </span>
-              {onThumbnail ? (
-                <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
-                  <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
-                  <div className="w-[80%] lg:w-[640px] relative">
-                    <Thumbnail
-                      category={category}
-                      src={
-                        searchResult[category].length !== 0
-                          ? category === 'outsource'
-                            ? {
-                                main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
-                                sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
-                              }
-                            : {
-                                main: `${thumbnailLink}_640x360?r=pad`,
-                                sub: `${thumbnailLink}_640x360?r=pad`,
-                              }
-                          : { main: '', sub: '' }
-                      }
-                      setPriority={setPriority}
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
+        ) : null}{' '}
+      </span>
+      <h1 className="inline-block">{title}</h1>
     </div>
   );
 };
 
-export default function Sort({ initialWorks, initialHasNextPage }: InitialData) {
+interface VideoItemProps {
+  video: WorksUsedInSort;
+  category: FlatformsCategory;
+  isGrid: boolean;
+  idx: number;
+  selectedItem?: WorksUsedInSort;
+  setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
+  setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
+  swapItems: IdWithOrder[];
+}
+
+const VideoItem = ({
+  video,
+  category,
+  isGrid,
+  idx,
+  selectedItem,
+  setSelectedList,
+  setSwapItems,
+  swapItems,
+}: VideoItemProps) => {
+  const { resourceId, title, thumbnailLink, category: kind } = video;
+  const [onThumbnail, setOnThumbnail] = useState(false);
+  const onThumbnailClick = (video: WorksUsedInSort) => {
+    setSelectedList((p) =>
+      selectedItem ? p.filter((item) => item.id !== video.id) : [...p, video]
+    );
+  };
+  return (
+    <>
+      {isGrid ? (
+        <section
+          className={cls(
+            selectedItem ? 'ring-2' : 'ring-0',
+            'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+          )}
+        >
+          <div
+            onClick={() => {
+              onThumbnailClick(video);
+            }}
+          >
+            <Thumbnail
+              category={category}
+              src={
+                category === 'filmShort'
+                  ? {
+                      main: `${thumbnailLink}_640x360?r=pad`,
+                      sub: `${thumbnailLink}_640x360?r=pad`,
+                      alt: title,
+                    }
+                  : {
+                      main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
+                      sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                      alt: title,
+                    }
+              }
+            />
+          </div>
+          <div className="flex mt-2">
+            <VideoItemInput video={video} setSwapItems={setSwapItems} swapItems={swapItems} />
+            <div className="text-xs">
+              <VideoItemTitle category={category} title={title} kind={kind} />
+              <div className="font-light break-words text-[#606060]">
+                <span className="whitespace-nowrap">Id : </span>
+                {resourceId}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section
+          className={cls(
+            selectedItem ? 'ring-2' : 'ring-0',
+            'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+          )}
+        >
+          <div
+            className={cls(
+              `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
+                idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
+              } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `,
+              'text-xs'
+            )}
+          >
+            <VideoItemTitle category={category} title={title} kind={kind} />
+            <div className="flex justify-between">
+              <div className="font-light break-words text-[#606060]">
+                <span className="whitespace-nowrap">Id : </span>
+                {resourceId}
+              </div>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOnThumbnail((p) => !p);
+                }}
+              >
+                <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
+                  (미리보기)
+                </span>
+                {onThumbnail ? (
+                  <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
+                    <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
+                    <div className="w-[80%] lg:w-[640px] relative">
+                      <Thumbnail
+                        category={category}
+                        src={
+                          category === 'filmShort'
+                            ? {
+                                main: `${thumbnailLink}_640x360?r=pad`,
+                                sub: `${thumbnailLink}_640x360?r=pad`,
+                                alt: title,
+                              }
+                            : {
+                                main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
+                                sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                                alt: title,
+                              }
+                        }
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+    </>
+  );
+};
+
+interface VideoFeedProps {
+  category: FlatformsCategory;
+  searchResult: VideoCollection<WorksUsedInSort[]>;
+  selectedList: WorksUsedInSort[];
+  setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
+  isGrid: boolean;
+  page: number;
+  idWithOrderByCategory: IdWithOrderByCategory;
+}
+
+const VideoFeed = ({
+  searchResult,
+  selectedList,
+  setSelectedList,
+  category,
+  isGrid,
+  page,
+  idWithOrderByCategory,
+}: VideoFeedProps) => {
+  const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
+  return (
+    <div
+      className={
+        isGrid
+          ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '
+          : 'grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-4'
+      }
+    >
+      {searchResult[category].map((video, index) => {
+        const selectedItem = selectedList.find((item) => item.id === video.id);
+        return index < 12 * page ? (
+          <VideoItem
+            key={video.id}
+            category={category}
+            video={video}
+            isGrid={isGrid}
+            idx={index}
+            selectedItem={selectedItem}
+            setSelectedList={setSelectedList}
+            setSwapItems={setSwapItems}
+            swapItems={swapItems}
+          />
+        ) : null;
+      })}
+    </div>
+  );
+};
+
+interface InitialData {
+  initialWorks: VideoCollection<WorksUsedInSort[]>;
+  initialHasNextPage: VideoCollection<boolean>;
+  idWithOrderByCategory: IdWithOrderByCategory;
+}
+
+export default function Sort({
+  initialWorks,
+  initialHasNextPage,
+  idWithOrderByCategory,
+}: InitialData) {
   const topElementRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [videoList, setVideoList] = useState(initialWorks);
@@ -195,13 +325,7 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
     if (category === categoryLabel) return;
     setCategory(categoryLabel);
   };
-  const onVideoClick = (video: WorksUsedInSort) => {
-    setSelectedList((p) =>
-      p.some((obj) => obj.id === video.id)
-        ? p.filter((item) => item.id !== video.id)
-        : [...p, video]
-    );
-  };
+
   const onSearchSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPage(1); // page 부분이 2부터 시작할 필요가 있는지 살피고 수정 필요
@@ -313,57 +437,38 @@ export default function Sort({ initialWorks, initialHasNextPage }: InitialData) 
           setSearchWord={setSearchWord}
           searchWord={searchWord}
         />
-        <div
-          className={
-            isGrid
-              ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 '
-              : 'grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-4'
-          }
-        >
-          {searchResult[category].map((li, index) =>
-            index < 12 * page ? (
-              <Work
-                key={li.id}
-                category={category}
-                selected={selectedList.some((p) => p.id === li.id)}
-                kind={li.category}
-                resourceId={li.resourceId}
-                title={li.title}
-                thumbnailLink={li.thumbnailLink}
-                onClick={() => {
-                  onVideoClick(li);
-                }}
-                searchResult={searchResult}
-                setPriority={index < 6 ? true : false}
-                isGrid={isGrid}
-                idx={index}
-              />
-            ) : null
-          )}
-          <UtilButtons
-            onViewSwitch={() => {
-              setIsGrid((p) => !p);
-            }}
-            isGrid={isGrid}
-            onListClick={onSelectedListClick}
-            onSelectedList={isSelectedListOpen}
-            count={selectedList.length}
-            useOnMobile={true}
-          />
-          <ButtonsController
-            onResetClick={onResetClick}
-            onSaveClick={() => {}}
-            onListClick={onSelectedListClick}
-            onViewSwitch={() => {
-              setIsGrid((p) => !p);
-            }}
-            isGrid={isGrid}
-            onSelectedList={isSelectedListOpen}
-            count={selectedList.length}
-            action="save"
-          />
-        </div>
-        <div ref={intersectionRef} className="h-1 mt-20 bg-pink-500" />
+        <VideoFeed
+          category={category}
+          isGrid={isGrid}
+          page={page}
+          searchResult={searchResult}
+          selectedList={selectedList}
+          setSelectedList={setSelectedList}
+          idWithOrderByCategory={idWithOrderByCategory}
+        />
+        <UtilButtons
+          onViewSwitch={() => {
+            setIsGrid((p) => !p);
+          }}
+          isGrid={isGrid}
+          onListClick={onSelectedListClick}
+          onSelectedList={isSelectedListOpen}
+          count={selectedList.length}
+          useOnMobile={true}
+        />
+        <ButtonsController
+          onResetClick={onResetClick}
+          onSaveClick={() => {}}
+          onListClick={onSelectedListClick}
+          onViewSwitch={() => {
+            setIsGrid((p) => !p);
+          }}
+          isGrid={isGrid}
+          onSelectedList={isSelectedListOpen}
+          count={selectedList.length}
+          action="save"
+        />
+        <div ref={intersectionRef} className="h-1 mt-20" />
       </PostManagementLayout>
     </Layout>
   );
@@ -374,12 +479,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
     filmShort: await client.works.findMany({
       where: { OR: [{ category: 'film' }, { category: 'short' }] },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
   };
   let initialHasNextPage = { filmShort: false, outsource: false };
@@ -388,10 +493,23 @@ export const getServerSideProps: GetServerSideProps = async () => {
       ? (initialHasNextPage[count as FlatformsCategory] = false)
       : (initialHasNextPage[count as FlatformsCategory] = true);
   }
+  const idWithOrderByCategory = {
+    filmShort: await client.works.findMany({
+      where: { OR: [{ category: 'film' }, { category: 'short' }] },
+      select: { id: true, order: true },
+      orderBy: { order: 'desc' },
+    }),
+    outsource: await client.works.findMany({
+      where: { category: 'outsource' },
+      select: { id: true, order: true },
+      orderBy: { order: 'desc' },
+    }),
+  };
   return {
     props: {
       initialWorks: JSON.parse(JSON.stringify(initialWorks)),
       initialHasNextPage,
+      idWithOrderByCategory,
     },
   };
 };
