@@ -1,6 +1,6 @@
 import client from '@/libs/server/client';
 import withHandler from '@/libs/server/withHandler';
-import { WorkInfos } from '@/pages/work/write';
+import { WorkInfos } from '@/pages/work/work';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
