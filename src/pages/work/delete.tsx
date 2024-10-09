@@ -9,37 +9,13 @@ import { ciIncludes, cls } from '@/libs/client/utils';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
 import { GetServerSideProps } from 'next';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
 import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
-
-interface ThumbnailProps {
-  src: { main: string; sub: string };
-  setPriority: boolean;
-  category: FlatformsCategory;
-}
-
-const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
-  const [error, setError] = useState(false);
-  const handleImageError = () => {
-    setError(true);
-  };
-  return (
-    <Image
-      src={!error ? src.main : src.sub}
-      alt="picturesAlter"
-      width={640}
-      height={category === 'filmShort' ? 360 : 480}
-      onError={handleImageError}
-      className="w-full object-cover aspect-video"
-      priority={setPriority}
-    />
-  );
-};
+import Thumbnail from '@/components/thumbnail';
 
 interface WorkProps {
   onClick: () => void;
@@ -86,12 +62,14 @@ const Work = ({
                 ? {
                     main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
                     sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                    alt: title,
                   }
                 : {
                     main: `${thumbnailLink}_640x360?r=pad`,
                     sub: `${thumbnailLink}_640x360?r=pad`,
+                    alt: title,
                   }
-              : { main: '', sub: '' }
+              : { main: '', sub: '', alt: '' }
           }
           setPriority={setPriority}
         />
@@ -149,12 +127,14 @@ const Work = ({
                             ? {
                                 main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
                                 sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                                alt: title,
                               }
                             : {
                                 main: `${thumbnailLink}_640x360?r=pad`,
                                 sub: `${thumbnailLink}_640x360?r=pad`,
+                                alt: title,
                               }
-                          : { main: '', sub: '' }
+                          : { main: '', sub: '', alt: '' }
                       }
                       setPriority={setPriority}
                     />
