@@ -22,6 +22,7 @@ model Works {
   thumbnailLink          String   @default("no-link") @db.VarChar(1000)
   animationThumbnailLink String   @default("no-link") @db.VarChar(1000)
   resourceId             String   @unique
+  order                  Int      @default(0)
 }
 
 model RevalidationStatus {
