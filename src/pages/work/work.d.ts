@@ -43,3 +43,5 @@ export interface OwnedVideoItems {
 export type ResourceHost = 'vimeo' | 'youtube';
 
 export type FlatformsCategory = 'filmShort' | 'outsource';
+
+export type VideoCategory = 'film' | 'short' | 'outsource';
