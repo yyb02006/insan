@@ -140,7 +140,7 @@ const VideoItem = ({
   swapItems,
   setSearchResult,
 }: VideoItemProps) => {
-  const { resourceId, title, thumbnailLink, category: kind } = video;
+  const { resourceId, title, thumbnailLink, category: kind, order } = video;
   const [onThumbnail, setOnThumbnail] = useState(false);
   const onThumbnailClick = (video: WorksUsedInSort) => {
     setSelectedList((p) =>
@@ -188,8 +188,8 @@ const VideoItem = ({
             <div className="text-xs">
               <VideoItemTitle category={category} title={title} kind={kind} />
               <div className="font-light break-words text-[#606060]">
-                <span className="whitespace-nowrap">Id : </span>
-                {resourceId}
+                <span className="whitespace-nowrap">OriginalOrder : </span>
+                <span className="text-[#999999] font-semibold">{order}</span>
               </div>
             </div>
           </div>
