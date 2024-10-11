@@ -76,24 +76,6 @@ const VideoItemInput = ({
           }
         });
       });
-      setSearchResult((p) => {
-        const currentSearchResult = p['filmShort'];
-        const previousIndex = currentSearchResult.findIndex((item) => item.id === video.id);
-        const currentIndex = currentSearchResult.findIndex((item) => item.id === duplicateOrder.id);
-        const newSearchResult = currentSearchResult.map((item, idx, result) => {
-          switch (true) {
-            case idx === currentIndex:
-              return result[previousIndex];
-            case idx > currentIndex && idx <= previousIndex:
-              return result[idx - 1];
-            case idx < currentIndex && idx >= previousIndex:
-              return result[idx + 1];
-            default:
-              return item;
-          }
-        });
-        return { ...p, filmShort: newSearchResult };
-      });
     } else {
       setOrderValue(previousValue || 0); // 값 원상복귀
     }
@@ -297,8 +279,16 @@ const VideoFeed = ({
 }: VideoFeedProps) => {
   const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
   useEffect(() => {
-    console.log(searchResult);
-  }, [searchResult]);
+    setSearchResult((p) => ({
+      ...p,
+      [category]: p[category]
+        .map((video) => {
+          const matchedItem = swapItems.find((item) => video.id === item.id);
+          return matchedItem ? { ...video, order: matchedItem.order } : video;
+        })
+        .sort((a, b) => b.order - a.order),
+    }));
+  }, [searchResult[category].length, swapItems, setSearchResult]);
   return (
     <div
       className={
