@@ -2,69 +2,73 @@
  * 파라미터로 여러 개의 문자열을 받아 각 문자열 사이에 공백을 추가하고 합쳐주는 함수
  */
 export function cls(...className: string[]) {
-	return className.join(' ');
+  return className.join(' ');
 }
 
 /**
  * mainString의 문자열이나 배열이 searchString을 포함하고 있는지 normalize한 후 대, 소문자 구분없이 판단하는 함수
  */
 export function ciIncludes(mainString: string, searchString: string) {
-	return mainString
-		.normalize('NFC')
-		.toUpperCase()
-		.includes(searchString.normalize('NFC').toUpperCase());
+  return mainString
+    .normalize('NFC')
+    .toUpperCase()
+    .includes(searchString.normalize('NFC').toUpperCase());
 }
 
 /**
  * 기본 fetch 함수
  */
 interface Init {
-	method?: 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH';
-	headers?: { [key: string]: any };
-	[key: string]: any;
+  method?: 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH';
+  headers?: { [key: string]: any };
+  [key: string]: any;
 }
 
 export async function fetchData(url: string, init?: Init) {
-	const response = await (await fetch(url, init)).json();
-	return response;
+  const response = await (await fetch(url, init)).json();
+  return response;
 }
 
 /**
  * fetch한 값을 콜백함수를 받아 처리해주는 함수
  */
 export function fetchApi<T>(
-	url: string,
-	setFunc: (value: T) => void,
-	opt?: { [key: string]: any }
+  url: string,
+  setFunc: (value: T) => void,
+  opt?: { [key: string]: any }
 ) {
-	fetch(url, opt)
-		.then((res) => res.json())
-		.then((data) => setFunc(data));
+  fetch(url, opt)
+    .then((res) => res.json())
+    .then((data) => setFunc(data));
 }
 
 /**
  * YouTubeFetch를 처리해주는 함수
  */
 export function fetchYouTubeApi<T>(
-	method: 'playlists' | 'playlistItems' | 'videos',
-	maxResult: string,
-	setFunc: (value: T) => void,
-	fields?: string,
-	playlistId?: string,
-	videosId?: string,
-	nextPageToken?: string
+  method: 'playlists' | 'playlistItems' | 'videos',
+  maxResult: string,
+  setFunc: (value: T) => void,
+  fields?: string,
+  playlistId?: string,
+  videosId?: string,
+  nextPageToken?: string
 ) {
-	const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-	fetchApi(
-		`https://www.googleapis.com/youtube/v3/${method}?${
-			method === 'videos' ? `id=${videosId}&` : ''
-		}key=${apiKey}&part=snippet&maxResults=${maxResult}${
-			method === 'playlists' ? '&channelId=UCwy8JhA4eDumalKwKrvrxQA' : ''
-		}${method === 'playlistItems' ? `&playlistId=${playlistId}` : ''}${
-			fields ? `&fields=${fields}` : ''
-		}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`,
-		setFunc
-	);
+  const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+  fetchApi(
+    `https://www.googleapis.com/youtube/v3/${method}?${
+      method === 'videos' ? `id=${videosId}&` : ''
+    }key=${apiKey}&part=snippet&maxResults=${maxResult}${
+      method === 'playlists' ? '&channelId=UCwy8JhA4eDumalKwKrvrxQA' : ''
+    }${method === 'playlistItems' ? `&playlistId=${playlistId}` : ''}${
+      fields ? `&fields=${fields}` : ''
+    }${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`,
+    setFunc
+  );
+}
+
+export function normalizeLeadingZero(string: string) {
+  return string.length > 1 && string.startsWith('0') ? string.substring(1) : string;
 }
 
 /* const useYouTubeApi = <T>(

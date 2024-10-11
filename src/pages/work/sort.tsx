@@ -7,7 +7,7 @@ import client from '@/libs/server/client';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 import { Works } from '@prisma/client';
-import { ciIncludes, cls } from '@/libs/client/utils';
+import { ciIncludes, cls, normalizeLeadingZero } from '@/libs/client/utils';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
@@ -79,7 +79,7 @@ const VideoItemInput = ({ video, setSwapItems, swapItems }: VideoItemInputProps)
     <input
       className="mr-2 h-10 w-16 border px-1 border-palettered flex justify-center items-center text-lg text-center bg-[#101010]"
       type="number"
-      value={orderValue}
+      value={normalizeLeadingZero(orderValue.toString())}
       onChange={onOrderChange}
       onBlur={onInputBlur}
     />
