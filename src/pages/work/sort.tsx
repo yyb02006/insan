@@ -23,14 +23,20 @@ interface VideoItemInputProps {
   video: WorksUsedInSort;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
+  setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
 }
 
-const VideoItemInput = ({ video, setSwapItems, swapItems }: VideoItemInputProps) => {
-  const swapItem = swapItems.find((item) => item.id === video.id);
-  const [orderValue, setOrderValue] = useState(swapItem?.order || 0);
+const VideoItemInput = ({
+  video,
+  setSwapItems,
+  swapItems,
+  setSearchResult,
+}: VideoItemInputProps) => {
+  const currentSwapItem = swapItems.find((item) => item.id === video.id);
+  const [orderValue, setOrderValue] = useState(currentSwapItem?.order || 0);
   useEffect(() => {
-    setOrderValue(swapItem?.order || 0);
-  }, [swapItem?.order]);
+    setOrderValue(currentSwapItem?.order || 0);
+  }, [currentSwapItem?.order]);
 
   const onOrderChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
@@ -40,16 +46,15 @@ const VideoItemInput = ({ video, setSwapItems, swapItems }: VideoItemInputProps)
   const onInputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     const currentValue = Number(value);
-    const previousValue = swapItem?.order;
+    const previousValue = currentSwapItem?.order;
     const duplicateOrder = swapItems.find(
-      (item) => item.order === currentValue && item.id !== video.id
+      (item) => item.order === currentValue && item.id !== video.id // 값을 바꾸지 않아서 입력된 값으로 검색된 id가 자기 자신인 경우가 아닐 때
     );
     if (
       previousValue &&
       duplicateOrder &&
-      duplicateOrder.id !== video.id && // 값을 바꾸지 않아서 입력된 값으로 검색된 id가 자기 자신인 경우가 아닐 때
-      currentValue <= swapItems.length && // 전체 길이보다 낮은 값일 때
-      currentValue > 0 // 전체 길이보다 높은 값일 때
+      currentValue <= swapItems.length && // 입력된 값이 전체 길이보다 낮은 값일 때
+      currentValue > 0 // 입력된 값이 전체 길이보다 높은 값일 때
     ) {
       setSwapItems((p) => {
         return p.map((item) => {
@@ -70,6 +75,24 @@ const VideoItemInput = ({ video, setSwapItems, swapItems }: VideoItemInputProps)
             }
           }
         });
+      });
+      setSearchResult((p) => {
+        const currentSearchResult = p['filmShort'];
+        const previousIndex = currentSearchResult.findIndex((item) => item.id === video.id);
+        const currentIndex = currentSearchResult.findIndex((item) => item.id === duplicateOrder.id);
+        const newSearchResult = currentSearchResult.map((item, idx, result) => {
+          switch (true) {
+            case idx === currentIndex:
+              return result[previousIndex];
+            case idx > currentIndex && idx <= previousIndex:
+              return result[idx - 1];
+            case idx < currentIndex && idx >= previousIndex:
+              return result[idx + 1];
+            default:
+              return item;
+          }
+        });
+        return { ...p, filmShort: newSearchResult };
       });
     } else {
       setOrderValue(previousValue || 0); // 값 원상복귀
@@ -121,6 +144,7 @@ interface VideoItemProps {
   setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
+  setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
 }
 
 const VideoItem = ({
@@ -132,6 +156,7 @@ const VideoItem = ({
   setSelectedList,
   setSwapItems,
   swapItems,
+  setSearchResult,
 }: VideoItemProps) => {
   const { resourceId, title, thumbnailLink, category: kind } = video;
   const [onThumbnail, setOnThumbnail] = useState(false);
@@ -172,7 +197,12 @@ const VideoItem = ({
             />
           </div>
           <div className="flex mt-2">
-            <VideoItemInput video={video} setSwapItems={setSwapItems} swapItems={swapItems} />
+            <VideoItemInput
+              video={video}
+              setSwapItems={setSwapItems}
+              swapItems={swapItems}
+              setSearchResult={setSearchResult}
+            />
             <div className="text-xs">
               <VideoItemTitle category={category} title={title} kind={kind} />
               <div className="font-light break-words text-[#606060]">
@@ -247,6 +277,7 @@ const VideoItem = ({
 interface VideoFeedProps {
   category: FlatformsCategory;
   searchResult: VideoCollection<WorksUsedInSort[]>;
+  setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
   selectedList: WorksUsedInSort[];
   setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
   isGrid: boolean;
@@ -262,8 +293,12 @@ const VideoFeed = ({
   isGrid,
   page,
   idWithOrderByCategory,
+  setSearchResult,
 }: VideoFeedProps) => {
   const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
+  useEffect(() => {
+    console.log(searchResult);
+  }, [searchResult]);
   return (
     <div
       className={
@@ -285,6 +320,7 @@ const VideoFeed = ({
             setSelectedList={setSelectedList}
             setSwapItems={setSwapItems}
             swapItems={swapItems}
+            setSearchResult={setSearchResult}
           />
         ) : null;
       })}
@@ -442,6 +478,7 @@ export default function Sort({
           isGrid={isGrid}
           page={page}
           searchResult={searchResult}
+          setSearchResult={setSearchResult}
           selectedList={selectedList}
           setSelectedList={setSelectedList}
           idWithOrderByCategory={idWithOrderByCategory}
