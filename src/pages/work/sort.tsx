@@ -15,7 +15,7 @@ import Thumbnail from '@/components/thumbnail';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
-type IdWithOrder = { id: number; order: number };
+type IdWithOrder = { id: number; currentOrder: number; originalOrder: number };
 
 type IdWithOrderByCategory = VideoCollection<Array<IdWithOrder>>;
 
@@ -33,10 +33,10 @@ const VideoItemInput = ({
   setSearchResult,
 }: VideoItemInputProps) => {
   const currentSwapItem = swapItems.find((item) => item.id === video.id);
-  const [orderValue, setOrderValue] = useState(currentSwapItem?.order || 0);
+  const [orderValue, setOrderValue] = useState(currentSwapItem?.currentOrder || 0);
   useEffect(() => {
-    setOrderValue(currentSwapItem?.order || 0);
-  }, [currentSwapItem?.order]);
+    setOrderValue(currentSwapItem?.currentOrder || 0);
+  }, [currentSwapItem?.currentOrder]);
 
   const onOrderChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
@@ -46,9 +46,9 @@ const VideoItemInput = ({
   const onInputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     const currentValue = Number(value);
-    const previousValue = currentSwapItem?.order;
+    const previousValue = currentSwapItem?.currentOrder;
     const duplicateOrder = swapItems.find(
-      (item) => item.order === currentValue && item.id !== video.id // 값을 바꾸지 않아서 입력된 값으로 검색된 id가 자기 자신인 경우가 아닐 때
+      (item) => item.currentOrder === currentValue && item.id !== video.id // 값을 바꾸지 않아서 입력된 값으로 검색된 id가 자기 자신인 경우가 아닐 때
     );
     if (
       previousValue &&
@@ -62,13 +62,13 @@ const VideoItemInput = ({
             switch (true) {
               // 자신일 경우
               case item.id === video.id:
-                return { ...item, order: currentValue };
+                return { ...item, currentOrder: currentValue };
               // 전보다 낮은 order를 입력했을 때, 이전 order와 현재 order 사이의 item일 경우
-              case item.order >= currentValue && item.order < previousValue:
-                return { ...item, order: item.order + 1 };
+              case item.currentOrder >= currentValue && item.currentOrder < previousValue:
+                return { ...item, currentOrder: item.currentOrder + 1 };
               // 전보다 높은 order를 입력했을 때, 이전 order와 현재 order 사이의 item일 경우
-              case item.order <= currentValue && item.order > previousValue:
-                return { ...item, order: item.order - 1 };
+              case item.currentOrder <= currentValue && item.currentOrder > previousValue:
+                return { ...item, currentOrder: item.currentOrder - 1 };
               // order 변경에 해당되지 않는 경우
               default:
                 return item;
@@ -264,7 +264,8 @@ interface VideoFeedProps {
   setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
   isGrid: boolean;
   page: number;
-  idWithOrderByCategory: IdWithOrderByCategory;
+  swapItems: IdWithOrder[];
+  setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
 }
 
 const VideoFeed = ({
@@ -274,20 +275,21 @@ const VideoFeed = ({
   category,
   isGrid,
   page,
-  idWithOrderByCategory,
   setSearchResult,
+  swapItems,
+  setSwapItems,
 }: VideoFeedProps) => {
-  const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
   useEffect(() => {
     setSearchResult((p) => ({
       ...p,
       [category]: p[category]
         .map((video) => {
           const matchedItem = swapItems.find((item) => video.id === item.id);
-          return matchedItem ? { ...video, order: matchedItem.order } : video;
+          return matchedItem ? { ...video, order: matchedItem.currentOrder } : video;
         })
         .sort((a, b) => b.order - a.order),
     }));
+    console.log(swapItems);
   }, [searchResult[category].length, swapItems, setSearchResult]);
   return (
     <div
@@ -346,6 +348,7 @@ export default function Sort({
     filmShort: number;
     outsource: number;
   }>({ filmShort: 1, outsource: 1 });
+  const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
   const perPage = 12;
   const onCategoryClick = (categoryLabel: FlatformsCategory) => {
     if (category === categoryLabel) return;
@@ -425,14 +428,7 @@ export default function Sort({
     setSearchResult((p) => ({ ...p, [category]: initialVideos }));
   };
   const onSelectedListClick = () => {
-    if (isSelectedListOpen) {
-      setIsSelectedListOpen(false);
-      commonReset();
-    } else {
-      setIsSelectedListOpen(true);
-      commonReset(selectedList);
-      topElementRef.current?.scrollIntoView();
-    }
+    setIsSelectedListOpen((p) => !p);
   };
   const onResetClick = () => {
     if (selectedList.length > 0) {
@@ -442,6 +438,7 @@ export default function Sort({
       topElementRef.current?.scrollIntoView();
     }
   };
+  const changedSwapItems = swapItems.filter((item) => item.currentOrder !== item.originalOrder);
   return (
     <Layout
       seoTitle="SORT"
@@ -471,7 +468,8 @@ export default function Sort({
           setSearchResult={setSearchResult}
           selectedList={selectedList}
           setSelectedList={setSelectedList}
-          idWithOrderByCategory={idWithOrderByCategory}
+          swapItems={swapItems}
+          setSwapItems={setSwapItems}
         />
         <UtilButtons
           onViewSwitch={() => {
@@ -480,7 +478,7 @@ export default function Sort({
           isGrid={isGrid}
           onListClick={onSelectedListClick}
           onSelectedList={isSelectedListOpen}
-          count={selectedList.length}
+          count={changedSwapItems.length}
           useOnMobile={true}
         />
         <ButtonsController
@@ -492,10 +490,26 @@ export default function Sort({
           }}
           isGrid={isGrid}
           onSelectedList={isSelectedListOpen}
-          count={selectedList.length}
+          count={changedSwapItems.length}
           action="save"
         />
         <div ref={intersectionRef} className="h-1 mt-20" />
+        {!isSelectedListOpen ? (
+          <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
+            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
+            <div className="relative bg-[#101010] w-full h-full">
+              <div className="grid grid-cols-3 w-[420px] m-auto">
+                {changedSwapItems.map((item) => (
+                  <div key={item.id} className="w-16 h-10">
+                    {item.originalOrder}
+                    {`=>`}
+                    {item.currentOrder}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </PostManagementLayout>
     </Layout>
   );
@@ -521,16 +535,20 @@ export const getServerSideProps: GetServerSideProps = async () => {
       : (initialHasNextPage[count as FlatformsCategory] = true);
   }
   const idWithOrderByCategory = {
-    filmShort: await client.works.findMany({
-      where: { OR: [{ category: 'film' }, { category: 'short' }] },
-      select: { id: true, order: true },
-      orderBy: { order: 'desc' },
-    }),
-    outsource: await client.works.findMany({
-      where: { category: 'outsource' },
-      select: { id: true, order: true },
-      orderBy: { order: 'desc' },
-    }),
+    filmShort: (
+      await client.works.findMany({
+        where: { OR: [{ category: 'film' }, { category: 'short' }] },
+        select: { id: true, order: true },
+        orderBy: { order: 'desc' },
+      })
+    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
+    outsource: (
+      await client.works.findMany({
+        where: { category: 'outsource' },
+        select: { id: true, order: true },
+        orderBy: { order: 'desc' },
+      })
+    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
   };
   return {
     props: {
