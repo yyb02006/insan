@@ -320,6 +320,67 @@ const VideoFeed = ({
   );
 };
 
+interface ChangedItemsModal {
+  setIsSelectedListOpen: Dispatch<SetStateAction<boolean>>;
+  changedSwapItems: IdWithOrder[];
+}
+
+const ChangedItemsModal = ({ changedSwapItems, setIsSelectedListOpen }: ChangedItemsModal) => {
+  return (
+    <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
+      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
+      <div className="relative bg-[#101010] w-full h-full overflow-y-scroll">
+        <button
+          className="absolute m-2 top-4 right-4"
+          onClick={() => {
+            setIsSelectedListOpen(false);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1}
+            stroke="currentColor"
+            className="w-10 h-10 stroke-[#707070]"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 max-w-[420px] m-auto gap-4 py-20">
+          {changedSwapItems.map((item) => (
+            <div key={item.id} className="w-full h-full flex justify-center items-center">
+              <span>
+                {item.originalOrder}
+                {` => `}
+                {item.currentOrder}
+              </span>
+              <span
+                className={cls(
+                  item.originalOrder > item.currentOrder
+                    ? 'text-palettered'
+                    : item.originalOrder < item.currentOrder
+                    ? 'text-green-500'
+                    : '',
+                  'ml-2'
+                )}
+              >
+                {`( ${
+                  item.originalOrder > item.currentOrder
+                    ? '-'
+                    : item.originalOrder < item.currentOrder
+                    ? '+'
+                    : ''
+                }${Math.abs(item.originalOrder - item.currentOrder)} )`}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface InitialData {
   initialWorks: VideoCollection<WorksUsedInSort[]>;
   initialHasNextPage: VideoCollection<boolean>;
@@ -354,6 +415,7 @@ export default function Sort({
     if (category === categoryLabel) return;
     setCategory(categoryLabel);
   };
+  const changedSwapItems = swapItems.filter((item) => item.currentOrder !== item.originalOrder);
 
   const onSearchSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -365,18 +427,23 @@ export default function Sort({
       [category]: currentList.filter((li) => ciIncludes(li.title, searchWord)),
     }));
   };
-  useEffect(() => {
-    setIsSelectedListOpen(false);
-    setSelectedList([]);
+  const commonReset = () => {
     setPage(1);
-    setSearchWordSnapShot('');
     setSearchWord('');
-    setSearchResult((p) => ({
-      ...p,
-      [category === 'filmShort' ? 'outsource' : 'filmShort']:
-        videoList[category === 'filmShort' ? 'outsource' : 'filmShort'],
-    }));
+    setSearchWordSnapShot('');
+    setSelectedList([]);
+    setSearchResult((p) => ({ ...p, [category]: videoList[category] }));
+    setSwapItems(idWithOrderByCategory[category]);
+  };
+  useEffect(() => {
+    commonReset();
   }, [category]);
+  const onResetClick = () => {
+    if (changedSwapItems.length > 0) {
+      commonReset();
+      topElementRef.current?.scrollIntoView();
+    }
+  };
   const processIntersection = () => {
     const getVideos = async () => {
       setFetchLoading(true);
@@ -421,24 +488,9 @@ export default function Sort({
     processIntersection,
     dependencyArray: [page, isGrid],
   });
-  const commonReset = (initialVideos: WorksUsedInSort[] = videoList[category]) => {
-    setPage(1);
-    setSearchWord('');
-    setSearchWordSnapShot('');
-    setSearchResult((p) => ({ ...p, [category]: initialVideos }));
-  };
   const onSelectedListClick = () => {
     setIsSelectedListOpen((p) => !p);
   };
-  const onResetClick = () => {
-    if (selectedList.length > 0) {
-      setSelectedList([]);
-      setIsSelectedListOpen(false);
-      commonReset();
-      topElementRef.current?.scrollIntoView();
-    }
-  };
-  const changedSwapItems = swapItems.filter((item) => item.currentOrder !== item.originalOrder);
   return (
     <Layout
       seoTitle="SORT"
@@ -494,21 +546,11 @@ export default function Sort({
           action="save"
         />
         <div ref={intersectionRef} className="h-1 mt-20" />
-        {!isSelectedListOpen ? (
-          <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
-            <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
-            <div className="relative bg-[#101010] w-full h-full">
-              <div className="grid grid-cols-3 w-[420px] m-auto">
-                {changedSwapItems.map((item) => (
-                  <div key={item.id} className="w-16 h-10">
-                    {item.originalOrder}
-                    {`=>`}
-                    {item.currentOrder}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {isSelectedListOpen ? (
+          <ChangedItemsModal
+            changedSwapItems={changedSwapItems}
+            setIsSelectedListOpen={setIsSelectedListOpen}
+          />
         ) : null}
       </PostManagementLayout>
     </Layout>
