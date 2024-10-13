@@ -10,7 +10,6 @@ import PostManagementLayout from '@/components/nav/postManagementLayout';
 import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
-import Circles from '@/components/circles';
 import { VimeoListFeed, YoutubeListFeed } from '@/components/feed/listFeed';
 import SearchForm from '@/components/searchForm';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
@@ -23,6 +22,9 @@ import {
   VimeoVideos,
   WorkInfos,
 } from '@/pages/work/work';
+import LoaidngIndicator from '@/components/loadingIndicator';
+import BackDrop from '@/components/backDrop';
+import ErrorOverlay from '@/components/errorOverlay';
 
 interface InitialData {
   initialVimeoVideos: VimeoVideos[];
@@ -55,7 +57,7 @@ export default function Write({
   });
   const [sendList, { loading, data, error }] = useMutation<{
     success: boolean;
-  }>(`/api/work/write`);
+  }>(`/api/work/update?purpose=write`);
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
   const [fetchLoading, setFetchLoading] = useState(false);
   const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
@@ -164,10 +166,11 @@ export default function Write({
   }; */
 
   const onSubmitWrites = () => {
-    const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
-    if (loading && inspectedWorkInfos.length > 0) return;
+    // const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
+    if (loading && workInfos.length > 0) return;
+    // workInfos.reduce((previous, current) => , []);
     sendList({
-      data: inspectedWorkInfos,
+      data: workInfos,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
     });
   };
@@ -362,26 +365,16 @@ export default function Write({
         />
         <ToTop toScroll={topElementRef} />
       </PostManagementLayout>
-      {loading ? (
-        <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black">
-          <div className="animate-spin-middle contrast-50 absolute w-[100px] aspect-square">
-            <Circles
-              liMotion={{
-                css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
-      {data?.success ? <div className="fixed top-0 w-screen h-screen z-[1]"></div> : null}
+      {loading ? <LoaidngIndicator /> : null}
+      {data?.success ? <BackDrop /> : null}
       {error ? (
-        <div className="fixed top-0 w-screen h-screen z-[1] flex justify-center items-center">
-          <div className="absolute top-0 w-full h-full opacity-60 bg-black" />
+        <ErrorOverlay>
           <div className="relative text-[#eaeaea] font-bold text-3xl lg:w-1/2 w-auto lg:px-0 px-6 leading-snug">
-            인산아 <span className="text-palettered">세이브</span> 도중 에러가 생겼단다 ㅎㅎ 아마도
-            새로고침하고 다시 해보면 되겠지만 그전에 나에게 보고하도록
+            인산아 <span className="text-palettered">세이브</span> 도중 에러가 생겼단다 ㅎㅎ
+            <br />
+            아마도 새로고침하고 다시 해보면 되겠지만 그전에 나에게 보고하도록
           </div>
-        </div>
+        </ErrorOverlay>
       ) : null}
     </Layout>
   );
@@ -428,12 +421,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
   );
 
   const lists = await client.works.findMany({
+    orderBy: { order: 'desc' },
     select: {
       title: true,
       category: true,
       date: true,
       description: true,
       resourceId: true,
+      order: true,
     },
   });
 
