@@ -57,7 +57,7 @@ export default function Write({
   });
   const [sendList, { loading, data, error }] = useMutation<{
     success: boolean;
-  }>(`/api/work/update?purpose=write`);
+  }>(`/api/work?purpose=write`);
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
   const [fetchLoading, setFetchLoading] = useState(false);
   const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
@@ -167,10 +167,19 @@ export default function Write({
 
   const onSubmitWrites = () => {
     // const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
-    if (loading && workInfos.length > 0) return;
-    // workInfos.reduce((previous, current) => , []);
+    if (loading || workInfos.length === 0) return;
+    const currentLastIndex = initialOwnedVideos[category][0].order;
+    let index = currentLastIndex;
+    const newWorkInfos = workInfos.map((item) => {
+      if (item.order === 0) {
+        index++;
+        return { ...item, order: index };
+      } else {
+        return item;
+      }
+    });
     sendList({
-      data: workInfos,
+      data: newWorkInfos,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
     });
   };
