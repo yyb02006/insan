@@ -20,6 +20,7 @@ export interface WorkInfos {
   date: string;
   thumbnailLink: string;
   animatedThumbnailLink: string;
+  order: number;
 }
 
 export interface VimeoVideos {
@@ -38,6 +39,7 @@ export interface OwnedVideoItems {
   date: string;
   description: string;
   resourceId: string;
+  order: number;
 }
 
 export type ResourceHost = 'vimeo' | 'youtube';
