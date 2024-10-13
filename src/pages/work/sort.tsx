@@ -12,6 +12,11 @@ import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
 import Thumbnail from '@/components/thumbnail';
+import useMutation from '@/libs/client/useMutation';
+import LoaidngIndicator from '@/components/loadingIndicator';
+import BackDrop from '@/components/backDrop';
+import ErrorOverlay from '@/components/errorOverlay';
+import { useRouter } from 'next/router';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
@@ -393,6 +398,7 @@ export default function Sort({
   idWithOrderByCategory,
 }: InitialData) {
   const topElementRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [videoList, setVideoList] = useState(initialWorks);
   const [searchWord, setSearchWord] = useState('');
@@ -415,7 +421,21 @@ export default function Sort({
     if (category === categoryLabel) return;
     setCategory(categoryLabel);
   };
+  const [sendItems, { loading, data, error }] = useMutation<{ success: boolean }>(
+    `/api/work?purpose=sort`
+  );
   const changedSwapItems = swapItems.filter((item) => item.currentOrder !== item.originalOrder);
+
+  useEffect(() => {
+    if (data && data?.success) {
+      router.push('/work');
+    } else if (data && !data?.success) {
+      const timeOut = setTimeout(() => {
+        router.push('/work');
+      }, 3000);
+      return () => clearTimeout(timeOut);
+    }
+  }, [data]);
 
   const onSearchSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -484,6 +504,10 @@ export default function Sort({
       setPage((p) => p + 1);
     }
   };
+  const onSubmitSort = () => {
+    if (loading || changedSwapItems.length === 0) return;
+    sendItems({ data: changedSwapItems, secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN });
+  };
   const intersectionRef = useInfiniteScroll({
     processIntersection,
     dependencyArray: [page, isGrid],
@@ -535,7 +559,7 @@ export default function Sort({
         />
         <ButtonsController
           onResetClick={onResetClick}
-          onSaveClick={() => {}}
+          onSaveClick={onSubmitSort}
           onListClick={onSelectedListClick}
           onViewSwitch={() => {
             setIsGrid((p) => !p);
@@ -551,6 +575,17 @@ export default function Sort({
             changedSwapItems={changedSwapItems}
             setIsSelectedListOpen={setIsSelectedListOpen}
           />
+        ) : null}
+        {loading ? <LoaidngIndicator /> : null}
+        {data?.success ? <BackDrop /> : null}
+        {error ? (
+          <ErrorOverlay>
+            <div className="relative text-[#eaeaea] font-bold text-3xl lg:w-1/2 w-auto lg:px-0 px-6 leading-snug">
+              인산아 <span className="text-palettered">세이브</span> 도중 에러가 생겼단다 ㅎㅎ
+              <br />
+              아마도 새로고침하고 다시 해보면 되겠지만 그전에 나에게 보고하도록
+            </div>
+          </ErrorOverlay>
         ) : null}
       </PostManagementLayout>
     </Layout>
