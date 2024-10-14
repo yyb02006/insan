@@ -166,7 +166,6 @@ export default function Write({
   }; */
 
   const onSubmitWrites = () => {
-    // const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
     if (loading || workInfos.length === 0) return;
     const currentLastIndex = initialOwnedVideos[category][0].order;
     let index = currentLastIndex;
