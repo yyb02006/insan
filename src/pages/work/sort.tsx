@@ -1,5 +1,13 @@
 import { GetServerSideProps } from 'next';
-import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  DragEvent,
+  SetStateAction,
+  SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Layout from '@/components/layout';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
 import SearchForm from '@/components/searchForm';
@@ -122,16 +130,85 @@ const VideoItemTitle = ({ category, kind, title }: VideoItemTitleProps) => {
   );
 };
 
+interface DragAreaProps {
+  position: 'left' | 'right';
+  isDraggingOver: {
+    left: boolean;
+    right: boolean;
+  };
+  setIsDraggingOver: Dispatch<
+    SetStateAction<{
+      left: boolean;
+      right: boolean;
+    }>
+  >;
+  selectedItem: WorksUsedInSort | undefined;
+  isDraggable: boolean;
+}
+
+const DragArea = ({
+  position,
+  isDraggable,
+  isDraggingOver,
+  selectedItem,
+  setIsDraggingOver,
+}: DragAreaProps) => {
+  const onVideoDragOver = (e: DragEvent<HTMLElement>, sidePosition: 'left' | 'right') => {
+    e.preventDefault();
+    if (!isDraggable || selectedItem) return;
+    if (sidePosition === 'left') {
+      setIsDraggingOver((p) => ({ ...p, left: true }));
+    } else {
+      setIsDraggingOver((p) => ({ ...p, right: true }));
+    }
+  };
+  const areaSideOffset = position === 'left' ? '-left-3' : '-right-3';
+  const ringSideOffset = position === 'left' ? '-left-1 border-l-4' : '-right-1 border-r-4';
+  useEffect(() => {
+    if (!isDraggable) {
+      setIsDraggingOver({ left: false, right: false });
+    }
+  }, [isDraggable, setIsDraggingOver]);
+  return (
+    <>
+      <div
+        onDragEnter={(e) => {
+          e.preventDefault();
+          onVideoDragOver(e, position);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDraggingOver((p) => ({ ...p, [position]: false }));
+        }}
+        className={cls(
+          isDraggable && !selectedItem ? 'block' : 'hidden',
+          areaSideOffset,
+          'absolute w-[calc(50%+12px)] h-full top-0 z-10 bg-transparent'
+        )}
+      />
+      <div
+        className={cls(
+          isDraggable && isDraggingOver[position] ? 'border-palettered' : 'border-transparent',
+          ringSideOffset,
+          'absolute top-0 h-full'
+        )}
+      />
+    </>
+  );
+};
+
 interface VideoItemProps {
   video: WorksUsedInSort;
   category: FlatformsCategory;
   isGrid: boolean;
   idx: number;
-  selectedItem?: WorksUsedInSort;
+  selectedList: WorksUsedInSort[];
   setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
   setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
+  isDraggable: boolean;
+  setIsDraggable: Dispatch<SetStateAction<boolean>>;
 }
 
 const VideoItem = ({
@@ -139,14 +216,21 @@ const VideoItem = ({
   category,
   isGrid,
   idx,
-  selectedItem,
+  selectedList,
   setSelectedList,
   setSwapItems,
   swapItems,
   setSearchResult,
+  isDraggable,
+  setIsDraggable,
 }: VideoItemProps) => {
+  const selectedItem = selectedList.find((item) => item.id === video.id);
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   const [onThumbnail, setOnThumbnail] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState<{ left: boolean; right: boolean }>({
+    left: false,
+    right: false,
+  });
   const onThumbnailClick = (video: WorksUsedInSort) => {
     setSelectedList((p) =>
       selectedItem ? p.filter((item) => item.id !== video.id) : [...p, video]
@@ -156,15 +240,37 @@ const VideoItem = ({
     <>
       {isGrid ? (
         <section
+          onDragStart={() => {
+            if (!selectedItem) return;
+            setIsDraggable(true);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+          }}
+          onDragEnd={() => {
+            setIsDraggable(false);
+          }}
+          onDrop={() => {}}
           className={cls(
             selectedItem ? 'ring-2' : 'ring-0',
             'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
           )}
         >
+          {['left', 'right'].map((position) => (
+            <DragArea
+              key={position}
+              position={position as 'left' | 'right'}
+              isDraggable={isDraggable}
+              isDraggingOver={isDraggingOver}
+              selectedItem={selectedItem}
+              setIsDraggingOver={setIsDraggingOver}
+            />
+          ))}
           <div
             onClick={() => {
               onThumbnailClick(video);
             }}
+            className="relative"
           >
             <Thumbnail
               category={category}
@@ -183,7 +289,7 @@ const VideoItem = ({
               }
             />
           </div>
-          <div className="flex mt-2">
+          <div className="flex mt-2 relative">
             <VideoItemInput
               video={video}
               setSwapItems={setSwapItems}
@@ -294,8 +400,8 @@ const VideoFeed = ({
         })
         .sort((a, b) => b.order - a.order),
     }));
-    console.log(swapItems);
   }, [searchResult[category].length, swapItems, setSearchResult]);
+  const [isDraggable, setIsDraggable] = useState(false);
   return (
     <div
       className={
@@ -305,7 +411,6 @@ const VideoFeed = ({
       }
     >
       {searchResult[category].map((video, index) => {
-        const selectedItem = selectedList.find((item) => item.id === video.id);
         return index < 12 * page ? (
           <VideoItem
             key={video.id}
@@ -313,11 +418,13 @@ const VideoFeed = ({
             video={video}
             isGrid={isGrid}
             idx={index}
-            selectedItem={selectedItem}
+            selectedList={selectedList}
             setSelectedList={setSelectedList}
             setSwapItems={setSwapItems}
             swapItems={swapItems}
             setSearchResult={setSearchResult}
+            isDraggable={isDraggable}
+            setIsDraggable={setIsDraggable}
           />
         ) : null;
       })}
