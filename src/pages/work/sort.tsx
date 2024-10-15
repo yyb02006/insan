@@ -153,7 +153,6 @@ interface DragAreaProps {
   currentSwapItem: IdWithOrder | undefined;
   isDraggingElement: boolean;
   selectedItem: SelectedItem | undefined;
-  setCurrentLocation: Dispatch<SetStateAction<number | undefined>>;
 }
 
 const DragArea = ({
@@ -164,17 +163,14 @@ const DragArea = ({
   isDraggingElement,
   selectedItem,
   setIsDraggingOver,
-  setCurrentLocation,
 }: DragAreaProps) => {
   const onVideoDragOver = (e: DragEvent<HTMLElement>, sidePosition: 'left' | 'right') => {
     e.preventDefault();
     if (!isDraggable || isDraggingElement || !currentSwapItem) return;
     if (sidePosition === 'left') {
       setIsDraggingOver((p) => ({ ...p, left: true }));
-      setCurrentLocation(currentSwapItem.currentOrder);
     } else {
       setIsDraggingOver((p) => ({ ...p, right: true }));
-      setCurrentLocation(currentSwapItem.currentOrder - 1);
     }
   };
   const sideAreaOffset = position === 'left' ? '-left-3' : '-right-3';
@@ -196,7 +192,6 @@ const DragArea = ({
         onDragLeave={(e) => {
           e.preventDefault();
           setIsDraggingOver((p) => ({ ...p, [position]: false }));
-          setCurrentLocation(undefined);
         }}
         className={cls(
           isDraggable && !isDraggingElement ? 'block' : 'hidden',
@@ -227,6 +222,264 @@ const DragArea = ({
   );
 };
 
+interface VideoListItemProps {
+  idx: number;
+  video: WorksUsedInSort;
+  category: FlatformsCategory;
+  selectedItem: SelectedItem | undefined;
+  currentSwapItem: IdWithOrder | undefined;
+  isDraggable: boolean;
+  isDragging: boolean;
+  isDraggingOver: { left: boolean; right: boolean };
+  swapItems: IdWithOrder[];
+  setIsDraggable: Dispatch<SetStateAction<boolean>>;
+  setIsDragging: Dispatch<SetStateAction<boolean>>;
+  setIsDraggingOver: Dispatch<SetStateAction<{ left: boolean; right: boolean }>>;
+  setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
+  onVideoDrop: () => void;
+  onThumbnailClick: (video: WorksUsedInSort) => void;
+}
+
+const VideoListItem = ({
+  idx,
+  category,
+  currentSwapItem,
+  isDraggable,
+  isDragging,
+  isDraggingOver,
+  onThumbnailClick,
+  onVideoDrop,
+  selectedItem,
+  setIsDraggable,
+  setIsDragging,
+  setIsDraggingOver,
+  setSwapItems,
+  swapItems,
+  video,
+}: VideoListItemProps) => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [onThumbnail, setOnThumbnail] = useState(false);
+  const { resourceId, title, thumbnailLink, category: kind, order } = video;
+  return (
+    <section
+      draggable
+      onDragStart={() => {
+        if (!selectedItem) return;
+        setIsDraggable(true);
+        setIsDragging(true);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDragEnd={() => {
+        setIsDraggable(false);
+        setIsDragging(false);
+      }}
+      onDrop={onVideoDrop}
+      onMouseDown={() => {
+        if (selectedItem) {
+          setIsRegistering(false);
+        } else {
+          setIsRegistering(true);
+          onThumbnailClick(video);
+        }
+      }}
+      onClick={() => {
+        if (!selectedItem || isRegistering) return;
+        onThumbnailClick(video);
+      }}
+      className={cls(
+        selectedItem ? 'ring-2' : 'ring-0',
+        'text-xs flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered',
+        `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
+          idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
+        } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `
+      )}
+    >
+      {['left', 'right'].map((position) => (
+        <DragArea
+          key={position}
+          position={position as 'left' | 'right'}
+          isDraggable={isDraggable}
+          currentSwapItem={currentSwapItem}
+          isDraggingOver={isDraggingOver}
+          isDraggingElement={isDragging}
+          setIsDraggingOver={setIsDraggingOver}
+          selectedItem={selectedItem}
+        />
+      ))}
+      <VideoItemInput
+        video={video}
+        setSwapItems={setSwapItems}
+        swapItems={swapItems}
+        currentSwapItem={currentSwapItem}
+      />
+      <div className="w-full">
+        <VideoItemTitle category={category} title={title} kind={kind} />
+        <div className="flex justify-between">
+          <div className="font-light break-words text-[#606060]">
+            <span className="whitespace-nowrap">OriginalOrder : </span>
+            <span className="text-[#999999] font-semibold">{order}</span>
+          </div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setOnThumbnail((p) => !p);
+            }}
+          >
+            <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
+              (미리보기)
+            </span>
+            {onThumbnail ? (
+              <div className="fixed z-[1002] w-screen h-screen left-0 top-0 flex justify-center items-center">
+                <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
+                <div className="w-[80%] lg:w-[640px] relative">
+                  <Thumbnail
+                    category={category}
+                    src={
+                      category === 'filmShort'
+                        ? {
+                            main: `${thumbnailLink}_640x360?r=pad`,
+                            sub: `${thumbnailLink}_640x360?r=pad`,
+                            alt: title,
+                          }
+                        : {
+                            main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
+                            sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                            alt: title,
+                          }
+                    }
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+interface VideoGridItemProps {
+  video: WorksUsedInSort;
+  category: FlatformsCategory;
+  selectedItem: SelectedItem | undefined;
+  currentSwapItem: IdWithOrder | undefined;
+  isDraggable: boolean;
+  isDragging: boolean;
+  isDraggingOver: { left: boolean; right: boolean };
+  swapItems: IdWithOrder[];
+  setIsDraggable: Dispatch<SetStateAction<boolean>>;
+  setIsDragging: Dispatch<SetStateAction<boolean>>;
+  setIsDraggingOver: Dispatch<SetStateAction<{ left: boolean; right: boolean }>>;
+  setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
+  onVideoDrop: () => void;
+  onThumbnailClick: (video: WorksUsedInSort) => void;
+}
+
+const VideoGridItem = ({
+  video,
+  category,
+  selectedItem,
+  currentSwapItem,
+  isDraggable,
+  isDragging,
+  isDraggingOver,
+  swapItems,
+  setIsDraggable,
+  setIsDragging,
+  setIsDraggingOver,
+  setSwapItems,
+  onVideoDrop,
+  onThumbnailClick,
+}: VideoGridItemProps) => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const { resourceId, title, thumbnailLink, category: kind, order } = video;
+  return (
+    <section
+      onDragStart={() => {
+        if (!selectedItem) return;
+        setIsDraggable(true);
+        setIsDragging(true);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDragEnd={() => {
+        setIsDraggable(false);
+        setIsDragging(false);
+      }}
+      onDrop={onVideoDrop}
+      className={cls(
+        selectedItem ? 'ring-2' : 'ring-0',
+        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+      )}
+    >
+      {['left', 'right'].map((position) => (
+        <DragArea
+          key={position}
+          position={position as 'left' | 'right'}
+          isDraggable={isDraggable}
+          currentSwapItem={currentSwapItem}
+          isDraggingOver={isDraggingOver}
+          isDraggingElement={isDragging}
+          setIsDraggingOver={setIsDraggingOver}
+          selectedItem={selectedItem}
+        />
+      ))}
+      <div
+        // 클릭과 동시에 드래그해도 리스트에 등록되면서,
+        // 이미 등록된 리스트를 드래그하기 위해 클릭할 때는 등록 해제가 되지 않도록 down, click 둘 다 사용
+        onMouseDown={() => {
+          if (selectedItem) {
+            setIsRegistering(false);
+          } else {
+            setIsRegistering(true);
+            onThumbnailClick(video);
+          }
+        }}
+        onClick={() => {
+          if (!selectedItem || isRegistering) return;
+          onThumbnailClick(video);
+        }}
+        className="relative"
+      >
+        <Thumbnail
+          category={category}
+          src={
+            category === 'filmShort'
+              ? {
+                  main: `${thumbnailLink}_640x360?r=pad`,
+                  sub: `${thumbnailLink}_640x360?r=pad`,
+                  alt: title,
+                }
+              : {
+                  main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
+                  sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                  alt: title,
+                }
+          }
+        />
+      </div>
+      <div className="flex mt-2 relative">
+        <VideoItemInput
+          video={video}
+          setSwapItems={setSwapItems}
+          swapItems={swapItems}
+          currentSwapItem={currentSwapItem}
+        />
+        <div className="text-xs">
+          <VideoItemTitle category={category} title={title} kind={kind} />
+          <div className="font-light break-words text-[#606060]">
+            <span className="whitespace-nowrap">OriginalOrder : </span>
+            <span className="text-[#999999] font-semibold">{order}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 interface VideoItemProps {
   video: WorksUsedInSort;
   category: FlatformsCategory;
@@ -254,15 +507,11 @@ const VideoItem = ({
 }: VideoItemProps) => {
   const selectedItem = selectedList.find((item) => item.id === video.id);
   const currentSwapItem = swapItems.find((item) => item.id === video.id);
-  const { resourceId, title, thumbnailLink, category: kind, order } = video;
   const [isDragging, setIsDragging] = useState(false);
-  const [onThumbnail, setOnThumbnail] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState<{ left: boolean; right: boolean }>({
     left: false,
     right: false,
   });
-  const [currentLocation, setCurrentLocation] = useState<number | undefined>(undefined);
-  const [isRegistering, setIsRegistering] = useState(false);
   const onThumbnailClick = (video: WorksUsedInSort) => {
     setSelectedList((p) => {
       const matchedSwapItem = swapItems.find((item) => item.id === video.id);
@@ -278,7 +527,8 @@ const VideoItem = ({
     });
   };
   const onVideoDrop = () => {
-    if (!currentLocation || !currentSwapItem) return;
+    console.log(!!currentSwapItem, !!isDraggable);
+    if (!currentSwapItem || !isDraggable) return;
     const sortedSelectedList = selectedList.sort((a, b) => b.currentOrder - a.currentOrder);
     const videoSort = (items: IdWithOrder[], position: 'left' | 'right') => {
       return items.map((item) => {
@@ -330,186 +580,40 @@ const VideoItem = ({
   return (
     <>
       {isGrid ? (
-        <section
-          onDragStart={() => {
-            if (!selectedItem) return;
-            setIsDraggable(true);
-            setIsDragging(true);
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-          }}
-          onDragEnd={() => {
-            setIsDraggable(false);
-            setIsDragging(false);
-          }}
-          onDrop={onVideoDrop}
-          className={cls(
-            selectedItem ? 'ring-2' : 'ring-0',
-            'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
-          )}
-        >
-          {['left', 'right'].map((position) => (
-            <DragArea
-              key={position}
-              position={position as 'left' | 'right'}
-              isDraggable={isDraggable}
-              currentSwapItem={currentSwapItem}
-              isDraggingOver={isDraggingOver}
-              isDraggingElement={isDragging}
-              setIsDraggingOver={setIsDraggingOver}
-              setCurrentLocation={setCurrentLocation}
-              selectedItem={selectedItem}
-            />
-          ))}
-          <div
-            // 클릭과 동시에 드래그해도 리스트에 등록되면서,
-            // 이미 등록된 리스트를 드래그하기 위해 클릭할 때는 등록 해제가 되지 않도록 down, click 둘 다 사용
-            onMouseDown={() => {
-              if (selectedItem) {
-                setIsRegistering(false);
-              } else {
-                setIsRegistering(true);
-                onThumbnailClick(video);
-              }
-            }}
-            onClick={() => {
-              if (!selectedItem || isRegistering) return;
-              onThumbnailClick(video);
-            }}
-            className="relative"
-          >
-            <Thumbnail
-              category={category}
-              src={
-                category === 'filmShort'
-                  ? {
-                      main: `${thumbnailLink}_640x360?r=pad`,
-                      sub: `${thumbnailLink}_640x360?r=pad`,
-                      alt: title,
-                    }
-                  : {
-                      main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
-                      sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
-                      alt: title,
-                    }
-              }
-            />
-          </div>
-          <div className="flex mt-2 relative">
-            <VideoItemInput
-              video={video}
-              setSwapItems={setSwapItems}
-              swapItems={swapItems}
-              currentSwapItem={currentSwapItem}
-            />
-            <div className="text-xs">
-              <VideoItemTitle category={category} title={title} kind={kind} />
-              <div className="font-light break-words text-[#606060]">
-                <span className="whitespace-nowrap">OriginalOrder : </span>
-                <span className="text-[#999999] font-semibold">{order}</span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <VideoGridItem
+          category={category}
+          currentSwapItem={currentSwapItem}
+          selectedItem={selectedItem}
+          isDraggable={isDraggable}
+          isDragging={isDragging}
+          isDraggingOver={isDraggingOver}
+          onThumbnailClick={onThumbnailClick}
+          onVideoDrop={onVideoDrop}
+          setIsDraggable={setIsDraggable}
+          setIsDragging={setIsDragging}
+          setIsDraggingOver={setIsDraggingOver}
+          setSwapItems={setSwapItems}
+          swapItems={swapItems}
+          video={video}
+        />
       ) : (
-        <section
-          draggable
-          onDragStart={() => {
-            if (!selectedItem) return;
-            setIsDraggable(true);
-            setIsDragging(true);
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-          }}
-          onDragEnd={() => {
-            setIsDraggable(false);
-            setIsDragging(false);
-          }}
-          onDrop={onVideoDrop}
-          onMouseDown={() => {
-            if (selectedItem) {
-              setIsRegistering(false);
-            } else {
-              setIsRegistering(true);
-              onThumbnailClick(video);
-            }
-          }}
-          onClick={() => {
-            if (!selectedItem || isRegistering) return;
-            onThumbnailClick(video);
-          }}
-          className={cls(
-            selectedItem ? 'ring-2' : 'ring-0',
-            'text-xs flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered',
-            `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
-              idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
-            } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `
-          )}
-        >
-          {['left', 'right'].map((position) => (
-            <DragArea
-              key={position}
-              position={position as 'left' | 'right'}
-              isDraggable={isDraggable}
-              currentSwapItem={currentSwapItem}
-              isDraggingOver={isDraggingOver}
-              isDraggingElement={isDragging}
-              setIsDraggingOver={setIsDraggingOver}
-              setCurrentLocation={setCurrentLocation}
-              selectedItem={selectedItem}
-            />
-          ))}
-          <VideoItemInput
-            video={video}
-            setSwapItems={setSwapItems}
-            swapItems={swapItems}
-            currentSwapItem={currentSwapItem}
-          />
-          <div className="w-full">
-            <VideoItemTitle category={category} title={title} kind={kind} />
-            <div className="flex justify-between">
-              <div className="font-light break-words text-[#606060]">
-                <span className="whitespace-nowrap">OriginalOrder : </span>
-                <span className="text-[#999999] font-semibold">{order}</span>
-              </div>
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOnThumbnail((p) => !p);
-                }}
-              >
-                <span className="whitespace-nowrap text-[#888888] hover:text-palettered">
-                  (미리보기)
-                </span>
-                {onThumbnail ? (
-                  <div className="fixed z-[1002] w-screen h-screen left-0 top-0 flex justify-center items-center">
-                    <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
-                    <div className="w-[80%] lg:w-[640px] relative">
-                      <Thumbnail
-                        category={category}
-                        src={
-                          category === 'filmShort'
-                            ? {
-                                main: `${thumbnailLink}_640x360?r=pad`,
-                                sub: `${thumbnailLink}_640x360?r=pad`,
-                                alt: title,
-                              }
-                            : {
-                                main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
-                                sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
-                                alt: title,
-                              }
-                        }
-                      />
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </section>
+        <VideoListItem
+          idx={idx}
+          category={category}
+          currentSwapItem={currentSwapItem}
+          selectedItem={selectedItem}
+          isDraggable={isDraggable}
+          isDragging={isDragging}
+          isDraggingOver={isDraggingOver}
+          onThumbnailClick={onThumbnailClick}
+          onVideoDrop={onVideoDrop}
+          setIsDraggable={setIsDraggable}
+          setIsDragging={setIsDragging}
+          setIsDraggingOver={setIsDraggingOver}
+          setSwapItems={setSwapItems}
+          swapItems={swapItems}
+          video={video}
+        />
       )}
     </>
   );
