@@ -10,6 +10,7 @@ interface ButtonsControllerProps {
   onSelectedList: boolean;
   count: number;
   action?: 'save' | 'delete';
+  listLabel?: string;
 }
 
 export default function ButtonsController({
@@ -21,6 +22,7 @@ export default function ButtonsController({
   onSelectedList,
   count,
   action = 'save',
+  listLabel = 'Videos',
 }: ButtonsControllerProps) {
   return (
     <div className="sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0">
@@ -53,6 +55,7 @@ export default function ButtonsController({
         onSelectedList={onSelectedList}
         count={count}
         useOnMobile={false}
+        listLabel={listLabel}
       />
     </div>
   );

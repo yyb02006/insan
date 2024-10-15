@@ -28,6 +28,7 @@ interface UtilButtonsProps {
   onSelectedList: boolean;
   count: number;
   useOnMobile: boolean;
+  listLabel?: string;
 }
 
 export default function UtilButtons({
@@ -37,6 +38,7 @@ export default function UtilButtons({
   onSelectedList,
   count,
   useOnMobile,
+  listLabel = 'Videos',
 }: UtilButtonsProps) {
   return (
     <div
@@ -60,7 +62,7 @@ export default function UtilButtons({
         disabled={!onSelectedList && count === 0}
       >
         <div>{count}</div>
-        <div>Videos</div>
+        <div>{listLabel}</div>
       </button>
       <button
         onClick={onViewSwitch}
