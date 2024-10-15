@@ -28,24 +28,31 @@ import { useRouter } from 'next/router';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
-type IdWithOrder = { id: number; currentOrder: number; originalOrder: number };
+interface IdWithOrder {
+  id: number;
+  currentOrder: number;
+  originalOrder: number;
+}
 
 type IdWithOrderByCategory = VideoCollection<Array<IdWithOrder>>;
+
+interface SelectedItem extends WorksUsedInSort {
+  currentOrder: number;
+}
 
 interface VideoItemInputProps {
   video: WorksUsedInSort;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
-  setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
+  currentSwapItem: IdWithOrder | undefined;
 }
 
 const VideoItemInput = ({
   video,
   setSwapItems,
   swapItems,
-  setSearchResult,
+  currentSwapItem,
 }: VideoItemInputProps) => {
-  const currentSwapItem = swapItems.find((item) => item.id === video.id);
   const [orderValue, setOrderValue] = useState(currentSwapItem?.currentOrder || 0);
   useEffect(() => {
     setOrderValue(currentSwapItem?.currentOrder || 0);
@@ -142,28 +149,38 @@ interface DragAreaProps {
       right: boolean;
     }>
   >;
-  selectedItem: WorksUsedInSort | undefined;
   isDraggable: boolean;
+  currentSwapItem: IdWithOrder | undefined;
+  isDraggingElement: boolean;
+  selectedItem: SelectedItem | undefined;
+  setCurrentLocation: Dispatch<SetStateAction<number | undefined>>;
 }
 
 const DragArea = ({
   position,
   isDraggable,
   isDraggingOver,
+  currentSwapItem,
+  isDraggingElement,
   selectedItem,
   setIsDraggingOver,
+  setCurrentLocation,
 }: DragAreaProps) => {
   const onVideoDragOver = (e: DragEvent<HTMLElement>, sidePosition: 'left' | 'right') => {
     e.preventDefault();
-    if (!isDraggable || selectedItem) return;
+    if (!isDraggable || isDraggingElement || !currentSwapItem) return;
     if (sidePosition === 'left') {
       setIsDraggingOver((p) => ({ ...p, left: true }));
+      setCurrentLocation(currentSwapItem.currentOrder);
     } else {
       setIsDraggingOver((p) => ({ ...p, right: true }));
+      setCurrentLocation(currentSwapItem.currentOrder - 1);
     }
   };
-  const areaSideOffset = position === 'left' ? '-left-3' : '-right-3';
-  const ringSideOffset = position === 'left' ? '-left-1 border-l-4' : '-right-1 border-r-4';
+  const sideAreaOffset = position === 'left' ? '-left-3' : '-right-3';
+  const sideBorderOffset =
+    position === 'left' ? '-left-[6px] border-l-[6px]' : '-right-[6px] border-r-[6px]';
+  const sideRingOffset = position === 'left' ? '-left-[4px]' : '-right-[4px]';
   useEffect(() => {
     if (!isDraggable) {
       setIsDraggingOver({ left: false, right: false });
@@ -172,27 +189,40 @@ const DragArea = ({
   return (
     <>
       <div
-        onDragEnter={(e) => {
+        onDragOver={(e) => {
           e.preventDefault();
           onVideoDragOver(e, position);
         }}
         onDragLeave={(e) => {
           e.preventDefault();
           setIsDraggingOver((p) => ({ ...p, [position]: false }));
+          setCurrentLocation(undefined);
         }}
         className={cls(
-          isDraggable && !selectedItem ? 'block' : 'hidden',
-          areaSideOffset,
+          isDraggable && !isDraggingElement ? 'block' : 'hidden',
+          sideAreaOffset,
           'absolute w-[calc(50%+12px)] h-full top-0 z-10 bg-transparent'
         )}
       />
       <div
         className={cls(
-          isDraggable && isDraggingOver[position] ? 'border-palettered' : 'border-transparent',
-          ringSideOffset,
+          isDraggable && isDraggingOver[position] && !selectedItem
+            ? 'border-palettered'
+            : 'border-transparent',
+          sideBorderOffset,
           'absolute top-0 h-full'
         )}
-      />
+      >
+        {selectedItem ? (
+          <div
+            className={cls(
+              isDraggable && isDraggingOver[position] ? 'bg-palettered ring-2 ring-palettered' : '',
+              sideRingOffset,
+              'absolute top-0 w-[2px] h-full'
+            )}
+          />
+        ) : null}
+      </div>
     </>
   );
 };
@@ -202,11 +232,10 @@ interface VideoItemProps {
   category: FlatformsCategory;
   isGrid: boolean;
   idx: number;
-  selectedList: WorksUsedInSort[];
-  setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
+  selectedList: SelectedItem[];
+  setSelectedList: Dispatch<SetStateAction<SelectedItem[]>>;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
-  setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
   isDraggable: boolean;
   setIsDraggable: Dispatch<SetStateAction<boolean>>;
 }
@@ -220,21 +249,82 @@ const VideoItem = ({
   setSelectedList,
   setSwapItems,
   swapItems,
-  setSearchResult,
   isDraggable,
   setIsDraggable,
 }: VideoItemProps) => {
   const selectedItem = selectedList.find((item) => item.id === video.id);
+  const currentSwapItem = swapItems.find((item) => item.id === video.id);
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
+  const [isDragging, setIsDragging] = useState(false);
   const [onThumbnail, setOnThumbnail] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState<{ left: boolean; right: boolean }>({
     left: false,
     right: false,
   });
+  const [currentLocation, setCurrentLocation] = useState<number | undefined>(undefined);
   const onThumbnailClick = (video: WorksUsedInSort) => {
-    setSelectedList((p) =>
-      selectedItem ? p.filter((item) => item.id !== video.id) : [...p, video]
-    );
+    setSelectedList((p) => {
+      const matchedSwapItem = swapItems.find((item) => item.id === video.id);
+      return selectedItem
+        ? p.filter((item) => item.id !== video.id)
+        : [
+            ...p,
+            {
+              ...video,
+              currentOrder: matchedSwapItem?.currentOrder || 0,
+            },
+          ];
+    });
+  };
+  const onVideoDrop = () => {
+    if (!currentLocation || !currentSwapItem) return;
+    const sortedSelectedList = selectedList.sort((a, b) => b.currentOrder - a.currentOrder);
+    const videoSort = (items: IdWithOrder[], position: 'left' | 'right') => {
+      return items.map((item) => {
+        const matchedIndex = sortedSelectedList.findIndex((listItem) => listItem.id === item.id);
+        // 드롭하려는 위치 의 order값
+        const targetOrder =
+          position === 'left' ? currentSwapItem.currentOrder : currentSwapItem.currentOrder - 1;
+        switch (true) {
+          // matchedIndex가 존재하는 경우
+          case matchedIndex !== -1:
+            return {
+              ...item,
+              currentOrder:
+                // 드롭하려는 위치
+                targetOrder -
+                // selectedList내부의 order값 순서대로 그대로 옮기기 위해 order값 순서만큼 감산
+                matchedIndex +
+                // 드롭하려는 위치보다 앞에서 아이템이 빠졌을 경우, 해당 아이템 수만큼 가산해서 드롭하려는 위치 조정
+                selectedList.filter((listItem) => listItem.currentOrder > targetOrder).length,
+            };
+          case item.currentOrder > targetOrder:
+            return {
+              ...item,
+              currentOrder:
+                item.currentOrder +
+                selectedList.filter((listItem) => listItem.currentOrder > item.currentOrder).length,
+            };
+          case item.currentOrder <= targetOrder:
+            return {
+              ...item,
+              currentOrder:
+                item.currentOrder -
+                selectedList.filter((listItem) => listItem.currentOrder < item.currentOrder).length,
+            };
+          default:
+            return item;
+        }
+      });
+    };
+    if (isDraggingOver.left) {
+      setSwapItems((p) => videoSort(p, 'left'));
+    } else if (isDraggingOver.right) {
+      setSwapItems((p) => videoSort(p, 'right'));
+    } else {
+      return;
+    }
+    setSelectedList([]);
   };
   return (
     <>
@@ -243,14 +333,16 @@ const VideoItem = ({
           onDragStart={() => {
             if (!selectedItem) return;
             setIsDraggable(true);
+            setIsDragging(true);
           }}
           onDragOver={(e) => {
             e.preventDefault();
           }}
           onDragEnd={() => {
             setIsDraggable(false);
+            setIsDragging(false);
           }}
-          onDrop={() => {}}
+          onDrop={onVideoDrop}
           className={cls(
             selectedItem ? 'ring-2' : 'ring-0',
             'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
@@ -261,13 +353,16 @@ const VideoItem = ({
               key={position}
               position={position as 'left' | 'right'}
               isDraggable={isDraggable}
+              currentSwapItem={currentSwapItem}
               isDraggingOver={isDraggingOver}
-              selectedItem={selectedItem}
+              isDraggingElement={isDragging}
               setIsDraggingOver={setIsDraggingOver}
+              setCurrentLocation={setCurrentLocation}
+              selectedItem={selectedItem}
             />
           ))}
           <div
-            onClick={() => {
+            onMouseDown={() => {
               onThumbnailClick(video);
             }}
             className="relative"
@@ -294,7 +389,7 @@ const VideoItem = ({
               video={video}
               setSwapItems={setSwapItems}
               swapItems={swapItems}
-              setSearchResult={setSearchResult}
+              currentSwapItem={currentSwapItem}
             />
             <div className="text-xs">
               <VideoItemTitle category={category} title={title} kind={kind} />
@@ -323,8 +418,8 @@ const VideoItem = ({
             <VideoItemTitle category={category} title={title} kind={kind} />
             <div className="flex justify-between">
               <div className="font-light break-words text-[#606060]">
-                <span className="whitespace-nowrap">Id : </span>
-                {resourceId}
+                <span className="whitespace-nowrap">OriginalOrder : </span>
+                <span className="text-[#999999] font-semibold">{order}</span>
               </div>
               <div
                 onClick={(e) => {
@@ -371,8 +466,8 @@ interface VideoFeedProps {
   category: FlatformsCategory;
   searchResult: VideoCollection<WorksUsedInSort[]>;
   setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
-  selectedList: WorksUsedInSort[];
-  setSelectedList: Dispatch<SetStateAction<WorksUsedInSort[]>>;
+  selectedList: SelectedItem[];
+  setSelectedList: Dispatch<SetStateAction<SelectedItem[]>>;
   isGrid: boolean;
   page: number;
   swapItems: IdWithOrder[];
@@ -422,7 +517,6 @@ const VideoFeed = ({
             setSelectedList={setSelectedList}
             setSwapItems={setSwapItems}
             swapItems={swapItems}
-            setSearchResult={setSearchResult}
             isDraggable={isDraggable}
             setIsDraggable={setIsDraggable}
           />
@@ -512,7 +606,7 @@ export default function Sort({
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
   const [searchResult, setSearchResult] =
     useState<VideoCollection<WorksUsedInSort[]>>(initialWorks);
-  const [selectedList, setSelectedList] = useState<WorksUsedInSort[]>([]);
+  const [selectedList, setSelectedList] = useState<SelectedItem[]>([]);
   const [hasNextPage, setHasNextPage] = useState<VideoCollection<boolean>>(initialHasNextPage);
   const [isGrid, setIsGrid] = useState(true);
   const [fetchLoading, setFetchLoading] = useState(false);
