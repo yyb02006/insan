@@ -262,6 +262,7 @@ const VideoItem = ({
     right: false,
   });
   const [currentLocation, setCurrentLocation] = useState<number | undefined>(undefined);
+  const [isRegistering, setIsRegistering] = useState(false);
   const onThumbnailClick = (video: WorksUsedInSort) => {
     setSelectedList((p) => {
       const matchedSwapItem = swapItems.find((item) => item.id === video.id);
@@ -362,7 +363,18 @@ const VideoItem = ({
             />
           ))}
           <div
+            // 클릭과 동시에 드래그해도 리스트에 등록되면서,
+            // 이미 등록된 리스트를 드래그하기 위해 클릭할 때는 등록 해제가 되지 않도록 down, click 둘 다 사용
             onMouseDown={() => {
+              if (selectedItem) {
+                setIsRegistering(false);
+              } else {
+                setIsRegistering(true);
+                onThumbnailClick(video);
+              }
+            }}
+            onClick={() => {
+              if (!selectedItem || isRegistering) return;
               onThumbnailClick(video);
             }}
             className="relative"
@@ -402,19 +414,60 @@ const VideoItem = ({
         </section>
       ) : (
         <section
+          draggable
+          onDragStart={() => {
+            if (!selectedItem) return;
+            setIsDraggable(true);
+            setIsDragging(true);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+          }}
+          onDragEnd={() => {
+            setIsDraggable(false);
+            setIsDragging(false);
+          }}
+          onDrop={onVideoDrop}
+          onMouseDown={() => {
+            if (selectedItem) {
+              setIsRegistering(false);
+            } else {
+              setIsRegistering(true);
+              onThumbnailClick(video);
+            }
+          }}
+          onClick={() => {
+            if (!selectedItem || isRegistering) return;
+            onThumbnailClick(video);
+          }}
           className={cls(
             selectedItem ? 'ring-2' : 'ring-0',
-            'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+            'text-xs flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered',
+            `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
+              idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
+            } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `
           )}
         >
-          <div
-            className={cls(
-              `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
-                idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
-              } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `,
-              'text-xs'
-            )}
-          >
+          {['left', 'right'].map((position) => (
+            <DragArea
+              key={position}
+              position={position as 'left' | 'right'}
+              isDraggable={isDraggable}
+              currentSwapItem={currentSwapItem}
+              isDraggingOver={isDraggingOver}
+              isDraggingElement={isDragging}
+              setIsDraggingOver={setIsDraggingOver}
+              setCurrentLocation={setCurrentLocation}
+              selectedItem={selectedItem}
+            />
+          ))}
+          <VideoItemInput
+            video={video}
+            setSwapItems={setSwapItems}
+            swapItems={swapItems}
+            currentSwapItem={currentSwapItem}
+          />
+          <div className="w-full">
             <VideoItemTitle category={category} title={title} kind={kind} />
             <div className="flex justify-between">
               <div className="font-light break-words text-[#606060]">
@@ -431,7 +484,7 @@ const VideoItem = ({
                   (미리보기)
                 </span>
                 {onThumbnail ? (
-                  <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
+                  <div className="fixed z-[1002] w-screen h-screen left-0 top-0 flex justify-center items-center">
                     <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
                     <div className="w-[80%] lg:w-[640px] relative">
                       <Thumbnail
@@ -757,6 +810,7 @@ export default function Sort({
           onSelectedList={isSelectedListOpen}
           count={changedSwapItems.length}
           useOnMobile={true}
+          listLabel="Diff"
         />
         <ButtonsController
           onResetClick={onResetClick}
@@ -769,6 +823,7 @@ export default function Sort({
           onSelectedList={isSelectedListOpen}
           count={changedSwapItems.length}
           action="save"
+          listLabel="Diff"
         />
         <div ref={intersectionRef} className="h-1 mt-20" />
         {isSelectedListOpen ? (
