@@ -397,6 +397,7 @@ const VideoGridItem = ({
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   return (
     <section
+      draggable
       onDragStart={() => {
         if (!selectedItem) return;
         setIsDraggable(true);
