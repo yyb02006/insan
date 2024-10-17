@@ -1,6 +1,5 @@
 import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import PostManagementLayout from '@/components/nav/postManagementLayout';
 import SearchForm from '@/components/searchForm';
 import ToTop from '@/components/toTop';
 import useDeleteRequest from '@/libs/client/useDelete';
@@ -16,6 +15,7 @@ import UtilButtons from '@/components/butttons/utilButtons';
 import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 import Thumbnail from '@/components/thumbnail';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
 
 interface WorkProps {
   onClick: () => void;
