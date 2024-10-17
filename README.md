@@ -190,3 +190,10 @@ This project is licensed under the MIT License
   - **_/work/sort_** sort페이지 추가, 정렬 순서를 직접 입력하거나, 드래그앤 드롭으로 수정 가능
   - **_/work/write_, _/work/delete_, _/work/sort_** 관리자 페이지 간의 이동 방법을 로컬 네비게이션으로 변경, 네비게이션 내에 로그아웃 기능 추가
   - **_/work_** 이제 작업물들이 sort페이지에서 수정한 정렬 순서의 역순으로 표시됨
+
+  ***
+
+- **Version 0.7.0 (2024-10-18):**
+
+  - **_/work/sort_** 정렬 카테고리를 3개로 분리
+  - 데이터 상의 정렬 순서와 실제 표시되는 정렬 순서가 달랐던 버그 수정
