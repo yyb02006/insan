@@ -1,10 +1,11 @@
 import { cls } from '@/libs/client/utils';
-import Circles from './circles';
-import Input from './input';
+import Circles from '@/components/circles';
+import Input from '@/components/input';
 import { useState } from 'react';
 import Image from 'next/image';
-import { VimeofeedProps, YoutubefeedProps } from './typings/components';
-import { createInputChange, onListItemClick } from './thumbnailFeed';
+import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
+import { createInputChange, onListItemClick } from '@/components/feed/thumbnailFeed';
+import { OwnedVideoItems, WorkInfos } from '@/pages/work/work';
 
 const VimeoThumbnailPreview = ({
   altName,
@@ -58,10 +59,10 @@ export function VimeoListFeed({
     <>
       <ul className="space-y-4">
         {resource.map((video, idx) => {
-          const matchedWorkInfo = workInfos?.find(
+          const matchedWorkInfo: WorkInfos | undefined = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.player_embed_url
           );
-          const matchedOwnedVideo = ownedVideos.find(
+          const matchedOwnedVideo: OwnedVideoItems | undefined = ownedVideos.find(
             (ownedVideo) => ownedVideo.resourceId === video.player_embed_url
           );
           return idx < 12 * (page - 1) ? (
@@ -179,6 +180,7 @@ export function VimeoListFeed({
                   data-description={matchedOwnedVideo?.description}
                   data-date={matchedOwnedVideo?.date}
                   data-category={matchedOwnedVideo?.category}
+                  data-order={matchedOwnedVideo?.order}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={
@@ -286,10 +288,10 @@ export function YoutubeListFeed({
     <>
       <ul className="space-y-4">
         {resource.map((video, idx) => {
-          const matchedWorkInfo = workInfos?.find(
+          const matchedWorkInfo: WorkInfos | undefined = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.snippet.resourceId?.videoId
           );
-          const matchedOwnedVideo = ownedVideos.find(
+          const matchedOwnedVideo: OwnedVideoItems | undefined = ownedVideos.find(
             (ownedVideo) => ownedVideo.resourceId === video.snippet.resourceId?.videoId
           );
           return idx < 12 * (page - 1) ? (
@@ -350,6 +352,7 @@ export function YoutubeListFeed({
                   data-description={matchedOwnedVideo?.description}
                   data-date={matchedOwnedVideo?.date}
                   data-category={'outsource'}
+                  data-order={matchedOwnedVideo?.order}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={

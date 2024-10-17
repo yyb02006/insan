@@ -14,15 +14,7 @@ import {
   Variants,
 } from 'framer-motion';
 import Link from 'next/link';
-import {
-  Dispatch,
-  SetStateAction,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Dispatch, SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { waveChild, waveContainer } from '..';
 import Input from '@/components/input';
 import Image from 'next/image';
@@ -1317,7 +1309,7 @@ export default function Work({ initialLength, initialWorks, initialHasNextPage }
     <>
       <Layout
         seoTitle="WORK"
-        nav={{ isShort: true }}
+        nav={{ isCollapsed: true }}
         css={onDetail?.isOpen === true ? `invisible` : 'visible'}
         description="디렉터 여인산의 개인 제작 영상을 위주로 외주 제작, 참여 영상 작업물들을 확인할 수 있습니다."
       >

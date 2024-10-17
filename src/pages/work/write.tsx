@@ -1,56 +1,30 @@
 import { ciIncludes, fetchData } from '@/libs/client/utils';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { GapiItem, VideosCategory } from '.';
+import { GapiItem } from '.';
 import useMutation from '@/libs/client/useMutation';
 import Layout from '@/components/layout';
-import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/thumbnailFeed';
+import { VimeoThumbnailFeed, YoutubeThumbnailFeed } from '@/components/feed/thumbnailFeed';
 import useInfiniteScrollFromFlatform from '@/libs/client/useInfiniteScroll';
 import { useRouter } from 'next/router';
-import {
-  ButtonsController,
-  CategoryTab,
-  MenuBar,
-  SearchForm,
-  UtilButtons,
-  VideoCollection,
-} from './delete';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
 import ToTop from '@/components/toTop';
 import { GetServerSideProps } from 'next';
 import client from '@/libs/server/client';
-import Circles from '@/components/circles';
-import { VimeoListFeed, YoutubeListFeed } from '@/components/listFeed';
-
-export interface WorkInfos {
-  title: string;
-  description: string;
-  resourceId: string;
-  category: string;
-  date: string;
-  thumbnailLink: string;
-  animatedThumbnailLink: string;
-}
-
-export interface VimeoVideos {
-  player_embed_url: string;
-  resource_key: string;
-  pictures: { base_link: string };
-  name: string;
-  description: string;
-  uri: string;
-  animated_thumbnail: string;
-}
-
-export interface OwnedVideoItems {
-  title: string;
-  category: VideosCategory;
-  date: string;
-  description: string;
-  resourceId: string;
-}
-
-export type ResourceHost = 'vimeo' | 'youtube';
-
-export type FlatformsCategory = 'filmShort' | 'outsource';
+import { VimeoListFeed, YoutubeListFeed } from '@/components/feed/listFeed';
+import SearchForm from '@/components/searchForm';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
+import UtilButtons from '@/components/butttons/utilButtons';
+import ButtonsController from '@/components/butttons/buttonsController';
+import {
+  FlatformsCategory,
+  OwnedVideoItems,
+  VideoCollection,
+  VimeoVideos,
+  WorkInfos,
+} from '@/pages/work/work';
+import LoaidngIndicator from '@/components/loadingIndicator';
+import BackDrop from '@/components/backDrop';
+import ErrorOverlay from '@/components/errorOverlay';
 
 interface InitialData {
   initialVimeoVideos: VimeoVideos[];
@@ -66,7 +40,7 @@ export default function Write({
   initialNextPageToken,
 }: InitialData) {
   const router = useRouter();
-  const topElement = useRef<HTMLDivElement>(null);
+  const topElementRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
@@ -83,7 +57,7 @@ export default function Write({
   });
   const [sendList, { loading, data, error }] = useMutation<{
     success: boolean;
-  }>(`/api/work/write`);
+  }>(`/api/work?purpose=write`);
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
   const [fetchLoading, setFetchLoading] = useState(false);
   const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
@@ -192,10 +166,19 @@ export default function Write({
   }; */
 
   const onSubmitWrites = () => {
-    const inspectedWorkInfos = workInfos.filter((info) => info.title.length !== 0);
-    if (loading && inspectedWorkInfos.length > 0) return;
+    if (loading || workInfos.length === 0) return;
+    const currentLastIndex = initialOwnedVideos[category][0].order;
+    let index = currentLastIndex;
+    const newWorkInfos = workInfos.map((item) => {
+      if (item.order === 0) {
+        index++;
+        return { ...item, order: index };
+      } else {
+        return item;
+      }
+    });
     sendList({
-      data: inspectedWorkInfos,
+      data: newWorkInfos,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
     });
   };
@@ -251,7 +234,7 @@ export default function Write({
     if (workInfos.length < 1) return;
     setWorkInfos([]);
     resetInit();
-    topElement.current?.scrollIntoView();
+    topElementRef.current?.scrollIntoView();
   };
 
   const onSelectedListClick = () => {
@@ -263,7 +246,7 @@ export default function Write({
       setSearchWord('');
       setSearchWordSnapshot('');
       setOnSelectedList(true);
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
       if (category === 'filmShort') {
         setSearchResults((p) => ({
           ...p,
@@ -301,18 +284,18 @@ export default function Write({
   };
 
   return (
-    <Layout seoTitle="WRITE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
-      <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <MenuBar currentPage="write" />
-        <CategoryTab
-          category={category}
-          onFilmShortClick={() => {
-            onCategoryClick('filmShort');
-          }}
-          onOutsourceClick={() => {
-            onCategoryClick('outsource');
-          }}
-        />
+    <Layout
+      seoTitle="WRITE"
+      footerPosition="hidden"
+      menu={{ hasMenu: true, menuComponent: <PostManagementMenu /> }}
+      nav={{ isCollapsed: true }}
+    >
+      <PostManagementLayout
+        category={category}
+        onCategoryClick={onCategoryClick}
+        title="추가하기"
+        topElementRef={topElementRef}
+      >
         <SearchForm onSearch={onSearch} searchWord={searchWord} setSearchWord={setSearchWord} />
         {category === 'filmShort' && list[category].length > 0 ? (
           isGrid ? (
@@ -388,28 +371,18 @@ export default function Write({
           count={workInfos.length}
           action="save"
         />
-      </section>
-      <ToTop toScroll={topElement} />
-      {loading ? (
-        <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] flex justify-center items-center bg-black">
-          <div className="animate-spin-middle contrast-50 absolute w-[100px] aspect-square">
-            <Circles
-              liMotion={{
-                css: 'w-[calc(16px+100%)] border-[#eaeaea] border-1',
-              }}
-            />
-          </div>
-        </div>
-      ) : null}
-      {data?.success ? <div className="fixed top-0 w-screen h-screen z-[1]"></div> : null}
+        <ToTop toScroll={topElementRef} />
+      </PostManagementLayout>
+      {loading ? <LoaidngIndicator /> : null}
+      {data?.success ? <BackDrop /> : null}
       {error ? (
-        <div className="fixed top-0 w-screen h-screen z-[1] flex justify-center items-center">
-          <div className="absolute top-0 w-full h-full opacity-60 bg-black" />
+        <ErrorOverlay>
           <div className="relative text-[#eaeaea] font-bold text-3xl lg:w-1/2 w-auto lg:px-0 px-6 leading-snug">
-            인산아 <span className="text-palettered">세이브</span> 도중 에러가 생겼단다 ㅎㅎ 아마도
-            새로고침하고 다시 해보면 되겠지만 그전에 나에게 보고하도록
+            인산아 <span className="text-palettered">세이브</span> 도중 에러가 생겼단다 ㅎㅎ
+            <br />
+            아마도 새로고침하고 다시 해보면 되겠지만 그전에 나에게 보고하도록
           </div>
-        </div>
+        </ErrorOverlay>
       ) : null}
     </Layout>
   );
@@ -456,12 +429,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
   );
 
   const lists = await client.works.findMany({
+    orderBy: { order: 'desc' },
     select: {
       title: true,
       category: true,
       date: true,
       description: true,
       resourceId: true,
+      order: true,
     },
   });
 

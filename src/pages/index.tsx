@@ -1100,7 +1100,7 @@ const Home: NextPage = () => {
       <Layout
         seoTitle="INSAN"
         nav={{
-          isShort: innerWidth > 640 ? !isInBackground : true,
+          isCollapsed: innerWidth > 640 ? !isInBackground : true,
         }}
       >
         <Chevron scrollYProgress={scrollYProgress} isInView={isInView} />

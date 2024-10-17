@@ -20,6 +20,7 @@ import { AuthResponse } from '@/pages/enter';
 import LoaidngIndicator from './loadingIndicator';
 import { VideoLength, useAppContext } from '@/appContext';
 import useUser from '@/libs/client/useUser';
+import HamburgerMenuContainer from '@/components/nav/hamburgerMenuContainer';
 
 interface LayoutProps {
   seoTitle: string;
@@ -27,9 +28,9 @@ interface LayoutProps {
   scrollbar?: boolean;
   css?: string;
   footerPosition?: string;
-  nav?: { exist?: boolean; isShort: boolean };
+  nav?: { hasNav?: boolean; isCollapsed: boolean };
   logo?: boolean;
-  menu?: boolean;
+  menu?: { hasMenu?: boolean; menuComponent?: ReactNode };
   description?: string;
 }
 
@@ -137,15 +138,15 @@ const ListMenu = ({ isAdmin, setIsLoading }: ListMenuProps) => {
 const ExtendedNav = ({
   isMobile,
   videoLength,
-  setIsLoading,
-  setIsNavigating,
-  isNavigating,
+  setIsAborted,
+  setOnNavigating,
+  onNavigating,
 }: {
   isMobile: boolean;
   videoLength: VideoLength;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  setIsNavigating: Dispatch<SetStateAction<boolean>>;
-  isNavigating: boolean;
+  setIsAborted: Dispatch<SetStateAction<boolean>>;
+  setOnNavigating: Dispatch<SetStateAction<boolean>>;
+  onNavigating: boolean;
 }) => {
   const router = useRouter();
   const [isUser] = useUser();
@@ -191,7 +192,7 @@ const ExtendedNav = ({
   useEffect(() => {
     if (ispresent) {
       const enterAnimation = async () => {
-        setIsLoading(true);
+        setIsAborted(true);
         animate(scope.current, { scale: 1 }, { duration: 0.4 });
         await animate(scope.current, { borderRadius: 0 }, { duration: 0.4 });
         await animate(
@@ -209,12 +210,12 @@ const ExtendedNav = ({
           { scale: [0.7, 1.2, 1], opacity: [0, 1] },
           { duration: 0.3, ease: 'easeIn', type: 'spring', bounce: 0.5 }
         );
-        setIsLoading(false);
+        setIsAborted(false);
       };
       enterAnimation();
     } else {
       const exitAnimation = async () => {
-        setIsLoading(true);
+        setIsAborted(true);
         animate(
           '.Circles',
           { scale: [1, 1.5], opacity: [1, 0] },
@@ -232,11 +233,11 @@ const ExtendedNav = ({
         animate(scope.current, { borderRadius: '0% 0% 0% 100%' }, { duration: 0.2 });
         await animate(scope.current, { scale: 0 }, { duration: 0.4 });
         safeToRemove();
-        setIsLoading(false);
+        setIsAborted(false);
       };
       exitAnimation();
     }
-  }, [ispresent, animate, safeToRemove, scope, setIsLoading]);
+  }, [ispresent, animate, safeToRemove, scope, setIsAborted]);
   const onLinkEnter = (selector: string) => {
     animate(`.${selector}`, { color: '#eaeaea', webkitTextStroke: '0px' }, { duration: 0.2 });
     animate(`.${selector}Letter`, { y: '110%' });
@@ -310,8 +311,8 @@ const ExtendedNav = ({
           ))}
           <div
             onClick={() => {
-              if (isNavigating) return;
-              setIsNavigating(true);
+              if (onNavigating) return;
+              setOnNavigating(true);
             }}
             className="Menu font-light self-end opacity-0 text-[#909090] hover:text-palettered"
           >
@@ -341,110 +342,14 @@ const ExtendedNav = ({
   );
 };
 
-const HamburgerMenu = ({
-  isMobile,
-  videoLength,
-  isExtended,
-  setIsExtended,
-}: {
-  isMobile: boolean;
-  videoLength: VideoLength;
-  isExtended: boolean;
-  setIsExtended: Dispatch<SetStateAction<boolean>>;
-}) => {
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isPresent, safeToRemove] = usePresence();
-  const [navRef, animate] = useAnimate();
-  const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    if (isPresent) {
-      const enterAnimation = async () => {
-        await animate(
-          '.ButtonShapes',
-          { x: [84, 0] },
-          {
-            duration: 0.2,
-            ease: 'easeOut',
-            delay: stagger(0.2, { from: 3 }),
-          }
-        );
-      };
-      enterAnimation();
-    } else {
-      const exitAnimation = async () => {
-        await animate(
-          '.ButtonShapes',
-          { x: [0, 84] },
-          { duration: 0.2, ease: 'easeOut', delay: stagger(0.2) }
-        );
-        safeToRemove();
-      };
-      exitAnimation();
-    }
-  }, [isPresent, animate, safeToRemove]);
-  useEffect(() => {
-    if (isExtended && isPresent) {
-      animate('.top', { y: 11.5, rotate: -45 });
-      animate('.bottom', { y: -11.5, rotate: 45 });
-      animate('.middle', { opacity: 0 });
-    } else if (!isExtended && isPresent) {
-      animate('.top', { y: 0, rotate: 0 });
-      animate('.bottom', { y: 0, rotate: 0 });
-      animate('.middle', { opacity: 1 });
-    }
-  }, [isExtended, isPresent, animate]);
-  return (
-    <ul
-      ref={navRef}
-      className="absolute flex justify-center items-center right-0 w-6 aspect-square font-Roboto font-light text-[15px] text-[#E1E1E1] gap-9"
-    >
-      <AnimatePresence>
-        {isExtended ? (
-          <ExtendedNav
-            videoLength={videoLength}
-            setIsLoading={setIsLoading}
-            isMobile={isMobile}
-            setIsNavigating={setIsNavigating}
-            isNavigating={isNavigating}
-          />
-        ) : null}
-      </AnimatePresence>
-      <div
-        onClick={() => {
-          if (isLoading) return;
-          setIsExtended((p) => !p);
-        }}
-        className="relative h-16 cursor-pointer aspect-square bg-[#101010] rounded-full flex justify-center items-center group"
-      >
-        <ul className="h-6 aspect-square flex flex-col justify-between items-end">
-          {[
-            { position: 'top', width: 'w-6' },
-            { position: 'middle', width: 'w-4' },
-            { position: 'bottom', width: 'w-6' },
-          ].map((arr, idx) => (
-            <li
-              key={idx}
-              className={cls(
-                cls(arr.position, arr.width),
-                'ButtonShapes h-[1px] origin-center bg-[#cacaca] rounded-full translate-x-[84px] group-hover:bg-palettered transition-colors duration-300'
-              )}
-            />
-          ))}
-        </ul>
-      </div>
-      {isNavigating ? <LoaidngIndicator /> : null}
-    </ul>
-  );
-};
-
 export default function Layout({
   seoTitle,
   children,
   css,
   footerPosition = 'relative',
-  nav = { exist: true, isShort: false },
+  nav = { hasNav: true, isCollapsed: false },
   logo = true,
-  menu = true,
+  menu = { hasMenu: true, menuComponent: undefined },
   scrollbar = true,
   description,
 }: LayoutProps) {
@@ -455,6 +360,9 @@ export default function Layout({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isExtended, setIsExtended] = useState(false);
+  const [isAborted, setIsAborted] = useState(false);
+  const [onNavigating, setOnNavigating] = useState(false);
+  const { hasMenu, menuComponent } = menu;
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -519,20 +427,32 @@ export default function Layout({
           </Link>
         </div>
       ) : null}
-      {menu ? (
+      {hasMenu ? (
         <div className="fixed z-[1001] right-0 mt-6 mr-[40px] md:mr-[60px] w-[42px] h-[42px] flex justify-end items-center">
           <AnimatePresence>
-            {!nav.isShort ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
+            {!nav.isCollapsed ? <ListMenu setIsLoading={setIsLoading} isAdmin={isAdmin} /> : null}
           </AnimatePresence>
           <AnimatePresence>
-            {nav.isShort ? (
-              <HamburgerMenu
-                isExtended={isExtended}
-                setIsExtended={setIsExtended}
-                videoLength={videoLength}
-                isMobile={isMobile}
-              />
-            ) : null}
+            {nav.isCollapsed
+              ? menuComponent || (
+                  <HamburgerMenuContainer
+                    isOpen={isExtended}
+                    isAborted={isAborted}
+                    onNavigating={onNavigating}
+                    setIsOpen={setIsExtended}
+                  >
+                    {
+                      <ExtendedNav
+                        videoLength={videoLength}
+                        setIsAborted={setIsAborted}
+                        isMobile={isMobile}
+                        setOnNavigating={setOnNavigating}
+                        onNavigating={onNavigating}
+                      />
+                    }
+                  </HamburgerMenuContainer>
+                )
+              : null}
           </AnimatePresence>
         </div>
       ) : null}

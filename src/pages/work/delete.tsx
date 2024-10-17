@@ -1,286 +1,21 @@
-import { SetStateAction, SyntheticEvent, useEffect, useRef, useState } from 'react';
-import { FlatformsCategory, WorkInfos } from './write';
-import { ciIncludes, cls } from '@/libs/client/utils';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
+import Circles from '@/components/circles';
 import Layout from '@/components/layout';
-import Link from 'next/link';
-import Input from '@/components/input';
-import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
-import useDeleteRequest from '@/libs/client/useDelete';
+import SearchForm from '@/components/searchForm';
 import ToTop from '@/components/toTop';
-import { GetServerSideProps } from 'next';
+import useDeleteRequest from '@/libs/client/useDelete';
+import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
+import { ciIncludes, cls } from '@/libs/client/utils';
 import client from '@/libs/server/client';
 import { Works } from '@prisma/client';
-import Circles from '@/components/circles';
-import LoaidngIndicator from '@/components/loadingIndicator';
-
-interface list extends WorkInfos {
-  id: number;
-}
-
-interface dataState {
-  success: boolean;
-  works: { film: list[]; short: list[]; outsource: list[] };
-}
-
-interface ThumbnailProps {
-  src: { main: string; sub: string };
-  setPriority: boolean;
-  category: FlatformsCategory;
-}
-
-const Thumbnail = ({ category, src, setPriority }: ThumbnailProps) => {
-  const [error, setError] = useState(false);
-  const handleImageError = () => {
-    setError(true);
-  };
-  return (
-    <Image
-      src={!error ? src.main : src.sub}
-      alt="picturesAlter"
-      width={640}
-      height={category === 'filmShort' ? 360 : 480}
-      onError={handleImageError}
-      className="w-full object-cover aspect-video"
-      priority={setPriority}
-    />
-  );
-};
-
-interface MenuBarProps {
-  currentPage: 'write' | 'delete';
-}
-
-export const MenuBar = ({ currentPage = 'write' }: MenuBarProps) => {
-  const [isNavigating, setIsNavigating] = useState(false);
-  return (
-    <>
-      <div className="h-[100px] flex items-center justify-center font-GmarketSans font-bold text-3xl">
-        {currentPage === 'write' ? <span>추가하기</span> : <span>삭제하기</span>}
-      </div>
-      <div
-        onClick={() => {
-          if (isNavigating) return;
-          setIsNavigating(true);
-        }}
-        className="absolute right-0 top-0 mr-[40px] md:mr-[60px] h-[100px] flex items-center text-sm"
-      >
-        <Link
-          href={`/work/${currentPage === 'write' ? 'delete' : 'write'}`}
-          className="hover:text-palettered"
-        >
-          {currentPage === 'write' ? <span>삭제하기</span> : <span>추가하기</span>}
-        </Link>
-      </div>
-      {isNavigating ? <LoaidngIndicator /> : null}
-    </>
-  );
-};
-
-interface CategoryTabProps {
-  onFilmShortClick: () => void;
-  onOutsourceClick: () => void;
-  category: FlatformsCategory;
-}
-
-export const CategoryTab = ({ onFilmShortClick, onOutsourceClick, category }: CategoryTabProps) => {
-  return (
-    <div className="flex py-4">
-      <button
-        onClick={onFilmShortClick}
-        className={cls(
-          category === 'filmShort' ? 'text-palettered' : '',
-          'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-        )}
-      >
-        Film / Short
-      </button>
-      <button
-        onClick={onOutsourceClick}
-        className={cls(
-          category === 'outsource' ? 'text-palettered' : '',
-          'w-full flex justify-center items-center text-lg font-semibold hover:text-palettered'
-        )}
-      >
-        Outsource
-      </button>
-    </div>
-  );
-};
-
-interface SearchFormProps {
-  onSearch: (e: SyntheticEvent<HTMLFormElement>) => void;
-  setSearchWord: (value: SetStateAction<string>) => void;
-  searchWord: string;
-}
-
-export const SearchForm = ({ onSearch, setSearchWord, searchWord }: SearchFormProps) => {
-  return (
-    <form
-      onSubmit={onSearch}
-      className="relative mb-8 font-light flex items-center gap-2 pb-1 border-b border-[#9a9a9a] text-lg leading-tight text-[#eaeaea]"
-    >
-      <button type="submit">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-          />
-        </svg>
-      </button>
-      <Input
-        name="search"
-        type="text"
-        placeholder="search"
-        css="border-none placeholder:font-bold bg-transparent"
-        onChange={(e: SyntheticEvent<HTMLInputElement>) => {
-          setSearchWord(e.currentTarget.value);
-        }}
-        value={searchWord}
-      />
-    </form>
-  );
-};
-
-const ListIcon = () => {
-  return (
-    <ul className="w-[50%] h-[50%] flex flex-col justify-around">
-      <li className="w-full border-y-[1px] bg-white" />
-      <li className="w-full border-y-[1px] bg-white" />
-      <li className="w-full border-y-[1px] bg-white" />
-    </ul>
-  );
-};
-
-const GridIcon = () => {
-  return (
-    <ul className="w-[50%] h-[50%] grid grid-cols-2 gap-1">
-      <li className="w-full aspect-square bg-[#eaeaea]" />
-      <li className="w-full aspect-square border border-[#eaeaea]" />
-      <li className="w-full aspect-square border border-[#eaeaea]" />
-      <li className="w-full aspect-square bg-[#eaeaea]" />
-    </ul>
-  );
-};
-
-interface UtilButtonsProps {
-  onListClick: () => void;
-  onViewSwitch: () => void;
-  isGrid: boolean;
-  onSelectedList: boolean;
-  count: number;
-  useOnMobile: boolean;
-}
-
-export const UtilButtons = ({
-  onListClick,
-  onViewSwitch,
-  isGrid,
-  onSelectedList,
-  count,
-  useOnMobile,
-}: UtilButtonsProps) => {
-  return (
-    <div
-      className={`${
-        useOnMobile
-          ? 'fixed sm:hidden bottom-24 right-4 w-16 font-bold '
-          : 'hidden sm:inline-block w-full font-light hover:font-bold'
-      }`}
-    >
-      <button
-        onClick={onListClick}
-        className={cls(
-          useOnMobile
-            ? 'mb-4 sm:hidden w-16 font-bold'
-            : 'hidden sm:inline-block w-full font-light hover:font-bold',
-          onSelectedList
-            ? 'bg-palettered'
-            : 'bg-[#101010] hover:text-palettered ring-1 ring-palettered',
-          'aspect-square text-sm rounded-full'
-        )}
-        disabled={!onSelectedList && count === 0}
-      >
-        <div>{count}</div>
-        <div>Videos</div>
-      </button>
-      <button
-        onClick={onViewSwitch}
-        className={cls(
-          'w-full flex justify-center items-center ring-1 ring-palettered aspect-square bg-[#101010] rounded-full'
-        )}
-      >
-        {isGrid ? <ListIcon /> : <GridIcon />}
-      </button>
-    </div>
-  );
-};
-
-interface ButtonsControllerProps {
-  onResetClick: () => void;
-  onSaveClick: () => void;
-  onListClick: () => void;
-  onViewSwitch: () => void;
-  isGrid: boolean;
-  onSelectedList: boolean;
-  count: number;
-  action?: 'save' | 'delete';
-}
-
-export const ButtonsController = ({
-  onResetClick,
-  onSaveClick,
-  onListClick,
-  onViewSwitch,
-  isGrid,
-  onSelectedList,
-  count,
-  action = 'save',
-}: ButtonsControllerProps) => {
-  return (
-    <div className="sm:w-[60px] flex sm:block h-14 sm:h-auto w-full sm:ring-1 sm:space-y-[1px] sm:ring-palettered sm:rounded-full fixed xl:right-20 sm:right-4 right-0 sm:top-[100px] sm:bottom-auto bottom-0">
-      <button
-        onClick={onResetClick}
-        className={cls(
-          count > 0 ? 'sm:hover:text-palettered sm:hover:font-bold' : 'text-[#404040]',
-          'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
-        )}
-        disabled={count === 0}
-      >
-        Reset
-      </button>
-      <button
-        onClick={onSaveClick}
-        className={cls(
-          count > 0
-            ? 'sm:hover:text-palettered sm:hover:font-bold bg-palettered'
-            : 'text-[#404040]',
-          'w-full ring-1 ring-palettered aspect-square bg-[#101010] sm:bg-[#101010] sm:rounded-full sm:font-light font-bold text-sm '
-        )}
-        disabled={count === 0}
-      >
-        {action === 'save' ? <span>Save</span> : <span>Delete</span>}
-      </button>
-      <UtilButtons
-        onViewSwitch={onViewSwitch}
-        onListClick={onListClick}
-        isGrid={isGrid}
-        onSelectedList={onSelectedList}
-        count={count}
-        useOnMobile={false}
-      />
-    </div>
-  );
-};
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import ButtonsController from '@/components/butttons/buttonsController';
+import UtilButtons from '@/components/butttons/utilButtons';
+import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
+import Thumbnail from '@/components/thumbnail';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
+import PostManagementLayout from '@/components/nav/postManagementLayout';
 
 interface WorkProps {
   onClick: () => void;
@@ -327,12 +62,14 @@ const Work = ({
                 ? {
                     main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
                     sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                    alt: title,
                   }
                 : {
                     main: `${thumbnailLink}_640x360?r=pad`,
                     sub: `${thumbnailLink}_640x360?r=pad`,
+                    alt: title,
                   }
-              : { main: '', sub: '' }
+              : { main: '', sub: '', alt: '' }
           }
           setPriority={setPriority}
         />
@@ -390,12 +127,14 @@ const Work = ({
                             ? {
                                 main: `https://i.ytimg.com/vi/${resourceId}/sddefault.jpg`,
                                 sub: `https://i.ytimg.com/vi/${resourceId}/hqdefault.jpg`,
+                                alt: title,
                               }
                             : {
                                 main: `${thumbnailLink}_640x360?r=pad`,
                                 sub: `${thumbnailLink}_640x360?r=pad`,
+                                alt: title,
                               }
-                          : { main: '', sub: '' }
+                          : { main: '', sub: '', alt: '' }
                       }
                       setPriority={setPriority}
                     />
@@ -410,11 +149,6 @@ const Work = ({
   );
 };
 
-export interface VideoCollection<T, U = T> {
-  filmShort: T;
-  outsource: U;
-}
-
 interface InitialData {
   initialWorks: VideoCollection<Works[]>;
   initialHasNextPage: VideoCollection<boolean>;
@@ -422,7 +156,7 @@ interface InitialData {
 
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
   const router = useRouter();
-  const topElement = useRef<HTMLDivElement>(null);
+  const topElementRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
@@ -489,7 +223,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     if (deleteIdList.length > 0) {
       setDeleteIdList([]);
       resetInit();
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
     }
   };
 
@@ -502,7 +236,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       setSearchWord('');
       setSearchWordSnapShot('');
       setOnSelectedList(true);
-      topElement.current?.scrollIntoView();
+      topElementRef.current?.scrollIntoView();
       setSearchResultSnapShot((p) => ({
         ...p,
         [category]: list[category].filter((li) => deleteIdList.includes(li.id)),
@@ -541,7 +275,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const processIntersection = () => {
     const getList = async () => {
       setFetchLoading(true);
-      const lists: dataState = await (
+      const lists: VideoResponseState = await (
         await fetch(
           `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
         )
@@ -588,18 +322,18 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   };
 
   return (
-    <Layout seoTitle="DELETE" footerPosition="hidden" nav={{ isShort: true }} menu={false}>
-      <section ref={topElement} className="relative xl:px-40 sm:px-24 px-16">
-        <MenuBar currentPage="delete" />
-        <CategoryTab
-          category={category}
-          onFilmShortClick={() => {
-            onCategoryClick('filmShort');
-          }}
-          onOutsourceClick={() => {
-            onCategoryClick('outsource');
-          }}
-        />
+    <Layout
+      seoTitle="DELETE"
+      footerPosition="hidden"
+      menu={{ hasMenu: true, menuComponent: <PostManagementMenu /> }}
+      nav={{ isCollapsed: true }}
+    >
+      <PostManagementLayout
+        category={category}
+        onCategoryClick={onCategoryClick}
+        title="삭제하기"
+        topElementRef={topElementRef}
+      >
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />
         <div
           className={
@@ -664,8 +398,8 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
           count={deleteIdList.length}
           action="delete"
         />
-        <ToTop toScroll={topElement} />
-      </section>
+        <ToTop toScroll={topElementRef} />
+      </PostManagementLayout>
       {loading ? (
         <div className="fixed top-0 w-screen h-screen opacity-60 z-[1] bg-black">
           <div className="absolute top-0 w-full h-full flex justify-center items-center">

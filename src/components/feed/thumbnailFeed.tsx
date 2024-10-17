@@ -1,10 +1,10 @@
 import Image from 'next/image';
-import Input from './input';
-import Circles from './circles';
-import { VimeofeedProps, YoutubefeedProps } from './typings/components';
+import Circles from '@/components/circles';
+import Input from '@/components/input';
+import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
-import { OwnedVideoItems, WorkInfos } from '@/pages/work/write';
 import { cls } from '@/libs/client/utils';
+import { OwnedVideoItems, WorkInfos } from '@/pages/work/work';
 
 export const createInputChange = (
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>,
@@ -48,6 +48,7 @@ export const createInputChange = (
             resourceId: dataset.resourceid || '',
             thumbnailLink: dataset.thumbnail || '',
             animatedThumbnailLink: dataset.animated_thumbnail || '',
+            order: Number(dataset.order) || 0,
           },
         ]);
       }
@@ -87,6 +88,7 @@ export const onListItemClick = ({
         resourceId: currentVideoDetails?.resourceId || '',
         thumbnailLink: currentVideoDetails?.thumbnailLink || '',
         animatedThumbnailLink: currentVideoDetails?.animatedThumbnailLink || '',
+        order: matchedOwnedVideo?.order || 0,
       },
     ]);
   }
@@ -111,10 +113,10 @@ export function VimeoThumbnailFeed({
             { animated_thumbnail, name, pictures: { base_link }, player_embed_url, resource_key },
             idx
           ) => {
-            const matchedWorkInfo = workInfos?.find(
+            const matchedWorkInfo: WorkInfos | undefined = workInfos?.find(
               (workInfo) => workInfo.resourceId === player_embed_url
             );
-            const matchedOwnedVideo = ownedVideos.find(
+            const matchedOwnedVideo: OwnedVideoItems | undefined = ownedVideos.find(
               (ownedVideo) => ownedVideo.resourceId === player_embed_url
             );
             return idx < 12 * (page - 1) ? (
@@ -184,6 +186,7 @@ export function VimeoThumbnailFeed({
                     data-description={matchedOwnedVideo?.description}
                     data-date={matchedOwnedVideo?.date}
                     data-category={matchedOwnedVideo?.category}
+                    data-order={matchedOwnedVideo?.order}
                     onChange={inputChange}
                     onBlur={inputBlur}
                     value={
@@ -304,10 +307,10 @@ export function YoutubeThumbnailFeed({
     <>
       <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12 ">
         {resource.map((video, idx) => {
-          const matchedWorkInfo = workInfos?.find(
+          const matchedWorkInfo: WorkInfos | undefined = workInfos?.find(
             (workInfo) => workInfo.resourceId === video.snippet.resourceId?.videoId
           );
-          const matchedOwnedVideo = ownedVideos.find(
+          const matchedOwnedVideo: OwnedVideoItems | undefined = ownedVideos.find(
             (ownedVideo) => ownedVideo.resourceId === video.snippet.resourceId?.videoId
           );
           return idx < 12 * (page - 1) ? (
@@ -371,6 +374,7 @@ export function YoutubeThumbnailFeed({
                   data-description={matchedOwnedVideo?.description}
                   data-date={matchedOwnedVideo?.date}
                   data-category={'outsource'}
+                  data-order={matchedOwnedVideo?.order}
                   onChange={inputChange}
                   onBlur={inputBlur}
                   value={

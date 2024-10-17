@@ -1,9 +1,8 @@
 // import { Stream } from '@prisma/client';
-import { FlatformsCategory, VimeoVideos } from '@/pages/work/write';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
-import { VideoCollection } from '@/pages/work/delete';
 import { ciIncludes, fetchData } from './utils';
+import { FlatformsCategory, VideoCollection, VimeoVideos } from '@/pages/work/work';
 
 interface UseInfiniteScrollFromFlatFormProps {
   category: FlatformsCategory;
