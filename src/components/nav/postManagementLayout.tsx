@@ -1,6 +1,5 @@
 import { RefObject, ReactNode, Dispatch, SetStateAction } from 'react';
 import { cls } from '@/libs/client/utils';
-import { FlatformsCategory } from '@/pages/work/work';
 
 interface Tabs<T> {
   category: T;
@@ -56,13 +55,13 @@ export default function PostManagementLayout<T>({
   title: string;
   tabs: Tabs<T>[];
   setCategory: Dispatch<SetStateAction<T>>;
-  reset: () => void;
+  reset: (agr: T) => void;
   children: ReactNode;
 }) {
   const onCategoryClick = (categoryLabel: T) => {
     if (category === categoryLabel) return;
     setCategory(categoryLabel);
-    reset();
+    reset(categoryLabel);
   };
   return (
     <section ref={topElementRef} className="relative xl:px-40 sm:px-24 px-16">

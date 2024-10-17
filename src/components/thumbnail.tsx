@@ -1,14 +1,13 @@
-import { FlatformsCategory } from '@/pages/work/work';
 import Image from 'next/image';
 import { useState } from 'react';
 
-interface ThumbnailProps {
+interface ThumbnailProps<T> {
   src: { main: string; sub: string; alt: string };
   setPriority?: boolean;
-  category: FlatformsCategory;
+  category: T;
 }
 
-export default function Thumbnail({ category, src, setPriority }: ThumbnailProps) {
+export default function Thumbnail<T>({ category, src, setPriority }: ThumbnailProps<T>) {
   const [error, setError] = useState(false);
   const handleImageError = () => {
     setError(true);
