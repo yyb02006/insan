@@ -85,6 +85,7 @@ export default function Write({
     if (data && data?.success) {
       router.push('/work');
     } else if (data && !data?.success) {
+      console.log(error);
       const timeOut = setTimeout(() => {
         router.push('/work');
       }, 3000);
@@ -193,18 +194,16 @@ export default function Write({
         .map((item, index, arr) => ({ ...item, order: arr.length - index }));
     };
 
-    const newVideos = {
-      film: sortVideos(newWorkInfos, 'film'),
-      short: sortVideos(newWorkInfos, 'short'),
-      outsource: sortVideos(newWorkInfos, 'outsource'),
-    };
+    const newVideos = [
+      ...sortVideos(newWorkInfos, 'film'),
+      ...sortVideos(newWorkInfos, 'short'),
+      ...sortVideos(newWorkInfos, 'outsource'),
+    ];
 
-    console.log(newVideos);
-
-    /* sendList({
-      data: newWorkInfos,
+    sendList({
+      data: newVideos,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
-    }); */
+    });
   };
 
   const onSearch = (e: SyntheticEvent<HTMLFormElement>) => {
