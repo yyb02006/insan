@@ -193,7 +193,7 @@ This project is licensed under the MIT License
 
   ***
 
-- **Version 0.7.0 (2024-10-18):**
+- **Version 0.7.1 (2024-10-18):**
 
   - **_/work/sort_** 정렬 카테고리를 3개로 분리
   - 데이터 상의 정렬 순서와 실제 표시되는 정렬 순서가 달랐던 버그 수정
