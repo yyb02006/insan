@@ -303,8 +303,8 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     dependencyArray: [page, fetchLoading, isGrid],
   });
 
-  const onCategoryChange = () => {
-    const oppositeCategory = category === 'filmShort' ? 'outsource' : 'filmShort';
+  const onCategoryChange = (categoryLabel: FlatformsCategory) => {
+    const oppositeCategory = categoryLabel === 'filmShort' ? 'outsource' : 'filmShort';
     setOnSelectedList(false);
     setDeleteIdList([]);
     setPage(2);
@@ -375,7 +375,6 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
             </div>
           </div>
         ) : null}
-
         <UtilButtons
           onViewSwitch={() => {
             setIsGrid((p) => !p);

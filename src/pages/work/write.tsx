@@ -301,8 +301,8 @@ export default function Write({
     }
   };
 
-  const onCategoryChange = () => {
-    const oppositeCategory = category === 'filmShort' ? 'outsource' : 'filmShort';
+  const onCategoryChange = (categoryLabel: FlatformsCategory) => {
+    const oppositeCategory = categoryLabel === 'filmShort' ? 'outsource' : 'filmShort';
     setOnSelectedList(false);
     setWorkInfos([]);
     setPage(2);
