@@ -192,19 +192,6 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     }
   }, [data]);
 
-  useEffect(() => {
-    setOnSelectedList(false);
-    setDeleteIdList([]);
-    setPage(2);
-    setSearchWordSnapShot('');
-    setSearchWord('');
-    setSearchResult((p) => ({
-      ...p,
-      [category === 'filmShort' ? 'outsource' : 'filmShort']:
-        list[category === 'filmShort' ? 'outsource' : 'filmShort'],
-    }));
-  }, [category]);
-
   const onSubmitDelete = () => {
     if (loading && deleteIdList.length > 0) return;
     send(deleteIdList, process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN!);
@@ -316,9 +303,17 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     dependencyArray: [page, fetchLoading, isGrid],
   });
 
-  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
-    if (category === categoryLabel) return;
-    setCategory(categoryLabel);
+  const onCategoryChange = () => {
+    const oppositeCategory = category === 'filmShort' ? 'outsource' : 'filmShort';
+    setOnSelectedList(false);
+    setDeleteIdList([]);
+    setPage(2);
+    setSearchWordSnapShot('');
+    setSearchWord('');
+    setSearchResult((p) => ({
+      ...p,
+      [oppositeCategory]: list[oppositeCategory],
+    }));
   };
 
   return (
@@ -330,9 +325,14 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     >
       <PostManagementLayout
         category={category}
-        onCategoryClick={onCategoryClick}
+        tabs={[
+          { category: 'filmShort', name: 'Film / Short' },
+          { category: 'outsource', name: 'OutSource' },
+        ]}
         title="삭제하기"
         topElementRef={topElementRef}
+        setCategory={setCategory}
+        reset={onCategoryChange}
       >
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />
         <div
