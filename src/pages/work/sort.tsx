@@ -473,7 +473,7 @@ const VideoGridItem = ({
           <VideoItemTitle category={category} title={title} kind={kind} />
           <div className="font-light break-words text-[#606060]">
             <span className="whitespace-nowrap">OriginalOrder : </span>
-            <span className="text-[#999999] font-semibold">{order}</span>
+            <span className="text-[#999999] font-semibold">{currentSwapItem?.originalOrder}</span>
           </div>
         </div>
       </div>
