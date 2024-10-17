@@ -100,22 +100,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             client.works.upsert({
               where: { resourceId: el.resourceId },
               create: {
-                title: el.title,
-                resourceId: el.resourceId,
-                description: el.description,
-                category: el.category || 'film',
-                date: el.date || 'no-date',
-                thumbnailLink: el.thumbnailLink,
-                animationThumbnailLink: el.animatedThumbnailLink,
+                title: el.title || '',
+                resourceId: el.resourceId || '',
+                description: el.description || '',
+                category: el.category === undefined ? undefined : el.category || 'film',
+                date: el.date === undefined ? undefined : el.date || 'no-date',
+                thumbnailLink: el.thumbnailLink || '',
+                animationThumbnailLink: el.animatedThumbnailLink || '',
+                order: el.order || 0,
               },
               update: {
                 title: el.title,
                 resourceId: el.resourceId,
                 description: el.description,
-                category: el.category ? el.category : 'film',
-                date: el.date ? el.date : 'no-date',
+                category: el.category === undefined ? undefined : el.category || 'film',
+                date: el.date === undefined ? undefined : el.date || 'no-date',
                 thumbnailLink: el.thumbnailLink,
                 animationThumbnailLink: el.animatedThumbnailLink,
+                order: el.order,
               },
             })
           )

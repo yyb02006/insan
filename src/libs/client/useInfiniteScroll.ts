@@ -2,7 +2,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { GapiItem } from '@/pages/work';
 import { ciIncludes, fetchData } from './utils';
-import { FlatformsCategory, VideoCollection, VimeoVideos } from '@/pages/work/work';
+import { FlatformsCategory, FlatformCollection, VimeoVideos } from '@/pages/work/work';
 
 interface UseInfiniteScrollFromFlatFormProps {
   category: FlatformsCategory;
@@ -12,9 +12,9 @@ interface UseInfiniteScrollFromFlatFormProps {
   searchResultsCount: number;
   initialNextPageToken: string;
   dependencies?: unknown[];
-  setSearchResults: Dispatch<SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>>;
+  setSearchResults: Dispatch<SetStateAction<FlatformCollection<VimeoVideos[], GapiItem[]>>>;
   setPage: Dispatch<SetStateAction<number>>;
-  setList: Dispatch<SetStateAction<VideoCollection<VimeoVideos[], GapiItem[]>>>;
+  setList: Dispatch<SetStateAction<FlatformCollection<VimeoVideos[], GapiItem[]>>>;
   setFetchLoading: Dispatch<SetStateAction<boolean>>;
 }
 

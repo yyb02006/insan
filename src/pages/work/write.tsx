@@ -18,7 +18,8 @@ import ButtonsController from '@/components/butttons/buttonsController';
 import {
   FlatformsCategory,
   OwnedVideoItems,
-  VideoCollection,
+  VideoCategory,
+  FlatformCollection,
   VimeoVideos,
   WorkInfos,
 } from '@/pages/work/work';
@@ -29,7 +30,7 @@ import ErrorOverlay from '@/components/errorOverlay';
 interface InitialData {
   initialVimeoVideos: VimeoVideos[];
   initialYoutubeVideos: GapiItem[];
-  initialOwnedVideos: VideoCollection<OwnedVideoItems[]>;
+  initialOwnedVideos: FlatformCollection<OwnedVideoItems[]>;
   initialNextPageToken: string;
 }
 
@@ -44,14 +45,16 @@ export default function Write({
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
-  const [searchResults, setSearchResults] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
-    filmShort: initialVimeoVideos,
-    outsource: initialYoutubeVideos,
-  });
+  const [searchResults, setSearchResults] = useState<FlatformCollection<VimeoVideos[], GapiItem[]>>(
+    {
+      filmShort: initialVimeoVideos,
+      outsource: initialYoutubeVideos,
+    }
+  );
   const [searchResultsSnapshot, setSearchResultsSnapshot] = useState<
-    VideoCollection<VimeoVideos[], GapiItem[]>
+    FlatformCollection<VimeoVideos[], GapiItem[]>
   >({ filmShort: [], outsource: [] });
-  const [list, setList] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
+  const [list, setList] = useState<FlatformCollection<VimeoVideos[], GapiItem[]>>({
     filmShort: initialVimeoVideos,
     outsource: initialYoutubeVideos,
   });
@@ -60,7 +63,7 @@ export default function Write({
   }>(`/api/work?purpose=write`);
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
   const [fetchLoading, setFetchLoading] = useState(false);
-  const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
+  const ownedVideos: FlatformCollection<OwnedVideoItems[]> = initialOwnedVideos;
   const [page, setPage] = useState(2);
   const [onSelectedList, setOnSelectedList] = useState(false);
   const [isGrid, setIsGrid] = useState(true);
@@ -82,25 +85,13 @@ export default function Write({
     if (data && data?.success) {
       router.push('/work');
     } else if (data && !data?.success) {
+      console.log(error);
       const timeOut = setTimeout(() => {
         router.push('/work');
       }, 3000);
       return () => clearTimeout(timeOut);
     }
   }, [data]);
-
-  useEffect(() => {
-    setOnSelectedList(false);
-    setWorkInfos([]);
-    setPage(2);
-    setSearchWordSnapshot('');
-    setSearchWord('');
-    setSearchResults((p) => ({
-      ...p,
-      [category === 'filmShort' ? 'outsource' : 'filmShort']:
-        list[category === 'filmShort' ? 'outsource' : 'filmShort'],
-    }));
-  }, [category]);
 
   const inputBlur = (e: SyntheticEvent<HTMLInputElement>) => {
     const {
@@ -167,18 +158,50 @@ export default function Write({
 
   const onSubmitWrites = () => {
     if (loading || workInfos.length === 0) return;
-    const currentLastIndex = initialOwnedVideos[category][0].order;
-    let index = currentLastIndex;
-    const newWorkInfos = workInfos.map((item) => {
-      if (item.order === 0) {
-        index++;
-        return { ...item, order: index };
-      } else {
-        return item;
-      }
-    });
+    const currentLastOrder: Record<VideoCategory, number> = {
+      film: initialOwnedVideos.filmShort.find((video) => video.category === 'film')?.order || 0,
+      short: initialOwnedVideos.filmShort.find((video) => video.category === 'short')?.order || 0,
+      outsource: initialOwnedVideos.outsource[0].order || 0,
+    };
+
+    const newWorkInfos = [
+      ...initialOwnedVideos[category]
+        .filter((item) => !workInfos.find((work) => item.resourceId === work.resourceId))
+        .map((item) => ({
+          title: undefined,
+          resourceId: item.resourceId,
+          description: undefined,
+          category: item.category,
+          date: undefined,
+          thumbnailLink: undefined,
+          animatedThumbnailLink: undefined,
+          order: item.order,
+        })),
+      ...workInfos.map((item) => {
+        if (item.order === 0 && typeof currentLastOrder[item.category] === 'number') {
+          currentLastOrder[item.category]++;
+          return { ...item, order: currentLastOrder[item.category] };
+        } else {
+          return item;
+        }
+      }),
+    ];
+
+    const sortVideos = (workInfos: typeof newWorkInfos, category: VideoCategory) => {
+      return workInfos
+        .filter((video) => video.category === category)
+        .sort((a, b) => b.order - a.order)
+        .map((item, index, arr) => ({ ...item, order: arr.length - index }));
+    };
+
+    const newVideos = [
+      ...sortVideos(newWorkInfos, 'film'),
+      ...sortVideos(newWorkInfos, 'short'),
+      ...sortVideos(newWorkInfos, 'outsource'),
+    ];
+
     sendList({
-      data: newWorkInfos,
+      data: newVideos,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
     });
   };
@@ -277,10 +300,17 @@ export default function Write({
     }
   };
 
-  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
-    if (category === categoryLabel) return;
-    setCategory(categoryLabel);
+  const onCategoryChange = (categoryLabel: FlatformsCategory) => {
+    const oppositeCategory = categoryLabel === 'filmShort' ? 'outsource' : 'filmShort';
+    setOnSelectedList(false);
     setWorkInfos([]);
+    setPage(2);
+    setSearchWordSnapshot('');
+    setSearchWord('');
+    setSearchResults((p) => ({
+      ...p,
+      [oppositeCategory]: list[oppositeCategory],
+    }));
   };
 
   return (
@@ -292,9 +322,14 @@ export default function Write({
     >
       <PostManagementLayout
         category={category}
-        onCategoryClick={onCategoryClick}
+        tabs={[
+          { category: 'filmShort', name: 'Film / Short' },
+          { category: 'outsource', name: 'OutSource' },
+        ]}
         title="추가하기"
         topElementRef={topElementRef}
+        reset={onCategoryChange}
+        setCategory={setCategory}
       >
         <SearchForm onSearch={onSearch} searchWord={searchWord} setSearchWord={setSearchWord} />
         {category === 'filmShort' && list[category].length > 0 ? (
@@ -431,6 +466,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const lists = await client.works.findMany({
     orderBy: { order: 'desc' },
     select: {
+      id: true,
       title: true,
       category: true,
       date: true,

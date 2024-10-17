@@ -1,6 +1,12 @@
-export interface VideoCollection<T, U = T> {
+export interface FlatformCollection<T, U = T> {
   filmShort: T;
   outsource: U;
+}
+
+export interface VideoCollection<T, U = T, G = T> {
+  film: T;
+  short: U;
+  outsource: G;
 }
 
 export interface WorkInfosWithId extends WorkInfos {
@@ -16,7 +22,7 @@ export interface WorkInfos {
   title: string;
   description: string;
   resourceId: string;
-  category: string;
+  category: VideoCategory;
   date: string;
   thumbnailLink: string;
   animatedThumbnailLink: string;
@@ -34,8 +40,9 @@ export interface VimeoVideos {
 }
 
 export interface OwnedVideoItems {
+  id: number;
   title: string;
-  category: VideosCategory;
+  category: VideoCategory;
   date: string;
   description: string;
   resourceId: string;

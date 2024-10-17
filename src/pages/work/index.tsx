@@ -1415,19 +1415,20 @@ export const getStaticProps: GetStaticProps = async () => {
     film: await client.works.findMany({
       where: { category: 'film' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
     short: await client.works.findMany({
       where: { category: 'short' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
   };
+  console.log(initialWorks);
   let initialHasNextPage = { film: false, short: false, outsource: false };
   for (const count in initialWorks) {
     initialWorks[count as VideosCategory].length < 12

@@ -15,16 +15,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!page || !per_page) return;
   const take = +per_page;
   const skip = +per_page * (+page - 1);
-  const id = order === 'asc' ? 'asc' : 'desc';
+  const sortOrder = order === 'asc' ? 'asc' : 'desc';
   let works: VideoResponseItem = {
     film: [],
     short: [],
     outsource: [],
   };
-  const restOptions: { skip: number; take: number; orderBy: { id: typeof id } } = {
+  const restOptions: { skip: number; take: number; orderBy: { order: 'asc' | 'desc' } } = {
     skip,
     take,
-    orderBy: { id: 'desc' },
+    orderBy: { order: sortOrder },
   };
   if (category === 'film') {
     works.film = await client.works.findMany({

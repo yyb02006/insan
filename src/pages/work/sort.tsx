@@ -13,7 +13,7 @@ import PostManagementLayout from '@/components/nav/postManagementLayout';
 import SearchForm from '@/components/searchForm';
 import client from '@/libs/server/client';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
-import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
+import { VideoCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 import { Works } from '@prisma/client';
 import { ciIncludes, cls, normalizeLeadingZero } from '@/libs/client/utils';
 import { useInfiniteScroll } from '@/libs/client/useInfiniteScroll';
@@ -112,7 +112,7 @@ const VideoItemInput = ({
 };
 
 interface VideoItemTitleProps {
-  category: FlatformsCategory;
+  category: VideoCategory;
   kind: string;
   title: string;
 }
@@ -225,7 +225,7 @@ const DragArea = ({
 interface VideoListItemProps {
   idx: number;
   video: WorksUsedInSort;
-  category: FlatformsCategory;
+  category: VideoCategory;
   selectedItem: SelectedItem | undefined;
   currentSwapItem: IdWithOrder | undefined;
   isDraggable: boolean;
@@ -337,7 +337,7 @@ const VideoListItem = ({
                   <Thumbnail
                     category={category}
                     src={
-                      category === 'filmShort'
+                      category === 'film' || category === 'short'
                         ? {
                             main: `${thumbnailLink}_640x360?r=pad`,
                             sub: `${thumbnailLink}_640x360?r=pad`,
@@ -362,7 +362,7 @@ const VideoListItem = ({
 
 interface VideoGridItemProps {
   video: WorksUsedInSort;
-  category: FlatformsCategory;
+  category: VideoCategory;
   selectedItem: SelectedItem | undefined;
   currentSwapItem: IdWithOrder | undefined;
   isDraggable: boolean;
@@ -448,7 +448,7 @@ const VideoGridItem = ({
         <Thumbnail
           category={category}
           src={
-            category === 'filmShort'
+            category === 'film' || category === 'short'
               ? {
                   main: `${thumbnailLink}_640x360?r=pad`,
                   sub: `${thumbnailLink}_640x360?r=pad`,
@@ -473,7 +473,7 @@ const VideoGridItem = ({
           <VideoItemTitle category={category} title={title} kind={kind} />
           <div className="font-light break-words text-[#606060]">
             <span className="whitespace-nowrap">OriginalOrder : </span>
-            <span className="text-[#999999] font-semibold">{order}</span>
+            <span className="text-[#999999] font-semibold">{currentSwapItem?.originalOrder}</span>
           </div>
         </div>
       </div>
@@ -483,11 +483,11 @@ const VideoGridItem = ({
 
 interface VideoItemProps {
   video: WorksUsedInSort;
-  category: FlatformsCategory;
+  category: VideoCategory;
   isGrid: boolean;
   idx: number;
-  selectedList: SelectedItem[];
-  setSelectedList: Dispatch<SetStateAction<SelectedItem[]>>;
+  sortedList: SelectedItem[];
+  setSortedList: Dispatch<SetStateAction<SelectedItem[]>>;
   setSwapItems: Dispatch<SetStateAction<IdWithOrder[]>>;
   swapItems: IdWithOrder[];
   isDraggable: boolean;
@@ -499,22 +499,23 @@ const VideoItem = ({
   category,
   isGrid,
   idx,
-  selectedList,
-  setSelectedList,
+  sortedList,
+  setSortedList,
   setSwapItems,
   swapItems,
   isDraggable,
   setIsDraggable,
 }: VideoItemProps) => {
-  const selectedItem = selectedList.find((item) => item.id === video.id);
+  const selectedItem = sortedList.find((item) => item.id === video.id);
   const currentSwapItem = swapItems.find((item) => item.id === video.id);
+
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState<{ left: boolean; right: boolean }>({
     left: false,
     right: false,
   });
   const onThumbnailClick = (video: WorksUsedInSort) => {
-    setSelectedList((p) => {
+    setSortedList((p) => {
       const matchedSwapItem = swapItems.find((item) => item.id === video.id);
       return selectedItem
         ? p.filter((item) => item.id !== video.id)
@@ -528,9 +529,8 @@ const VideoItem = ({
     });
   };
   const onVideoDrop = () => {
-    console.log(!!currentSwapItem, !!isDraggable);
     if (!currentSwapItem || !isDraggable) return;
-    const sortedSelectedList = selectedList.sort((a, b) => b.currentOrder - a.currentOrder);
+    const sortedSelectedList = sortedList.sort((a, b) => b.currentOrder - a.currentOrder);
     const videoSort = (items: IdWithOrder[], position: 'left' | 'right') => {
       return items.map((item) => {
         const matchedIndex = sortedSelectedList.findIndex((listItem) => listItem.id === item.id);
@@ -545,24 +545,24 @@ const VideoItem = ({
               currentOrder:
                 // 드롭하려는 위치
                 targetOrder -
-                // selectedList내부의 order값 순서대로 그대로 옮기기 위해 order값 순서만큼 감산
+                // sortedt내부의 order값 순서대로 그대로 옮기기 위해 order값 순서만큼 감산
                 matchedIndex +
                 // 드롭하려는 위치보다 앞에서 아이템이 빠졌을 경우, 해당 아이템 수만큼 가산해서 드롭하려는 위치 조정
-                selectedList.filter((listItem) => listItem.currentOrder > targetOrder).length,
+                sortedList.filter((listItem) => listItem.currentOrder > targetOrder).length,
             };
           case item.currentOrder > targetOrder:
             return {
               ...item,
               currentOrder:
                 item.currentOrder +
-                selectedList.filter((listItem) => listItem.currentOrder > item.currentOrder).length,
+                sortedList.filter((listItem) => listItem.currentOrder > item.currentOrder).length,
             };
           case item.currentOrder <= targetOrder:
             return {
               ...item,
               currentOrder:
                 item.currentOrder -
-                selectedList.filter((listItem) => listItem.currentOrder < item.currentOrder).length,
+                sortedList.filter((listItem) => listItem.currentOrder < item.currentOrder).length,
             };
           default:
             return item;
@@ -576,7 +576,7 @@ const VideoItem = ({
     } else {
       return;
     }
-    setSelectedList([]);
+    setSortedList([]);
   };
   return (
     <>
@@ -621,11 +621,11 @@ const VideoItem = ({
 };
 
 interface VideoFeedProps {
-  category: FlatformsCategory;
+  category: VideoCategory;
   searchResult: VideoCollection<WorksUsedInSort[]>;
   setSearchResult: Dispatch<SetStateAction<VideoCollection<WorksUsedInSort[]>>>;
-  selectedList: SelectedItem[];
-  setSelectedList: Dispatch<SetStateAction<SelectedItem[]>>;
+  sortedList: SelectedItem[];
+  setSortedList: Dispatch<SetStateAction<SelectedItem[]>>;
   isGrid: boolean;
   page: number;
   swapItems: IdWithOrder[];
@@ -634,8 +634,8 @@ interface VideoFeedProps {
 
 const VideoFeed = ({
   searchResult,
-  selectedList,
-  setSelectedList,
+  sortedList,
+  setSortedList,
   category,
   isGrid,
   page,
@@ -671,8 +671,8 @@ const VideoFeed = ({
             video={video}
             isGrid={isGrid}
             idx={index}
-            selectedList={selectedList}
-            setSelectedList={setSelectedList}
+            sortedList={sortedList}
+            setSortedList={setSortedList}
             setSwapItems={setSwapItems}
             swapItems={swapItems}
             isDraggable={isDraggable}
@@ -685,11 +685,11 @@ const VideoFeed = ({
 };
 
 interface ChangedItemsModal {
-  setIsSelectedListOpen: Dispatch<SetStateAction<boolean>>;
+  setIsSortedListOpen: Dispatch<SetStateAction<boolean>>;
   changedSwapItems: IdWithOrder[];
 }
 
-const ChangedItemsModal = ({ changedSwapItems, setIsSelectedListOpen }: ChangedItemsModal) => {
+const ChangedItemsModal = ({ changedSwapItems, setIsSortedListOpen }: ChangedItemsModal) => {
   return (
     <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
       <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
@@ -697,7 +697,7 @@ const ChangedItemsModal = ({ changedSwapItems, setIsSelectedListOpen }: ChangedI
         <button
           className="absolute m-2 top-4 right-4"
           onClick={() => {
-            setIsSelectedListOpen(false);
+            setIsSortedListOpen(false);
           }}
         >
           <svg
@@ -758,28 +758,25 @@ export default function Sort({
 }: InitialData) {
   const topElementRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const [category, setCategory] = useState<FlatformsCategory>('filmShort');
+  const [category, setCategory] = useState<VideoCategory>('film');
   const [videoList, setVideoList] = useState(initialWorks);
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
   const [searchResult, setSearchResult] =
     useState<VideoCollection<WorksUsedInSort[]>>(initialWorks);
-  const [selectedList, setSelectedList] = useState<SelectedItem[]>([]);
+  const [sortedList, setSortedList] = useState<SelectedItem[]>([]);
   const [hasNextPage, setHasNextPage] = useState<VideoCollection<boolean>>(initialHasNextPage);
   const [isGrid, setIsGrid] = useState(true);
   const [fetchLoading, setFetchLoading] = useState(false);
-  const [isSelectedListOpen, setIsSelectedListOpen] = useState(false);
+  const [isSortedListOpen, setIsSortedListOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [apiPage, setApiPage] = useState<{
-    filmShort: number;
-    outsource: number;
-  }>({ filmShort: 1, outsource: 1 });
+  const [apiPage, setApiPage] = useState<Record<VideoCategory, number>>({
+    film: 1,
+    short: 1,
+    outsource: 1,
+  });
   const [swapItems, setSwapItems] = useState<IdWithOrder[]>(idWithOrderByCategory[category]);
   const perPage = 12;
-  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
-    if (category === categoryLabel) return;
-    setCategory(categoryLabel);
-  };
   const [sendItems, { loading, data, error }] = useMutation<{ success: boolean }>(
     `/api/work?purpose=sort`
   );
@@ -800,26 +797,23 @@ export default function Sort({
     e.preventDefault();
     setPage(1); // page 부분이 2부터 시작할 필요가 있는지 살피고 수정 필요
     setSearchWordSnapShot(searchWord);
-    const currentList = isSelectedListOpen ? selectedList : videoList[category]; // 뻐킹 상상치도 못한방법
+    /* const currentList = isSortedListOpen ? sortedList : videoList[category]; */ // 뻐킹 상상치도 못한방법은 이제 과거로
     setSearchResult((p) => ({
       ...p,
-      [category]: currentList.filter((li) => ciIncludes(li.title, searchWord)),
+      [category]: videoList[category].filter((li) => ciIncludes(li.title, searchWord)),
     }));
   };
-  const commonReset = () => {
+  const commonReset = (newCategory: VideoCategory) => {
     setPage(1);
     setSearchWord('');
     setSearchWordSnapShot('');
-    setSelectedList([]);
-    setSearchResult((p) => ({ ...p, [category]: videoList[category] }));
-    setSwapItems(idWithOrderByCategory[category]);
+    setSortedList([]);
+    setSearchResult((p) => ({ ...p, [newCategory]: videoList[newCategory] }));
+    setSwapItems(idWithOrderByCategory[newCategory]);
   };
-  useEffect(() => {
-    commonReset();
-  }, [category]);
   const onResetClick = () => {
     if (changedSwapItems.length > 0) {
-      commonReset();
+      commonReset(category);
       topElementRef.current?.scrollIntoView();
     }
   };
@@ -828,24 +822,24 @@ export default function Sort({
       setFetchLoading(true);
       const response: VideoResponseState = await (
         await fetch(
-          `/api/work/list?page=${apiPage[category] + 1}&per_page=${perPage}&category=${category}`
+          `/api/work/list?page=${
+            apiPage[category] + 1
+          }&per_page=${perPage}&category=${category}$order=desc`
         )
       ).json();
-      const convertedCategory = category === 'filmShort' ? 'film' : 'outsource';
-      if (response.works[convertedCategory].length < perPage) {
+
+      if (response.works[category].length < perPage) {
         setHasNextPage((p) => ({ ...p, [category]: false }));
       }
       setVideoList((p) => ({
         ...p,
-        [category]: [...p[category], ...response.works[convertedCategory]],
+        [category]: [...p[category], ...response.works[category]],
       }));
       setSearchResult((p) => ({
         ...p,
         [category]: [
           ...p[category],
-          ...response.works[convertedCategory].filter((work) =>
-            ciIncludes(work.title, searchWordSnapShot)
-          ),
+          ...response.works[category].filter((work) => ciIncludes(work.title, searchWordSnapShot)),
         ],
       }));
       setApiPage((p) => ({ ...p, [category]: p[category] + 1 }));
@@ -855,7 +849,7 @@ export default function Sort({
     if (
       searchResult[category].length <= page * perPage &&
       hasNextPage[category] &&
-      !isSelectedListOpen
+      !isSortedListOpen
     ) {
       getVideos();
     }
@@ -871,9 +865,14 @@ export default function Sort({
     processIntersection,
     dependencyArray: [page, isGrid],
   });
-  const onSelectedListClick = () => {
-    setIsSelectedListOpen((p) => !p);
+  const onSortedListClick = () => {
+    setIsSortedListOpen((p) => !p);
   };
+
+  const onCategoryChange = (categoryLabel: VideoCategory) => {
+    commonReset(categoryLabel);
+  };
+
   return (
     <Layout
       seoTitle="SORT"
@@ -886,9 +885,15 @@ export default function Sort({
     >
       <PostManagementLayout
         category={category}
-        onCategoryClick={onCategoryClick}
+        tabs={[
+          { category: 'film', name: 'Film' },
+          { category: 'short', name: 'Short' },
+          { category: 'outsource', name: 'Outsource' },
+        ]}
         title="정렬하기"
         topElementRef={topElementRef}
+        setCategory={setCategory}
+        reset={onCategoryChange}
       >
         <SearchForm
           onSearch={onSearchSubmit}
@@ -901,8 +906,8 @@ export default function Sort({
           page={page}
           searchResult={searchResult}
           setSearchResult={setSearchResult}
-          selectedList={selectedList}
-          setSelectedList={setSelectedList}
+          sortedList={sortedList}
+          setSortedList={setSortedList}
           swapItems={swapItems}
           setSwapItems={setSwapItems}
         />
@@ -911,8 +916,8 @@ export default function Sort({
             setIsGrid((p) => !p);
           }}
           isGrid={isGrid}
-          onListClick={onSelectedListClick}
-          onSelectedList={isSelectedListOpen}
+          onListClick={onSortedListClick}
+          onSelectedList={isSortedListOpen}
           count={changedSwapItems.length}
           useOnMobile={true}
           listLabel="Diff"
@@ -920,21 +925,21 @@ export default function Sort({
         <ButtonsController
           onResetClick={onResetClick}
           onSaveClick={onSubmitSort}
-          onListClick={onSelectedListClick}
+          onListClick={onSortedListClick}
           onViewSwitch={() => {
             setIsGrid((p) => !p);
           }}
           isGrid={isGrid}
-          onSelectedList={isSelectedListOpen}
+          onSelectedList={isSortedListOpen}
           count={changedSwapItems.length}
           action="save"
           listLabel="Diff"
         />
         <div ref={intersectionRef} className="h-1 mt-20" />
-        {isSelectedListOpen ? (
+        {isSortedListOpen ? (
           <ChangedItemsModal
             changedSwapItems={changedSwapItems}
-            setIsSelectedListOpen={setIsSelectedListOpen}
+            setIsSortedListOpen={setIsSortedListOpen}
           />
         ) : null}
         {loading ? <LoaidngIndicator /> : null}
@@ -955,8 +960,13 @@ export default function Sort({
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const initialWorks = {
-    filmShort: await client.works.findMany({
-      where: { OR: [{ category: 'film' }, { category: 'short' }] },
+    film: await client.works.findMany({
+      where: { category: 'film' },
+      take: 12,
+      orderBy: { order: 'desc' },
+    }),
+    short: await client.works.findMany({
+      where: { category: 'short' },
       take: 12,
       orderBy: { order: 'desc' },
     }),
@@ -966,16 +976,23 @@ export const getServerSideProps: GetServerSideProps = async () => {
       orderBy: { order: 'desc' },
     }),
   };
-  let initialHasNextPage = { filmShort: false, outsource: false };
-  for (const count in initialWorks) {
-    initialWorks[count as FlatformsCategory].length < 12
-      ? (initialHasNextPage[count as FlatformsCategory] = false)
-      : (initialHasNextPage[count as FlatformsCategory] = true);
+  let initialHasNextPage = { film: false, short: false, outsource: false };
+  for (const key in initialWorks) {
+    initialWorks[key as VideoCategory].length < 12
+      ? (initialHasNextPage[key as VideoCategory] = false)
+      : (initialHasNextPage[key as VideoCategory] = true);
   }
   const idWithOrderByCategory = {
-    filmShort: (
+    film: (
       await client.works.findMany({
-        where: { OR: [{ category: 'film' }, { category: 'short' }] },
+        where: { category: 'film' },
+        select: { id: true, order: true },
+        orderBy: { order: 'desc' },
+      })
+    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
+    short: (
+      await client.works.findMany({
+        where: { category: 'short' },
         select: { id: true, order: true },
         orderBy: { order: 'desc' },
       })

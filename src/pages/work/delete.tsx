@@ -12,14 +12,14 @@ import { useRouter } from 'next/router';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
-import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
+import { FlatformsCategory, FlatformCollection, VideoResponseState } from '@/pages/work/work';
 import Thumbnail from '@/components/thumbnail';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
 
 interface WorkProps {
   onClick: () => void;
-  searchResult: VideoCollection<Works[]>;
+  searchResult: FlatformCollection<Works[]>;
   category: FlatformsCategory;
   selected: boolean;
   resourceId: string;
@@ -150,8 +150,8 @@ const Work = ({
 };
 
 interface InitialData {
-  initialWorks: VideoCollection<Works[]>;
-  initialHasNextPage: VideoCollection<boolean>;
+  initialWorks: FlatformCollection<Works[]>;
+  initialHasNextPage: FlatformCollection<boolean>;
 }
 
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
@@ -160,12 +160,12 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
-  const [searchResult, setSearchResult] = useState<VideoCollection<Works[]>>(initialWorks);
-  const [searchResultSnapShot, setSearchResultSnapShot] = useState<VideoCollection<Works[]>>({
+  const [searchResult, setSearchResult] = useState<FlatformCollection<Works[]>>(initialWorks);
+  const [searchResultSnapShot, setSearchResultSnapShot] = useState<FlatformCollection<Works[]>>({
     filmShort: [],
     outsource: [],
   });
-  const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
+  const [list, setList] = useState<FlatformCollection<Works[]>>(initialWorks);
   const [send, { loading, data, error }] = useDeleteRequest<{
     success: boolean;
   }>(`/api/work`);
@@ -179,7 +179,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const [onSelectedList, setOnSelectedList] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [isGrid, setIsGrid] = useState(true);
-  const [hasNextPage, setHasNextPage] = useState<VideoCollection<boolean>>(initialHasNextPage);
+  const [hasNextPage, setHasNextPage] = useState<FlatformCollection<boolean>>(initialHasNextPage);
 
   useEffect(() => {
     if (data && data?.success) {
@@ -191,19 +191,6 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       return () => clearTimeout(timeOut);
     }
   }, [data]);
-
-  useEffect(() => {
-    setOnSelectedList(false);
-    setDeleteIdList([]);
-    setPage(2);
-    setSearchWordSnapShot('');
-    setSearchWord('');
-    setSearchResult((p) => ({
-      ...p,
-      [category === 'filmShort' ? 'outsource' : 'filmShort']:
-        list[category === 'filmShort' ? 'outsource' : 'filmShort'],
-    }));
-  }, [category]);
 
   const onSubmitDelete = () => {
     if (loading && deleteIdList.length > 0) return;
@@ -316,9 +303,17 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     dependencyArray: [page, fetchLoading, isGrid],
   });
 
-  const onCategoryClick = (categoryLabel: FlatformsCategory) => {
-    if (category === categoryLabel) return;
-    setCategory(categoryLabel);
+  const onCategoryChange = (categoryLabel: FlatformsCategory) => {
+    const oppositeCategory = categoryLabel === 'filmShort' ? 'outsource' : 'filmShort';
+    setOnSelectedList(false);
+    setDeleteIdList([]);
+    setPage(2);
+    setSearchWordSnapShot('');
+    setSearchWord('');
+    setSearchResult((p) => ({
+      ...p,
+      [oppositeCategory]: list[oppositeCategory],
+    }));
   };
 
   return (
@@ -330,9 +325,14 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
     >
       <PostManagementLayout
         category={category}
-        onCategoryClick={onCategoryClick}
+        tabs={[
+          { category: 'filmShort', name: 'Film / Short' },
+          { category: 'outsource', name: 'OutSource' },
+        ]}
         title="삭제하기"
         topElementRef={topElementRef}
+        setCategory={setCategory}
+        reset={onCategoryChange}
       >
         <SearchForm onSearch={onSearch} setSearchWord={setSearchWord} searchWord={searchWord} />
         <div
@@ -375,7 +375,6 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
             </div>
           </div>
         ) : null}
-
         <UtilButtons
           onViewSwitch={() => {
             setIsGrid((p) => !p);
