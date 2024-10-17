@@ -4,7 +4,7 @@ import Input from '@/components/input';
 import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
 import { Dispatch, SetStateAction, SyntheticEvent } from 'react';
 import { cls } from '@/libs/client/utils';
-import { OwnedVideoItems, WorkInfos } from '@/pages/work/work';
+import { OwnedVideoItems, VideoCategory, WorkInfos } from '@/pages/work/work';
 
 export const createInputChange = (
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>,
@@ -32,7 +32,13 @@ export const createInputChange = (
       } else if (type === 'radio') {
         setWorkInfos((p) =>
           p.map((arr) =>
-            arr.resourceId === dataset.resourceid ? { ...arr, category: value } : arr
+            arr.resourceId === dataset.resourceid
+              ? {
+                  ...arr,
+                  category: value as 'film' | 'short',
+                  order: dataset.prevCategory !== value ? 0 : arr.order,
+                }
+              : arr
           )
         );
       }
@@ -44,7 +50,7 @@ export const createInputChange = (
             title: value,
             description: dataset.description || '',
             date: dataset.date || '',
-            category: dataset.category || '',
+            category: (dataset.category as VideoCategory | undefined) || 'film',
             resourceId: dataset.resourceid || '',
             thumbnailLink: dataset.thumbnail || '',
             animatedThumbnailLink: dataset.animated_thumbnail || '',
@@ -71,7 +77,7 @@ export const onListItemClick = ({
     animatedThumbnailLink?: string;
   };
   setWorkInfos: Dispatch<SetStateAction<WorkInfos[]>>;
-  category?: string;
+  category?: VideoCategory;
 }) => {
   if (matchedWorkInfo) {
     setWorkInfos((prev) =>
@@ -84,7 +90,7 @@ export const onListItemClick = ({
         title: matchedOwnedVideo?.title || '',
         description: matchedOwnedVideo?.description || '',
         date: matchedOwnedVideo?.date || '',
-        category: category || '',
+        category: category || 'film',
         resourceId: currentVideoDetails?.resourceId || '',
         thumbnailLink: currentVideoDetails?.thumbnailLink || '',
         animatedThumbnailLink: currentVideoDetails?.animatedThumbnailLink || '',
@@ -142,7 +148,7 @@ export function VimeoThumbnailFeed({
                         setWorkInfos,
                         matchedWorkInfo,
                         matchedOwnedVideo,
-                        category: matchedOwnedVideo?.category,
+                        category: matchedOwnedVideo?.category || 'film',
                       });
                     }}
                     className={cls(
@@ -233,6 +239,7 @@ export function VimeoThumbnailFeed({
                         labelName="Film"
                         value="film"
                         data-resourceid={player_embed_url}
+                        data-prevcategory={matchedWorkInfo?.category}
                         onChange={inputChange}
                         checked={
                           matchedWorkInfo
@@ -254,6 +261,7 @@ export function VimeoThumbnailFeed({
                         labelName="Short"
                         value="short"
                         data-resourceid={player_embed_url}
+                        data-prevcategory={matchedWorkInfo?.category}
                         onChange={inputChange}
                         checked={
                           matchedWorkInfo
