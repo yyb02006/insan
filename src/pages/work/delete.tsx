@@ -11,11 +11,11 @@ import { Works } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
-import PostManagementMenu from '@/components/nav/postManagementMenu';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
 import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
 import Thumbnail from '@/components/thumbnail';
+import PostManagementMenu from '@/components/nav/postManagementMenu';
 
 interface WorkProps {
   onClick: () => void;
