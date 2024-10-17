@@ -19,7 +19,7 @@ import {
   FlatformsCategory,
   OwnedVideoItems,
   VideoCategory,
-  VideoCollection,
+  FlatformCollection,
   VimeoVideos,
   WorkInfos,
 } from '@/pages/work/work';
@@ -30,7 +30,7 @@ import ErrorOverlay from '@/components/errorOverlay';
 interface InitialData {
   initialVimeoVideos: VimeoVideos[];
   initialYoutubeVideos: GapiItem[];
-  initialOwnedVideos: VideoCollection<OwnedVideoItems[]>;
+  initialOwnedVideos: FlatformCollection<OwnedVideoItems[]>;
   initialNextPageToken: string;
 }
 
@@ -45,14 +45,16 @@ export default function Write({
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapshot, setSearchWordSnapshot] = useState('');
-  const [searchResults, setSearchResults] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
-    filmShort: initialVimeoVideos,
-    outsource: initialYoutubeVideos,
-  });
+  const [searchResults, setSearchResults] = useState<FlatformCollection<VimeoVideos[], GapiItem[]>>(
+    {
+      filmShort: initialVimeoVideos,
+      outsource: initialYoutubeVideos,
+    }
+  );
   const [searchResultsSnapshot, setSearchResultsSnapshot] = useState<
-    VideoCollection<VimeoVideos[], GapiItem[]>
+    FlatformCollection<VimeoVideos[], GapiItem[]>
   >({ filmShort: [], outsource: [] });
-  const [list, setList] = useState<VideoCollection<VimeoVideos[], GapiItem[]>>({
+  const [list, setList] = useState<FlatformCollection<VimeoVideos[], GapiItem[]>>({
     filmShort: initialVimeoVideos,
     outsource: initialYoutubeVideos,
   });
@@ -61,7 +63,7 @@ export default function Write({
   }>(`/api/work?purpose=write`);
   const [workInfos, setWorkInfos] = useState<WorkInfos[]>([]);
   const [fetchLoading, setFetchLoading] = useState(false);
-  const ownedVideos: VideoCollection<OwnedVideoItems[]> = initialOwnedVideos;
+  const ownedVideos: FlatformCollection<OwnedVideoItems[]> = initialOwnedVideos;
   const [page, setPage] = useState(2);
   const [onSelectedList, setOnSelectedList] = useState(false);
   const [isGrid, setIsGrid] = useState(true);

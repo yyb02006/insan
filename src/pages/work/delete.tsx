@@ -12,14 +12,14 @@ import { useRouter } from 'next/router';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import ButtonsController from '@/components/butttons/buttonsController';
 import UtilButtons from '@/components/butttons/utilButtons';
-import { FlatformsCategory, VideoCollection, VideoResponseState } from '@/pages/work/work';
+import { FlatformsCategory, FlatformCollection, VideoResponseState } from '@/pages/work/work';
 import Thumbnail from '@/components/thumbnail';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
 
 interface WorkProps {
   onClick: () => void;
-  searchResult: VideoCollection<Works[]>;
+  searchResult: FlatformCollection<Works[]>;
   category: FlatformsCategory;
   selected: boolean;
   resourceId: string;
@@ -150,8 +150,8 @@ const Work = ({
 };
 
 interface InitialData {
-  initialWorks: VideoCollection<Works[]>;
-  initialHasNextPage: VideoCollection<boolean>;
+  initialWorks: FlatformCollection<Works[]>;
+  initialHasNextPage: FlatformCollection<boolean>;
 }
 
 export default function Delete({ initialWorks, initialHasNextPage }: InitialData) {
@@ -160,12 +160,12 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const [category, setCategory] = useState<FlatformsCategory>('filmShort');
   const [searchWord, setSearchWord] = useState('');
   const [searchWordSnapShot, setSearchWordSnapShot] = useState('');
-  const [searchResult, setSearchResult] = useState<VideoCollection<Works[]>>(initialWorks);
-  const [searchResultSnapShot, setSearchResultSnapShot] = useState<VideoCollection<Works[]>>({
+  const [searchResult, setSearchResult] = useState<FlatformCollection<Works[]>>(initialWorks);
+  const [searchResultSnapShot, setSearchResultSnapShot] = useState<FlatformCollection<Works[]>>({
     filmShort: [],
     outsource: [],
   });
-  const [list, setList] = useState<VideoCollection<Works[]>>(initialWorks);
+  const [list, setList] = useState<FlatformCollection<Works[]>>(initialWorks);
   const [send, { loading, data, error }] = useDeleteRequest<{
     success: boolean;
   }>(`/api/work`);
@@ -179,7 +179,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
   const [onSelectedList, setOnSelectedList] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [isGrid, setIsGrid] = useState(true);
-  const [hasNextPage, setHasNextPage] = useState<VideoCollection<boolean>>(initialHasNextPage);
+  const [hasNextPage, setHasNextPage] = useState<FlatformCollection<boolean>>(initialHasNextPage);
 
   useEffect(() => {
     if (data && data?.success) {
