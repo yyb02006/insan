@@ -290,10 +290,10 @@ const VideoListItem = ({
       }}
       className={cls(
         selectedItem ? 'ring-2' : 'ring-0',
-        'text-xs flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered',
-        `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
-          idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
-        } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `
+        idx % 2 === 0 ? 'bg-[#1a1a1a]' : '',
+        idx % 4 === 2 ? 'xl:bg-[#101010]' : '',
+        idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : '',
+        'text-xs px-2 py-3 flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
       )}
     >
       {['left', 'right'].map((position) => (
@@ -397,7 +397,6 @@ const VideoGridItem = ({
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   return (
     <section
-      draggable
       onDragStart={() => {
         if (!selectedItem) return;
         setIsDraggable(true);
@@ -413,7 +412,7 @@ const VideoGridItem = ({
       onDrop={onVideoDrop}
       className={cls(
         selectedItem ? 'ring-2' : 'ring-0',
-        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered select-none'
       )}
     >
       {['left', 'right'].map((position) => (
@@ -693,7 +692,7 @@ const ChangedItemsModal = ({ changedSwapItems, setIsSortedListOpen }: ChangedIte
   return (
     <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
       <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
-      <div className="relative bg-[#101010] w-full h-full overflow-y-scroll">
+      <div className="relative bg-[#101010] w-full h-full overflow-y-auto">
         <button
           className="absolute m-2 top-4 right-4"
           onClick={() => {
