@@ -164,9 +164,11 @@ export default function Write({
       outsource: initialOwnedVideos.outsource[0].order || 0,
     };
 
+    const workinfosMap = new Map(workInfos.map((item) => [item.resourceId, item]));
+
     const workinfosWithOwnedVideos = [
       ...initialOwnedVideos[category]
-        .filter((item) => !workInfos.find((work) => item.resourceId === work.resourceId))
+        .filter((item) => !workinfosMap.has(item.resourceId))
         .map((item) => ({
           title: undefined,
           resourceId: item.resourceId,
