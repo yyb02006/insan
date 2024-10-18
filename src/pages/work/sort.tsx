@@ -25,6 +25,7 @@ import LoaidngIndicator from '@/components/loadingIndicator';
 import BackDrop from '@/components/backDrop';
 import ErrorOverlay from '@/components/errorOverlay';
 import { useRouter } from 'next/router';
+import useScrollLock from '@/libs/client/useScrollLock';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
@@ -258,7 +259,7 @@ const VideoListItem = ({
   video,
 }: VideoListItemProps) => {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [onThumbnail, setOnThumbnail] = useState(false);
+  const [onThumbnail, setOnThumbnail] = useScrollLock(false);
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   return (
     <section
