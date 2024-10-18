@@ -16,6 +16,7 @@ import { FlatformsCategory, FlatformCollection, VideoResponseState } from '@/pag
 import Thumbnail from '@/components/thumbnail';
 import PostManagementMenu from '@/components/nav/postManagementMenu';
 import PostManagementLayout from '@/components/nav/postManagementLayout';
+import useScrollLock from '@/libs/client/useScrollLock';
 
 interface WorkProps {
   onClick: () => void;
@@ -44,7 +45,7 @@ const Work = ({
   isGrid,
   idx,
 }: WorkProps) => {
-  const [onThumbnail, setOnThumbnail] = useState(false);
+  const [onThumbnail, setOnThumbnail] = useScrollLock(false);
   return (
     <div
       className={cls(
@@ -116,7 +117,7 @@ const Work = ({
                 (미리보기)
               </span>
               {onThumbnail ? (
-                <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
+                <div className="fixed z-[1001] w-screen h-screen left-0 top-0 flex justify-center items-center">
                   <div className="w-full h-full bg-black opacity-80 absolute top-0 left-0" />
                   <div className="w-[80%] lg:w-[640px] relative">
                     <Thumbnail
@@ -264,7 +265,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       setFetchLoading(true);
       const lists: VideoResponseState = await (
         await fetch(
-          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
+          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}&order=desc`
         )
       ).json();
       if (lists.works[category === 'filmShort' ? 'film' : 'outsource'].length < perPage) {
@@ -431,12 +432,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
     filmShort: await client.works.findMany({
       where: { OR: [{ category: 'film' }, { category: 'short' }] },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
   };
   let initialHasNextPage = { filmShort: false, outsource: false };

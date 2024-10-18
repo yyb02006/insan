@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { VimeofeedProps, YoutubefeedProps } from '@/components/typings/components';
 import { createInputChange, onListItemClick } from '@/components/feed/thumbnailFeed';
 import { OwnedVideoItems, WorkInfos } from '@/pages/work/work';
+import useScrollLock from '@/libs/client/useScrollLock';
 
 const VimeoThumbnailPreview = ({
   altName,
@@ -16,18 +17,18 @@ const VimeoThumbnailPreview = ({
   altName: string;
   idx: number;
 }) => {
-  const [onThumbnail, setOnThumbnail] = useState(false);
+  const [isThumbnailOpen, setIsThumbnailOpen] = useScrollLock();
   return (
     <span
       onClick={(e) => {
         e.stopPropagation();
-        setOnThumbnail((p) => !p);
+        setIsThumbnailOpen((p) => !p);
       }}
       className="text-xs sm:text-sm font-normal cursor-pointer hover:text-palettered"
     >
       <span className="whitespace-nowrap text-[#888888] hover:text-palettered">( 미리보기 )</span>
-      {onThumbnail ? (
-        <div className="fixed z-[1000] w-screen h-screen left-0 top-0 flex justify-center items-center">
+      {isThumbnailOpen ? (
+        <div className="fixed z-[1001] w-screen h-screen left-0 top-0 flex justify-center items-center">
           <div className="bg-black opacity-80 w-full h-full absolute left-0 top-0"></div>
           <Image
             src={`${baseLink}_640x360?r=pad`}
@@ -89,7 +90,7 @@ export function VimeoListFeed({
                         setWorkInfos,
                         matchedOwnedVideo,
                         matchedWorkInfo,
-                        category: matchedOwnedVideo?.category,
+                        category: matchedOwnedVideo?.category || 'film',
                       });
                     }}
                     className="inline-block group hover:text-palettered cursor-pointer"
@@ -245,7 +246,7 @@ export function VimeoListFeed({
 }
 
 const YoutubeThumbnailPreview = ({ imageLink, idx }: { imageLink: string; idx: number }) => {
-  const [onThumbnail, setOnThumbnail] = useState(false);
+  const [onThumbnail, setOnThumbnail] = useScrollLock();
   return (
     <span
       onClick={(e) => {

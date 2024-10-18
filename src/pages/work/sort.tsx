@@ -25,6 +25,7 @@ import LoaidngIndicator from '@/components/loadingIndicator';
 import BackDrop from '@/components/backDrop';
 import ErrorOverlay from '@/components/errorOverlay';
 import { useRouter } from 'next/router';
+import useScrollLock from '@/libs/client/useScrollLock';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
@@ -258,7 +259,7 @@ const VideoListItem = ({
   video,
 }: VideoListItemProps) => {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [onThumbnail, setOnThumbnail] = useState(false);
+  const [onThumbnail, setOnThumbnail] = useScrollLock(false);
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   return (
     <section
@@ -290,10 +291,10 @@ const VideoListItem = ({
       }}
       className={cls(
         selectedItem ? 'ring-2' : 'ring-0',
-        'text-xs flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered',
-        `px-2 py-3 ${idx % 2 === 0 ? 'bg-[#1a1a1a]' : ''} ${
-          idx % 4 === 2 ? 'xl:bg-[#101010]' : ''
-        } ${idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : ''} `
+        idx % 2 === 0 ? 'bg-[#1a1a1a]' : '',
+        idx % 4 === 2 ? 'xl:bg-[#101010]' : '',
+        idx % 4 === 3 || idx % 4 === 0 ? 'xl:bg-[#1a1a1a] bg-[#101010]' : '',
+        'text-xs px-2 py-3 flex ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
       )}
     >
       {['left', 'right'].map((position) => (
@@ -397,7 +398,6 @@ const VideoGridItem = ({
   const { resourceId, title, thumbnailLink, category: kind, order } = video;
   return (
     <section
-      draggable
       onDragStart={() => {
         if (!selectedItem) return;
         setIsDraggable(true);
@@ -413,7 +413,7 @@ const VideoGridItem = ({
       onDrop={onVideoDrop}
       className={cls(
         selectedItem ? 'ring-2' : 'ring-0',
-        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered'
+        'ring-palettered relative cursor-pointer hover:ring-2 hover:ring-palettered select-none'
       )}
     >
       {['left', 'right'].map((position) => (
@@ -693,7 +693,7 @@ const ChangedItemsModal = ({ changedSwapItems, setIsSortedListOpen }: ChangedIte
   return (
     <div className="fixed z-[1001] top-0 left-0 w-screen h-screen xl:px-48 sm:px-32 px-24 py-32">
       <div className="absolute top-0 left-0 w-full h-full bg-black opacity-80" />
-      <div className="relative bg-[#101010] w-full h-full overflow-y-scroll">
+      <div className="relative bg-[#101010] w-full h-full overflow-y-auto">
         <button
           className="absolute m-2 top-4 right-4"
           onClick={() => {
@@ -959,52 +959,46 @@ export default function Sort({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const initialWorks = {
-    film: await client.works.findMany({
-      where: { category: 'film' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
-    short: await client.works.findMany({
-      where: { category: 'short' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
-    outsource: await client.works.findMany({
-      where: { category: 'outsource' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
+  const initialWorks: Record<VideoCategory, Works[]> = {
+    film: [],
+    short: [],
+    outsource: [],
   };
-  let initialHasNextPage = { film: false, short: false, outsource: false };
   for (const key in initialWorks) {
-    initialWorks[key as VideoCategory].length < 12
-      ? (initialHasNextPage[key as VideoCategory] = false)
-      : (initialHasNextPage[key as VideoCategory] = true);
+    const videoCategoryKey = key as VideoCategory;
+    initialWorks[videoCategoryKey] = await client.works.findMany({
+      where: { category: videoCategoryKey },
+      take: 12,
+      orderBy: { order: 'desc' },
+    });
   }
-  const idWithOrderByCategory = {
-    film: (
-      await client.works.findMany({
-        where: { category: 'film' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
-    short: (
-      await client.works.findMany({
-        where: { category: 'short' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
-    outsource: (
-      await client.works.findMany({
-        where: { category: 'outsource' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
+
+  const initialHasNextPage = { film: false, short: false, outsource: false };
+  for (const key in initialWorks) {
+    const videoCategoryKey = key as VideoCategory;
+    initialWorks[videoCategoryKey].length < 12
+      ? (initialHasNextPage[videoCategoryKey] = false)
+      : (initialHasNextPage[videoCategoryKey] = true);
+  }
+
+  const idWithOrder = await client.works.findMany({
+    select: { id: true, order: true, category: true },
+  });
+  const idWithOrderByCategory: Record<
+    VideoCategory,
+    Array<{ id: number; currentOrder: number; originalOrder: number }>
+  > = {
+    film: [],
+    short: [],
+    outsource: [],
   };
+  for (const key in idWithOrderByCategory) {
+    const videoCategoryKey = key as VideoCategory;
+    idWithOrderByCategory[videoCategoryKey] = idWithOrder
+      .filter((item) => item.category === videoCategoryKey)
+      .sort((a, b) => b.order - a.order)
+      .map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order }));
+  }
   return {
     props: {
       initialWorks: JSON.parse(JSON.stringify(initialWorks)),
