@@ -264,7 +264,7 @@ export default function Delete({ initialWorks, initialHasNextPage }: InitialData
       setFetchLoading(true);
       const lists: VideoResponseState = await (
         await fetch(
-          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}`
+          `/api/work/list?page=${apiPage[category]}&per_page=${perPage}&category=${category}&order=desc`
         )
       ).json();
       if (lists.works[category === 'filmShort' ? 'film' : 'outsource'].length < perPage) {
@@ -431,12 +431,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
     filmShort: await client.works.findMany({
       where: { OR: [{ category: 'film' }, { category: 'short' }] },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
     outsource: await client.works.findMany({
       where: { category: 'outsource' },
       take: 12,
-      orderBy: { id: 'desc' },
+      orderBy: { order: 'desc' },
     }),
   };
   let initialHasNextPage = { filmShort: false, outsource: false };
