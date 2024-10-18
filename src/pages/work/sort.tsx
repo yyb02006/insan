@@ -959,52 +959,46 @@ export default function Sort({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const initialWorks = {
-    film: await client.works.findMany({
-      where: { category: 'film' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
-    short: await client.works.findMany({
-      where: { category: 'short' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
-    outsource: await client.works.findMany({
-      where: { category: 'outsource' },
-      take: 12,
-      orderBy: { order: 'desc' },
-    }),
+  const initialWorks: Record<VideoCategory, Works[]> = {
+    film: [],
+    short: [],
+    outsource: [],
   };
-  let initialHasNextPage = { film: false, short: false, outsource: false };
   for (const key in initialWorks) {
-    initialWorks[key as VideoCategory].length < 12
-      ? (initialHasNextPage[key as VideoCategory] = false)
-      : (initialHasNextPage[key as VideoCategory] = true);
+    const videoCategoryKey = key as VideoCategory;
+    initialWorks[videoCategoryKey] = await client.works.findMany({
+      where: { category: videoCategoryKey },
+      take: 12,
+      orderBy: { order: 'desc' },
+    });
   }
-  const idWithOrderByCategory = {
-    film: (
-      await client.works.findMany({
-        where: { category: 'film' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
-    short: (
-      await client.works.findMany({
-        where: { category: 'short' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
-    outsource: (
-      await client.works.findMany({
-        where: { category: 'outsource' },
-        select: { id: true, order: true },
-        orderBy: { order: 'desc' },
-      })
-    ).map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order })),
+
+  const initialHasNextPage = { film: false, short: false, outsource: false };
+  for (const key in initialWorks) {
+    const videoCategoryKey = key as VideoCategory;
+    initialWorks[videoCategoryKey].length < 12
+      ? (initialHasNextPage[videoCategoryKey] = false)
+      : (initialHasNextPage[videoCategoryKey] = true);
+  }
+
+  const idWithOrder = await client.works.findMany({
+    select: { id: true, order: true, category: true },
+  });
+  const idWithOrderByCategory: Record<
+    VideoCategory,
+    Array<{ id: number; currentOrder: number; originalOrder: number }>
+  > = {
+    film: [],
+    short: [],
+    outsource: [],
   };
+  for (const key in idWithOrderByCategory) {
+    const videoCategoryKey = key as VideoCategory;
+    idWithOrderByCategory[videoCategoryKey] = idWithOrder
+      .filter((item) => item.category === videoCategoryKey)
+      .sort((a, b) => b.order - a.order)
+      .map((item) => ({ id: item.id, currentOrder: item.order, originalOrder: item.order }));
+  }
   return {
     props: {
       initialWorks: JSON.parse(JSON.stringify(initialWorks)),
