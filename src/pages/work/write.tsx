@@ -164,7 +164,7 @@ export default function Write({
       outsource: initialOwnedVideos.outsource[0].order || 0,
     };
 
-    const newWorkInfos = [
+    const workinfosWithOwnedVideos = [
       ...initialOwnedVideos[category]
         .filter((item) => !workInfos.find((work) => item.resourceId === work.resourceId))
         .map((item) => ({
@@ -187,21 +187,31 @@ export default function Write({
       }),
     ];
 
-    const sortVideos = (workInfos: typeof newWorkInfos, category: VideoCategory) => {
+    const sortVideos = (workInfos: typeof workinfosWithOwnedVideos, category: VideoCategory) => {
       return workInfos
         .filter((video) => video.category === category)
         .sort((a, b) => b.order - a.order)
         .map((item, index, arr) => ({ ...item, order: arr.length - index }));
     };
 
-    const newVideos = [
-      ...sortVideos(newWorkInfos, 'film'),
-      ...sortVideos(newWorkInfos, 'short'),
-      ...sortVideos(newWorkInfos, 'outsource'),
-    ];
+    const allVideos = (['film', 'short', 'outsource'] satisfies VideoCategory[]).reduce<
+      typeof workinfosWithOwnedVideos
+    >((acc, category) => [...acc, ...sortVideos(workinfosWithOwnedVideos, category)], []);
+
+    const ownedVideoOrderMap = new Map<string, number>(
+      initialOwnedVideos.filmShort.map(
+        (item) => [item.resourceId, item.order] as [string, number] // 요소를 두 개만 갖는 배열임을 단언시켜줘야 한다
+      )
+    );
+
+    const videosToUpdate = allVideos.filter(
+      (video) =>
+        (video.title === undefined && ownedVideoOrderMap.get(video.resourceId) !== video.order) ||
+        typeof video.title === 'string'
+    );
 
     sendList({
-      data: newVideos,
+      data: videosToUpdate,
       secret: process.env.NEXT_PUBLIC_ODR_SECRET_TOKEN,
     });
   };
