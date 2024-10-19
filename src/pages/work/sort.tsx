@@ -27,6 +27,7 @@ import ErrorOverlay from '@/components/errorOverlay';
 import { useRouter } from 'next/router';
 import useScrollLock from '@/libs/client/useScrollLock';
 import ToTop from '@/components/toTop';
+import Circles from '@/components/circles';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
@@ -934,7 +935,19 @@ export default function Sort({
           action="save"
           listLabel="Diff"
         />
-        <div ref={intersectionRef} className="h-1 mt-20" />
+        <div ref={intersectionRef} className="h-32 my-10">
+          {fetchLoading ? (
+            <div className="relative w-full h-full flex justify-center items-center">
+              <div className="animate-spin-middle contrast-50 absolute w-[40px] aspect-square">
+                <Circles
+                  liMotion={{
+                    css: 'w-[calc(15px+100%)] border-[#eaeaea] border-1',
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
         {isSortedListOpen ? (
           <ChangedItemsModal
             changedSwapItems={changedSwapItems}
