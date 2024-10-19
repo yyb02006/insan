@@ -26,6 +26,7 @@ import BackDrop from '@/components/backDrop';
 import ErrorOverlay from '@/components/errorOverlay';
 import { useRouter } from 'next/router';
 import useScrollLock from '@/libs/client/useScrollLock';
+import ToTop from '@/components/toTop';
 
 type WorksUsedInSort = Omit<Works, 'createdAt' | 'updatedAt' | 'description'>;
 
@@ -121,18 +122,16 @@ interface VideoItemTitleProps {
 const VideoItemTitle = ({ category, kind, title }: VideoItemTitleProps) => {
   return (
     <div className="relative text-base break-words">
-      <span className="whitespace-nowrap">
-        {category !== 'outsource' ? (
-          <span
-            className={cls(
-              kind === 'film' ? 'text-palettered' : 'text-green-500',
-              'text-base font-semibold'
-            )}
-          >
-            {kind === 'film' ? '[FILM]' : '[SHORT]'}
-          </span>
-        ) : null}{' '}
-      </span>
+      {category !== 'outsource' ? (
+        <span
+          className={cls(
+            kind === 'film' ? 'text-palettered' : 'text-green-500',
+            'text-base font-semibold'
+          )}
+        >
+          {kind === 'film' ? '[FILM]' : '[SHORT]'}
+        </span>
+      ) : null}{' '}
       <h1 className="inline-block">{title}</h1>
     </div>
   );
@@ -954,6 +953,7 @@ export default function Sort({
           </ErrorOverlay>
         ) : null}
       </PostManagementLayout>
+      <ToTop toScroll={topElementRef} />
     </Layout>
   );
 }
