@@ -1,5 +1,6 @@
 import { useAnimate, usePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 
 export default function PostManagementNav({
@@ -9,6 +10,7 @@ export default function PostManagementNav({
   setIsNavigating: Dispatch<SetStateAction<boolean>>;
   setIsAborted: Dispatch<SetStateAction<boolean>>;
 }) {
+  const router = useRouter();
   const [isPresent, safeToRemove] = usePresence();
   const [scope, animate] = useAnimate();
   const menuItems = useRef([
@@ -38,9 +40,11 @@ export default function PostManagementNav({
       exitAnimation();
     }
   }, [isPresent, animate, scope, setIsAborted]);
-  const handleMenuClick = () => {
+  const handleMenuClick = (path?: string) => {
+    if (path === router.pathname) return;
     setIsNavigating(true);
   };
+  console.log(router.pathname);
   return (
     <motion.div
       ref={scope}
@@ -51,18 +55,22 @@ export default function PostManagementNav({
         initial={{ scale: 0 }}
         className="Inner origin-top-right w-[calc(100%-6px)] h-[calc(100%-6px)] border-b border-l float-right rounded-bl-[16px] border-[#eaeaea]"
       >
-        <ul className="font-Pretendard pt-[100px] pb-[60px] font-light text-base w-full h-full flex flex-col justify-between items-center">
+        <ul className="font-Pretendard pt-[100px] pb-[60px] font-light text-base w-full h-full flex flex-col justify-between items-center select-none">
           {menuItems.current.map((item) => {
             const { name, path } = item;
             return (
               <li
                 key={name}
                 onClick={() => {
-                  handleMenuClick();
+                  handleMenuClick(item.path);
                 }}
                 className="hover:text-palettered cursor-pointer"
               >
-                <Link href={path}>{name}</Link>
+                {path === router.pathname ? (
+                  <span className="text-palettered font-semibold">{name}</span>
+                ) : (
+                  <Link href={path}>{name}</Link>
+                )}
               </li>
             );
           })}
